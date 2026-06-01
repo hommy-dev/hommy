@@ -3,6 +3,24 @@
 
 ---
 
+## 0. Build Decisions — reconciled with the codebase (2026-06)
+
+> This brief began as a draft. The points below reconcile it with the actual project (a cleaned, rebranded Next.js 16 codebase) and with current-as-of-2026 API research. Where this section conflicts with later sections, **this section wins** — the later text has been updated to match but read this first.
+
+- **Framework:** Next.js **16** App Router (the draft said 15). `cacheComponents: true` is on — use the `"use cache"` directive, never `unstable_cache`. `proxy.ts` replaces `middleware.ts`. `params`/`searchParams` are always Promises. See `CODING_GUIDE.md`.
+- **Project layout:** `src/` based — `src/app`, `src/lib`, `src/components`; Inngest functions live in `src/lib/inngest/functions/` (the draft's root `/app`, `/inngest` layout in §13 is superseded by §13's updated version).
+- **File storage:** **Cloudinary** (already wired: `src/lib/cloudinary/*`, `next-cloudinary`, `CLOUDINARY_*` env). The draft said Supabase Storage — we use Cloudinary instead.
+- **Maps / address autocomplete:** **Google Places (New)** via the `PlaceAutocompleteElement` web component (we have a Google Maps JS key + `@googlemaps/js-api-loader`). The deprecated `Autocomplete` widget is closed to new projects. Mapbox is **not** used — ignore `NEXT_PUBLIC_MAPBOX_TOKEN` in the draft.
+- **Weather:** **NOAA / NWS `api.weather.gov`** — free, US-only, official, returns hail-size/wind-gust fields. Poll `GET /alerts/active?point={lat},{lon}` per service-area centroid on a cron (needs a `User-Agent` header, coords to 4 decimals, **no API key**). Open-Meteo `wind_gusts_10m_max` is an optional historical-wind supplement. The draft's `WEATHER_API_KEY` is not needed for NWS.
+- **Roof measurement:** **manual entry** (sq ft / squares) for the MVP. API auto-measurement (EagleView Developer API) is a later enhancement — the `estimates` table carries a `measurement_source` enum so it can be backfilled without a migration.
+- **Estimate acceptance / e-sign:** **tokenized "Accept this estimate" link** recorded in the DB (acceptance timestamp + IP + user-agent + quote snapshot). This satisfies ESIGN/UETA intent for a quote. DocuSeal is a later upgrade only if true signature artifacts are needed.
+- **Homeowners are unauthenticated (important).** They never create accounts. All homeowner communication is **SMS (Twilio) + email (Resend)**, and they act through **tokenized links** (estimate acceptance, review submission). The contractor "Messages" inbox (§6.2) is the contractor's view of those SMS/email threads — not an in-app two-account chat. Build it on the existing realtime/chat UI components, but the counterparty is a phone number/email, not a logged-in user.
+- **Payments:** **Stripe subscriptions only** (Checkout Session for signup → Billing Customer Portal for self-serve → webhook route handler for state sync, raw body via `request.text()` on the Node runtime). No Stripe Connect, no escrow, no money moving between homeowner and contractor.
+- **Routes:** public/homeowner & marketing at `/`, `/get-a-quote`, `/thank-you`, `/contractors`, `/contractors/signup`, `/roofing-contractors/[city]-[state]`, `/review/[token]`; the authenticated contractor CRM lives under **`/dashboard`**; admin under `/admin`.
+- **Auth/roles:** Supabase Auth. `users.role` is `contractor` or `admin` only (no homeowner role). `getRequiredUser()` in `src/lib/auth/session.ts`.
+
+---
+
 ## 1. What We Are Building
 
 A two-sided platform connecting homeowners who need roofing work with local roofing contractors. The platform has two jobs:
@@ -18,33 +36,36 @@ The business model is a monthly contractor subscription that includes a set numb
 
 ## 2. Core Problems We Are Solving
 
-These are real, data-backed pain points this platform directly addresses:
+These are real pain points this platform directly addresses. The stats below are the *defensible*, sourced versions (the original draft figures were fact-checked — some were folklore; cite the primary studies, not vendor blogs):
 
-- **Shared leads from Angi/HomeAdvisor are garbage.** Contractors pay $100-300 per lead that gets sent to 5 competitors simultaneously. We provide exclusive leads only.
-- **78% of homeowners choose the first contractor to respond**, yet the average response time is 8+ hours. Our platform sends instant push + SMS alerts to contractors the moment a lead arrives.
-- **Most roofing leads need 5-7 follow-up attempts to close**, but contractors stop after 2. We automate the follow-up sequence.
-- **72% of roofing contractors use no CRM at all.** They run on spreadsheets and memory. We give them a simple, mobile-first tool built for their workflow.
-- **Storm events create lead overflow with no system to handle it.** We integrate weather data to push storm-triggered leads automatically.
+- **Shared leads from Angi/HomeAdvisor are garbage.** A shared lead is sold simultaneously to **3–5 contractors**, and premium roofing leads run **$100+ each** — pushing realistic cost-per-acquisition into the **$600–$1,200** range at a 10–15% close rate. We provide exclusive leads only. *(Jobber; LeadTruffle 2026)*
+- **Speed to lead wins the job.** Responding within **5 minutes** vs. 30 makes a lead ~**21× more likely** to qualify (Lead Response Management / MIT study). Yet measured average first-response times are dismal — the canonical HBR/Oldroyd study found an **~42-hour average** first response, and home-service businesses miss **~27% of inbound calls**. We send instant push + SMS the moment a lead arrives. *(HBR 2011; LeadResponseManagement.org)*
+- **Closing takes persistence most contractors don't have.** **80% of sales require 5+ follow-ups**, but **~44% of reps quit after one** and only ~8% make five or more. We automate the follow-up sequence. *(IRC Sales Solutions; SPOTIO)*
+- **Most small roofers have no real CRM workflow.** They run on spreadsheets, sticky notes, and group texts; CRM *daily usage* in the trades is low even where software exists. We give them a simple, mobile-first tool built for how they actually work. *(Qualitative — roofing-software industry sources; avoid quoting a hard "%," none is reliably sourced.)*
+- **Storm events create lead overflow with no system to handle it.** We poll NOAA/NWS severe-weather alerts by service-area and push storm-triggered leads automatically.
+
+> Marketing-page note: also strong and well-sourced — "**~91% of homeowners read online reviews before choosing a contractor**" (ACHR News 2024) and "**85% of callers who reach voicemail won't call back; ~67% immediately call a competitor**" (2024). Use the 5-minute rule and missed-call stats as hero numbers; avoid the unverifiable "72% no CRM" figure from the draft.
 
 ---
 
 ## 3. Tech Stack
 
-Use this stack exactly. Do not deviate or suggest alternatives unless something is genuinely impossible.
+Use this stack exactly. Do not deviate or suggest alternatives unless something is genuinely impossible. (Reconciled with the installed codebase — see §0.)
 
-- **Framework:** Next.js 15 App Router (not Pages Router)
+- **Framework:** Next.js **16** App Router (Pages Router not used) — `cacheComponents: true`, `proxy.ts` (not middleware), async `params`/`searchParams`/`cookies`/`headers`
 - **Database:** Supabase (Postgres)
-- **ORM:** Drizzle ORM
-- **Auth:** Supabase Auth
-- **Styling:** Tailwind CSS + shadcn/ui
-- **Background Jobs / Queues:** Inngest
-- **File Storage:** Supabase Storage
-- **Payments:** Stripe (subscriptions only, no Connect needed — we are not moving money between homeowner and contractor)
+- **ORM:** Drizzle ORM (`postgres-js` driver, Supavisor pooler — `prepare: false`)
+- **Auth:** Supabase Auth (`@supabase/ssr`)
+- **Styling:** Tailwind CSS v4 + shadcn/ui
+- **Background Jobs / Queues:** Inngest (`src/lib/inngest`)
+- **File Storage:** **Cloudinary** (`src/lib/cloudinary/*`, `next-cloudinary`)
+- **Payments:** Stripe (subscriptions only — Checkout + Customer Portal + webhooks; no Connect, we are not moving money between homeowner and contractor)
 - **SMS / Notifications:** Twilio
 - **Email:** Resend
-- **Push Notifications:** Web Push API
-- **Weather Data:** Open-Meteo API or Tomorrow.io (free tier first)
-- **Language:** TypeScript throughout
+- **Push Notifications:** Web Push API (VAPID; `web-push`, service worker at `public/sw.js`)
+- **Maps / Geocoding:** Google Places (New) — `PlaceAutocompleteElement`, `@googlemaps/js-api-loader`
+- **Weather Data:** NOAA / NWS `api.weather.gov` (free, US, no key; severe alerts by lat/lng). Optional: Open-Meteo for historical wind.
+- **Language:** TypeScript throughout (strict mode)
 
 ---
 
@@ -101,12 +122,12 @@ The platform has three distinct sides:
 
 **Form fields (keep short):**
 - What do you need? (dropdown: Repair / Full Replacement / Inspection / Storm Damage)
-- Your address (autocomplete using Google Places or Mapbox)
+- Your address (autocomplete using Google Places — `PlaceAutocompleteElement`)
 - How urgent? (dropdown: Emergency / Within a week / Within a month / Just planning)
 - Full name
 - Phone number
 - Email
-- Optional: Upload a photo of the damage (single image, Supabase Storage)
+- Optional: Upload a photo of the damage (single image, Cloudinary)
 
 **On submit:** Do not redirect immediately. Show inline loading state, then transition to confirmation state on the same page showing "We're matching you now."
 
@@ -169,7 +190,7 @@ Multi-step onboarding form. Do not put everything on one page.
 
 **Step 3 — Service Area**
 - Zip code input with add/remove tags
-- Or draw on a map (map picker using Mapbox or Google Maps)
+- Or draw on a map (map picker using Google Maps)
 - Job types they handle (multi-select: Repair, Replacement, Inspection, Storm Damage, Commercial)
 
 **Step 4 — Choose Plan**
@@ -198,7 +219,7 @@ Generate these pages dynamically from a cities table in the database. Seed with 
 
 ### 6.2 Contractor Dashboard (Authenticated)
 
-All routes under `/dashboard`. Require auth. Redirect to `/contractors/login` if not authenticated.
+All routes under `/dashboard`. Require auth (role = `contractor`). Redirect to `/auth/login` if not authenticated.
 
 The dashboard uses a persistent three-column layout on desktop:
 - **Left:** Fixed sidebar navigation (always visible)
@@ -325,7 +346,7 @@ Sections:
 **Not a separate page.** Lives as a section inside the project detail.
 
 **Fields:**
-- Roof size (sq ft) — can pull from address lookup via EagleView API or manual entry
+- Roof size (sq ft) — **manual entry for MVP** (contractor types sq ft / squares). API auto-measurement (EagleView Developer API) is a later enhancement; store a `measurement_source` enum (`manual` | `eagleview`) so it can be added without a migration.
 - Job type (repair / replacement / inspection)
 - Materials (dropdown: Asphalt Shingle / Metal / Tile / TPO / Other)
 - Labor cost
@@ -338,7 +359,7 @@ Sections:
 **Output:**
 - Auto-calculates subtotal, tax, total
 - Generates a clean PDF proposal branded with contractor's company name and logo
-- Send button: delivers PDF via SMS link + email to homeowner with e-signature link (use DocuSeal or a simple "Accept this estimate" link that logs acceptance in the system)
+- Send button: delivers PDF via SMS link + email to homeowner with a **tokenized "Accept this estimate" link** (MVP). Acceptance records timestamp + IP + user-agent + a snapshot of the quote total/version on the `estimates` row — ESIGN/UETA-sufficient for a quote. (DocuSeal is a later upgrade only if true signature artifacts are required.)
 - When homeowner accepts: project auto-moves to "In Progress" stage and contractor gets a push notification
 
 ---
@@ -542,6 +563,8 @@ service_areas {
   id: uuid
   contractor_id: uuid (FK contractors)
   zip_code: text
+  lat: decimal (nullable)   // zip centroid — used to poll NWS /alerts/active?point=lat,lon
+  lng: decimal (nullable)
   created_at: timestamp
 }
 
@@ -612,6 +635,7 @@ estimates {
   id: uuid
   project_id: uuid (FK projects)
   roof_size_sqft: decimal
+  measurement_source: enum('manual', 'eagleview')  // MVP = manual; API auto-measure later
   materials: text
   labor_cost: decimal
   materials_cost: decimal
@@ -624,12 +648,20 @@ estimates {
   valid_until: timestamp
   pdf_url: text
   status: enum('draft', 'sent', 'accepted', 'rejected')
-  sent_at: timestamp
+  accept_token: text (unique, nullable)  // tokenized homeowner "Accept this estimate" link
   accepted_at: timestamp
+  accepted_ip: text (nullable)           // ESIGN/UETA acceptance audit
+  accepted_user_agent: text (nullable)
+  accepted_snapshot: jsonb (nullable)    // frozen total/version at moment of acceptance
+  sent_at: timestamp
   created_at: timestamp
 }
 
-// messages — Unified message store across all channels
+// messages — Unified message store. The homeowner has NO account: outbound
+// messages go out as SMS (Twilio) / email (Resend); inbound messages arrive via
+// Twilio/Resend inbound webhooks and are matched back to a contact by phone/email.
+// The contractor's "Messages" inbox is their view of these threads. 'platform' =
+// internal/system entries (e.g. logged calls, automated notes), not homeowner chat.
 messages {
   id: uuid
   project_id: uuid (nullable FK projects)
@@ -788,87 +820,125 @@ Never call Twilio or Resend directly from page handlers. All outbound comms go t
 
 ## 13. File Structure
 
+Everything lives under `src/`. Items marked ✅ already exist in the codebase (kept infra); the rest are to be built.
+
 ```
-/app
-  /(public)
-    /page.tsx                    # Homepage
-    /get-a-quote/page.tsx
-    /thank-you/page.tsx
-    /contractors/page.tsx
-    /contractors/signup/page.tsx
-    /roofing-contractors/[slug]/page.tsx
-    /review/[token]/page.tsx
-  /(dashboard)
-    /layout.tsx                  # Dashboard shell with sidebar
-    /dashboard/page.tsx
-    /dashboard/leads/page.tsx
-    /dashboard/contacts/page.tsx
-    /dashboard/contacts/[id]/page.tsx
-    /dashboard/projects/page.tsx
-    /dashboard/projects/[id]/page.tsx
-    /dashboard/messages/page.tsx
-    /dashboard/storm-alerts/page.tsx
-    /dashboard/reviews/page.tsx
-    /dashboard/profile/page.tsx
-    /dashboard/settings/page.tsx
-  /(admin)
-    /layout.tsx
-    /admin/page.tsx
-    /admin/leads/page.tsx
-    /admin/contractors/page.tsx
-    /admin/storm-events/page.tsx
-    /admin/analytics/page.tsx
-    /admin/settings/page.tsx
-/components
-  /ui                            # shadcn/ui components
-  /dashboard                     # Dashboard-specific components
-  /public                        # Public page components
-  /shared                        # Shared across both
-/lib
-  /db                            # Drizzle schema and client
-  /inngest                       # All Inngest functions
-  /notifications                 # Notification helpers
-  /twilio.ts
-  /resend.ts
-  /stripe.ts
-  /weather.ts
-/inngest
-  /client.ts
-  /functions/                    # One file per automation
+src/
+  proxy.ts                         # ✅ auth cookie gate (replaces middleware.ts)
+  app/
+    layout.tsx                     # ✅ root layout
+    globals.css                    # ✅
+    page.tsx                       # Homepage (lead intake form above the fold)
+    get-a-quote/page.tsx
+    thank-you/page.tsx
+    contractors/page.tsx           # contractor recruitment landing
+    contractors/signup/page.tsx    # multi-step contractor onboarding
+    roofing-contractors/[slug]/page.tsx   # SEO city pages ([city]-[state])
+    review/[token]/page.tsx        # tokenized homeowner review submission
+    dashboard/                     # authenticated contractor CRM (role = contractor)
+      layout.tsx                   # sidebar shell + getRequiredUser('contractor')
+      page.tsx                     # command center
+      leads/page.tsx
+      contacts/page.tsx
+      contacts/[id]/page.tsx
+      projects/page.tsx
+      projects/[id]/page.tsx       # project detail + estimate builder
+      messages/page.tsx
+      storm-alerts/page.tsx
+      reviews/page.tsx
+      profile/page.tsx
+      settings/page.tsx
+    admin/                         # role = admin (separate layout)
+      layout.tsx
+      page.tsx
+      leads/page.tsx
+      contractors/page.tsx
+      storm-events/page.tsx
+      analytics/page.tsx
+      settings/page.tsx
+    auth/
+      login/page.tsx               # ✅
+      callback/route.ts            # ✅ Supabase auth callback
+    api/
+      inngest/route.ts             # ✅ Inngest serve endpoint
+      push/{subscribe,unsubscribe}/route.ts   # ✅ Web Push
+      webhooks/stripe/route.ts     # Stripe webhook (raw body, Node runtime)
+      webhooks/twilio/route.ts     # inbound SMS
+  components/
+    ui/                            # ✅ shadcn/ui primitives
+    dashboard/                     # ✅ sidebar shell, nav, user menu
+    chat/  presence/  realtime/  notifications/   # ✅ reusable comms UI
+    public/                        # public/marketing page components (to build)
+  lib/
+    db/{index.ts ✅, schema.ts}    # Drizzle client ✅ + schema (build per §7)
+    supabase/                      # ✅ server/client/admin/middleware
+    auth/                          # ✅ getRequiredUser(), session
+    inngest/
+      client.ts                    # ✅
+      functions/                   # one file per automation (§9) — index.ts ✅ (stub)
+    notifications/                 # ✅ sendNotification core + sms/email/push transports
+    cloudinary/                    # ✅ uploads
+    geo/                           # ✅ haversine; add geocoding + zip→latlng helpers
+    weather.ts                     # NWS client (to build)
+    stripe.ts                      # Stripe client + subscription helpers (to build)
+    matching/                      # lead-assignment engine (§10, to build)
 ```
 
 ---
 
 ## 14. Environment Variables Needed
 
+Variable names match the keys already present in `.env` where applicable.
+
 ```
+# Supabase + DB
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
-DATABASE_URL
+DATABASE_URL                      # Supavisor pooler URL (port 6543, prepare:false)
 
+# Inngest (prod; INNGEST_DEV=1 locally)
 INNGEST_SIGNING_KEY
 INNGEST_EVENT_KEY
 
+# Twilio (SMS)
 TWILIO_ACCOUNT_SID
 TWILIO_AUTH_TOKEN
 TWILIO_PHONE_NUMBER
 
+# Resend (email)
 RESEND_API_KEY
+FROM_EMAIL
 
+# Stripe (subscriptions only)
 STRIPE_SECRET_KEY
-STRIPE_PUBLISHABLE_KEY
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_WEBHOOK_SECRET
 STRIPE_STARTER_PRICE_ID
 STRIPE_GROWTH_PRICE_ID
 STRIPE_PRO_PRICE_ID
 
-NEXT_PUBLIC_MAPBOX_TOKEN
+# Google Maps / Places (geocoding + address autocomplete)
+NEXT_PUBLIC_GOOGLE_MAPS_KEY
 
-WEATHER_API_KEY
+# Cloudinary (file storage)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+
+# Web Push (VAPID)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY
+VAPID_PRIVATE_KEY
+VAPID_SUBJECT
+
+# Weather — NOAA/NWS needs NO API key, only a descriptive User-Agent
+NWS_USER_AGENT                    # e.g. "RoofLink (contact@rooflink.com)"
 
 NEXT_PUBLIC_APP_URL
 ```
+
+> The draft listed `NEXT_PUBLIC_MAPBOX_TOKEN` and `WEATHER_API_KEY` — neither is used (Google Places + keyless NWS instead).
 
 ---
 

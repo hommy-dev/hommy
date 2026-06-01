@@ -115,37 +115,45 @@ export default nextConfig;
 ```
 src/
 ├── app/
-│   ├── (public)/        # Public pages — no auth required
+│   ├── page.tsx            # Homepage — public, no auth (homeowner lead intake)
+│   ├── get-a-quote/        # Public homeowner pages — NO accounts for homeowners
+│   ├── contractors/        # Public contractor recruitment + /contractors/signup
+│   ├── roofing-contractors/[slug]/   # Public SEO city pages
+│   ├── review/[token]/     # Tokenized homeowner review submission (no login)
+│   ├── dashboard/          # Contractor CRM — auth required, role = contractor
+│   │   ├── layout.tsx      # Auth guard here: getRequiredUser('contractor')
+│   │   └── page.tsx
+│   ├── admin/              # Admin — auth required, role = admin
 │   │   ├── layout.tsx
 │   │   └── page.tsx
-│   ├── homeowner/        # Homeowner app — auth required, role = HOMEOWNER
-│   │   ├── layout.tsx      # Auth guard here
-│   │   └── dashboard/
-│   ├── contractor/          # Contractor app — auth required, role = CONTRACTOR
-│   │   ├── layout.tsx      # Auth guard here
-│   │   └── dashboard/
-│   └── admin/            # Admin — auth required, role = ADMIN
-│       ├── layout.tsx
-│       └── page.tsx
+│   ├── auth/               # login + Supabase callback
+│   └── api/                # inngest, push, webhooks/* (Stripe, Twilio)
 ├── lib/
 │   ├── db/
 │   │   ├── index.ts        # Drizzle client
 │   │   └── schema.ts       # Schema
 │   ├── supabase/
 │   │   ├── server.ts       # Server-side client
-│   │   └── client.ts       # Browser client
+│   │   ├── client.ts       # Browser client
+│   │   └── middleware.ts   # handleProxyAuth() — called by proxy.ts
 │   ├── auth/
 │   │   └── session.ts      # getRequiredUser(), getOptionalUser()
+│   ├── notifications/      # sendNotification() — SMS/email/push core
+│   ├── inngest/            # client + functions/ (background jobs)
 │   └── actions/            # ALL Server Actions live here — never inline them
-│       ├── quote.ts
-│       ├── job.ts
-│       └── payment.ts
+│       ├── leads.ts
+│       ├── projects.ts
+│       └── estimates.ts
 ├── components/
 │   ├── ui/                 # shadcn — never edit these
-│   ├── contractor/
-│   ├── homeowner/
+│   ├── dashboard/          # contractor CRM chrome (sidebar, nav)
+│   ├── chat/ realtime/ presence/ notifications/   # reusable comms UI
 │   └── admin/
 └── proxy.ts                # Auth + routing — NOT middleware.ts
+
+# NOTE: Homeowners are UNAUTHENTICATED. There is no /homeowner app and no
+# HOMEOWNER role. Homeowners submit public forms and act via tokenized links
+# (estimate acceptance, reviews); all homeowner comms are SMS + email.
 ```
 
 ---
@@ -160,20 +168,20 @@ src/
 // src/proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 
+// RoofLink public surface (homeowners are unauthenticated). The real
+// implementation lives in src/lib/supabase/middleware.ts (handleProxyAuth);
+// proxy.ts just delegates to it. Everything NOT public requires a session.
 const PUBLIC_PATHS = [
   "/",
-  "/contractors",
-  "/how-it-works",
-  "/pricing",
-  "/blog",
+  "/get-a-quote",
+  "/thank-you",
+  "/contractors",          // recruitment landing + /contractors/signup
+  "/roofing-contractors",  // SEO city pages
+  "/review",               // tokenized homeowner review flow
   "/auth/login",
   "/auth/signup",
-  "/join",
-  "/trust",
-  "/about",
-  "/contact",
-  "/contractors",
-  "/verify-email",
+  "/auth/callback",
+  "/api/inngest",
 ];
 
 export function proxy(request: NextRequest) {
@@ -187,7 +195,7 @@ export function proxy(request: NextRequest) {
   )
     return NextResponse.next();
 
-  // Webhooks — always allow (Stripe, etc. have no session cookie)
+  // Webhooks — always allow (Stripe, Twilio have no session cookie)
   if (pathname.startsWith("/api/webhooks")) return NextResponse.next();
 
   // Public paths — allow
@@ -196,10 +204,13 @@ export function proxy(request: NextRequest) {
   );
   if (isPublic) return NextResponse.next();
 
-  // Protected — check cookie exists only. Layouts do real auth.
-  const session = request.cookies.get("sb-auth-token");
-  if (!session) {
-    const url = new URL("/login", request.url);
+  // Protected — presence of any Supabase cookie is enough here. Layouts do
+  // the real JWT validation + role check via getRequiredUser().
+  const hasSession = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-"));
+  if (!hasSession) {
+    const url = new URL("/auth/login", request.url);
     url.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(url);
   }
@@ -260,12 +271,12 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-type Role = "HOMEOWNER" | "CONTRACTOR" | "ADMIN";
+// Only two authenticated roles — homeowners never log in.
+type Role = "contractor" | "admin";
 
 const ROLE_HOMES: Record<Role, string> = {
-  HOMEOWNER: "/dashboard",
-  CONTRACTOR: "/contractor",
-  ADMIN: "/admin",
+  contractor: "/dashboard",
+  admin: "/admin",
 };
 
 // Use in layouts and pages. Redirects on failure — never returns null.
@@ -276,7 +287,7 @@ export async function getRequiredUser(requiredRole?: Role) {
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) redirect("/login");
+  if (error || !user) redirect("/auth/login");
 
   const [dbUser] = await db
     .select()
@@ -284,7 +295,7 @@ export async function getRequiredUser(requiredRole?: Role) {
     .where(eq(users.id, user.id))
     .limit(1);
 
-  if (!dbUser) redirect("/login");
+  if (!dbUser) redirect("/auth/login");
 
   if (requiredRole && dbUser.role !== requiredRole) {
     redirect(ROLE_HOMES[dbUser.role as Role]);
@@ -316,7 +327,7 @@ export async function getOptionalUser() {
 ### Route Group Auth Pattern
 
 ```tsx
-// src/app/contractor/layout.tsx
+// src/app/dashboard/layout.tsx
 // One auth check gates the ENTIRE contractor section
 import { getRequiredUser } from "@/lib/auth/session";
 
@@ -326,7 +337,7 @@ export default async function ContractorLayout({
   children: React.ReactNode;
 }) {
   // Redirects if not logged in OR wrong role — never reaches children
-  const user = await getRequiredUser("CONTRACTOR");
+  const user = await getRequiredUser("contractor");
   return (
     <div className="flex h-screen">
       <ContractorSidebar user={user} />
@@ -335,10 +346,10 @@ export default async function ContractorLayout({
   );
 }
 
-// src/app/contractor/page.tsx
+// src/app/dashboard/page.tsx
 // No separate auth check needed — layout already did it
 export default async function ContractorDashboard() {
-  const user = await getRequiredUser("CONTRACTOR"); // fast — React deduplicates the call
+  const user = await getRequiredUser("contractor"); // fast — React deduplicates the call
   const [leads, jobs] = await Promise.all([
     getLeads(user.id),
     getJobs(user.id),
@@ -491,57 +502,56 @@ export async function getUnreadNotificationCount(userId: string) {
 ### Mixing cached and dynamic content (PPR)
 
 ```tsx
-// app/homeowner/dashboard/page.tsx
+// app/dashboard/page.tsx — contractor command center
 import { Suspense } from "react";
 
 // No "use cache" at page level — page reads session (dynamic)
-export default async function HomeownerDashboard() {
-  const user = await getRequiredUser("HOMEOWNER");
+export default async function DashboardHome() {
+  const user = await getRequiredUser("contractor");
 
   return (
     <div>
       {/* CACHED — loads from static shell instantly, same for everyone */}
-      <Suspense fallback={<HowItWorksSkeleton />}>
-        <CachedHowItWorksSection />
+      <Suspense fallback={<TipsSkeleton />}>
+        <CachedGettingStartedSection />
       </Suspense>
 
-      {/* DYNAMIC — streams in, user-specific */}
-      <Suspense fallback={<ProjectsSkeleton />}>
-        <ActiveProjects homeownerId={user.id} />
+      {/* DYNAMIC — streams in, contractor-specific */}
+      <Suspense fallback={<PipelineSkeleton />}>
+        <ActivePipeline contractorId={user.id} />
       </Suspense>
 
-      <Suspense fallback={<QuotesSkeleton />}>
-        <RecentQuotes homeownerId={user.id} />
+      <Suspense fallback={<LeadsSkeleton />}>
+        <TodaysLeads contractorId={user.id} />
       </Suspense>
     </div>
   );
 }
 
-async function CachedHowItWorksSection() {
+async function CachedGettingStartedSection() {
   "use cache";
   cacheLife("max");
-  cacheTag("how-it-works");
-  return <HowItWorksUI />; // no DB call — pure static content
+  cacheTag("getting-started");
+  return <GettingStartedUI />; // no DB call — pure static content
 }
 
-async function ActiveProjects({ homeownerId }: { homeownerId: string }) {
-  // No cache — always fresh
+async function ActivePipeline({ contractorId }: { contractorId: string }) {
+  // No cache — pipeline changes constantly
   const projects = await db
     .select()
-    .from(projectsTable)
+    .from(projects)
     .where(
       and(
-        eq(projectsTable.homeownerId, homeownerId),
-        inArray(projectsTable.status, [
-          "OPEN",
-          "MATCHING",
-          "QUOTING",
-          "HIRED",
-          "IN_PROGRESS",
+        eq(projects.contractorId, contractorId),
+        inArray(projects.stage, [
+          "new_lead",
+          "contacted",
+          "estimate_sent",
+          "in_progress",
         ])
       )
     );
-  return <ProjectList projects={projects} />;
+  return <PipelineBoard projects={projects} />;
 }
 ```
 
@@ -555,7 +565,7 @@ export async function updateContractorProfile(
   data: UpdateInput
 ) {
   "use server";
-  const user = await getRequiredUser("CONTRACTOR");
+  const user = await getRequiredUser("contractor");
   await db
     .update(contractorProfiles)
     .set(data)
@@ -715,7 +725,7 @@ export default function LeadInbox() {
 // ✅ Only the interactive part is client
 // page.tsx — Server Component
 export default async function LeadInbox() {
-  const user = await getRequiredUser("CONTRACTOR");
+  const user = await getRequiredUser("contractor");
   const leads = await getLeads(user.id); // direct DB call
 
   return (
@@ -776,7 +786,7 @@ export async function updateJobStatus(
   formData: FormData
 ): Promise<ActionResult> {
   // Rule 1: Auth first, always
-  const user = await getRequiredUser("CONTRACTOR");
+  const user = await getRequiredUser("contractor");
 
   // Rule 2: Validate input with Zod — never trust client data
   const parsed = UpdateJobSchema.safeParse({
@@ -809,9 +819,9 @@ export async function updateJobStatus(
     .where(eq(jobs.id, jobId));
 
   // Rule 6: Invalidate exactly the caches this mutation affects
-  updateTag(`job-${jobId}`);
-  updateTag(`contractor-jobs-${user.id}`);
-  updateTag(`homeowner-job-${job.homeownerId}`); // homeowner portal shows job status
+  updateTag(`project-${jobId}`);
+  updateTag(`contractor-projects-${user.id}`); // contractor pipeline view
+  // (No homeowner portal — homeowners are unauthenticated; notify them via SMS/email instead.)
 
   return { success: true };
 }
@@ -910,7 +920,7 @@ async function ContractorDashboard({ contractorId }: { contractorId: string }) {
 
 ```tsx
 export default async function Dashboard() {
-  const user = await getRequiredUser("CONTRACTOR");
+  const user = await getRequiredUser("contractor");
 
   return (
     <div>
@@ -1104,13 +1114,13 @@ Use error.tsx:        at route segment level to catch DB errors, not-found, etc.
 ```
 
 ```tsx
-// app/contractor/jobs/loading.tsx
+// app/dashboard/jobs/loading.tsx
 // Shows while jobs/page.tsx is fetching — Next.js shows this automatically
 export default function JobsLoading() {
   return <JobsPageSkeleton />;
 }
 
-// app/contractor/jobs/error.tsx
+// app/dashboard/jobs/error.tsx
 ("use client"); // error.tsx MUST be a Client Component
 export default function JobsError({
   error,
