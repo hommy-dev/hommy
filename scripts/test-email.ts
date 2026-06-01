@@ -34,7 +34,7 @@ function parseArgs(argv: string[]): Args {
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   const to = args.to ?? process.env.TEST_EMAIL_TO?.trim()
-  const subject = args.subject ?? 'RoofLink Resend smoke test'
+  const subject = args.subject ?? 'Homei Resend smoke test'
   const html =
     args.body ??
     `<div style="font-family: Inter, system-ui, sans-serif; padding: 24px;">
@@ -48,7 +48,7 @@ async function main() {
     </div>`
 
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.FROM_EMAIL ?? 'notifications@rooflink.com'
+  const from = process.env.FROM_EMAIL ?? 'notifications@homei.com'
 
   console.log('[email:test] config', {
     hasApiKey: Boolean(apiKey),

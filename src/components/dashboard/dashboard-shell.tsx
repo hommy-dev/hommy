@@ -61,7 +61,7 @@ export function DashboardShell({
   navItems,
   user,
   brandHref = "/",
-  brandLabel = "RoofLink",
+  brandLabel = "Homei",
   settingsHref,
   navUnreadCounts,
   messagesHref,

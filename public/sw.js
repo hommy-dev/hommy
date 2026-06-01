@@ -1,4 +1,4 @@
-// RoofLink Service Worker — handles Web Push notifications
+// Homei Service Worker — handles Web Push notifications
 // Registered by src/hooks/use-push-subscription.ts on mount.
 
 self.addEventListener('install', () => {
@@ -16,10 +16,10 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data.json()
   } catch {
-    data = { title: 'RoofLink', body: event.data.text() }
+    data = { title: 'Homei', body: event.data.text() }
   }
 
-  const { title = 'RoofLink', body = '', actionUrl = '/', entityId } = data
+  const { title = 'Homei', body = '', actionUrl = '/', entityId } = data
 
   event.waitUntil(
     self.registration.showNotification(title, {

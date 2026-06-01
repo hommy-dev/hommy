@@ -1,14 +1,14 @@
 export const CLOUDINARY_FOLDERS = {
-  avatars: 'rooflink/avatars',
-  portfolio: 'rooflink/portfolio',
-  projects: 'rooflink/projects',
-  documents: 'rooflink/documents',
-  jobs: 'rooflink/jobs',
-  disputes: 'rooflink/disputes',
-  reviews: 'rooflink/reviews',
+  avatars: 'homei/avatars',
+  portfolio: 'homei/portfolio',
+  projects: 'homei/projects',
+  documents: 'homei/documents',
+  jobs: 'homei/jobs',
+  disputes: 'homei/disputes',
+  reviews: 'homei/reviews',
   // Chat attachments are nested per-conversation via the helper in
-  // `lib/cloudinary/chat-upload.ts` — `rooflink/chat/{conversationId}`.
-  chat: 'rooflink/chat',
+  // `lib/cloudinary/chat-upload.ts` — `homei/chat/{conversationId}`.
+  chat: 'homei/chat',
 } as const
 
 export type CloudinaryFolder = keyof typeof CLOUDINARY_FOLDERS

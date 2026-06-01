@@ -41,7 +41,7 @@ const SAMPLES: Array<{
   },
   {
     type: 'SYSTEM',
-    title: '👋 Hello from RoofLink',
+    title: '👋 Hello from Homei',
     body: 'This is a test notification — if you can see this toast, real-time is working.',
     actionUrl: '/',
   },

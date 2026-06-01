@@ -4,8 +4,8 @@
 //
 // This is the reusable transport core. Domain-specific helpers (new lead,
 // follow-up due, storm alert, estimate accepted, review request — see
-// docs/ROOFING_PLATFORM.md §9 & §12) are built on top of sendNotification()
-// when the RoofLink schema and Inngest jobs land.
+// docs/HOMEI_PLATFORM.md §9 & §12) are built on top of sendNotification()
+// when the Homei schema and Inngest jobs land.
 
 import { db } from '@/lib/db'
 import { notifications, users } from '@/lib/db/schema'
@@ -184,7 +184,7 @@ export async function sendNotification(
   // 3. SMS — only for high-urgency types when explicitly requested
   const smsAllowed = doSms && SMS_ALLOWED_TYPES.includes(type) && !!user.phone
   if (smsAllowed) {
-    const text = smsBody ?? `RoofLink: ${title}. ${body}`.slice(0, 160)
+    const text = smsBody ?? `Homei: ${title}. ${body}`.slice(0, 160)
     result.sms = await sendSms(user.phone!, text)
   }
 
@@ -212,14 +212,14 @@ function fallbackEmailHtml(
     : ''
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;background:#f4f4f5;padding:40px 20px;">
 <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;">
-  <div style="background:#6c47ff;padding:20px 32px;"><span style="color:#fff;font-size:18px;font-weight:700;">RoofLink</span></div>
+  <div style="background:#6c47ff;padding:20px 32px;"><span style="color:#fff;font-size:18px;font-weight:700;">Homei</span></div>
   <div style="padding:32px;">
     <h2 style="margin:0 0 12px;font-size:20px;color:#18181b;">${title}</h2>
     <p style="margin:0;color:#71717a;line-height:1.6;">${body}</p>
     ${cta}
   </div>
   <div style="background:#f9f9fb;border-top:1px solid #e4e4e7;padding:16px 32px;text-align:center;">
-    <p style="margin:0;color:#a1a1aa;font-size:12px;">© ${new Date().getFullYear()} RoofLink</p>
+    <p style="margin:0;color:#a1a1aa;font-size:12px;">© ${new Date().getFullYear()} Homei</p>
   </div>
 </div>
 </body></html>`

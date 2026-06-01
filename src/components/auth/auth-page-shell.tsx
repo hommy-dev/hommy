@@ -32,7 +32,7 @@ export function AuthPageShell({
           >
             <BrandMark className="size-6" />
             <span className="text-base font-semibold tracking-tight">
-              RoofLink
+              Homei
             </span>
           </Link>
           <Link
@@ -100,7 +100,7 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
 
         </div> */}
 
-        <p className="text-xs text-background/45">© 2025 RoofLink, Inc.</p>
+        <p className="text-xs text-background/45">© 2025 Homei, Inc.</p>
       </div>
     </aside>
   );

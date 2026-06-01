@@ -14,7 +14,7 @@ import {
 type Role = 'HOMEOWNER' | 'CONTRACTOR'
 
 /** localStorage key for the dev "quiet toasts" toggle. */
-const QUIET_TOASTS_KEY = 'rooflink_toasts_quiet'
+const QUIET_TOASTS_KEY = 'homei_toasts_quiet'
 
 /**
  * Should we suppress a toast for this event?

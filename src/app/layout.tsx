@@ -21,7 +21,7 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RoofLink - Find Trusted Local Contractors",
+  title: "Homei - Find Trusted Local Contractors",
   description:
     "Connect with vetted roofing contractors in your area",
   manifest: "/manifest.json",

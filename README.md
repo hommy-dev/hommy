@@ -35,12 +35,14 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## RoofLink
+## Homei
 
-RoofLink is a two-sided platform connecting homeowners who need roofing work with
-local roofing contractors: exclusive lead generation on the homeowner side, and a
-purpose-built CRM on the contractor side. See **`docs/ROOFING_PLATFORM.md`** for the
-full product & technical brief (the single source of truth).
+Homei is a two-sided **home-services** platform: exclusive lead generation on the
+homeowner side, and a purpose-built CRM on the contractor side. It **launches with
+roofing** as the first vertical, but the architecture is multi-vertical — more home
+services (cleaning, gutters, etc.) come later on the same core. See
+**`docs/HOMEI_PLATFORM.md`** for the full product & technical brief (the single
+source of truth) — read §0 first for the multi-vertical naming/schema rules.
 
 ### Run the background-jobs dev server (Inngest)
 
@@ -58,7 +60,7 @@ Root:
 └── .impeccable.md    — design context (voice, aesthetic, principles)
 
 docs/
-└── ROOFING_PLATFORM.md — single source of truth: pages, flows, schema,
+└── HOMEI_PLATFORM.md — single source of truth: pages, flows, schema,
                           Inngest jobs, lead-assignment logic, pricing, env
 ```
 

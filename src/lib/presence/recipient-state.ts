@@ -17,7 +17,7 @@ import { db } from '@/lib/db'
 export type RecipientState =
   /** Chat is open and tab is focused. They literally see the message land. */
   | 'viewing'
-  /** Active on RoofLink right now, but not in this conversation. */
+  /** Active on Homei right now, but not in this conversation. */
   | 'on_platform'
   /** Last seen 2–15 min ago. Probably switched away briefly. */
   | 'recently_away'

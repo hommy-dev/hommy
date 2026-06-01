@@ -168,7 +168,7 @@ src/
 // src/proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 
-// RoofLink public surface (homeowners are unauthenticated). The real
+// Homei public surface (homeowners are unauthenticated). The real
 // implementation lives in src/lib/supabase/middleware.ts (handleProxyAuth);
 // proxy.ts just delegates to it. Everything NOT public requires a session.
 const PUBLIC_PATHS = [

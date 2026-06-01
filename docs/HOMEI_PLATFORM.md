@@ -1,9 +1,31 @@
-# RoofLink — Product & Technical Brief
-> This document is the single source of truth for building the RoofLink platform. Read every section before writing any code.
+# Homei — Product & Technical Brief
+> This document is the single source of truth for building the Homei platform. Read every section before writing any code.
 
 ---
 
-## 0. Build Decisions — reconciled with the codebase (2026-06)
+## 0. Platform Vision & Naming — READ THIS FIRST
+
+**Homei is a multi-vertical home-services platform — NOT a roofing app.** Roofing is **launch vertical #1**. Once it proves out, we add more home services on the same core (e.g. deep cleaning, ceiling/drywall, gutters, and other home-related trades). Every agent must build with that future in mind, even while only roofing ships now.
+
+**Scope rule:** Build **only roofing** right now. Do not build other verticals — but never design anything in a way that would block adding them later.
+
+**Naming rules (non-negotiable):**
+- The brand/platform name is **Homei**. Never name the platform, or anything core, after roofing.
+- **No `roof`/`roofing` in core names** — not table names, column names, enum values that are meant to be shared, route segments, server-action files, function names, or component names. Use service-neutral vocabulary: `services`, `leads`, `contacts`, `projects`, `estimates`, `service_areas`, `reviews`.
+- Roofing-specific vocabulary is allowed only inside clearly roofing-scoped places (a roofing `service_details` payload, a roofing seed row, a fenced roofing-only module/route).
+
+**Schema rules (multi-vertical from day one):**
+- A **`services`** table (the verticals) is the backbone. Roofing is just a seed row. `leads`, `projects`, and the contractor's offered-services join all reference a **`service_id`** — never a hardcoded roofing `job_type` enum.
+- **Service-specific intake/estimate fields live in a flexible `service_details` (jsonb)** on `leads` and `estimates` — so roofing's `roof_size_sqft` and shingle/material choices never become columns on the core tables. Each service defines its own `service_details` shape (validated in app code per service). Cleaning, gutters, etc. will have entirely different fields.
+- **Roofing-only features are isolated, optional modules.** Storm/weather alerts only make sense for roofing — so `storm_events` and `leads.storm_event_id` are roofing-scoped, nullable, and fenced off, not part of the core lead lifecycle.
+- **Shared enums stay service-neutral:** urgency, pipeline `stage`, lead `status`, message `channel`, notification `type` — these apply to every vertical, so keep them generic.
+- Pricing/subscription (plan → included leads) is platform-level and service-neutral.
+
+> Practical example: "what do you need?" on the homepage is `service_id` (Roofing) + a roofing-defined subtype in `service_details` (Repair / Replacement / Inspection / Storm Damage). When cleaning launches, it's a new `services` row with its own subtypes in `service_details` — zero schema migration.
+
+---
+
+## 0.1 Build Decisions — reconciled with the codebase (2026-06)
 
 > This brief began as a draft. The points below reconcile it with the actual project (a cleaned, rebranded Next.js 16 codebase) and with current-as-of-2026 API research. Where this section conflicts with later sections, **this section wins** — the later text has been updated to match but read this first.
 
@@ -23,7 +45,7 @@
 
 ## 1. What We Are Building
 
-A two-sided platform connecting homeowners who need roofing work with local roofing contractors. The platform has two jobs:
+A two-sided **home-services** platform connecting homeowners who need work done with local service contractors. **It launches with roofing as the first vertical** (so all current copy, flows, and seed data are roofing), but the architecture is multi-vertical — see §0. The platform has two jobs:
 
 1. **Generate and deliver exclusive, high-intent leads to contractors** (homeowner side)
 2. **Give contractors a purpose-built CRM and toolset to close those leads** (contractor side)
@@ -151,7 +173,7 @@ The platform has three distinct sides:
 - "While you wait" section with useful content (what to document for insurance, etc.)
 
 **Triggered automatically:**
-- SMS to homeowner: "Hi [Name], your roofing request was received. A local contractor will call you within 60 minutes. — RoofLink"
+- SMS to homeowner: "Hi [Name], your roofing request was received. A local contractor will call you within 60 minutes. — Homei"
 - Email confirmation with job summary
 
 ---
@@ -534,6 +556,18 @@ users {
   created_at: timestamp
 }
 
+// services — the verticals. Roofing is launch vertical #1 (a seed row).
+// Adding a new home service later is a new row here — NOT a schema migration.
+services {
+  id: uuid
+  slug: text (unique)          // 'roofing', later 'cleaning', 'gutters', ...
+  name: text                   // 'Roofing'
+  is_active: boolean           // gate which verticals are live
+  subtypes: jsonb              // service-defined options, e.g. roofing:
+                               //   ['repair','replacement','inspection','storm_damage']
+  created_at: timestamp
+}
+
 // contractors — One per contractor user
 contractors {
   id: uuid
@@ -568,10 +602,13 @@ service_areas {
   created_at: timestamp
 }
 
-// job_types — Many-to-many contractor to job types
-contractor_job_types {
-  contractor_id: uuid
-  job_type: enum('repair', 'replacement', 'inspection', 'storm_damage', 'commercial')
+// contractor_services — which verticals (+ subtypes) a contractor handles.
+// Replaces the roofing-only job_type enum. Service-neutral.
+contractor_services {
+  contractor_id: uuid (FK contractors)
+  service_id: uuid (FK services)
+  subtypes: text[]             // service-scoped, e.g. roofing: ['repair','replacement','inspection','storm_damage','commercial']
+  // primary key (contractor_id, service_id)
 }
 
 // homeowners — Created when a lead is submitted
@@ -593,11 +630,13 @@ homeowners {
 leads {
   id: uuid
   homeowner_id: uuid (FK homeowners)
-  job_type: enum('repair', 'replacement', 'inspection', 'storm_damage')
-  urgency: enum('emergency', 'within_week', 'within_month', 'planning')
+  service_id: uuid (FK services)          // which vertical (Roofing for now)
+  service_details: jsonb                  // vertical-specific intake, e.g. roofing:
+                                          //   { subtype: 'storm_damage' }
+  urgency: enum('emergency', 'within_week', 'within_month', 'planning')   // shared across verticals
   photo_url: text
   notes: text
-  storm_event_id: uuid (nullable FK storm_events)
+  storm_event_id: uuid (nullable FK storm_events)   // ROOFING-ONLY module — null for other verticals
   status: enum('pending', 'assigned', 'expired')
   assigned_to: uuid (nullable FK contractors)
   assigned_at: timestamp
@@ -621,8 +660,8 @@ projects {
   contractor_id: uuid (FK contractors)
   contact_id: uuid (FK contacts)
   lead_id: uuid (nullable FK leads)
-  job_type: enum
-  stage: enum('new_lead', 'contacted', 'estimate_sent', 'in_progress', 'completed', 'lost')
+  service_id: uuid (FK services)          // inherited from the lead's vertical
+  stage: enum('new_lead', 'contacted', 'estimate_sent', 'in_progress', 'completed', 'lost')   // shared across verticals
   estimate_value: decimal
   notes: text
   follow_up_at: timestamp
@@ -634,9 +673,9 @@ projects {
 estimates {
   id: uuid
   project_id: uuid (FK projects)
-  roof_size_sqft: decimal
-  measurement_source: enum('manual', 'eagleview')  // MVP = manual; API auto-measure later
-  materials: text
+  service_details: jsonb   // vertical-specific fields, e.g. roofing:
+                           //   { roof_size_sqft, measurement_source: 'manual'|'eagleview',
+                           //     materials: 'asphalt_shingle'|'metal'|'tile'|'tpo'|'other' }
   labor_cost: decimal
   materials_cost: decimal
   line_items: jsonb
@@ -785,7 +824,7 @@ When a homeowner submits a form:
 
 1. Geocode the address to get zip code and coordinates
 2. Query `service_areas` for contractors covering that zip code
-3. Filter to contractors with `verification_status = 'verified'` and `leads_used_this_month < plan_limit`
+3. Filter to contractors who **offer the lead's `service_id`** (`contractor_services`), are `verification_status = 'verified'`, and have `leads_used_this_month < plan_limit`
 4. Rank by: plan tier (Pro first), then avg_response_time (fastest first), then random tiebreak
 5. Assign to the top-ranked contractor
 6. Increment their `leads_used_this_month`
@@ -933,7 +972,7 @@ VAPID_PRIVATE_KEY
 VAPID_SUBJECT
 
 # Weather — NOAA/NWS needs NO API key, only a descriptive User-Agent
-NWS_USER_AGENT                    # e.g. "RoofLink (contact@rooflink.com)"
+NWS_USER_AGENT                    # e.g. "Homei (contact@homei.com)"
 
 NEXT_PUBLIC_APP_URL
 ```

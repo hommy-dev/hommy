@@ -3,7 +3,7 @@
  *
  * Uses the existing unsigned upload preset (same pattern as avatars /
  * portfolio / projects). Files live at
- *   rooflink/chat/{conversationId}/{cloudinary-generated-public-id}
+ *   homei/chat/{conversationId}/{cloudinary-generated-public-id}
  *
  * We use XHR (not fetch) because we need `upload.onprogress` for the
  * progress UI — fetch doesn't expose that event.
@@ -50,7 +50,7 @@ export async function uploadChatAttachment(
   const form = new FormData()
   form.append('file', file)
   form.append('upload_preset', uploadPreset)
-  form.append('folder', `rooflink/chat/${args.conversationId}`)
+  form.append('folder', `homei/chat/${args.conversationId}`)
 
   // `auto` lets Cloudinary classify images vs video vs raw automatically.
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`

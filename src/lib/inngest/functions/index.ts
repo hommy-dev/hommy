@@ -1,7 +1,7 @@
 // ============================================================
-// ROOFLINK — INNGEST BACKGROUND JOBS
+// HOMEI — INNGEST BACKGROUND JOBS
 // ============================================================
-// TODO: Implement automations per docs/ROOFING_PLATFORM.md §9:
+// TODO: Implement automations per docs/HOMEI_PLATFORM.md §9:
 //   lead.assigned, lead.expiring, lead.expired, project.stage_changed,
 //   followup.due, review.request, storm.monitor (cron),
 //   leads.monthly_reset (cron).
