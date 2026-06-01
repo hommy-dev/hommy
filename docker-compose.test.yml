@@ -1,16 +1,16 @@
 services:
   postgres-test:
     image: postgres:15-alpine
-    container_name: paintpro-postgres-test
+    container_name: rooflink-postgres-test
     restart: unless-stopped
     environment:
-      POSTGRES_USER: paintpro_test
-      POSTGRES_PASSWORD: paintpro_test
-      POSTGRES_DB: paintpro_test
+      POSTGRES_USER: rooflink_test
+      POSTGRES_PASSWORD: rooflink_test
+      POSTGRES_DB: rooflink_test
     ports:
       - '54322:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U paintpro_test']
+      test: ['CMD-SHELL', 'pg_isready -U rooflink_test']
       interval: 2s
       timeout: 3s
       retries: 20

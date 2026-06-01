@@ -5,17 +5,6 @@ const nextConfig: NextConfig = {
     '192.168.100.5'
   ],
 
-  async redirects() {
-    return [
-      { source: "/painter", destination: "/contractor", permanent: true },
-      {
-        source: "/painter/:path*",
-        destination: "/contractor/:path*",
-        permanent: true,
-      },
-    ];
-  },
-
   // Enables "use cache" directive + PPR — required for this guide
   cacheComponents: true,
 

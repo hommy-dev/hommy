@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.FROM_EMAIL ?? 'notifications@paintpro.com'
+const FROM = process.env.FROM_EMAIL ?? 'notifications@rooflink.com'
 
 export async function sendEmail(
   to: string,

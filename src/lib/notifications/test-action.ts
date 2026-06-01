@@ -12,19 +12,19 @@ const SAMPLES: Array<{
   {
     type: 'LEAD',
     title: '🎯 New lead in your area',
-    body: 'A homeowner needs interior painting in Austin, TX. Tap to review and quote.',
+    body: 'A homeowner needs roof repair in Austin, TX. Tap to review and quote.',
     actionUrl: '/contractor/leads',
   },
   {
     type: 'QUOTE',
-    title: '💬 New quote from John\'s Painting',
+    title: '💬 New quote from John\'s Roofing',
     body: 'Total $3,200 over 5 days · 4.8★ (32 reviews)',
     actionUrl: '/homeowner',
   },
   {
     type: 'JOB',
     title: '🎉 Your quote was accepted',
-    body: 'The homeowner booked you for the bedroom repaint. Open the job to plan next steps.',
+    body: 'The homeowner booked you for the roof replacement. Open the job to plan next steps.',
     actionUrl: '/contractor/jobs',
   },
   {
@@ -41,7 +41,7 @@ const SAMPLES: Array<{
   },
   {
     type: 'SYSTEM',
-    title: '👋 Hello from PaintPro',
+    title: '👋 Hello from RoofLink',
     body: 'This is a test notification — if you can see this toast, real-time is working.',
     actionUrl: '/',
   },

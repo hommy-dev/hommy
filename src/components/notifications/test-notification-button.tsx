@@ -17,7 +17,7 @@ const TYPES: NotificationType[] = [
   'SYSTEM',
 ]
 
-const QUIET_TOASTS_KEY = 'paintpro_toasts_quiet'
+const QUIET_TOASTS_KEY = 'rooflink_toasts_quiet'
 
 /**
  * Floating dev-only button. Triggers sendTestNotificationAction so the

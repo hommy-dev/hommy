@@ -13,7 +13,7 @@ export interface PushPayload {
 function initWebPush() {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
   const privateKey = process.env.VAPID_PRIVATE_KEY
-  const subject = process.env.VAPID_SUBJECT ?? 'mailto:notifications@paintpro.com'
+  const subject = process.env.VAPID_SUBJECT ?? 'mailto:notifications@rooflink.com'
   if (publicKey && privateKey) {
     webpush.setVapidDetails(subject, publicKey, privateKey)
     return true

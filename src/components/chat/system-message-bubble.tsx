@@ -144,7 +144,7 @@ function renderForType(
       return {
         icon: <ShieldCheck className="size-4 text-green-600" />,
         title: 'Deposit received',
-        subtitle: 'Painter confirmed payment.',
+        subtitle: 'Contractor confirmed payment.',
       }
     }
     case 'cooling_off.expired': {
@@ -207,7 +207,7 @@ function renderForType(
     case 'job.complete': {
       return {
         icon: <ListTodo className="size-4" />,
-        title: 'Painter marked job complete',
+        title: 'Contractor marked job complete',
         subtitle:
           viewerRole === 'HOMEOWNER'
             ? 'Approve the work or flag items to fix.'

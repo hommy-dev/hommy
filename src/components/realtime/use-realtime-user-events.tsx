@@ -14,7 +14,7 @@ import {
 type Role = 'HOMEOWNER' | 'CONTRACTOR'
 
 /** localStorage key for the dev "quiet toasts" toggle. */
-const QUIET_TOASTS_KEY = 'paintpro_toasts_quiet'
+const QUIET_TOASTS_KEY = 'rooflink_toasts_quiet'
 
 /**
  * Should we suppress a toast for this event?
@@ -218,7 +218,7 @@ function dispatch<E extends UserEventName>(
       const p = payload as UserEventPayload['lead:declined']
       if (role === 'HOMEOWNER') {
         showToast(`${p.contractorBusinessName} declined`, {
-          description: 'No worries — other matched painters are still reviewing.',
+          description: 'No worries — other matched contractors are still reviewing.',
           type: 'info',
         })
       }

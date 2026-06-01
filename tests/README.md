@@ -1,4 +1,4 @@
-# PaintPro test suite
+# RoofLink test suite
 
 Three layers, each with its own job. See `business-scope-launch-sharded-lake.md`
 for the full rationale.
@@ -53,6 +53,6 @@ pnpm test:db:down
 
 - AI conversation quality (Gemini phrasing, intake feel)
 - Real Stripe charge/payout
-- Realtime UX timing on painter-status broadcasts
+- Realtime UX timing on contractor-status broadcasts
 - Mobile layout / Lighthouse perf
 - Push/email/SMS deliverability (we assert the call was made; delivery is manual)

@@ -121,7 +121,7 @@ src/
 │   ├── homeowner/        # Homeowner app — auth required, role = HOMEOWNER
 │   │   ├── layout.tsx      # Auth guard here
 │   │   └── dashboard/
-│   ├── painter/          # Painter app — auth required, role = CONTRACTOR
+│   ├── contractor/          # Contractor app — auth required, role = CONTRACTOR
 │   │   ├── layout.tsx      # Auth guard here
 │   │   └── dashboard/
 │   └── admin/            # Admin — auth required, role = ADMIN
@@ -142,7 +142,7 @@ src/
 │       └── payment.ts
 ├── components/
 │   ├── ui/                 # shadcn — never edit these
-│   ├── painter/
+│   ├── contractor/
 │   ├── homeowner/
 │   └── admin/
 └── proxy.ts                # Auth + routing — NOT middleware.ts
@@ -162,7 +162,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = [
   "/",
-  "/for-painters",
+  "/contractors",
   "/how-it-works",
   "/pricing",
   "/blog",
@@ -172,7 +172,7 @@ const PUBLIC_PATHS = [
   "/trust",
   "/about",
   "/contact",
-  "/painters",
+  "/contractors",
   "/verify-email",
 ];
 
@@ -317,7 +317,7 @@ export async function getOptionalUser() {
 
 ```tsx
 // src/app/contractor/layout.tsx
-// One auth check gates the ENTIRE painter section
+// One auth check gates the ENTIRE contractor section
 import { getRequiredUser } from "@/lib/auth/session";
 
 export default async function ContractorLayout({
@@ -422,7 +422,7 @@ async function CachedForm({ action }: { action: () => Promise<void> }) {
 // src/lib/data/contractor.ts
 import { cacheLife, cacheTag } from "next/cache";
 
-// Public painter profile — safe to cache, same for all users
+// Public contractor profile — safe to cache, same for all users
 export async function getPublicContractorProfile(contractorId: string) {
   "use cache";
   cacheLife("standard");
@@ -550,7 +550,7 @@ async function ActiveProjects({ homeownerId }: { homeownerId: string }) {
 ```ts
 // updateTag() — use after Server Actions triggered by users
 // User sees their own change immediately (read-your-writes)
-export async function updatePainterProfile(
+export async function updateContractorProfile(
   contractorId: string,
   data: UpdateInput
 ) {
@@ -805,12 +805,12 @@ export async function updateJobStatus(
   // Rule 5: DB mutation
   await db
     .update(jobs)
-    .set({ status: parsed.data.status, completedByPainterAt: new Date() })
+    .set({ status: parsed.data.status, completedByContractorAt: new Date() })
     .where(eq(jobs.id, jobId));
 
   // Rule 6: Invalidate exactly the caches this mutation affects
   updateTag(`job-${jobId}`);
-  updateTag(`painter-jobs-${user.id}`);
+  updateTag(`contractor-jobs-${user.id}`);
   updateTag(`homeowner-job-${job.homeownerId}`); // homeowner portal shows job status
 
   return { success: true };

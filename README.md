@@ -35,38 +35,38 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## RoofLink
+
+RoofLink is a two-sided platform connecting homeowners who need roofing work with
+local roofing contractors: exclusive lead generation on the homeowner side, and a
+purpose-built CRM on the contractor side. See **`docs/ROOFING_PLATFORM.md`** for the
+full product & technical brief (the single source of truth).
+
+### Run the background-jobs dev server (Inngest)
+
+```bash
 pnpm dlx inngest-cli@latest dev -u http://localhost:3000/api/inngest
+```
 
-Root (Layer 1 — framework rules, AI reads always):
-├── AGENTS.md — Next.js 16 rules + docs index
-├── CLAUDE.md — Points to AGENTS.md
-├── CODING_GUIDE.md — Next.js 16 patterns, auth, caching
+### Documentation
 
-docs/ (Layer 2 — platform rules, AI reads per feature):
-├── platform-overview.md — WHAT to build + WHY (business rules, flows, edge cases)
-├── architecture.md — HOW to build (schema, actions, Stripe, Inngest, code patterns)
-└── specs/ (Layer 3 — feature-specific deep references)
-└── job-input-fields.md — per-service intake field schemas
+```
+Root:
+├── AGENTS.md         — Next.js 16 rules + docs index
+├── CLAUDE.md         — points to AGENTS.md
+├── CODING_GUIDE.md   — Next.js 16 patterns, auth, caching, common bugs
+└── .impeccable.md    — design context (voice, aesthetic, principles)
 
+docs/
+└── ROOFING_PLATFORM.md — single source of truth: pages, flows, schema,
+                          Inngest jobs, lead-assignment logic, pricing, env
+```
 
+### Useful scripts
 
-3. Contractor seed script. Run pnpm seed:contractors. Key flags:
-
-  # 5 contractors scattered around NYC (default)
-  pnpm seed:contractors
-
-  # Around a preset city
-  pnpm seed:contractors -- --near="Lahore"
-  pnpm seed:contractors -- --near="Dubai"
-  pnpm seed:contractors -- --near="London"
-
-  # Explicit coords (any place on Earth)
-  pnpm seed:contractors -- --lat=31.5204 --lng=74.3587
-
-  # More contractors
-  pnpm seed:contractors -- --count=8
-
-  # Wipe previous seeds before re-seeding (looks up @seed.paintpro.test emails)
-  pnpm seed:contractors -- --reset --near="Lahore"
-
- pnpm email:test -- --to=web.dev.haseeb@gmail.com
+```bash
+pnpm db:generate         # generate Drizzle migrations from src/lib/db/schema.ts
+pnpm db:migrate          # apply migrations
+pnpm admin:create        # create an admin user
+pnpm email:test -- --to=you@example.com   # Resend smoke test
+```

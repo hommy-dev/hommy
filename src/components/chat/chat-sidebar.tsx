@@ -79,7 +79,7 @@ export function ChatSidebar({ viewer, basePath }: Props) {
             {query
               ? 'No conversations match that search.'
               : viewer === 'homeowner'
-                ? 'No conversations yet. When painters quote your project, you can ask them questions here.'
+                ? 'No conversations yet. When contractors quote your project, you can ask them questions here.'
                 : 'No conversations yet. Submit a quote on a lead — the homeowner can reach out here.'}
           </div>
         ) : (

@@ -21,9 +21,9 @@ const fontMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PaintPro - Find Trusted Local Contractors",
+  title: "RoofLink - Find Trusted Local Contractors",
   description:
-    "Connect with vetted painting and home-service professionals in your area",
+    "Connect with vetted roofing contractors in your area",
   manifest: "/manifest.json",
 };
 

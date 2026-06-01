@@ -1,7 +1,7 @@
 {
-  "name": "PaintPro",
-  "short_name": "PaintPro",
-  "description": "Find trusted painting contractors or manage your painting business.",
+  "name": "RoofLink",
+  "short_name": "RoofLink",
+  "description": "Find a trusted local roofing contractor, or manage your roofing business.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

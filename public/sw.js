@@ -1,4 +1,4 @@
-// PaintPro Service Worker — handles Web Push notifications
+// RoofLink Service Worker — handles Web Push notifications
 // Registered by src/hooks/use-push-subscription.ts on mount.
 
 self.addEventListener('install', () => {
@@ -16,10 +16,10 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data.json()
   } catch {
-    data = { title: 'PaintPro', body: event.data.text() }
+    data = { title: 'RoofLink', body: event.data.text() }
   }
 
-  const { title = 'PaintPro', body = '', actionUrl = '/', entityId } = data
+  const { title = 'RoofLink', body = '', actionUrl = '/', entityId } = data
 
   event.waitUntil(
     self.registration.showNotification(title, {

@@ -1,5 +1,5 @@
 {
-  "name": "painters",
+  "name": "rooflink",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint",
     "admin:create": "tsx scripts/create-admin.ts",
-    "seed:contractors": "tsx scripts/seed-contractors.ts",
     "email:test": "tsx scripts/test-email.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",

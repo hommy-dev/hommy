@@ -617,12 +617,12 @@ async function recordLeadActivityFromMessage(args: {
   // longer governs the lead.
   if (convo.jobId) return
 
-  const isPainter = convo.contractorUserId === args.senderUserId
+  const isContractor = convo.contractorUserId === args.senderUserId
   const isHomeowner = convo.homeownerUserId === args.senderUserId
-  if (!isPainter && !isHomeowner) return
+  if (!isContractor && !isHomeowner) return
 
-  // 1) First-response — painter side only.
-  if (isPainter) {
+  // 1) First-response — contractor side only.
+  if (isContractor) {
     await db
       .update(leads)
       .set({ firstResponseAt: new Date() })
@@ -639,7 +639,7 @@ async function recordLeadActivityFromMessage(args: {
   // message on this conversation in the last 7d. Otherwise this is a
   // one-sided exchange (the failure mode we explicitly do NOT reward).
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  const otherUserId = isPainter ? convo.homeownerUserId : convo.contractorUserId
+  const otherUserId = isContractor ? convo.homeownerUserId : convo.contractorUserId
   if (!otherUserId) return
   const [otherSide] = await db
     .select({ id: messages.id })

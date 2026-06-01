@@ -32,7 +32,7 @@ export function AuthPageShell({
           >
             <BrandMark className="size-6" />
             <span className="text-base font-semibold tracking-tight">
-              PaintPro
+              RoofLink
             </span>
           </Link>
           <Link
@@ -54,7 +54,7 @@ export function AuthPageShell({
 function BrandPanel({ variant }: { variant: BrandVariant }) {
   const headline =
     variant === "contractor"
-      ? "The modern marketplace for professional painters."
+      ? "The modern marketplace for professional roofing contractors."
       : "Built for the trades. Ready for the future.";
 
   const sub =
@@ -100,7 +100,7 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
 
         </div> */}
 
-        <p className="text-xs text-background/45">© 2025 PaintPro, Inc.</p>
+        <p className="text-xs text-background/45">© 2025 RoofLink, Inc.</p>
       </div>
     </aside>
   );

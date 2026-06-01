@@ -11,12 +11,11 @@ describe('test harness', () => {
   })
 
   it('resolves the @ alias', async () => {
-    const { LEAD_TUNABLES } = await import('@/lib/config/tunables')
-    expect(LEAD_TUNABLES).toBeDefined()
+    const { cn } = await import('@/lib/utils')
+    expect(cn).toBeTypeOf('function')
   })
 
   it('loads .env.test', () => {
     expect(process.env.NODE_ENV).toBe('test')
-    expect(process.env.PAINTPRO_AI_PROVIDER).toBe('stub')
   })
 })

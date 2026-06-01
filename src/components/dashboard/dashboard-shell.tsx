@@ -61,7 +61,7 @@ export function DashboardShell({
   navItems,
   user,
   brandHref = "/",
-  brandLabel = "Painters",
+  brandLabel = "RoofLink",
   settingsHref,
   navUnreadCounts,
   messagesHref,

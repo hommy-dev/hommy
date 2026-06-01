@@ -135,7 +135,7 @@ export function LoginForm() {
         </div>
         <div className="relative flex justify-center">
           <span className="bg-background px-3 text-xs text-muted-foreground">
-            New to PaintPro?
+            New to RoofLink?
           </span>
         </div>
       </div>

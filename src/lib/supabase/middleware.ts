@@ -2,21 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = [
   "/",
-  "/for-painters",
-  "/how-it-works",
-  "/pricing",
-  "/blog",
+  "/get-a-quote", // standalone homeowner lead form
+  "/thank-you", // post-submission confirmation
+  "/contractors", // contractor recruitment landing + /contractors/signup
+  "/roofing-contractors", // SEO location pages: /roofing-contractors/[city]-[state]
+  "/review", // tokenized public review submission flow
   "/auth/login",
   "/auth/signup",
   "/auth/callback",
-  "/join",
-  "/trust",
-  "/about",
-  "/contact",
-  "/painters",
-  "/post-project", // homeowner wizard — guests complete it and auto-create an account on submit
-  "/testimonial", // tokenized public testimonial submission flow
-  "/verify-email",
   "/api/inngest",
 ];
 

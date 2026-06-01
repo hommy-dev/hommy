@@ -3,15 +3,13 @@ import { expect, test } from '@playwright/test'
 /**
  * Public-routes smoke E2E.
  *
- * The full golden-path E2E (homeowner + painter parallel contexts
- * driving accept → deposit → start → complete → release) needs a
- * test-only auth path that bypasses Supabase JWT, since we don't run
- * Supabase locally for tests. That's a future ticket.
+ * The full golden-path E2E (homeowner lead submit → contractor claim →
+ * contact → estimate sent → won) needs a test-only auth path that bypasses
+ * Supabase JWT, since we don't run Supabase locally for tests. Future ticket.
  *
  * In the meantime this spec proves:
  *   - The Next.js dev server boots and serves pages.
- *   - The unauth public surface (home, login, signup, post-project)
- *     all return 200 and render their headline copy.
+ *   - The unauth public surface (home, login) returns 200 and renders copy.
  *   - The login form validates with no JS errors.
  *
  * It catches the worst regression class — "the build deploys but the
@@ -21,10 +19,8 @@ import { expect, test } from '@playwright/test'
  */
 
 const PUBLIC_ROUTES = [
-  { path: '/', expectText: /paint/i },
+  { path: '/', expectText: /roof/i },
   { path: '/auth/login', expectText: /sign in|log in/i },
-  { path: '/auth/signup/contractor', expectText: /contractor|paint/i },
-  { path: '/post-project', expectText: /post|project|paint/i },
 ]
 
 test.describe('public routes smoke', () => {

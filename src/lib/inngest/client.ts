@@ -2,7 +2,7 @@
 
 import { Inngest } from "inngest"
 
-export const inngest = new Inngest({ id: "paintpro" })
+export const inngest = new Inngest({ id: "rooflink" })
 
 // ============================================================
 // EVENT TYPES (Phase 1 - no subscription events)
