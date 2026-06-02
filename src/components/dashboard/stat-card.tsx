@@ -1,38 +1,38 @@
-import type { ComponentProps } from "react"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Card } from "@/components/ui/card"
-
-type Hugeicon = NonNullable<ComponentProps<typeof HugeiconsIcon>["icon"]>
+import type { ReactNode } from "react"
+import { cn } from "@/lib/utils"
 
 export function StatCard({
   label,
   value,
   hint,
   icon,
+  tint,
 }: {
   label: string
-  value: string | number
+  value: ReactNode
   hint?: string
-  icon?: Hugeicon
+  icon?: ReactNode
+  tint?: string
 }) {
   return (
-    <Card className="p-5">
+    <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">
-            {value}
-          </p>
-          {hint ? (
-            <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
-          ) : null}
-        </div>
+        <p className="text-sm text-muted-foreground">{label}</p>
         {icon ? (
-          <div className="rounded-lg bg-muted p-2 text-muted-foreground">
-            <HugeiconsIcon icon={icon} strokeWidth={2} className="size-5" />
-          </div>
+          <span
+            className={cn(
+              "flex size-9 items-center justify-center rounded-xl",
+              tint ?? "bg-muted text-muted-foreground",
+            )}
+          >
+            {icon}
+          </span>
         ) : null}
       </div>
-    </Card>
+      <p className="mt-3 font-sebenta text-[1.75rem] font-bold leading-none tracking-tight tabular-nums">
+        {value}
+      </p>
+      {hint ? <p className="mt-2 text-xs text-muted-foreground">{hint}</p> : null}
+    </div>
   )
 }

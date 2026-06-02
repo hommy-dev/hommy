@@ -5,7 +5,6 @@ import * as React from "react";
 import { useTheme } from "next-themes";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ArrowUp01Icon,
   ComputerIcon,
   Logout03Icon,
   Moon02Icon,
@@ -27,7 +26,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signOutFormAction } from "@/lib/actions/auth";
-import { cn } from "@/lib/utils";
 
 type UserMenuUser = {
   email: string;
@@ -38,6 +36,8 @@ type UserMenuUser = {
 type UserMenuProps = {
   user: UserMenuUser;
   settingsHref: string;
+  /** Compact (avatar-only) trigger, opens downward — for the top header. */
+  compact?: boolean;
 };
 
 function initials(name: string): string {
@@ -47,7 +47,7 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function UserMenu({ user, settingsHref }: UserMenuProps) {
+export function UserMenu({ user, settingsHref, compact = false }: UserMenuProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
@@ -59,41 +59,19 @@ export function UserMenu({ user, settingsHref }: UserMenuProps) {
         <button
           type="button"
           aria-label="Open account menu"
-          className={cn(
-            "group/user-menu flex w-full items-center gap-2 rounded-lg p-1.5 text-left outline-none transition-colors",
-            "hover:bg-sidebar-accent focus-visible:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-            "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-          )}
+          className="flex size-9 items-center justify-center rounded-full outline-none ring-1 ring-border transition-shadow hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Avatar
-            size="sm"
-            className="size-9 shrink-0 ring-1 ring-sidebar-foreground/20"
-          >
-            {user.avatarUrl ? (
-              <AvatarImage src={user.avatarUrl} alt="" />
-            ) : null}
-            <AvatarFallback className="bg-sidebar-foreground/15 text-xs font-medium text-sidebar-foreground">
+          <Avatar size="sm" className="size-8">
+            {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
+            <AvatarFallback className="bg-muted text-xs font-medium text-foreground/70">
               {initials(user.fullName)}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
-              {user.fullName}
-            </p>
-            <p className="truncate text-xs text-sidebar-foreground/70">
-              {user.email}
-            </p>
-          </div>
-          <HugeiconsIcon
-            icon={ArrowUp01Icon}
-            strokeWidth={2}
-            className="size-4 shrink-0 text-sidebar-foreground/60 transition-transform group-data-[collapsible=icon]:hidden group-data-[state=open]/user-menu:rotate-180"
-          />
         </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side="top"
+        side={compact ? "bottom" : "top"}
         align="end"
         sideOffset={8}
         className="w-64"
@@ -111,11 +89,7 @@ export function UserMenu({ user, settingsHref }: UserMenuProps) {
 
         <DropdownMenuItem asChild>
           <Link href={settingsHref} className="flex items-center gap-2">
-            <HugeiconsIcon
-              icon={UserSettings01Icon}
-              strokeWidth={2}
-              className="size-4"
-            />
+            <HugeiconsIcon icon={UserSettings01Icon} strokeWidth={2} className="size-4" />
             Account settings
           </Link>
         </DropdownMenuItem>
@@ -133,32 +107,17 @@ export function UserMenu({ user, settingsHref }: UserMenuProps) {
             </span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-44">
-            <DropdownMenuRadioGroup
-              value={currentTheme}
-              onValueChange={(value) => setTheme(value)}
-            >
+            <DropdownMenuRadioGroup value={currentTheme} onValueChange={setTheme}>
               <DropdownMenuRadioItem value="light" className="gap-2">
-                <HugeiconsIcon
-                  icon={Sun03Icon}
-                  strokeWidth={2}
-                  className="size-4"
-                />
+                <HugeiconsIcon icon={Sun03Icon} strokeWidth={2} className="size-4" />
                 Light
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="dark" className="gap-2">
-                <HugeiconsIcon
-                  icon={Moon02Icon}
-                  strokeWidth={2}
-                  className="size-4"
-                />
+                <HugeiconsIcon icon={Moon02Icon} strokeWidth={2} className="size-4" />
                 Dark
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="system" className="gap-2">
-                <HugeiconsIcon
-                  icon={ComputerIcon}
-                  strokeWidth={2}
-                  className="size-4"
-                />
+                <HugeiconsIcon icon={ComputerIcon} strokeWidth={2} className="size-4" />
                 System
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
@@ -173,11 +132,7 @@ export function UserMenu({ user, settingsHref }: UserMenuProps) {
               type="submit"
               className="flex w-full items-center gap-2 text-destructive focus:text-destructive"
             >
-              <HugeiconsIcon
-                icon={Logout03Icon}
-                strokeWidth={2}
-                className="size-4"
-              />
+              <HugeiconsIcon icon={Logout03Icon} strokeWidth={2} className="size-4" />
               Sign out
             </button>
           </DropdownMenuItem>

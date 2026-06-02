@@ -9,11 +9,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Stack: Next.js 16, Supabase, Drizzle ORM, Tailwind, shadcn/ui
 - Database schema is at src/lib/db/schema.ts
 - Server Actions are in src/lib/actions/
-- Auth helper is getRequiredUser() in src/lib/auth/session.ts — supply-side role is `contractor` (see docs/HOMEI_PLATFORM.md §4 roles & §7 schema)
+- Auth helper is getRequiredUser() in src/lib/auth/session.ts — three roles: `contractor`, `homeowner`, `admin` (see docs/HOMEI_PLATFORM.md §5 identity & §8 schema)
 - cacheComponents: true is enabled — use "use cache" directive, NOT unstable_cache
 - proxy.ts replaces middleware.ts — never create middleware.ts
 - params and searchParams are always Promises — always await them
 - Money fields use Decimal strings in DB — parse with parseFloat() for display only
+- v2 MODEL (canonical in docs/HOMEI_PLATFORM.md): a contractor is a COMPANY with many member users (users → contractor_members → contractors); homeowners are AUTHENTICATED users with a dashboard; the business model is a CREDIT economy (append-only credit_transactions ledger; plans grant credits; leads are free to receive, small charge to engage, full charge when a quote is accepted); messaging is a universal conversations/participants graph; SMS is Plivo (not Twilio). The code/schema still reflect v1 — migrate toward §8 before building v2 features.
 
 # Documentation (read before building any feature):
 - docs/HOMEI_PLATFORM.md — single source of truth: WHAT to build (business rules, every page & flow, all features), the Drizzle schema, file structure, Inngest jobs, lead-assignment logic, pricing, and env vars

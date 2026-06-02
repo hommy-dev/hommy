@@ -27,7 +27,6 @@ import {
   type DashboardNavItem,
   isDashboardNavActive,
 } from "@/components/dashboard/dashboard-nav";
-import { UserMenu } from "@/components/dashboard/user-menu";
 import { useTotalUnread, useViewerId } from "@/components/chat/chat-store";
 
 export type DashboardShellUser = {
@@ -38,11 +37,10 @@ export type DashboardShellUser = {
 
 export type DashboardShellProps = {
   navItems: DashboardNavItem[];
-  user: DashboardShellUser;
   brandHref?: string;
   brandLabel?: string;
-  /** Link for the "Account settings" item in the user menu. */
-  settingsHref: string;
+  /** Status / announcement card rendered at the bottom of the sidebar. */
+  notice?: React.ReactNode;
   /** Unread totals keyed by nav `href` (e.g. `/contractor/chat`). */
   navUnreadCounts?: Partial<Record<string, number>>;
   /**
@@ -59,10 +57,9 @@ export type DashboardShellProps = {
 
 export function DashboardShell({
   navItems,
-  user,
   brandHref = "/",
   brandLabel = "Homei",
-  settingsHref,
+  notice,
   navUnreadCounts,
   messagesHref,
   topRight,
@@ -87,7 +84,7 @@ export function DashboardShell({
   return (
     <TooltipProvider delayDuration={300}>
       <SidebarProvider defaultOpen>
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar">
           {/* Logo at top */}
           <SidebarHeader className="px-3 pt-4 pb-3">
             <Link
@@ -121,7 +118,7 @@ export function DashboardShell({
                           asChild
                           isActive={active}
                           tooltip={item.label}
-                          className="text-sidebar-foreground/85 hover:text-sidebar-foreground data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground rounded-sm"
+                          className="text-sidebar-foreground/70 hover:text-sidebar-foreground data-active:bg-sidebar-accent data-active:text-sidebar-foreground data-active:font-medium data-active:shadow-[var(--shadow-xs)] rounded-md"
                         >
                           <Link
                             href={item.href}
@@ -154,21 +151,19 @@ export function DashboardShell({
             </SidebarGroup>
           </SidebarContent>
 
-          {/* User info at bottom */}
-          <SidebarFooter className="border-t border-sidebar-border px-1.5 pt-2 pb-2">
-            <UserMenu user={user} settingsHref={settingsHref} />
-          </SidebarFooter>
+          {/* Status / announcement at bottom */}
+          <SidebarFooter className="px-2 pb-3 pt-1">{notice}</SidebarFooter>
 
           <SidebarRail />
         </Sidebar>
 
-        <SidebarInset className="min-h-0 flex-1 overflow-hidden">
+        <SidebarInset className="min-h-0 flex-1 overflow-hidden bg-background">
           <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4">
             <SidebarTrigger className="md:hidden" />
             <div className="ml-auto flex items-center gap-2">{topRight}</div>
           </header>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6 lg:p-8">
             {children}
           </div>
         </SidebarInset>

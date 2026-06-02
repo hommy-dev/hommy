@@ -1,38 +1,48 @@
-// Data layer for the contractor dashboard.
+// Data layer for the contractor dashboard (v2).
 //
-// These functions are intentionally NOT cached ("use cache"): leads, counts,
-// and pipeline state change constantly and the contractor must see them fresh
-// (see CODING_GUIDE.md §4 — "lead counts are NOT cached"). They run on the
-// privileged Drizzle connection, so RLS does not apply here; authorization is
-// enforced by scoping every query to the caller's contractorId.
+// NOT cached ("use cache"): offers, counts, and pipeline state change constantly
+// and must be fresh (CODING_GUIDE.md §4). Runs on the privileged Drizzle
+// connection (RLS bypassed); authorization is enforced by scoping every query to
+// the caller's contractorId — resolved from their active membership.
 
 import { db } from '@/lib/db'
-import { and, count, desc, eq, inArray } from 'drizzle-orm'
+import { and, count, desc, eq, getTableColumns, inArray } from 'drizzle-orm'
 import {
   contractors,
+  contractorMembers,
+  contractorServices,
   homeowners,
+  leadRecipients,
   leads,
   projects,
+  serviceAreas,
   services,
+  users,
 } from '@/lib/db/schema'
 
 export type Contractor = typeof contractors.$inferSelect
 
-/** Map an authenticated user → their contractor row (one per user). */
+/** Map an authenticated user → the company they actively belong to (one for now). */
 export async function getContractorForUser(
   userId: string,
 ): Promise<Contractor | null> {
   const [row] = await db
-    .select()
+    .select(getTableColumns(contractors))
     .from(contractors)
-    .where(eq(contractors.userId, userId))
+    .innerJoin(contractorMembers, eq(contractorMembers.contractorId, contractors.id))
+    .where(
+      and(
+        eq(contractorMembers.userId, userId),
+        eq(contractorMembers.status, 'active'),
+      ),
+    )
     .limit(1)
   return row ?? null
 }
 
 export type DashboardLead = {
   id: string
-  status: (typeof leads.status.enumValues)[number]
+  recipientStatus: (typeof leadRecipients.status.enumValues)[number]
   urgency: (typeof leads.urgency.enumValues)[number]
   subtype: string | null
   notes: string | null
@@ -41,40 +51,42 @@ export type DashboardLead = {
   city: string | null
   state: string | null
   zipCode: string | null
-  assignedAt: Date | null
+  offeredAt: Date
   createdAt: Date
 }
 
-/** Exclusive leads assigned to this contractor, newest first. */
+/** Leads offered to this company (the fan-out), newest offer first. */
 export async function getContractorLeads(
   contractorId: string,
 ): Promise<DashboardLead[]> {
   const rows = await db
     .select({
       id: leads.id,
-      status: leads.status,
+      recipientStatus: leadRecipients.status,
       urgency: leads.urgency,
       serviceDetails: leads.serviceDetails,
       notes: leads.notes,
       serviceName: services.name,
-      homeownerName: homeowners.fullName,
-      city: homeowners.city,
-      state: homeowners.state,
-      zipCode: homeowners.zipCode,
-      assignedAt: leads.assignedAt,
+      homeownerName: users.fullName,
+      city: leads.city,
+      state: leads.state,
+      zipCode: leads.zipCode,
+      offeredAt: leadRecipients.offeredAt,
       createdAt: leads.createdAt,
     })
-    .from(leads)
+    .from(leadRecipients)
+    .innerJoin(leads, eq(leadRecipients.leadId, leads.id))
     .innerJoin(homeowners, eq(leads.homeownerId, homeowners.id))
+    .innerJoin(users, eq(homeowners.userId, users.id))
     .innerJoin(services, eq(leads.serviceId, services.id))
-    .where(eq(leads.assignedTo, contractorId))
-    .orderBy(desc(leads.assignedAt), desc(leads.createdAt))
+    .where(eq(leadRecipients.contractorId, contractorId))
+    .orderBy(desc(leadRecipients.offeredAt))
 
   return rows.map((r) => {
     const subtype = r.serviceDetails?.subtype
     return {
       id: r.id,
-      status: r.status,
+      recipientStatus: r.recipientStatus,
       urgency: r.urgency,
       subtype: typeof subtype === 'string' ? subtype : null,
       notes: r.notes,
@@ -83,32 +95,33 @@ export async function getContractorLeads(
       city: r.city,
       state: r.state,
       zipCode: r.zipCode,
-      assignedAt: r.assignedAt,
+      offeredAt: r.offeredAt,
       createdAt: r.createdAt,
     }
   })
 }
 
-const ACTIVE_PROJECT_STAGES = [
-  'new_lead',
-  'contacted',
-  'estimate_sent',
-  'in_progress',
-] as const
+const OPEN_OFFER_STATUSES = ['offered', 'viewed', 'engaged'] as const
+const ACTIVE_PROJECT_STAGES = ['new_lead', 'contacted', 'estimate_sent', 'in_progress'] as const
 
 export type DashboardStats = {
-  assignedLeads: number
+  openOffers: number
   activeProjects: number
 }
 
 export async function getDashboardStats(
   contractorId: string,
 ): Promise<DashboardStats> {
-  const [leadRows, projectRows] = await Promise.all([
+  const [offerRows, projectRows] = await Promise.all([
     db
       .select({ value: count() })
-      .from(leads)
-      .where(eq(leads.assignedTo, contractorId)),
+      .from(leadRecipients)
+      .where(
+        and(
+          eq(leadRecipients.contractorId, contractorId),
+          inArray(leadRecipients.status, [...OPEN_OFFER_STATUSES]),
+        ),
+      ),
     db
       .select({ value: count() })
       .from(projects)
@@ -121,7 +134,26 @@ export async function getDashboardStats(
   ])
 
   return {
-    assignedLeads: leadRows[0]?.value ?? 0,
+    openOffers: offerRows[0]?.value ?? 0,
     activeProjects: projectRows[0]?.value ?? 0,
+  }
+}
+
+export type SetupStatus = { hasServices: boolean; hasAreas: boolean }
+
+export async function getSetupStatus(contractorId: string): Promise<SetupStatus> {
+  const [svcRows, areaRows] = await Promise.all([
+    db
+      .select({ value: count() })
+      .from(contractorServices)
+      .where(eq(contractorServices.contractorId, contractorId)),
+    db
+      .select({ value: count() })
+      .from(serviceAreas)
+      .where(eq(serviceAreas.contractorId, contractorId)),
+  ])
+  return {
+    hasServices: (svcRows[0]?.value ?? 0) > 0,
+    hasAreas: (areaRows[0]?.value ?? 0) > 0,
   }
 }

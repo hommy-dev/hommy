@@ -35,7 +35,7 @@ export function LeadCard({ lead }: { lead: DashboardLead }) {
     place && lead.zipCode
       ? `${place} · ${lead.zipCode}`
       : place || lead.zipCode || "—"
-  const when = lead.assignedAt ?? lead.createdAt
+  const when = lead.offeredAt ?? lead.createdAt
 
   return (
     <div className="rounded-lg border border-border bg-card p-4 transition-colors hover:border-foreground/20">

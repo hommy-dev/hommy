@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
+import { provisionContractor } from '@/lib/auth/provisioning'
 
 // ============================================================
 // SCHEMAS
@@ -26,10 +27,11 @@ type ActionResult<T = void> =
   | { success: true; data?: T }
   | { success: false; error: string; fieldErrors?: FieldErrors }
 
-// Homei has two authenticated roles only — homeowners never log in.
-// Contractor CRM is /dashboard; admin console is /admin.
-const ROLE_DEFAULT_PATH: Record<'contractor' | 'admin', string> = {
+// v2: three authenticated roles. Contractor CRM is /dashboard, homeowner
+// dashboard is /home, admin console is /admin.
+const ROLE_DEFAULT_PATH: Record<'contractor' | 'homeowner' | 'admin', string> = {
   contractor: '/dashboard',
+  homeowner: '/home',
   admin: '/admin',
 }
 
@@ -94,6 +96,97 @@ export async function loginAction(
     ROLE_DEFAULT_PATH[row.role as keyof typeof ROLE_DEFAULT_PATH] ?? '/'
 
   return { success: true, data: { redirectTo } }
+}
+
+const ContractorSignupSchema = z.object({
+  fullName: z.string().trim().min(2, 'Enter your name'),
+  email: z.string().trim().email('Enter a valid email'),
+  password: z.string().min(8, 'Use at least 8 characters'),
+  agree: z.boolean().refine((v) => v === true, 'Please accept the terms to continue'),
+})
+
+/**
+ * Contractor signup (email + password). Creates the Supabase auth user, then the
+ * company scaffolding (company + owner membership + free plan + signup credits).
+ * If the project requires email confirmation, returns needsConfirmation instead
+ * of a session.
+ */
+export async function signupContractor(
+  formData: FormData,
+): Promise<ActionResult<{ redirectTo?: string; needsConfirmation?: boolean }>> {
+  const parsed = ContractorSignupSchema.safeParse({
+    fullName: formData.get('fullName'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+    agree: formData.get('agree') === 'on' || formData.get('agree') === 'true',
+  })
+
+  if (!parsed.success) {
+    const fieldErrors: FieldErrors = {}
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0]
+      if (typeof key === 'string' && !fieldErrors[key]) fieldErrors[key] = issue.message
+    }
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? 'Check your details and try again',
+      fieldErrors,
+    }
+  }
+
+  const supabase = await createClient()
+  const origin = getAppOrigin()
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: { full_name: parsed.data.fullName, role: 'contractor' },
+      emailRedirectTo: `${origin}/auth/callback?intent=contractor&next=/onboarding`,
+    },
+  })
+
+  if (error || !data.user) {
+    return { success: false, error: error?.message || 'Could not create your account' }
+  }
+
+  try {
+    await provisionContractor({
+      userId: data.user.id,
+      email: parsed.data.email,
+      fullName: parsed.data.fullName,
+      passwordSet: true,
+    })
+  } catch (err) {
+    console.error('[signupContractor] provisioning failed', err)
+    return {
+      success: false,
+      error: 'Your account was created but setup failed. Please contact support.',
+    }
+  }
+
+  if (data.session) {
+    return { success: true, data: { redirectTo: '/onboarding' } }
+  }
+  return { success: true, data: { needsConfirmation: true } }
+}
+
+/**
+ * Returns a Google OAuth URL for contractor signup. The callback (intent=contractor)
+ * provisions the company scaffolding after the session is established.
+ */
+export async function startContractorGoogleSignup(): Promise<
+  ActionResult<{ url: string }>
+> {
+  const supabase = await createClient()
+  const origin = getAppOrigin()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${origin}/auth/callback?intent=contractor&next=/onboarding` },
+  })
+  if (error || !data.url) {
+    return { success: false, error: error?.message || 'Could not start Google sign-in' }
+  }
+  return { success: true, data: { url: data.url } }
 }
 
 /**
