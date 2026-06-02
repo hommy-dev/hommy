@@ -9,6 +9,8 @@
     "lint": "eslint",
     "admin:create": "tsx scripts/create-admin.ts",
     "email:test": "tsx scripts/test-email.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:seed:dev": "tsx scripts/seed.ts --dev",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",

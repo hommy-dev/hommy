@@ -8,7 +8,6 @@ import {
   CheckListIcon,
   Chat01Icon,
   DashboardSquare01Icon,
-  Home03Icon,
   Note02Icon,
   Settings01Icon,
   Target02Icon,
@@ -25,35 +24,35 @@ export type DashboardNavItem = {
   icon: Hugeicon
 }
 
+// Homei contractor CRM lives under /dashboard (see docs/HOMEI_PLATFORM.md §13).
+// There is NO homeowner dashboard — homeowners are unauthenticated.
 export const CONTRACTOR_NAV: DashboardNavItem[] = [
-  { href: "/contractor", label: "Dashboard", icon: DashboardSquare01Icon },
-  { href: "/contractor/leads", label: "Leads", icon: Target02Icon },
-  { href: "/contractor/jobs", label: "Jobs", icon: Briefcase01Icon },
-  { href: "/contractor/messages", label: "Messages", icon: Chat01Icon },
-  { href: "/contractor/profile", label: "Profile", icon: User02Icon },
-  { href: "/contractor/settings", label: "Settings", icon: Settings01Icon },
-]
-
-export const HOMEOWNER_NAV: DashboardNavItem[] = [
-  { href: "/homeowner", label: "My projects", icon: Home03Icon },
-  { href: "/homeowner/jobs", label: "Jobs", icon: Briefcase01Icon },
-  { href: "/homeowner/messages", label: "Messages", icon: Chat01Icon },
+  { href: "/dashboard", label: "Dashboard", icon: DashboardSquare01Icon },
+  { href: "/dashboard/leads", label: "Leads", icon: Target02Icon },
+  { href: "/dashboard/contacts", label: "Contacts", icon: UserGroupIcon },
+  { href: "/dashboard/projects", label: "Projects", icon: Briefcase01Icon },
+  { href: "/dashboard/messages", label: "Messages", icon: Chat01Icon },
+  { href: "/dashboard/storm-alerts", label: "Storm alerts", icon: AlertCircleIcon },
+  { href: "/dashboard/reviews", label: "Reviews", icon: Note02Icon },
+  { href: "/dashboard/profile", label: "Profile", icon: User02Icon },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings01Icon },
 ]
 
 export const ADMIN_NAV: DashboardNavItem[] = [
   { href: "/admin", label: "Dashboard", icon: DashboardSquare01Icon },
   { href: "/admin/verification", label: "Verification", icon: UserCheck01Icon },
+  { href: "/admin/leads", label: "Leads", icon: Target02Icon },
+  { href: "/admin/contractors", label: "Contractors", icon: UserGroupIcon },
+  { href: "/admin/storm-events", label: "Storm events", icon: AlertCircleIcon },
   { href: "/admin/disputes", label: "Disputes", icon: BalanceScaleIcon },
-  { href: "/admin/incidents", label: "Incidents", icon: AlertCircleIcon },
-  { href: "/admin/site-visits", label: "Site visits", icon: CheckListIcon },
   { href: "/admin/quotes", label: "Quotes", icon: Note02Icon },
-  { href: "/admin/users", label: "Users", icon: UserGroupIcon },
   { href: "/admin/jobs", label: "Jobs", icon: Calendar03Icon },
+  { href: "/admin/audits", label: "Audits", icon: CheckListIcon },
   { href: "/admin/settings", label: "Settings", icon: Settings01Icon },
 ]
 
 export function isDashboardNavActive(pathname: string, href: string): boolean {
-  const roots = ["/contractor", "/homeowner", "/admin"] as const
+  const roots = ["/dashboard", "/admin"] as const
   if ((roots as readonly string[]).includes(href)) {
     return pathname === href
   }

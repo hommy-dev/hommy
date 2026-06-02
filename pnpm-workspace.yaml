@@ -1,4 +1,6 @@
 allowBuilds:
   esbuild: true
+  msw: false
+  protobufjs: false
   sharp: true
   unrs-resolver: true

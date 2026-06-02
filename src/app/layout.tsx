@@ -1,24 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { inter, sebenta } from "@/style/font";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
 import { Suspense } from "react";
-
-const fontSans = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-  display: "swap",
-  variable: "--font-sans",
-});
-
-const fontMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap",
-  variable: "--font-mono",
-});
 
 export const metadata: Metadata = {
   title: "Homei - Find Trusted Local Contractors",
@@ -35,13 +21,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", "font-sans")}
+      className={cn(
+        "h-full antialiased font-sans",
+        inter.variable,
+        sebenta.variable,
+      )}
       suppressHydrationWarning
     >
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} antialiased`}
-        suppressHydrationWarning
-      >
+      <body className="antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

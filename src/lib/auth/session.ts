@@ -5,12 +5,13 @@ import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
-type Role = 'HOMEOWNER' | 'CONTRACTOR' | 'ADMIN'
+// Matches the user_role enum in src/lib/db/schema.ts. There is NO homeowner
+// role — homeowners are unauthenticated (see docs/HOMEI_PLATFORM.md §4).
+type Role = 'contractor' | 'admin'
 
 const ROLE_HOMES: Record<Role, string> = {
-  HOMEOWNER: '/homeowner',
-  CONTRACTOR: '/contractor',
-  ADMIN: '/admin',
+  contractor: '/dashboard',
+  admin: '/admin',
 }
 
 /**

@@ -5,11 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import {
-  contractorProfiles,
-  homeownerProfiles,
-  users,
-} from '@/lib/db/schema'
+import { users } from '@/lib/db/schema'
 
 // ============================================================
 // SCHEMAS
@@ -18,28 +14,6 @@ import {
 const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-})
-
-const HomeownerSignupSchema = z.object({
-  email: z.string().trim().email(),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters'),
-  fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
-  role: z.literal('HOMEOWNER'),
-})
-
-const ContractorSignupSchema = z.object({
-  email: z.string().trim().email(),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters'),
-  fullName: z.string().trim().min(2, 'Name must be at least 2 characters'),
-  businessName: z
-    .string()
-    .trim()
-    .min(2, 'Business name must be at least 2 characters'),
-  role: z.literal('CONTRACTOR'),
 })
 
 // ============================================================
@@ -52,18 +26,11 @@ type ActionResult<T = void> =
   | { success: true; data?: T }
   | { success: false; error: string; fieldErrors?: FieldErrors }
 
-const ROLE_DEFAULT_PATH: Record<
-  'HOMEOWNER' | 'CONTRACTOR' | 'ADMIN',
-  string
-> = {
-  HOMEOWNER: '/',
-  CONTRACTOR: '/contractor',
-  ADMIN: '/admin',
-}
-
-export type SignupSuccessData = {
-  userId: string
-  needsEmailConfirmation: boolean
+// Homei has two authenticated roles only — homeowners never log in.
+// Contractor CRM is /dashboard; admin console is /admin.
+const ROLE_DEFAULT_PATH: Record<'contractor' | 'admin', string> = {
+  contractor: '/dashboard',
+  admin: '/admin',
 }
 
 function getAppOrigin(): string {
@@ -72,15 +39,6 @@ function getAppOrigin(): string {
   if (process.env.VERCEL_URL)
     return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`
   return 'http://localhost:3000'
-}
-
-function isUniqueViolation(err: unknown): boolean {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'code' in err &&
-    (err as { code: string }).code === '23505'
-  )
 }
 
 // ============================================================
@@ -136,140 +94,6 @@ export async function loginAction(
     ROLE_DEFAULT_PATH[row.role as keyof typeof ROLE_DEFAULT_PATH] ?? '/'
 
   return { success: true, data: { redirectTo } }
-}
-
-function parseSignupForm(formData: FormData) {
-  const roleRaw = formData.get('role')
-  const common = {
-    email: formData.get('email'),
-    password: formData.get('password'),
-    fullName: formData.get('fullName'),
-  }
-
-  if (roleRaw === 'CONTRACTOR') {
-    return ContractorSignupSchema.safeParse({
-      ...common,
-      role: 'CONTRACTOR',
-      businessName: formData.get('businessName'),
-    })
-  }
-
-  if (roleRaw === 'HOMEOWNER') {
-    return HomeownerSignupSchema.safeParse({
-      ...common,
-      role: 'HOMEOWNER',
-    })
-  }
-
-  return {
-    success: false as const,
-    error: new z.ZodError([
-      {
-        code: 'custom',
-        path: ['role'],
-        message: 'Invalid account type',
-      },
-    ]),
-  }
-}
-
-/**
- * Signup action — Supabase auth user plus `users` row and role profile (transaction).
- */
-export async function signupAction(
-  formData: FormData
-): Promise<ActionResult<SignupSuccessData>> {
-  const parsed = parseSignupForm(formData)
-
-  if (!parsed.success) {
-    if ('error' in parsed && parsed.error instanceof z.ZodError) {
-      const fieldErrors: FieldErrors = {}
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0]
-        if (typeof key === 'string' && !fieldErrors[key]) {
-          fieldErrors[key] = issue.message
-        }
-      }
-      return {
-        success: false,
-        error: parsed.error.issues[0]?.message ?? 'Invalid signup data',
-        fieldErrors,
-      }
-    }
-    return { success: false, error: 'Invalid signup data' }
-  }
-
-  const data = parsed.data
-  const supabase = await createClient()
-
-  const postConfirmPath =
-    data.role === 'CONTRACTOR' ? '/contractor' : '/'
-  const emailRedirectTo = `${getAppOrigin()}/auth/callback?next=${encodeURIComponent(postConfirmPath)}`
-
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
-    options: {
-      data: {
-        full_name: data.fullName,
-        role: data.role,
-      },
-      emailRedirectTo,
-    },
-  })
-
-  if (authError || !authData.user) {
-    return {
-      success: false,
-      error: authError?.message || 'Failed to create account',
-    }
-  }
-
-  const authUser = authData.user
-  const needsEmailConfirmation = !authData.session
-
-  try {
-    await db.transaction(async (tx) => {
-      await tx.insert(users).values({
-        id: authUser.id,
-        email: data.email,
-        fullName: data.fullName,
-        role: data.role,
-        passwordSet: true,
-      })
-
-      if (data.role === 'CONTRACTOR') {
-        await tx.insert(contractorProfiles).values({
-          userId: authUser.id,
-          businessName: data.businessName,
-        })
-      } else {
-        await tx.insert(homeownerProfiles).values({
-          userId: authUser.id,
-        })
-      }
-    })
-  } catch (err) {
-    console.error('[signupAction] DB insert failed after auth signup', err)
-    if (isUniqueViolation(err)) {
-      return {
-        success: false,
-        error: 'An account with this email may already exist. Try signing in.',
-      }
-    }
-    return {
-      success: false,
-      error: 'Account was created but profile setup failed. Please contact support.',
-    }
-  }
-
-  return {
-    success: true,
-    data: {
-      userId: authUser.id,
-      needsEmailConfirmation,
-    },
-  }
 }
 
 /**

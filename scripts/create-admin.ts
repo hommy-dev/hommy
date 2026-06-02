@@ -150,8 +150,7 @@ async function main() {
       .set({
         email,
         fullName,
-        role: 'ADMIN',
-        updatedAt: new Date(),
+        role: 'admin',
       })
       .where(eq(users.id, userId))
     console.log('Updated public.users row to ADMIN for:', email)
@@ -160,7 +159,7 @@ async function main() {
       id: userId,
       email,
       fullName,
-      role: 'ADMIN',
+      role: 'admin',
     })
     console.log('Inserted public.users row as ADMIN for:', email)
   }
