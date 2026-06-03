@@ -8,6 +8,10 @@ import {
   startContractorGoogleSignup,
 } from "@/lib/actions/auth"
 import { showToast } from "@/components/ui/toast"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type FieldErrors = Record<string, string>
 
@@ -83,15 +87,17 @@ export function ContractorSignupForm() {
         Free to join. You only pay credits when you win a job.
       </p>
 
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="lg"
         onClick={handleGoogle}
         disabled={googlePending || pending}
-        className="mt-7 flex w-full items-center justify-center gap-2.5 rounded-xl border border-foreground/15 bg-card px-4 py-3 text-sm font-semibold transition-colors hover:bg-muted/60 disabled:opacity-60"
+        className="mt-7 h-11 w-full gap-2.5 bg-card hover:bg-background hover:border-foreground/40 text-sm font-semibold"
       >
         <GoogleIcon />
         {googlePending ? "Opening Google..." : "Continue with Google"}
-      </button>
+      </Button>
 
       <div className="my-6 flex items-center gap-3 text-xs text-foreground/40">
         <span className="h-px flex-1 bg-foreground/10" />
@@ -100,37 +106,43 @@ export function ContractorSignupForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        <Field label="Full name" error={errors.fullName}>
-          <input
+        <Field id="signup-fullName" label="Full name" error={errors.fullName}>
+          <Input
+            id="signup-fullName"
             name="fullName"
             type="text"
             autoComplete="name"
             placeholder="Sam Rivera"
             disabled={pending}
-            className={inputCls(!!errors.fullName)}
+            className="h-11 bg-card"
+            aria-invalid={!!errors.fullName}
           />
         </Field>
 
-        <Field label="Work email" error={errors.email}>
-          <input
+        <Field id="signup-email" label="Work email" error={errors.email}>
+          <Input
+            id="signup-email"
             name="email"
             type="email"
             autoComplete="email"
             placeholder="you@company.com"
             disabled={pending}
-            className={inputCls(!!errors.email)}
+            className="h-11 bg-card"
+            aria-invalid={!!errors.email}
           />
         </Field>
 
-        <Field label="Password" error={errors.password}>
+        <Field id="signup-password" label="Password" error={errors.password}>
           <div className="relative">
-            <input
+            <Input
+              id="signup-password"
               name="password"
               type={showPw ? "text" : "password"}
               autoComplete="new-password"
               placeholder="At least 8 characters"
               disabled={pending}
-              className={inputCls(!!errors.password)}
+              className="h-11 bg-card pr-14"
+              aria-invalid={!!errors.password}
             />
             <button
               type="button"
@@ -143,35 +155,48 @@ export function ContractorSignupForm() {
           </div>
         </Field>
 
-        <label className="flex items-start gap-2.5 pt-1">
-          <input
-            name="agree"
-            type="checkbox"
-            className="mt-0.5 size-4 shrink-0 accent-primary"
-          />
-          <span className="text-[13px] leading-relaxed text-foreground/60">
-            I agree to the{" "}
-            <Link href="#" className="text-foreground underline underline-offset-2">
-              Terms
-            </Link>{" "}
-            and{" "}
-            <Link href="#" className="text-foreground underline underline-offset-2">
-              Privacy Policy
-            </Link>
-            .
-          </span>
-        </label>
-        {errors.agree && (
-          <p className="text-xs text-destructive">{errors.agree}</p>
-        )}
+        <div className="space-y-1.5 pt-1">
+          <label
+            htmlFor="signup-agree"
+            className="flex items-start gap-2.5"
+          >
+            <Checkbox
+              id="signup-agree"
+              name="agree"
+              aria-invalid={!!errors.agree}
+              className="mt-0.5 bg-background border-foreground"
+            />
+            <span className="text-[13px] leading-relaxed text-foreground/60">
+              I agree to the{" "}
+              <Link
+                href="#"
+                className="text-foreground underline underline-offset-2"
+              >
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="#"
+                className="text-foreground underline underline-offset-2"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </span>
+          </label>
+          {errors.agree && (
+            <p className="text-xs text-destructive">{errors.agree}</p>
+          )}
+        </div>
 
-        <button
+        <Button
           type="submit"
+          size="lg"
           disabled={pending}
-          className="mt-2 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-[transform,background-color] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-60"
+          className="mt-2 h-11 w-full text-sm font-semibold"
         >
           {pending ? "Creating your account..." : "Create account"}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-foreground/55">
@@ -187,28 +212,22 @@ export function ContractorSignupForm() {
   )
 }
 
-function inputCls(invalid: boolean) {
-  return [
-    "w-full rounded-xl border bg-card px-3.5 py-3 text-[15px] text-foreground outline-none transition-colors",
-    "placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15",
-    invalid ? "border-destructive/60" : "border-foreground/15",
-  ].join(" ")
-}
-
 function Field({
+  id,
   label,
   error,
   children,
 }: {
+  id: string
   label: string
   error?: string
   children: React.ReactNode
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[13px] font-medium text-foreground/75">
+      <Label htmlFor={id} className="text-xs font-medium text-foreground/80">
         {label}
-      </label>
+      </Label>
       {children}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>

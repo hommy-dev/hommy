@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
-import { provisionContractor } from '@/lib/auth/provisioning'
+import { provisionContractor, provisionHomeowner } from '@/lib/auth/provisioning'
 
 /**
  * Exchanges Supabase PKCE `code` for a session (OAuth, email confirmation, magic links).
@@ -45,18 +45,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login?error=callback', request.url))
   }
 
-  // Google contractor signup: no pre-signup step ran, so provision here.
-  // provisionContractor is idempotent, so existing users pass through untouched.
-  if (intent === 'contractor' && data.user) {
+  // Google signup: no pre-signup step ran, so provision here. Both provisioning
+  // functions are idempotent, so existing users pass through untouched.
+  if (data.user && (intent === 'contractor' || intent === 'homeowner')) {
+    const fullName =
+      (data.user.user_metadata?.full_name as string | undefined) ?? null
     try {
-      await provisionContractor({
-        userId: data.user.id,
-        email: data.user.email ?? '',
-        fullName: (data.user.user_metadata?.full_name as string | undefined) ?? null,
-        passwordSet: false,
-      })
+      if (intent === 'contractor') {
+        await provisionContractor({
+          userId: data.user.id,
+          email: data.user.email ?? '',
+          fullName,
+          passwordSet: false,
+        })
+      } else {
+        await provisionHomeowner({
+          userId: data.user.id,
+          email: data.user.email ?? '',
+          fullName,
+          passwordSet: false,
+        })
+      }
     } catch (err) {
-      console.error('[auth/callback] contractor provisioning failed', err)
+      console.error(`[auth/callback] ${intent} provisioning failed`, err)
     }
   }
 

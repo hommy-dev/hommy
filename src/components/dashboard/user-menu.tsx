@@ -3,14 +3,7 @@
 import Link from "next/link";
 import * as React from "react";
 import { useTheme } from "next-themes";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  ComputerIcon,
-  Logout03Icon,
-  Moon02Icon,
-  Sun03Icon,
-  UserSettings01Icon,
-} from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,16 +82,15 @@ export function UserMenu({ user, settingsHref, compact = false }: UserMenuProps)
 
         <DropdownMenuItem asChild>
           <Link href={settingsHref} className="flex items-center gap-2">
-            <HugeiconsIcon icon={UserSettings01Icon} strokeWidth={2} className="size-4" />
+            <Icon name="setting" className="size-4" />
             Account settings
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2">
-            <HugeiconsIcon
-              icon={currentTheme === "dark" ? Moon02Icon : Sun03Icon}
-              strokeWidth={2}
+            <Icon
+              name={currentTheme === "dark" ? "moon" : "sun"}
               className="size-4"
             />
             Theme
@@ -109,15 +101,15 @@ export function UserMenu({ user, settingsHref, compact = false }: UserMenuProps)
           <DropdownMenuSubContent className="w-44">
             <DropdownMenuRadioGroup value={currentTheme} onValueChange={setTheme}>
               <DropdownMenuRadioItem value="light" className="gap-2">
-                <HugeiconsIcon icon={Sun03Icon} strokeWidth={2} className="size-4" />
+                <Icon name="sun" className="size-4" />
                 Light
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="dark" className="gap-2">
-                <HugeiconsIcon icon={Moon02Icon} strokeWidth={2} className="size-4" />
+                <Icon name="moon" className="size-4" />
                 Dark
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="system" className="gap-2">
-                <HugeiconsIcon icon={ComputerIcon} strokeWidth={2} className="size-4" />
+                <Icon name="monitor" className="size-4" />
                 System
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
@@ -132,7 +124,7 @@ export function UserMenu({ user, settingsHref, compact = false }: UserMenuProps)
               type="submit"
               className="flex w-full items-center gap-2 text-destructive focus:text-destructive"
             >
-              <HugeiconsIcon icon={Logout03Icon} strokeWidth={2} className="size-4" />
+              <Icon name="logout" className="size-4" />
               Sign out
             </button>
           </DropdownMenuItem>

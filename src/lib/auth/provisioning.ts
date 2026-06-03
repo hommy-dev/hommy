@@ -18,6 +18,7 @@ import {
   subscriptions,
   creditTransactions,
   plans,
+  homeowners,
 } from '@/lib/db/schema'
 
 export const SIGNUP_BONUS_CREDITS = 25
@@ -82,4 +83,35 @@ export async function provisionContractor({
       sourceType: 'signup',
     })
   })
+}
+
+// Provisions a brand-new homeowner. Like provisionContractor, this runs from
+// both the email/password signup action and the OAuth callback, so it must be
+// IDEMPOTENT. Homeowners have no company or credits — just the public.users row
+// and a 1:1 homeowners profile. The dashboard lives at /home.
+export async function provisionHomeowner({
+  userId,
+  email,
+  fullName,
+  passwordSet = true,
+}: {
+  userId: string
+  email: string
+  fullName: string | null
+  passwordSet?: boolean
+}): Promise<void> {
+  await db
+    .insert(users)
+    .values({ id: userId, email, fullName, role: 'homeowner', passwordSet })
+    .onConflictDoUpdate({ target: users.id, set: { email } })
+
+  // Already has a profile? Nothing more to do.
+  const existing = await db
+    .select({ id: homeowners.id })
+    .from(homeowners)
+    .where(eq(homeowners.userId, userId))
+    .limit(1)
+  if (existing.length > 0) return
+
+  await db.insert(homeowners).values({ userId })
 }

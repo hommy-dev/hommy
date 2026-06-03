@@ -88,17 +88,12 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
           <SVGIcon src="/icons/logo.svg" className="size-10" />
         </Link>
 
-        {/* <div className="max-w-md space-y-10">
-          <div className="space-y-5">
-            <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight">
-              {headline}
-            </h1>
-            <p className="text-base leading-relaxed text-background/70">
-              {sub}
-            </p>
-          </div>
-
-        </div> */}
+        <div className="max-w-md space-y-5">
+          <h1 className="font-sebenta text-[2.4rem] font-bold leading-[110%] tracking-normal">
+            {headline}
+          </h1>
+          <p className="text-base leading-relaxed text-background/70">{sub}</p>
+        </div>
 
         <p className="text-xs text-background/45">© 2025 Homei, Inc.</p>
       </div>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   Sidebar,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { SVGIcon } from "@/components/ui/svg-icon";
+import { Icon } from "@/components/ui/icon";
 import { formatUnreadBadge } from "@/utils/format/unread";
 import {
   type DashboardNavItem,
@@ -125,10 +125,9 @@ export function DashboardShell({
                             prefetch
                             className="flex w-full min-w-0 items-center gap-2.5"
                           >
-                            <HugeiconsIcon
-                              icon={item.icon}
-                              strokeWidth={2}
-                              className="shrink-0"
+                            <Icon
+                              name={item.icon}
+                              className="size-5 shrink-0"
                             />
                             <span className="min-w-0 flex-1 truncate">
                               {item.label}
