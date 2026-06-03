@@ -19,7 +19,7 @@
   --tertiary: #ff7aa2;
   --secondary-foreground: #1a2a00;
   --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted-foreground: #414242;
   --accent: #f3fbd9;
   --accent-foreground: #0055a4;
   --destructive: #ef4444;
@@ -200,5 +200,45 @@
   }
   html {
     @apply font-sans;
+  }
+
+  /* Tailwind v4 Preflight no longer sets a pointer cursor on interactive
+     elements. Restore it globally for everything clickable (utilities like
+     `cursor-not-allowed`/`cursor-default` still override this, and disabled
+     elements are excluded). */
+  button:not(:disabled),
+  [role="button"]:not(:disabled):not([aria-disabled="true"]):not([data-disabled]),
+  [role="tab"]:not([data-disabled]),
+  [role="menuitem"]:not([data-disabled]),
+  [role="menuitemradio"]:not([data-disabled]),
+  [role="option"]:not([data-disabled]),
+  [role="switch"]:not([data-disabled]),
+  label:has(> input:is([type="checkbox"], [type="radio"], [type="file"])),
+  summary,
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Animated success check (see AnimatedCheck component) */
+@keyframes homei-pop-in {
+  0% {
+    transform: scale(0);
+  }
+  80% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes homei-draw-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes homei-draw-check {
+  to {
+    stroke-dashoffset: 0;
   }
 }

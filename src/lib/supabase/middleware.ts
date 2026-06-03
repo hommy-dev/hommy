@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/auth/signup",
   "/auth/callback",
   "/api/inngest",
+  "/sandbox", // dev-only component preview
 ];
 
 function isPublicPath(pathname: string): boolean {

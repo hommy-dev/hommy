@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ImageUpload, UploadedImagePreview } from "@/components/ui/image-upload"
+import { buttonVariants } from "@/components/ui/button"
 import {
   updateBusinessProfile,
   submitVerification,
@@ -15,9 +16,6 @@ type Initial = {
   companyName: string
   bio: string
   logoUrl: string | null
-  licenseNumber: string
-  insuranceProvider: string
-  insurancePolicy: string
   licenseDocUrl: string | null
   insuranceDocUrl: string | null
   verificationState: VerificationState
@@ -34,9 +32,6 @@ export function ProfileForm({ initial }: { initial: Initial }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(initial.logoUrl)
   const [savingProfile, startProfile] = useTransition()
 
-  const [licenseNumber, setLicenseNumber] = useState(initial.licenseNumber)
-  const [insuranceProvider, setInsuranceProvider] = useState(initial.insuranceProvider)
-  const [insurancePolicy, setInsurancePolicy] = useState(initial.insurancePolicy)
   const [licenseDocUrl, setLicenseDocUrl] = useState<string | null>(initial.licenseDocUrl)
   const [insuranceDocUrl, setInsuranceDocUrl] = useState<string | null>(initial.insuranceDocUrl)
   const [submitting, startSubmit] = useTransition()
@@ -62,19 +57,22 @@ export function ProfileForm({ initial }: { initial: Initial }) {
       return showToast("Upload both documents to submit", { type: "error" })
     }
     startSubmit(async () => {
-      const res = await submitVerification({
-        licenseNumber: licenseNumber.trim(),
-        insuranceProvider: insuranceProvider.trim(),
-        insurancePolicy: insurancePolicy.trim(),
-        licenseDocUrl,
-        insuranceDocUrl,
-      })
+      const res = await submitVerification({ licenseDocUrl, insuranceDocUrl })
       if (!res.success) return showToast(res.error, { type: "error" })
       setState("in_review")
       showToast("Submitted for verification", { type: "success" })
       router.refresh()
     })
   }
+
+  const docsChanged =
+    licenseDocUrl !== initial.licenseDocUrl ||
+    insuranceDocUrl !== initial.insuranceDocUrl
+
+  // While in review the documents are already submitted, so there's nothing to
+  // do unless the contractor actually swaps a file. Only then do we surface the
+  // re-submit action.
+  const showSubmit = state !== "in_review" || docsChanged
 
   const submitLabel =
     state === "rejected"
@@ -187,54 +185,29 @@ export function ProfileForm({ initial }: { initial: Initial }) {
             )}
 
             <div className="mt-5 space-y-4">
-              <Field label="License number">
-                <input
-                  value={licenseNumber}
-                  onChange={(e) => setLicenseNumber(e.target.value)}
-                  className={inputCls}
-                  placeholder="TX-ROOF-00000"
-                />
-              </Field>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Insurance provider">
-                  <input
-                    value={insuranceProvider}
-                    onChange={(e) => setInsuranceProvider(e.target.value)}
-                    className={inputCls}
-                    placeholder="Acme Insurance"
-                  />
-                </Field>
-                <Field label="Policy number">
-                  <input
-                    value={insurancePolicy}
-                    onChange={(e) => setInsurancePolicy(e.target.value)}
-                    className={inputCls}
-                    placeholder="POL-000000"
-                  />
-                </Field>
-              </div>
-
               <DocField
                 label="License document"
                 url={licenseDocUrl}
-                onUpload={setLicenseDocUrl}
+                onChange={setLicenseDocUrl}
               />
               <DocField
                 label="Insurance certificate"
                 url={insuranceDocUrl}
-                onUpload={setInsuranceDocUrl}
+                onChange={setInsuranceDocUrl}
               />
             </div>
 
-            <div className="mt-6">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
-              >
-                {submitting ? "Submitting..." : submitLabel}
-              </button>
-            </div>
+            {showSubmit && (
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+                >
+                  {submitting ? "Submitting..." : submitLabel}
+                </button>
+              </div>
+            )}
           </>
         )}
       </form>
@@ -242,42 +215,135 @@ export function ProfileForm({ initial }: { initial: Initial }) {
   )
 }
 
+function isImageUrl(u: string) {
+  return /\.(png|jpe?g|webp|gif|avif)$/i.test(u.split("?")[0])
+}
+
+function urlKind(u: string): "image" | "pdf" | "file" {
+  if (isImageUrl(u)) return "image"
+  if (/\.pdf(\?|$)/i.test(u)) return "pdf"
+  return "file"
+}
+
 function DocField({
   label,
   url,
-  onUpload,
+  onChange,
 }: {
   label: string
   url: string | null
-  onUpload: (u: string) => void
+  onChange: (u: string | null) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-border p-3.5">
-      <div className="min-w-0">
-        <p className="text-sm font-medium">{label}</p>
-        {url ? (
-          <a
-            href={url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-medium text-primary hover:underline"
-          >
-            View uploaded file
-          </a>
-        ) : (
-          <p className="text-xs text-muted-foreground">PDF or image, up to 10MB</p>
-        )}
-      </div>
-      <ImageUpload
-        folder="documents"
-        accept="image+pdf"
-        onUpload={(r) => onUpload(r.secureUrl)}
-      >
-        <span className="shrink-0 rounded-lg border border-foreground/15 px-3 py-2 text-sm font-medium transition-colors hover:bg-muted">
-          {url ? "Replace" : "Upload"}
-        </span>
-      </ImageUpload>
+    <div>
+      <label className="mb-1.5 block text-[13px] font-medium text-foreground/75">
+        {label}
+      </label>
+      {url ? (
+        <div className="space-y-2.5">
+          <div className="overflow-hidden rounded-xl border border-border bg-muted/30">
+            {urlKind(url) === "image" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={url}
+                alt={label}
+                className="mx-auto max-h-56 w-full object-contain"
+              />
+            ) : urlKind(url) === "pdf" ? (
+              <iframe src={url} title={label} className="h-56 w-full" />
+            ) : (
+              <div className="flex h-40 items-center justify-center text-foreground/40">
+                <FileGlyph />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5">
+              <ImageUpload
+                folder="documents"
+                accept="image+pdf"
+                onUpload={(r) => onChange(r.secureUrl)}
+              >
+                <span className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+                  Replace
+                </span>
+              </ImageUpload>
+              <button
+                type="button"
+                onClick={() => onChange(null)}
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+              >
+                Remove
+              </button>
+            </div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Open
+            </a>
+          </div>
+        </div>
+      ) : (
+        <ImageUpload
+          folder="documents"
+          accept="image+pdf"
+          onUpload={(r) => onChange(r.secureUrl)}
+          className="w-full [&>button]:w-full"
+        >
+          <span className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-foreground/15 px-4 py-7 text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
+            <span className="flex size-10 items-center justify-center rounded-full bg-muted text-foreground/50">
+              <UploadGlyph />
+            </span>
+            <span className="text-sm font-semibold">Click to upload</span>
+            <span className="text-xs text-muted-foreground">
+              PDF or image, up to 10MB
+            </span>
+          </span>
+        </ImageUpload>
+      )}
     </div>
+  )
+}
+
+function UploadGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 15V4m0 0L8 8m4-4l4 4"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function FileGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 3v5h5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 

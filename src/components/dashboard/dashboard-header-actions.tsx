@@ -1,13 +1,14 @@
 "use client";
 
-import * as React from "react";
-import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { UserMenu } from "@/components/dashboard/user-menu";
+import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 
 const ICON_BTN =
   "flex size-9 items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -15,13 +16,24 @@ const ICON_BTN =
 export function DashboardHeaderActions({
   user,
   settingsHref,
+  credits,
 }: {
   user: { email: string; fullName: string; avatarUrl: string | null };
   settingsHref: string;
+  credits: number;
 }) {
   return (
-    <div className="flex items-center gap-1">
-      <ThemeToggle />
+    <div className="flex items-center gap-1.5">
+      <Link
+        href="/dashboard/settings"
+        title="Buy credits"
+        className="flex items-center gap-1.5 rounded-full bg-secondary/70 px-3 py-1.5 text-sm font-semibold text-secondary-foreground transition-colors hover:bg-secondary"
+      >
+        <CoinIcon />
+        <span className="tabular-nums">{credits}</span>
+        <span className="hidden text-secondary-foreground/65 sm:inline">credits</span>
+      </Link>
+      <HeaderThemeToggle />
       <NotificationBell />
       <span className="mx-1 h-5 w-px bg-border" />
       <UserMenu user={user} settingsHref={settingsHref} compact />
@@ -29,21 +41,15 @@ export function DashboardHeaderActions({
   );
 }
 
-function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
-  const isDark = mounted && resolvedTheme === "dark";
-
+// next-themes resolves the theme only on the client, so the toggle renders
+// different markup on server vs. client. Gate it behind a mount flag so the
+// first client render matches the SSR placeholder (no hydration mismatch).
+function HeaderThemeToggle() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <span className="size-9 shrink-0" aria-hidden />;
   return (
-    <button
-      type="button"
-      aria-label="Toggle theme"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={ICON_BTN}
-    >
-      {isDark ? <MoonIcon /> : <SunIcon />}
-    </button>
+    <ThemeToggleButton className="size-9 bg-transparent p-2 text-foreground/65 hover:bg-muted hover:text-foreground" />
   );
 }
 
@@ -65,28 +71,15 @@ function NotificationBell() {
   );
 }
 
-function SunIcon() {
+function CoinIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <circle cx="10" cy="10" r="3.6" stroke="currentColor" strokeWidth="1.6" />
+    <svg width="15" height="15" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="6.4" stroke="currentColor" strokeWidth="1.6" />
       <path
-        d="M10 2.5v1.6M10 15.9v1.6M3.6 3.6l1.1 1.1M15.3 15.3l1.1 1.1M2.5 10h1.6M15.9 10h1.6M3.6 16.4l1.1-1.1M15.3 4.7l1.1-1.1"
+        d="M9 5.6v6.8M7.2 7.1c0-.8.8-1.3 1.8-1.3s1.8.5 1.8 1.3-.8 1.2-1.8 1.2-1.8.5-1.8 1.3.8 1.3 1.8 1.3 1.8-.5 1.8-1.3"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.4"
         strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path
-        d="M16.5 11.8A6.5 6.5 0 0 1 8.2 3.5a6.5 6.5 0 1 0 8.3 8.3z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
       />
     </svg>
   );

@@ -8,18 +8,15 @@ export type VerificationState =
 
 /**
  * Resolves the contractor's verification state. We don't store a separate
- * "submitted" timestamp, so "in review" is inferred from the presence of the
- * license number + both documents while the status is still pending.
+ * "submitted" timestamp, so "in review" is inferred from the presence of both
+ * documents while the status is still pending.
  */
 export function getVerificationState(
-  c: Pick<
-    Contractor,
-    "verificationStatus" | "licenseNumber" | "licenseDocUrl" | "insuranceDocUrl"
-  >,
+  c: Pick<Contractor, "verificationStatus" | "licenseDocUrl" | "insuranceDocUrl">,
 ): VerificationState {
   if (c.verificationStatus === "verified") return "verified"
   if (c.verificationStatus === "rejected") return "rejected"
-  const submitted = Boolean(c.licenseNumber && c.licenseDocUrl && c.insuranceDocUrl)
+  const submitted = Boolean(c.licenseDocUrl && c.insuranceDocUrl)
   return submitted ? "in_review" : "not_started"
 }
 

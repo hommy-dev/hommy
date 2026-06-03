@@ -162,7 +162,7 @@ function CountrySelect({
             variant="outline"
             size={variant}
             className={cn(
-              "rounded-s-4xl rounded-e-none flex gap-1 border-e-0 px-2.5 py-0 leading-none hover:bg-transparent focus:z-10 data-pressed:bg-transparent",
+              "rounded-s-md rounded-e-none flex gap-1 border-e-0 px-2.5 py-0 leading-none hover:bg-transparent focus:z-10 data-pressed:bg-transparent",
               disabled && "opacity-50"
             )}
             disabled={disabled}
@@ -196,7 +196,7 @@ function CountrySelect({
               placeholder="Search country…"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              className="h-9 w-full rounded-md border border-input bg-input/30 pr-3 pl-8 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/50"
+              className="h-9 w-full rounded-md border border-input bg-input/30 pr-3 pl-8 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-0"
             />
           </div>
         </div>

@@ -59,9 +59,9 @@ export function UserMenu({ user, settingsHref, compact = false }: UserMenuProps)
         <button
           type="button"
           aria-label="Open account menu"
-          className="flex size-9 items-center justify-center rounded-full outline-none ring-1 ring-border transition-shadow hover:ring-foreground/25 focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-9 items-center justify-center rounded-full outline-none ring-1 ring-border transition-shadow"
         >
-          <Avatar size="sm" className="size-8">
+          <Avatar className="w-full h-full">
             {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground/70">
               {initials(user.fullName)}

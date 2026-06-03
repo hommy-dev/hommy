@@ -118,7 +118,7 @@ export function DashboardShell({
                           asChild
                           isActive={active}
                           tooltip={item.label}
-                          className="text-sidebar-foreground/70 hover:text-sidebar-foreground data-active:bg-sidebar-accent data-active:text-sidebar-foreground data-active:font-medium data-active:shadow-[var(--shadow-xs)] rounded-md"
+                          className="text-sidebar-foreground/70 hover:text-sidebar-foreground data-active:bg-sidebar-accent data-active:text-sidebar-foreground data-active:font-medium data-active:shadow-[var(--shadow-xs)]"
                         >
                           <Link
                             href={item.href}
