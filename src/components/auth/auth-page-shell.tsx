@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { SVGIcon } from "../ui/svg-icon";
 
-type BrandVariant = "default" | "contractor";
+type BrandVariant = "default" | "contractor" | "homeowner";
 
 interface AuthPageShellProps {
   children: React.ReactNode;
@@ -55,12 +55,16 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
   const headline =
     variant === "contractor"
       ? "The modern marketplace for professional roofing contractors."
-      : "Built for the trades. Ready for the future.";
+      : variant === "homeowner"
+        ? "The right roofer, without the guesswork."
+        : "Built for the trades. Ready for the future.";
 
   const sub =
     variant === "contractor"
       ? "Win better leads, quote faster with AI, and get paid securely. Free for contractors, forever."
-      : "Connect with vetted local pros. Compare quotes, book confidently, and pay only when the work is done.";
+      : variant === "homeowner"
+        ? "Tell us about your project and we’ll connect you with trusted, vetted pros near you. Free, with no obligation."
+        : "Connect with vetted local pros. Compare quotes, book confidently, and pay only when the work is done.";
 
   return (
     <aside

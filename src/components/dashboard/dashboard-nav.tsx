@@ -10,15 +10,23 @@ export type DashboardNavItem = {
 // Homei contractor CRM lives under /dashboard (see docs/HOMEI_PLATFORM.md §13).
 // There is NO homeowner dashboard — homeowners are unauthenticated.
 export const CONTRACTOR_NAV: DashboardNavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: "category" },
-  { href: "/dashboard/leads", label: "Leads", icon: "discovery" },
-  { href: "/dashboard/contacts", label: "Contacts", icon: "user-3" },
-  { href: "/dashboard/projects", label: "Projects", icon: "work" },
-  { href: "/dashboard/messages", label: "Messages", icon: "chat" },
-  { href: "/dashboard/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
-  { href: "/dashboard/reviews", label: "Reviews", icon: "star" },
-  { href: "/dashboard/profile", label: "Profile", icon: "profile" },
-  { href: "/dashboard/settings", label: "Settings", icon: "setting" },
+  { href: "/contractor", label: "Dashboard", icon: "category" },
+  { href: "/contractor/leads", label: "Leads", icon: "discovery" },
+  { href: "/contractor/contacts", label: "Contacts", icon: "user-3" },
+  { href: "/contractor/projects", label: "Projects", icon: "work" },
+  { href: "/contractor/messages", label: "Messages", icon: "chat" },
+  { href: "/contractor/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
+  { href: "/contractor/reviews", label: "Reviews", icon: "star" },
+  { href: "/contractor/profile", label: "Profile", icon: "profile" },
+  { href: "/contractor/settings", label: "Settings", icon: "setting" },
+]
+
+export const HOMEOWNER_NAV: DashboardNavItem[] = [
+  { href: "/homeowner", label: "Dashboard", icon: "category" },
+  { href: "/homeowner/requests", label: "My requests", icon: "paper" },
+  { href: "/homeowner/quotes", label: "Quotes", icon: "discount" },
+  { href: "/homeowner/messages", label: "Messages", icon: "chat" },
+  { href: "/homeowner/profile", label: "Profile", icon: "profile" },
 ]
 
 export const ADMIN_NAV: DashboardNavItem[] = [
@@ -35,7 +43,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
 ]
 
 export function isDashboardNavActive(pathname: string, href: string): boolean {
-  const roots = ["/dashboard", "/admin"] as const
+  const roots = ["/contractor", "/homeowner", "/admin"] as const
   if ((roots as readonly string[]).includes(href)) {
     return pathname === href
   }

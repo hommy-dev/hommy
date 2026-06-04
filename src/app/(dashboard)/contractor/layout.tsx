@@ -27,7 +27,7 @@ export default async function DashboardLayout({
             fullName: personName,
             avatarUrl: contractor?.logoUrl ?? null,
           }}
-          settingsHref="/dashboard/settings"
+          settingsHref="/contractor/settings"
           credits={contractor?.creditBalance ?? 0}
         />
       }
@@ -49,7 +49,7 @@ function buildNotice(
         tone="warning"
         title="Verification needs attention"
         body="Update your license or insurance to keep going."
-        cta={{ label: "Review", href: "/dashboard/profile" }}
+        cta={{ label: "Review", href: "/contractor/profile" }}
       />
     )
   }
@@ -60,7 +60,7 @@ function buildNotice(
         tone="info"
         title="We’re reviewing your verification"
         body="We’ll let you know the moment you’re approved."
-        cta={{ label: "View", href: "/dashboard/profile" }}
+        cta={{ label: "View", href: "/contractor/profile" }}
       />
     )
   }
@@ -71,7 +71,7 @@ function buildNotice(
         tone="announcement"
         title="Finish verifying"
         body="Add your license to start winning jobs."
-        cta={{ label: "Get verified", href: "/dashboard/profile" }}
+        cta={{ label: "Get verified", href: "/contractor/profile" }}
       />
     )
   }
@@ -81,7 +81,7 @@ function buildNotice(
       tone="success"
       title={`${contractor.creditBalance} credits`}
       body="Spent only when you win a job."
-      cta={{ label: "Buy credits", href: "/dashboard/settings" }}
+      cta={{ label: "Buy credits", href: "/contractor/settings" }}
     />
   )
 }

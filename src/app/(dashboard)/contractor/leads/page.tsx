@@ -49,7 +49,7 @@ export default async function LeadsPage() {
             </div>
           </div>
           <Link
-            href="/dashboard/profile"
+            href="/contractor/profile"
             className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Get verified

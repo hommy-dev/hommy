@@ -49,7 +49,7 @@ export function ContractorSignupForm() {
         setSentTo(String(fd.get("email") ?? ""))
         return
       }
-      router.push(res.data?.redirectTo ?? "/dashboard")
+      router.push(res.data?.redirectTo ?? "/contractor")
       router.refresh()
     })
   }

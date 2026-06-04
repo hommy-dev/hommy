@@ -27,11 +27,11 @@ type ActionResult<T = void> =
   | { success: true; data?: T }
   | { success: false; error: string; fieldErrors?: FieldErrors }
 
-// v2: three authenticated roles. Contractor CRM is /dashboard, homeowner
-// dashboard is /home, admin console is /admin.
+// v2: three authenticated roles. Contractor CRM is /contractor, homeowner
+// dashboard is /homeowner, admin console is /admin.
 const ROLE_DEFAULT_PATH: Record<'contractor' | 'homeowner' | 'admin', string> = {
-  contractor: '/dashboard',
-  homeowner: '/home',
+  contractor: '/contractor',
+  homeowner: '/homeowner',
   admin: '/admin',
 }
 
@@ -231,7 +231,7 @@ export async function signupHomeowner(
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName, role: 'homeowner' },
-      emailRedirectTo: `${origin}/auth/callback?intent=homeowner&next=/home`,
+      emailRedirectTo: `${origin}/auth/callback?intent=homeowner&next=/homeowner`,
     },
   })
 
@@ -255,7 +255,7 @@ export async function signupHomeowner(
   }
 
   if (data.session) {
-    return { success: true, data: { redirectTo: '/home' } }
+    return { success: true, data: { redirectTo: '/homeowner' } }
   }
   return { success: true, data: { needsConfirmation: true } }
 }
@@ -271,7 +271,7 @@ export async function startHomeownerGoogleSignup(): Promise<
   const origin = getAppOrigin()
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${origin}/auth/callback?intent=homeowner&next=/home` },
+    options: { redirectTo: `${origin}/auth/callback?intent=homeowner&next=/homeowner` },
   })
   if (error || !data.url) {
     return { success: false, error: error?.message || 'Could not start Google sign-in' }

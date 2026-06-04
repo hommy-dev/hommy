@@ -49,7 +49,7 @@ export function HomeownerSignupForm() {
         setSentTo(String(fd.get("email") ?? ""))
         return
       }
-      router.push(res.data?.redirectTo ?? "/home")
+      router.push(res.data?.redirectTo ?? "/homeowner")
       router.refresh()
     })
   }

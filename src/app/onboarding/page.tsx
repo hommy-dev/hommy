@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function OnboardingPage() {
   const user = await getRequiredUser("contractor")
   const contractor = await getContractorForUser(user.id)
-  if (!contractor) redirect("/dashboard")
+  if (!contractor) redirect("/contractor")
 
   const [roofing] = await db
     .select({ id: services.id, subtypes: services.subtypes })

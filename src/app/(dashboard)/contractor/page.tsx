@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const needsSetup = verification === "not_started" || verification === "rejected"
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="space-y-6">
       <header>
         <h1 className="font-sebenta text-2xl font-bold tracking-tight">
           {contractor.companyName ?? "Your dashboard"}
@@ -113,7 +113,7 @@ async function RecentLeads({ contractorId }: { contractorId: string }) {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">Recent leads</h2>
         <Link
-          href="/dashboard/leads"
+          href="/contractor/leads"
           prefetch
           className="text-sm font-medium text-primary hover:underline"
         >

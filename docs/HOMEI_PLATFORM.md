@@ -549,10 +549,12 @@ Every notification goes through one `sendNotification()` core: writes a per-user
 
 ## 13. App Structure (routes)
 
-- **Public / marketing:** `/`, `/get-a-quote`, `/contractors`, `/contractors/signup`, `/roofing-contractors/[city]-[state]`.
-- **Homeowner (auth, role `homeowner`):** `/home` (or `/me`) dashboard — their job posts + stats, quotes received + accept, messages, profile/password setup. (Frictionless auto-signup from the post flow.)
-- **Contractor (auth, role `contractor`):** `/dashboard` — command center, `/dashboard/leads` (offers + engage), contacts, projects (+ quote builder), messages, storm-alerts, reviews, **team** (members + invites), **billing** (plan + credits + purchase), profile, settings.
-- **Admin (auth, role `admin`):** `/admin` — leads, contractors (verify), members, storm-events, plans/credits, analytics, settings.
+`src/app` is organized with route groups by audience (the group name is NOT in the URL): `(public)/` for marketing, `auth/` for auth flows, and `(dashboard)/{contractor,homeowner,admin}/` for the three authenticated areas. So the contractor area lives at `src/app/(dashboard)/contractor/` and serves `/contractor`.
+
+- **Public / marketing:** `/`, `/get-a-quote`, `/contractors`, `/contractors/signup`, `/roofing-contractors/[city]-[state]`. (`src/app/(public)/`)
+- **Homeowner (auth, role `homeowner`):** `/homeowner` dashboard — their job posts + stats, quotes received + accept, messages, profile/password setup. (Frictionless auto-signup from the post flow.) (`src/app/(dashboard)/homeowner/`)
+- **Contractor (auth, role `contractor`):** `/contractor` — command center, `/contractor/leads` (offers + engage), contacts, projects (+ quote builder), messages, storm-alerts, reviews, **team** (members + invites), **billing** (plan + credits + purchase), profile, settings. (`src/app/(dashboard)/contractor/`)
+- **Admin (auth, role `admin`):** `/admin` — leads, contractors (verify), members, storm-events, plans/credits, analytics, settings. (`src/app/(dashboard)/admin/`)
 - **Tokenized (no session needed):** quote acceptance link, review submission link, invitation accept link.
 - **API route handlers:** `/api/inngest`, `/api/push/*`, `/api/webhooks/stripe`, `/api/webhooks/plivo` (inbound SMS), `/api/webhooks/resend` (inbound email).
 

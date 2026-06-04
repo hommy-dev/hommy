@@ -52,7 +52,7 @@ export function UserMenu({ user, settingsHref, compact = false }: UserMenuProps)
         <button
           type="button"
           aria-label="Open account menu"
-          className="flex size-9 items-center justify-center rounded-full outline-none ring-1 ring-border transition-shadow"
+          className="flex size-8 items-center justify-center rounded-full outline-none ring-1 ring-border transition-shadow"
         >
           <Avatar className="w-full h-full">
             {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}

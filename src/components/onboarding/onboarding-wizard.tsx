@@ -73,7 +73,7 @@ export function OnboardingWizard({
         showToast(res.error, { type: "error" })
         return
       }
-      router.push("/dashboard")
+      router.push("/contractor")
       router.refresh()
     })
   }
@@ -83,7 +83,7 @@ export function OnboardingWizard({
       <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-5">
         <span className="font-sebenta text-lg font-bold">Homei</span>
         <Link
-          href="/dashboard"
+          href="/contractor"
           className="text-xs font-medium text-foreground/50 transition-colors hover:text-foreground"
         >
           Skip for now
