@@ -10,7 +10,7 @@ import { GetAQuoteWizard } from "@/components/public/get-a-quote-wizard"
 export default async function GetAQuotePage({
   searchParams,
 }: {
-  searchParams: Promise<{ subtype?: string; zip?: string }>
+  searchParams: Promise<{ subtype?: string; where?: string }>
 }) {
   const sp = await searchParams
 
@@ -31,7 +31,7 @@ export default async function GetAQuotePage({
     <GetAQuoteWizard
       subtypes={subtypes}
       initialSubtype={initialSubtype}
-      initialZip={sp.zip ?? ""}
+      initialWhere={sp.where ?? ""}
       isLoggedInHomeowner={isHomeowner}
       loggedInName={isHomeowner ? user?.fullName ?? null : null}
     />

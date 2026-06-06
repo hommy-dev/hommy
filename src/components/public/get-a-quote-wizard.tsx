@@ -26,13 +26,13 @@ type FieldErrors = Record<string, string>
 export function GetAQuoteWizard({
   subtypes,
   initialSubtype,
-  initialZip,
+  initialWhere,
   isLoggedInHomeowner,
   loggedInName,
 }: {
   subtypes: string[]
   initialSubtype: string
-  initialZip: string
+  initialWhere: string
   isLoggedInHomeowner: boolean
   loggedInName: string | null
 }) {
@@ -90,7 +90,7 @@ export function GetAQuoteWizard({
         address: place?.formattedAddress ?? "",
         city: place?.city ?? "",
         state: place?.state ?? "",
-        zipCode: place?.zipCode || initialZip,
+        zipCode: place?.zipCode ?? "",
         lat: place?.lat ?? null,
         lng: place?.lng ?? null,
         ...(isLoggedInHomeowner ? {} : { fullName, email, phone }),
@@ -214,7 +214,7 @@ export function GetAQuoteWizard({
               <GooglePlacesInput
                 mode="address"
                 placeholder="Start typing your address…"
-                value={place?.formattedAddress}
+                value={place ? place.formattedAddress : initialWhere}
                 onPlaceSelect={(p) => {
                   setPlace(p)
                   clearError("zipCode")

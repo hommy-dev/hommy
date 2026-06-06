@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { SiteHeader } from "@/components/public/site-header"
-import { QuoteForm } from "@/components/public/quote-form"
 
 export const metadata: Metadata = {
   title: "Homei | Find a roofer you can actually trust",
@@ -30,121 +30,73 @@ export default function HomePage() {
 
 // ────────────────────────────── HERO ──────────────────────────────
 
+// ⬇ SWAP THIS for your real home/roof photo: drop it in public/bg/ and change
+// this one path. A warm, slightly aspirational shot of a nice home/roof works best.
+const HERO_IMAGE = "/bg/hero.jpg"
+
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:pb-24 lg:pt-20">
-        <div id="quote" className="scroll-mt-24">
-          <span className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-foreground/60">
-            <span className="size-1.5 rounded-full bg-tertiary" />
-            Roofing, done right
+    <section className="relative w-full overflow-hidden">
+      <Image
+        src={HERO_IMAGE}
+        alt="A well-kept home with a freshly finished roof"
+        fill
+        priority
+        sizes="100vw"
+        className="object-bottom object-cover"
+      />
+
+      {/* Warm scrim — keeps the centered dark text readable over the photo. */}
+      {/* <div className="absolute inset-0 bg-gradient-to-b from-background/90 from-5% to-transparent to-30%" /> */}
+
+      <div
+        id="quote"
+        className="relative mx-auto flex min-h-[36rem] max-w-3xl flex-col items-center justify-center px-6 py-16 text-center lg:min-h-screen"
+      >
+        <h1 className="font-sebenta text-[2.6rem] font-bold leading-[1.04] tracking-tight sm:text-6xl lg:text-[4.25rem]">
+          Find a roofer you can actually trust.
+        </h1>
+
+        <p className="mt-4 max-w-md text-[17px] leading-relaxed text-foreground/70">
+          A few vetted local roofers, matched to your job. Free, no pressure.
+        </p>
+
+        <Link
+          href="/get-a-quote"
+          className="group mt-7 inline-flex items-center gap-2 rounded-lg bg-foreground px-7 py-3.5 text-base font-semibold text-background transition-colors hover:bg-foreground/90"
+        >
+          Post a job
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            className="transition-transform group-hover:translate-x-0.5"
+          >
+            <path
+              d="M3 8h9m0 0l-3.5-3.5M12 8l-3.5 3.5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-foreground/65">
+          <span className="inline-flex items-center gap-1.5">
+            <Stars />
+            <span className="font-medium text-foreground">4.8</span>
+            from homeowners
           </span>
-
-          <h1 className="mt-5 font-sebenta text-[2.7rem] font-bold leading-[1.02] tracking-tight sm:text-6xl">
-            Find a roofer you
-            <br className="hidden sm:block" /> can actually trust.
-          </h1>
-
-          <p className="mt-5 max-w-md text-[17px] leading-relaxed text-foreground/65">
-            Tell us what is going on with your roof. We will line up a few
-            licensed, insured local roofers who do honest work and actually show
-            up. It is free, and you are never locked into anything.
-          </p>
-
-          <div className="mt-7 max-w-xl">
-            <QuoteForm />
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-foreground/60">
-            <span className="inline-flex items-center gap-1.5">
-              <Stars />
-              <span className="font-medium text-foreground">4.8 of 5</span>
-              from homeowners
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Check className="text-primary" />
-              Licensed and insured, every time
-            </span>
-          </div>
+          <span className="inline-flex items-center gap-1.5">
+            <Check className="text-primary" />
+            Licensed &amp; insured
+          </span>
         </div>
-
-        <HeroVisual />
       </div>
     </section>
-  )
-}
-
-function HeroVisual() {
-  return (
-    <div className="relative mx-auto hidden w-full max-w-md lg:block">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] [background:radial-gradient(120%_120%_at_70%_10%,#0a3a66,#001a33)]">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-[0.12]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #ffffff 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-        <House />
-      </div>
-
-      {/* floating proof cards */}
-      <div className="absolute -left-5 top-10 rounded-2xl border border-foreground/10 bg-card p-3 shadow-[var(--shadow-lg)]">
-        <div className="flex items-center gap-2">
-          <Stars />
-          <span className="text-sm font-semibold">4.8</span>
-        </div>
-        <p className="mt-1 text-[11px] text-foreground/55">avg roofer rating</p>
-      </div>
-
-      <div className="absolute -right-4 bottom-24 rounded-2xl border border-foreground/10 bg-card p-3 shadow-[var(--shadow-lg)]">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-            <Check />
-          </span>
-          <div>
-            <p className="text-xs font-semibold leading-tight">Licensed</p>
-            <p className="text-[11px] leading-tight text-foreground/55">
-              and insured
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute -bottom-4 left-8 rounded-2xl bg-secondary px-4 py-2.5 text-secondary-foreground shadow-[var(--shadow-lg)]">
-        <p className="text-xs font-semibold">3 quotes ready</p>
-        <p className="text-[11px] opacity-70">in your area today</p>
-      </div>
-    </div>
-  )
-}
-
-function House() {
-  return (
-    <svg
-      viewBox="0 0 320 360"
-      className="absolute left-1/2 top-1/2 w-[78%] -translate-x-1/2 -translate-y-1/2"
-      fill="none"
-      aria-hidden="true"
-    >
-      {/* roof */}
-      <path d="M40 168 L160 70 L280 168 Z" fill="#dcf4a2" />
-      <path d="M160 70 L280 168 L248 168 L160 100 Z" fill="#c7e87f" />
-      {/* body */}
-      <rect x="72" y="168" width="176" height="150" rx="6" fill="#f6f3ec" />
-      {/* door */}
-      <rect x="142" y="238" width="36" height="80" rx="4" fill="#0055a4" />
-      <circle cx="170" cy="280" r="2.5" fill="#dcf4a2" />
-      {/* windows */}
-      <rect x="92" y="196" width="34" height="34" rx="4" fill="#0055a4" />
-      <rect x="194" y="196" width="34" height="34" rx="4" fill="#0055a4" />
-      <path d="M109 196v34M92 213h34" stroke="#f6f3ec" strokeWidth="2" />
-      <path d="M211 196v34M194 213h34" stroke="#f6f3ec" strokeWidth="2" />
-      {/* chimney */}
-      <rect x="214" y="96" width="22" height="46" rx="2" fill="#ff7aa2" />
-    </svg>
   )
 }
 

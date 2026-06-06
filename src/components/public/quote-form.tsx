@@ -10,26 +10,25 @@ const SERVICES = [
   { label: "Roof repair", subtype: "Repair" },
   { label: "Full replacement", subtype: "Replacement" },
   { label: "Storm damage", subtype: "Storm Damage" },
-  { label: "Roof inspection", subtype: "Inspection" },
+  { label: "Inspection", subtype: "Inspection" },
 ] as const
 
 /**
- * Homepage hero teaser. Collects just service + ZIP, then hands off to the full
- * /get-a-quote wizard (pre-filled) which creates the lead and fans it out.
+ * Homepage hero teaser: service + rough location, then hands off to the full
+ * /get-a-quote wizard (pre-filled) where the exact address is picked.
  */
 export function QuoteForm({ className }: { className?: string }) {
   const router = useRouter()
   const [subtype, setSubtype] = useState<string>(SERVICES[0].subtype)
-  const [zip, setZip] = useState("")
+  const [where, setWhere] = useState("")
   const [pending, setPending] = useState(false)
-  // Permissive postal code — works worldwide, not just US 5-digit ZIPs.
-  const zipValid = zip.trim().length >= 2
+  const whereValid = where.trim().length >= 2
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!zipValid || pending) return
+    if (!whereValid || pending) return
     setPending(true)
-    const params = new URLSearchParams({ subtype, zip: zip.trim() })
+    const params = new URLSearchParams({ subtype, where: where.trim() })
     router.push(`/get-a-quote?${params.toString()}`)
   }
 
@@ -37,76 +36,58 @@ export function QuoteForm({ className }: { className?: string }) {
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "rounded-3xl border border-foreground/10 bg-card p-2.5 shadow-[var(--shadow-lg)]",
+        "flex flex-col overflow-hidden rounded-lg border border-foreground/15 bg-card shadow-sm transition-colors focus-within:border-foreground/30 sm:flex-row sm:items-stretch",
         className,
       )}
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-        <label className="flex min-w-0 flex-1 flex-col rounded-2xl bg-muted/60 px-4 py-2.5 text-left focus-within:bg-muted">
-          <span className="text-[11px] font-medium uppercase tracking-wide text-foreground/45">
-            What is going on?
-          </span>
-          <select
-            value={subtype}
-            onChange={(e) => setSubtype(e.target.value)}
-            className="-ml-0.5 mt-0.5 cursor-pointer appearance-none bg-transparent text-[15px] font-medium text-foreground outline-none"
-            aria-label="What is going on with your roof?"
-          >
-            {SERVICES.map((s) => (
-              <option key={s.subtype} value={s.subtype}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="hidden w-px self-stretch bg-foreground/10 sm:block" />
-
-        <label className="flex flex-col rounded-2xl bg-muted/60 px-4 py-2.5 text-left focus-within:bg-muted sm:w-40">
-          <span className="text-[11px] font-medium uppercase tracking-wide text-foreground/45">
-            Your postal code
-          </span>
-          <input
-            value={zip}
-            onChange={(e) =>
-              setZip(e.target.value.toUpperCase().replace(/[^A-Z0-9 -]/g, "").slice(0, 12))
-            }
-            placeholder="75201"
-            className="mt-0.5 w-full bg-transparent text-[15px] font-medium text-foreground placeholder:text-foreground/30 outline-none"
-            aria-label="Your postal code"
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={!zipValid || pending}
-          className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-5 py-3 text-[15px] font-semibold text-primary-foreground transition-[transform,background-color] hover:bg-primary/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:py-0"
+      <div className="relative flex items-center border-b border-foreground/10 sm:border-b-0 sm:border-r">
+        <select
+          value={subtype}
+          onChange={(e) => setSubtype(e.target.value)}
+          aria-label="Type of work"
+          className="h-12 w-full cursor-pointer appearance-none bg-transparent pl-4 pr-9 text-[15px] font-medium text-foreground outline-none"
         >
-          {pending ? "Matching..." : "Get my quotes"}
-          {!pending && <ArrowRight className="transition-transform group-hover:translate-x-0.5" />}
-        </button>
+          {SERVICES.map((s) => (
+            <option key={s.subtype} value={s.subtype}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+        <Chevron className="pointer-events-none absolute right-3 text-foreground/40" />
       </div>
+
+      <input
+        value={where}
+        onChange={(e) => setWhere(e.target.value.slice(0, 80))}
+        placeholder="Your city or ZIP"
+        aria-label="Your city or area"
+        className="h-12 min-w-0 flex-1 bg-transparent px-4 text-[15px] text-foreground outline-none placeholder:text-foreground/40"
+      />
+
+      <button
+        type="submit"
+        disabled={!whereValid || pending}
+        className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-foreground px-6 text-[15px] font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+      >
+        {pending ? "Matching…" : "Get quotes"}
+        {!pending && <ArrowRight className="transition-transform group-hover:translate-x-0.5" />}
+      </button>
     </form>
+  )
+}
+
+function Chevron({ className }: { className?: string }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
+      <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 }
 
 function ArrowRight({ className }: { className?: string }) {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
-      <path
-        d="M3 8h9m0 0l-3.5-3.5M12 8l-3.5 3.5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
+      <path d="M3 8h9m0 0l-3.5-3.5M12 8l-3.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

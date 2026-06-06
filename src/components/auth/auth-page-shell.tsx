@@ -73,7 +73,7 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
         "lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-[46%] lg:shrink-0 lg:flex-col lg:self-start",
       )}
       style={{
-        backgroundImage: "url('/images/handshake.png')",
+        backgroundImage: "url('/bg/house-lake.avif')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

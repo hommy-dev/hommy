@@ -20,6 +20,7 @@ import { expect, test } from '@playwright/test'
 
 const PUBLIC_ROUTES = [
   { path: '/', expectText: /roof/i },
+  { path: '/get-a-quote', expectText: /roof|address|where/i },
   { path: '/auth/login', expectText: /sign in|log in/i },
 ]
 
