@@ -212,14 +212,16 @@ async function seedDevFixtures(serviceId: string, growthPlanId: string): Promise
     .values({ id: ID.creditTxn, contractorId: ID.contractor, kind: 'signup_bonus', amount: 50, balanceAfter: 50, sourceType: 'seed' })
     .onConflictDoNothing({ target: creditTransactions.id })
 
+  // Coverage = center point + radius. One generous Dallas-metro area so any
+  // Dallas-area address a homeowner picks falls inside it (geographic matching).
   for (const a of [
-    { id: ID.area1, zip: '75201', lat: 32.7876, lng: -96.7994 },
-    { id: ID.area2, zip: '75204', lat: 32.8121, lng: -96.7866 },
+    { id: ID.area1, label: 'Dallas, TX', zip: '75201', lat: 32.7876, lng: -96.7994, radiusMiles: 35 },
+    { id: ID.area2, label: 'Uptown Dallas, TX', zip: '75204', lat: 32.8121, lng: -96.7866, radiusMiles: 35 },
   ]) {
     await db
       .insert(serviceAreas)
-      .values({ id: a.id, contractorId: ID.contractor, zipCode: a.zip, lat: a.lat, lng: a.lng })
-      .onConflictDoUpdate({ target: serviceAreas.id, set: { zipCode: a.zip, lat: a.lat, lng: a.lng } })
+      .values({ id: a.id, contractorId: ID.contractor, label: a.label, zipCode: a.zip, lat: a.lat, lng: a.lng, radiusMiles: a.radiusMiles })
+      .onConflictDoUpdate({ target: serviceAreas.id, set: { label: a.label, zipCode: a.zip, lat: a.lat, lng: a.lng, radiusMiles: a.radiusMiles } })
   }
 
   await db

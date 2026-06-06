@@ -15,6 +15,20 @@
       "when": 1780369311000,
       "tag": "0001_rls_and_realtime",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780729994029,
+      "tag": "0002_nebulous_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780732245933,
+      "tag": "0003_gray_hellion",
+      "breakpoints": true
     }
   ]
 }

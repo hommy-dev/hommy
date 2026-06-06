@@ -36,7 +36,12 @@ export default async function OnboardingPage() {
     : []
 
   const areas = await db
-    .select({ zipCode: serviceAreas.zipCode })
+    .select({
+      label: serviceAreas.label,
+      lat: serviceAreas.lat,
+      lng: serviceAreas.lng,
+      radiusMiles: serviceAreas.radiusMiles,
+    })
     .from(serviceAreas)
     .where(eq(serviceAreas.contractorId, contractor.id))
 
@@ -48,7 +53,15 @@ export default async function OnboardingPage() {
         phone: user.phone ?? "",
         yearsInBusiness: contractor.yearsInBusiness ?? null,
         subtypes: existing[0]?.subtypes ?? [],
-        zips: areas.map((a) => a.zipCode),
+        // Only areas with coordinates can be matched/edited in the wizard.
+        areas: areas
+          .filter((a) => a.lat != null && a.lng != null)
+          .map((a) => ({
+            label: a.label ?? "Coverage area",
+            lat: a.lat as number,
+            lng: a.lng as number,
+            radiusMiles: a.radiusMiles,
+          })),
       }}
     />
   )

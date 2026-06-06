@@ -20,36 +20,31 @@ type ToneStyle = {
  * straight to it — and to its action button.
  */
 const TONES: Record<NoticeTone, ToneStyle> = {
-  // Calm sky blue — neutral status / "in progress".
   info: {
-    card: "border-sky-200/70 bg-gradient-to-br from-[#d6f3ff] to-[#c0e3ff]",
-    text: "text-sky-950",
-    body: "text-sky-900/70",
-    cta: "bg-sky-600 text-white hover:bg-sky-700",
+    card: "border-info/30 bg-info-bg",
+    text: "text-info-foreground",
+    body: "text-info-foreground/70",
+    cta: "bg-info text-white hover:bg-info/85",
   },
-  // Warm butter yellow (#fcf6bd) → amber — needs attention, not yet alarming.
   warning: {
-    card: "border-amber-300/70 bg-gradient-to-br from-[#fcf6bd] to-[#ffd98a]",
-    text: "text-amber-950",
-    body: "text-amber-900/70",
-    cta: "bg-amber-500 text-amber-950 hover:bg-amber-400",
+    card: "border-warning/30 bg-warning-bg",
+    text: "text-warning-foreground",
+    body: "text-warning-foreground/70",
+    cta: "bg-warning text-warning-foreground hover:bg-warning/85",
   },
-  // Fresh mint green — all good / positive balance.
   success: {
-    card: "border-emerald-200/70 bg-gradient-to-br from-[#c7f9cc] to-[#9af1dd]",
-    text: "text-emerald-950",
-    body: "text-emerald-900/70",
-    cta: "bg-emerald-600 text-white hover:bg-emerald-700",
+    card: "border-success/30 bg-success-bg",
+    text: "text-success-foreground",
+    body: "text-success-foreground/70",
+    cta: "bg-success text-success-foreground hover:bg-success/85",
   },
-  // Soft rose (#ff5d8f) — high-priority nudge to act now.
   announcement: {
-    card: "border-pink-200/70 bg-gradient-to-br from-[#ffd6e7] to-[#ffaecb]",
-    text: "text-rose-950",
-    body: "text-rose-900/75",
-    cta: "bg-[#ff5d8f] text-white hover:bg-[#ff4080]",
+    card: "border-primary/30 bg-accent",
+    text: "text-primary",
+    body: "text-primary/70",
+    cta: "bg-secondary text-secondary-foreground hover:bg-secondary/85",
   },
 }
-
 /**
  * Small status / announcement card for the bottom of the sidebar
  * (verification status, credits, etc.). Hidden when the sidebar collapses

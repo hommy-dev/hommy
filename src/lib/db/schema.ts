@@ -237,17 +237,21 @@ export const creditTransactions = pgTable('credit_transactions', {
 // SUPPLY-SIDE (company-scoped)
 // ============================================================
 
+// service_areas — a company's coverage as CENTER POINT + RADIUS (miles). A lead
+// matches when its lat/lng is within radiusMiles of any of the company's areas
+// (Haversine). zipCode is optional/display only — matching is geographic, not
+// postal-string based, so it works worldwide. label is the human name ("Dallas, TX").
 export const serviceAreas = pgTable('service_areas', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }),
-  zipCode: text('zip_code').notNull(),
+  label: text('label'),
+  zipCode: text('zip_code'),
   lat: doublePrecision('lat'),
   lng: doublePrecision('lng'),
+  radiusMiles: integer('radius_miles').notNull().default(25),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('service_areas_contractor_idx').on(t.contractorId),
-  index('service_areas_zip_idx').on(t.zipCode),
-  uniqueIndex('service_areas_contractor_zip_uq').on(t.contractorId, t.zipCode),
 ])
 
 export const contractorServices = pgTable('contractor_services', {
@@ -483,6 +487,7 @@ export const notifications = pgTable('notifications', {
   metadata: jsonb('metadata').$type<Record<string, unknown>>(),
   dedupKey: text('dedup_key'),
   isRead: boolean('is_read').notNull().default(false),
+  readAt: timestamp('read_at', { withTimezone: true }),
   sentInApp: boolean('sent_in_app').notNull().default(false),
   sentEmail: boolean('sent_email').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -490,6 +495,22 @@ export const notifications = pgTable('notifications', {
   index('notifications_user_idx').on(t.userId),
   index('notifications_user_unread_idx').on(t.userId, t.isRead),
   uniqueIndex('notifications_user_dedup_uq').on(t.userId, t.dedupKey).where(sql`${t.dedupKey} is not null`),
+])
+
+// push_subscriptions — a user's Web Push endpoints (one row per browser/device).
+// VAPID keys live in env; this stores the per-device subscription so a server
+// job can push to every device. Stale endpoints (HTTP 410/404) are deleted on send.
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('push_subscriptions_user_endpoint_uq').on(t.userId, t.endpoint),
+  index('push_subscriptions_user_idx').on(t.userId),
 ])
 
 // ============================================================

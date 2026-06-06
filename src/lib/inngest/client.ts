@@ -14,7 +14,10 @@ export const INNGEST_EVENTS = {
   PROJECT_MATCHING_RETRY: "project/matching.retry",
   PROJECT_EXPIRY_SCHEDULED: "project/expiry.scheduled",
 
-  // Lead events
+  // Lead events (v2 — credit economy, see docs/HOMEI_PLATFORM.md §10)
+  LEAD_CREATED: "lead/created",            // fan-out done inline; this drives async comms
+  LEAD_ENGAGED: "lead/engaged",            // contractor engaged — charge + project (future module)
+  LEAD_RECIPIENT_SLA: "lead/recipient.sla", // offer passed SLA — cascade (future module)
   LEAD_EXPIRY_SCHEDULED: "lead/expiry.scheduled",
   LEAD_DECLINE_PROCESSED: "lead/decline.processed",
 

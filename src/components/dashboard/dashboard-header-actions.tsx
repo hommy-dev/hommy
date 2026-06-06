@@ -2,13 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useTheme } from "next-themes";
 import { UserMenu } from "@/components/dashboard/user-menu";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Icon } from "@/components/ui/icon";
 
 const ICON_BTN =
@@ -16,10 +12,14 @@ const ICON_BTN =
 
 export function DashboardHeaderActions({
   user,
+  userId,
+  unreadCount = 0,
   settingsHref,
   credits,
 }: {
   user: { email: string; fullName: string; avatarUrl: string | null };
+  userId: string;
+  unreadCount?: number;
   settingsHref: string;
   credits: number;
 }) {
@@ -35,7 +35,7 @@ export function DashboardHeaderActions({
         <span className="hidden text-secondary-foreground/65 sm:inline">credits</span>
       </Link>
       <HeaderThemeToggle />
-      <NotificationBell />
+      <NotificationBell userId={userId} initialUnreadCount={unreadCount} />
       <span className="mx-1 h-5 w-px bg-border" />
       <UserMenu user={user} settingsHref={settingsHref} compact />
     </div>
@@ -62,22 +62,3 @@ function HeaderThemeToggle() {
     </button>
   );
 }
-
-function NotificationBell() {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button type="button" aria-label="Notifications" className={ICON_BTN}>
-          <Icon name="notification" className="size-[18px]" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-72">
-        <p className="text-sm font-semibold">Notifications</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          You’re all caught up. New leads and updates will show up here.
-        </p>
-      </PopoverContent>
-    </Popover>
-  );
-}
-

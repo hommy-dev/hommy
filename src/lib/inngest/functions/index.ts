@@ -1,14 +1,15 @@
 // ============================================================
 // HOMEI — INNGEST BACKGROUND JOBS
 // ============================================================
-// TODO: Implement automations per docs/HOMEI_PLATFORM.md §9:
-//   lead.assigned, lead.expiring, lead.expired, project.stage_changed,
-//   followup.due, review.request, storm.monitor (cron),
-//   leads.monthly_reset (cron).
-//
 // Every outbound comm (SMS / email / push) goes through Inngest —
-// never call Twilio / Resend / Web Push directly from request handlers.
+// never call Plivo / Resend / Web Push directly from request handlers.
+//
+// TODO (next modules, docs/HOMEI_PLATFORM.md §10): lead/engaged charge,
+//   quote/accepted award, lead/recipient.sla cascade, review.request,
+//   storm.poll (cron), credits.expire (cron).
 // ============================================================
 
+import { leadCreated } from './lead-created'
+
 // Registered with serve() in src/app/api/inngest/route.ts
-export const functions: never[] = []
+export const functions = [leadCreated]

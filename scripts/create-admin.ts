@@ -109,7 +109,7 @@ async function main() {
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: fullName },
+      user_metadata: { full_name: fullName, role: 'admin' },
     })
 
   if (createError) {
@@ -151,6 +151,7 @@ async function main() {
         email,
         fullName,
         role: 'admin',
+        passwordSet: true,
       })
       .where(eq(users.id, userId))
     console.log('Updated public.users row to ADMIN for:', email)
@@ -160,6 +161,7 @@ async function main() {
       email,
       fullName,
       role: 'admin',
+      passwordSet: true,
     })
     console.log('Inserted public.users row as ADMIN for:', email)
   }

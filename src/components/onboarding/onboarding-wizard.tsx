@@ -5,17 +5,24 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { completeOnboarding } from "@/lib/actions/onboarding"
 import { showToast } from "@/components/ui/toast"
+import {
+  GooglePlacesInput,
+  type PlaceResult,
+} from "@/components/ui/google-places-input"
 import { cn } from "@/lib/utils"
+
+type Area = { label: string; lat: number; lng: number; radiusMiles: number }
 
 type Initial = {
   companyName: string
   phone: string
   yearsInBusiness: number | null
   subtypes: string[]
-  zips: string[]
+  areas: Area[]
 }
 
 const STEP_TITLES = ["Your company", "What you do", "Where you work"]
+const RADIUS_OPTIONS = [10, 25, 50, 100] as const
 
 export function OnboardingWizard({
   availableSubtypes,
@@ -34,8 +41,9 @@ export function OnboardingWizard({
     initial.yearsInBusiness != null ? String(initial.yearsInBusiness) : "",
   )
   const [subtypes, setSubtypes] = useState<string[]>(initial.subtypes)
-  const [zips, setZips] = useState<string[]>(initial.zips)
-  const [zipInput, setZipInput] = useState("")
+  const [areas, setAreas] = useState<Area[]>(initial.areas)
+  const [radius, setRadius] = useState<number>(25)
+  const [pickerKey, setPickerKey] = useState(0) // bump to clear the address input
 
   function toggleSubtype(s: string) {
     setSubtypes((cur) =>
@@ -43,17 +51,27 @@ export function OnboardingWizard({
     )
   }
 
-  function addZip() {
-    const z = zipInput.trim()
-    if (!/^\d{5}$/.test(z)) return
-    if (!zips.includes(z)) setZips((cur) => [...cur, z])
-    setZipInput("")
+  function addArea(place: PlaceResult) {
+    const label =
+      place.city && place.state
+        ? `${place.city}, ${place.state}`
+        : place.formattedAddress
+    if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return
+    setAreas((cur) => {
+      if (cur.some((a) => a.label === label)) return cur
+      return [...cur, { label, lat: place.lat, lng: place.lng, radiusMiles: radius }]
+    })
+    setPickerKey((k) => k + 1) // reset the autocomplete for the next area
+  }
+
+  function setAreaRadius(index: number, r: number) {
+    setAreas((cur) => cur.map((a, i) => (i === index ? { ...a, radiusMiles: r } : a)))
   }
 
   const canAdvance =
     (step === 0 && companyName.trim().length >= 2) ||
     (step === 1 && subtypes.length >= 1) ||
-    (step === 2 && zips.length >= 1)
+    (step === 2 && areas.length >= 1)
 
   function next() {
     if (!canAdvance) return
@@ -67,7 +85,7 @@ export function OnboardingWizard({
         phone: phone.trim(),
         yearsInBusiness: years.trim() === "" ? null : Number(years),
         subtypes,
-        zips,
+        areas,
       })
       if (!res.success) {
         showToast(res.error, { type: "error" })
@@ -180,56 +198,72 @@ export function OnboardingWizard({
         {step === 2 && (
           <Step
             title="Where do you work?"
-            sub="Add the ZIP codes you cover. We only send you leads inside them."
+            sub="Add the areas you serve and how far you'll travel. We only send you leads inside them."
           >
-            <Field label="Add a ZIP code">
-              <div className="flex gap-2">
-                <input
-                  value={zipInput}
-                  onChange={(e) =>
-                    setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5))
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault()
-                      addZip()
-                    }
-                  }}
-                  inputMode="numeric"
-                  placeholder="75201"
-                  className={inputCls}
-                />
-                <button
-                  type="button"
-                  onClick={addZip}
-                  disabled={!/^\d{5}$/.test(zipInput)}
-                  className="shrink-0 rounded-xl bg-foreground px-5 text-sm font-semibold text-background transition-opacity disabled:opacity-40"
+            <Field label="Add an area you cover">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="min-w-0 flex-1">
+                  <GooglePlacesInput
+                    key={pickerKey}
+                    mode="cities"
+                    placeholder="Search a city or town…"
+                    onPlaceSelect={addArea}
+                  />
+                </div>
+                <select
+                  value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                  className={cn(inputCls, "sm:w-40")}
+                  aria-label="Coverage radius for the next area"
                 >
-                  Add
-                </button>
+                  {RADIUS_OPTIONS.map((r) => (
+                    <option key={r} value={r}>
+                      within {r} mi
+                    </option>
+                  ))}
+                </select>
               </div>
             </Field>
-            {zips.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {zips.map((z) => (
-                  <span
-                    key={z}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground"
+
+            {areas.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                {areas.map((a, i) => (
+                  <div
+                    key={`${a.label}-${i}`}
+                    className="flex items-center gap-3 rounded-xl border border-foreground/12 bg-card px-3.5 py-2.5"
                   >
-                    {z}
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                      {a.label}
+                    </span>
+                    <select
+                      value={a.radiusMiles}
+                      onChange={(e) => setAreaRadius(i, Number(e.target.value))}
+                      className="rounded-lg border border-foreground/15 bg-transparent px-2 py-1 text-xs font-medium text-foreground/70 outline-none"
+                      aria-label={`Radius for ${a.label}`}
+                    >
+                      {RADIUS_OPTIONS.map((r) => (
+                        <option key={r} value={r}>
+                          within {r} mi
+                        </option>
+                      ))}
+                    </select>
                     <button
                       type="button"
-                      onClick={() => setZips((cur) => cur.filter((x) => x !== z))}
-                      aria-label={`Remove ${z}`}
-                      className="text-secondary-foreground/60 hover:text-secondary-foreground"
+                      onClick={() => setAreas((cur) => cur.filter((_, x) => x !== i))}
+                      aria-label={`Remove ${a.label}`}
+                      className="text-foreground/40 transition-colors hover:text-foreground"
                     >
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                         <path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                       </svg>
                     </button>
-                  </span>
+                  </div>
                 ))}
               </div>
+            ) : (
+              <p className="mt-4 text-xs text-foreground/45">
+                Search a city above to add it. Pick a radius for how far you travel.
+              </p>
             )}
           </Step>
         )}

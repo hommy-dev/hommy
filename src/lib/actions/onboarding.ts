@@ -20,7 +20,17 @@ const OnboardingSchema = z.object({
   phone: z.string().trim().max(30).optional().default(''),
   yearsInBusiness: z.number().int().min(0).max(100).nullable().optional(),
   subtypes: z.array(z.string().trim().min(1)).min(1, 'Pick at least one type of work'),
-  zips: z.array(z.string().regex(/^\d{5}$/)).min(1, 'Add at least one ZIP code'),
+  // Coverage = center point + radius (miles). Geographic matching, worldwide.
+  areas: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1).max(160),
+        lat: z.number(),
+        lng: z.number(),
+        radiusMiles: z.number().int().min(1).max(500),
+      }),
+    )
+    .min(1, 'Add at least one coverage area'),
 })
 
 /**
@@ -51,7 +61,6 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
   const allowed = new Set(roofing.subtypes)
   const subtypes = d.subtypes.filter((s) => allowed.has(s))
   if (subtypes.length === 0) return { success: false, error: 'Pick at least one type of work.' }
-  const zips = Array.from(new Set(d.zips))
 
   try {
     await db.transaction(async (tx) => {
@@ -72,10 +81,16 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
           set: { subtypes },
         })
 
-      // Replace the company's service areas with the new set.
+      // Replace the company's coverage areas with the new set.
       await tx.delete(serviceAreas).where(eq(serviceAreas.contractorId, contractor.id))
       await tx.insert(serviceAreas).values(
-        zips.map((zipCode) => ({ contractorId: contractor.id, zipCode })),
+        d.areas.map((a) => ({
+          contractorId: contractor.id,
+          label: a.label,
+          lat: a.lat,
+          lng: a.lng,
+          radiusMiles: a.radiusMiles,
+        })),
       )
     })
   } catch (err) {

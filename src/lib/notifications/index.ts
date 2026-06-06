@@ -91,6 +91,9 @@ export async function sendNotification(
   } = options
 
   const result: NotificationResult = {}
+  // Id of the notification row we create (if any) — used to scope the
+  // sentEmail flag update below to this exact row.
+  let createdNotificationId: string | null = null
 
   // Fetch user contact info (email + phone) in one query
   const [user] = await db
@@ -145,6 +148,7 @@ export async function sendNotification(
       }
 
       createdId = row.id
+      createdNotificationId = row.id
       result.inApp = { success: true }
 
       // Fire-and-forget: tell the open tab(s) immediately. The DB row is
@@ -172,11 +176,11 @@ export async function sendNotification(
   if (doEmail && user.email) {
     const html = emailHtml ?? fallbackEmailHtml(title, body, actionUrl)
     result.email = await sendEmail(user.email, title, html)
-    // Update sentEmail flag on the notification row (best-effort)
-    if (result.inApp?.success) {
+    // Flag the exact row we created (best-effort, scoped by id).
+    if (createdNotificationId) {
       db.update(notifications)
         .set({ sentEmail: true })
-        .where(eq(notifications.userId, userId))
+        .where(eq(notifications.id, createdNotificationId))
         .catch(() => {})
     }
   }
@@ -208,11 +212,11 @@ function fallbackEmailHtml(
   actionUrl?: string
 ): string {
   const cta = actionUrl
-    ? `<a href="${actionUrl}" style="display:inline-block;margin-top:20px;background:#6c47ff;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;">Open →</a>`
+    ? `<a href="${actionUrl}" style="display:inline-block;margin-top:20px;background:#1f00ce;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;">Open →</a>`
     : ''
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;background:#f4f4f5;padding:40px 20px;">
 <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;">
-  <div style="background:#6c47ff;padding:20px 32px;"><span style="color:#fff;font-size:18px;font-weight:700;">Homei</span></div>
+  <div style="background:#1f00ce;padding:20px 32px;"><span style="color:#fff;font-size:18px;font-weight:700;">Homei</span></div>
   <div style="padding:32px;">
     <h2 style="margin:0 0 12px;font-size:20px;color:#18181b;">${title}</h2>
     <p style="margin:0;color:#71717a;line-height:1.6;">${body}</p>

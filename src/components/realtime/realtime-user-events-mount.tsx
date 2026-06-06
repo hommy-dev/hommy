@@ -1,14 +1,14 @@
 'use client'
 
-import { useRealtimeUserEvents } from './use-realtime-user-events'
+import { useRealtimeUserEvents, type Role } from './use-realtime-user-events'
 
 type Props = {
   userId: string
-  role: 'HOMEOWNER' | 'CONTRACTOR'
+  role: Role
 }
 
 /**
- * Tiny wrapper so the server-component layouts can mount the hook
+ * Tiny wrapper so the server-component layouts can mount the realtime hook
  * without becoming client components themselves. Renders nothing.
  */
 export function RealtimeUserEventsMount({ userId, role }: Props) {
