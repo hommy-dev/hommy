@@ -13,7 +13,7 @@ export default async function LeadsPage() {
 
   if (!contractor) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
         Your contractor profile isn’t set up yet.
       </p>
     )
@@ -23,26 +23,26 @@ export default async function LeadsPage() {
   const canEngage = canEngageLeads(contractor)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-5xl lg:max-w-[71.104vw] space-y-6 lg:space-y-[1.667vw]">
       <header>
-        <h1 className="font-sebenta text-2xl font-bold tracking-tight">Leads</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">Leads</h1>
+        <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
           Leads offered to you. Respond fast, the first few to engage win the
           job.
         </p>
       </header>
 
       {!canEngage && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/20 bg-accent/60 p-4">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <div className="flex flex-wrap items-center justify-between gap-4 lg:gap-[1.111vw] rounded-2xl lg:rounded-[1.111vw] border border-primary/20 bg-accent/60 p-4 lg:p-[1.111vw]">
+          <div className="flex items-start gap-3 lg:gap-[0.833vw]">
+            <span className="mt-0.5 lg:mt-[0.139vw] flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-lg lg:rounded-[0.694vw] bg-primary/10 text-primary">
               <LockIcon />
             </span>
             <div>
-              <p className="text-sm font-semibold">
+              <p className="text-sm lg:text-[0.972vw] font-semibold">
                 Verify your business to respond
               </p>
-              <p className="mt-0.5 text-sm text-foreground/65">
+              <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-foreground/65">
                 You can browse offers now, but you’ll need to be verified to
                 engage a lead.
               </p>
@@ -50,7 +50,7 @@ export default async function LeadsPage() {
           </div>
           <Link
             href="/contractor/profile"
-            className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            className="shrink-0 rounded-full bg-primary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Get verified
           </Link>

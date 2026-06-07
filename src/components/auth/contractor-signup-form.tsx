@@ -57,20 +57,20 @@ export function ContractorSignupForm() {
   if (sentTo) {
     return (
       <div className="text-center">
-        <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+        <span className="mx-auto flex size-12 lg:size-[3.333vw] items-center justify-center rounded-full bg-secondary text-secondary-foreground">
           <MailIcon />
         </span>
-        <h1 className="mt-5 font-sebenta text-2xl font-bold tracking-tight">
+        <h1 className="mt-5 lg:mt-[1.389vw] font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
           Check your email
         </h1>
-        <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-foreground/60">
+        <p className="mx-auto mt-2 lg:mt-[0.556vw] max-w-sm lg:max-w-[26.664vw] text-[15px] lg:text-[1.042vw] leading-relaxed text-foreground/60">
           We sent a confirmation link to{" "}
           <span className="font-medium text-foreground">{sentTo}</span>. Click it
           to finish setting up your roofer account.
         </p>
         <Link
           href="/auth/login"
-          className="mt-6 inline-block text-sm font-semibold text-primary hover:underline"
+          className="mt-6 lg:mt-[1.667vw] inline-block text-sm lg:text-[0.972vw] font-semibold text-primary hover:underline"
         >
           Back to sign in
         </Link>
@@ -80,10 +80,10 @@ export function ContractorSignupForm() {
 
   return (
     <div>
-      <h1 className="font-sebenta text-[1.9rem] font-bold leading-tight tracking-tight">
+      <h1 className="font-sebenta text-[1.9rem] lg:text-[2.111vw] font-bold leading-tight tracking-tight">
         Create your roofer account
       </h1>
-      <p className="mt-2 text-[15px] text-foreground/60">
+      <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
         Free to join. You only pay credits when you win a job.
       </p>
 
@@ -93,19 +93,19 @@ export function ContractorSignupForm() {
         size="lg"
         onClick={handleGoogle}
         disabled={googlePending || pending}
-        className="mt-7 h-11 w-full gap-2.5 bg-card hover:bg-background hover:border-foreground/40 text-sm font-semibold"
+        className="mt-7 lg:mt-[1.944vw] h-11 lg:h-[3.056vw] w-full gap-2.5 lg:gap-[0.694vw] bg-card hover:bg-background hover:border-foreground/40 text-sm lg:text-[0.972vw] font-semibold"
       >
         <GoogleIcon />
         {googlePending ? "Opening Google..." : "Continue with Google"}
       </Button>
 
-      <div className="my-6 flex items-center gap-3 text-xs text-foreground/40">
-        <span className="h-px flex-1 bg-foreground/10" />
+      <div className="my-6 lg:my-[1.667vw] flex items-center gap-3 lg:gap-[0.833vw] text-xs lg:text-[0.833vw] text-foreground/40">
+        <span className="h-px lg:h-[0.069vw] flex-1 bg-foreground/10" />
         or
-        <span className="h-px flex-1 bg-foreground/10" />
+        <span className="h-px lg:h-[0.069vw] flex-1 bg-foreground/10" />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-[1.111vw]" noValidate>
         <Field id="signup-fullName" label="Full name" error={errors.fullName}>
           <Input
             id="signup-fullName"
@@ -114,7 +114,7 @@ export function ContractorSignupForm() {
             autoComplete="name"
             placeholder="Sam Rivera"
             disabled={pending}
-            className="h-11 bg-card"
+            className="h-11 lg:h-[3.056vw] bg-card"
             aria-invalid={!!errors.fullName}
           />
         </Field>
@@ -127,7 +127,7 @@ export function ContractorSignupForm() {
             autoComplete="email"
             placeholder="you@company.com"
             disabled={pending}
-            className="h-11 bg-card"
+            className="h-11 lg:h-[3.056vw] bg-card"
             aria-invalid={!!errors.email}
           />
         </Field>
@@ -141,13 +141,13 @@ export function ContractorSignupForm() {
               autoComplete="new-password"
               placeholder="At least 8 characters"
               disabled={pending}
-              className="h-11 bg-card pr-14"
+              className="h-11 lg:h-[3.056vw] bg-card pr-14 lg:pr-[3.889vw]"
               aria-invalid={!!errors.password}
             />
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute inset-y-0 right-3 my-auto h-fit text-xs font-medium text-foreground/50 hover:text-foreground"
+              className="absolute inset-y-0 right-3 lg:right-[0.833vw] my-auto h-fit text-xs lg:text-[0.833vw] font-medium text-foreground/50 hover:text-foreground"
               tabIndex={-1}
             >
               {showPw ? "Hide" : "Show"}
@@ -155,18 +155,18 @@ export function ContractorSignupForm() {
           </div>
         </Field>
 
-        <div className="space-y-1.5 pt-1">
+        <div className="space-y-1.5 lg:space-y-[0.417vw] pt-1 lg:pt-[0.278vw]">
           <label
             htmlFor="signup-agree"
-            className="flex items-start gap-2.5"
+            className="flex items-start gap-2.5 lg:gap-[0.694vw]"
           >
             <Checkbox
               id="signup-agree"
               name="agree"
               aria-invalid={!!errors.agree}
-              className="mt-0.5 bg-background border-foreground"
+              className="mt-0.5 lg:mt-[0.139vw] bg-background border-foreground"
             />
-            <span className="text-[13px] leading-relaxed text-foreground/60">
+            <span className="text-[13px] lg:text-[0.903vw] leading-relaxed text-foreground/60">
               I agree to the{" "}
               <Link
                 href="#"
@@ -185,7 +185,7 @@ export function ContractorSignupForm() {
             </span>
           </label>
           {errors.agree && (
-            <p className="text-xs text-destructive">{errors.agree}</p>
+            <p className="text-xs lg:text-[0.833vw] text-destructive">{errors.agree}</p>
           )}
         </div>
 
@@ -193,13 +193,13 @@ export function ContractorSignupForm() {
           type="submit"
           size="lg"
           disabled={pending}
-          className="mt-2 h-11 w-full text-sm font-semibold"
+          className="mt-2 lg:mt-[0.556vw] h-11 lg:h-[3.056vw] w-full text-sm lg:text-[0.972vw] font-semibold"
         >
           {pending ? "Creating your account..." : "Create account"}
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-foreground/55">
+      <p className="mt-6 lg:mt-[1.667vw] text-center text-sm lg:text-[0.972vw] text-foreground/55">
         Already have an account?{" "}
         <Link
           href="/auth/login"
@@ -224,12 +224,12 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id} className="text-xs font-medium text-foreground/80">
+    <div className="space-y-1.5 lg:space-y-[0.417vw]">
+      <Label htmlFor={id} className="text-xs lg:text-[0.833vw] font-medium text-foreground/80">
         {label}
       </Label>
       {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-xs lg:text-[0.833vw] text-destructive">{error}</p>}
     </div>
   )
 }

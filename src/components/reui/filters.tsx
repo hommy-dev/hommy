@@ -234,13 +234,13 @@ const useFilterContext = () => useContext(FilterContext)
 const filtersContainerVariants = cva("flex flex-wrap items-center", {
   variants: {
     variant: {
-      solid: "gap-2",
+      solid: "gap-2 lg:gap-[0.556vw]",
       default: "",
     },
     size: {
-      sm: "gap-1.5",
-      default: "gap-2.5",
-      lg: "gap-3.5",
+      sm: "gap-1.5 lg:gap-[0.417vw]",
+      default: "gap-2.5 lg:gap-[0.694vw]",
+      lg: "gap-3.5 lg:gap-[0.972vw]",
     },
   },
   defaultVariants: {
@@ -348,7 +348,7 @@ function FilterInput<T = unknown>({
   return (
     <InputGroup
       className={cn(
-        "w-36",
+        "w-36 lg:w-[10vw]",
         context.size == "sm" &&
           "h-8!",
         context.size == "default" &&
@@ -375,7 +375,7 @@ function FilterInput<T = unknown>({
         onKeyDown={handleKeyDown}
         className={cn(
           context.size == "sm" &&
-            "h-8! text-xs",
+            "h-8! text-xs lg:text-[0.833vw]",
           context.size == "default" &&
             "h-9!",
           context.size == "lg" &&
@@ -389,11 +389,11 @@ function FilterInput<T = unknown>({
             <Tooltip>
               <TooltipTrigger asChild>
                 <InputGroupButton size="icon-xs">
-                  <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="text-destructive size-3.5" />
+                  <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="text-destructive size-3.5 lg:size-[0.972vw]" />
                 </InputGroupButton>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="text-sm">{validationMessage}</p>
+                <p className="text-sm lg:text-[0.972vw]">{validationMessage}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -777,7 +777,7 @@ function SelectOptionsPopover<T = unknown>({
               field.label || ""
             )}
             className={cn(
-              "border-input h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
+              "border-input h-8 lg:h-[2.222vw] rounded-none lg:rounded-[0vw] border-0 bg-transparent! px-2 lg:px-[0.556vw] text-sm lg:text-[0.972vw] shadow-none",
               "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0"
             )}
             value={searchInput}
@@ -843,14 +843,14 @@ function SelectOptionsPopover<T = unknown>({
         >
           <ScrollArea className="size-full min-h-0 **:data-[slot=scroll-area-scrollbar]:m-0 **:data-[slot=scroll-area-viewport]:h-full **:data-[slot=scroll-area-viewport]:overscroll-contain">
             {allFilteredOptions.length === 0 && (
-              <div className="text-muted-foreground py-2 text-center text-sm">
+              <div className="text-muted-foreground py-2 lg:py-[0.556vw] text-center text-sm lg:text-[0.972vw]">
                 {context.i18n.noResultsFound}
               </div>
             )}
 
             {/* Selected items */}
             {filteredSelectedOptions.length > 0 && (
-              <DropdownMenuGroup className="px-1">
+              <DropdownMenuGroup className="px-1 lg:px-[0.278vw]">
                 {filteredSelectedOptions.map((option, index) => {
                   const isHighlighted = highlightedIndex === index
                   const itemId = `${baseId}-item-${index}`
@@ -899,7 +899,7 @@ function SelectOptionsPopover<T = unknown>({
 
             {/* Available items */}
             {filteredUnselectedOptions.length > 0 && (
-              <DropdownMenuGroup className="px-1">
+              <DropdownMenuGroup className="px-1 lg:px-[0.278vw]">
                 {filteredUnselectedOptions.map((option, index) => {
                   const overallIndex = index + filteredSelectedOptions.length
                   const isHighlighted = highlightedIndex === overallIndex
@@ -971,13 +971,13 @@ function SelectOptionsPopover<T = unknown>({
     >
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size={context.size}>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
             {field.customValueRenderer ? (
               field.customValueRenderer(values, field.options || [])
             ) : (
               <>
                 {selectedOptions.length > 0 && (
-                  <div className="flex items-center -space-x-1.5">
+                  <div className="flex items-center -space-x-1.5 lg:-space-x-[0.417vw]">
                     {selectedOptions.slice(0, 3).map((option) => (
                       <div key={String(option.value)}>{option.icon}</div>
                     ))}
@@ -995,7 +995,7 @@ function SelectOptionsPopover<T = unknown>({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className={cn("w-[200px] px-0", field.className)}
+        className={cn("w-[200px] lg:w-[13.889vw] px-0", field.className)}
       >
         {renderMenuContent()}
       </DropdownMenuContent>
@@ -1033,7 +1033,7 @@ function FilterValueSelector<T = unknown>({
         placeholder={field.placeholder}
         pattern={field.pattern}
         field={field}
-        className={cn("w-36", field.className)}
+        className={cn("w-36 lg:w-[10vw]", field.className)}
         autoFocus={autoFocus}
       />
     )
@@ -1244,7 +1244,7 @@ function FilterSubmenuContent<T = unknown>({
             }
             placeholder={i18n.placeholders.searchField(field.label || "")}
             className={cn(
-              "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
+              "h-8 lg:h-[2.222vw] rounded-none lg:rounded-[0vw] border-0 bg-transparent! px-2 lg:px-[0.556vw] text-sm lg:text-[0.972vw] shadow-none",
               "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0"
             )}
             value={searchInput}
@@ -1337,7 +1337,7 @@ function FilterSubmenuContent<T = unknown>({
         >
           <ScrollArea className="size-full min-h-0 **:data-[slot=scroll-area-scrollbar]:m-0 **:data-[slot=scroll-area-viewport]:h-full **:data-[slot=scroll-area-viewport]:overscroll-contain">
             {filteredOptions.length === 0 ? (
-              <div className="text-muted-foreground py-2 text-center text-sm">
+              <div className="text-muted-foreground py-2 lg:py-[0.556vw] text-center text-sm lg:text-[0.972vw]">
                 {i18n.noResultsFound}
               </div>
             ) : (
@@ -1584,7 +1584,7 @@ export function Filters<T = unknown>({
               )}
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className={cn("w-[220px]", menuPopupClassName)}
+              className={cn("w-[220px] lg:w-[15.278vw]", menuPopupClassName)}
               align="start"
             >
               {showSearchInput && (
@@ -1601,7 +1601,7 @@ export function Filters<T = unknown>({
                       }
                       placeholder={mergedI18n.searchFields}
                       className={cn(
-                        "h-8 rounded-none border-0 bg-transparent! px-2 text-sm shadow-none",
+                        "h-8 lg:h-[2.222vw] rounded-none lg:rounded-[0vw] border-0 bg-transparent! px-2 lg:px-[0.556vw] text-sm lg:text-[0.972vw] shadow-none",
                         "focus-visible:border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                       )}
                       value={menuSearchInput}
@@ -1671,7 +1671,7 @@ export function Filters<T = unknown>({
                       }}
                     />
                     {enableShortcut && shortcutLabel && (
-                      <Kbd className="bg-background absolute top-1/2 right-2 -translate-y-1/2 border">
+                      <Kbd className="bg-background absolute top-1/2 right-2 lg:right-[0.556vw] -translate-y-1/2 border">
                         {shortcutLabel}
                       </Kbd>
                     )}
@@ -1690,7 +1690,7 @@ export function Filters<T = unknown>({
                     {(() => {
                       if (filteredFields.length === 0) {
                         return (
-                          <div className="text-muted-foreground py-2 text-center text-sm">
+                          <div className="text-muted-foreground py-2 lg:py-[0.556vw] text-center text-sm lg:text-[0.972vw]">
                             {mergedI18n.noFieldsFound}
                           </div>
                         )
@@ -1741,7 +1741,7 @@ export function Filters<T = unknown>({
                                 {field.icon}
                                 <span>{field.label}</span>
                               </DropdownMenuSubTrigger>
-                              <DropdownMenuSubContent className="w-[200px]">
+                              <DropdownMenuSubContent className="w-[200px] lg:w-[13.889vw]">
                                 <FilterSubmenuContent
                                   field={field}
                                   currentValues={currentValues}

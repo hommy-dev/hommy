@@ -25,26 +25,26 @@ export function AuthPageShell({
       <BrandPanel variant={variant} />
 
       <main className="relative flex flex-1 flex-col">
-        <header className="flex items-center justify-between px-6 py-6 lg:hidden">
+        <header className="flex items-center justify-between px-6 lg:px-[1.667vw] py-6 lg:py-[1.667vw] lg:hidden">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-foreground"
+            className="inline-flex items-center gap-2 lg:gap-[0.556vw] text-foreground"
           >
-            <BrandMark className="size-6" />
-            <span className="text-base font-semibold tracking-tight">
+            <BrandMark className="size-6 lg:size-[1.667vw]" />
+            <span className="text-base lg:text-[1.111vw] font-semibold tracking-tight">
               Homei
             </span>
           </Link>
           <Link
             href="/"
-            className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-xs lg:text-[0.833vw] font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Back to site
           </Link>
         </header>
 
-        <div className="flex flex-1 items-center justify-center px-6 pb-16 pt-2">
-          <div className="w-full max-w-lg">{children}</div>
+        <div className="flex flex-1 items-center justify-center px-6 lg:px-[1.667vw] pb-16 lg:pb-[4.444vw] pt-2 lg:pt-[0.556vw]">
+          <div className="w-full max-w-lg lg:max-w-[35.552vw]">{children}</div>
         </div>
       </main>
     </div>
@@ -84,22 +84,22 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
         className="pointer-events-none absolute inset-0 bg-foreground/30"
       />
 
-      <div className="relative z-10 flex h-full flex-col justify-between p-12">
+      <div className="relative z-10 flex h-full flex-col justify-between p-12 lg:p-[3.333vw]">
         <Link
           href="/"
-          className="relative z-10 flex w-fit shrink-0 items-center gap-2"
+          className="relative z-10 flex w-fit shrink-0 items-center gap-2 lg:gap-[0.556vw]"
         >
-          <SVGIcon src="/icons/logo.svg" className="size-10" />
+          <SVGIcon src="/icons/logo.svg" className="size-10 lg:size-[2.778vw]" />
         </Link>
 
-        <div className="max-w-md space-y-5">
-          <h1 className="font-sebenta text-[2.4rem] font-bold leading-[110%] tracking-normal">
+        <div className="max-w-md lg:max-w-[31.108vw] space-y-5 lg:space-y-[1.389vw]">
+          <h1 className="font-sebenta text-[2.4rem] lg:text-[2.666vw] font-bold leading-[110%] tracking-normal">
             {headline}
           </h1>
-          <p className="text-base leading-relaxed text-background/70">{sub}</p>
+          <p className="text-base lg:text-[1.111vw] leading-relaxed text-background/70">{sub}</p>
         </div>
 
-        <p className="text-xs text-background/45">© 2025 Homei, Inc.</p>
+        <p className="text-xs lg:text-[0.833vw] text-background/45">© 2025 Homei, Inc.</p>
       </div>
     </aside>
   );

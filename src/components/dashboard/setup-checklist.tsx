@@ -8,33 +8,33 @@ export function SetupChecklist({ items }: { items: ChecklistItem[] }) {
   const pct = Math.round((done / items.length) * 100)
 
   return (
-    <section className="rounded-2xl border border-primary/15 bg-accent/50 p-5">
-      <div className="flex items-center justify-between gap-3">
+    <section className="rounded-2xl lg:rounded-[1.111vw] border border-primary/15 bg-accent/50 p-5 lg:p-[1.389vw]">
+      <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
         <div>
-          <h2 className="font-sebenta text-lg font-bold tracking-tight">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
             Get ready to win jobs
           </h2>
-          <p className="mt-0.5 text-sm text-foreground/60">
+          <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-foreground/60">
             {done} of {items.length} done. Finish setup so we can start sending
             you leads.
           </p>
         </div>
-        <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground/55">
+        <span className="shrink-0 text-sm lg:text-[0.972vw] font-semibold tabular-nums text-foreground/55">
           {pct}%
         </span>
       </div>
 
-      <ul className="mt-4 divide-y divide-foreground/10">
+      <ul className="mt-4 lg:mt-[1.111vw] divide-y divide-foreground/10">
         {items.map((item) => (
           <li key={item.label}>
             <Link
               href={item.href}
               prefetch
-              className="group flex items-center gap-3 py-3"
+              className="group flex items-center gap-3 lg:gap-[0.833vw] py-3 lg:py-[0.833vw]"
             >
               <span
                 className={cn(
-                  "flex size-6 shrink-0 items-center justify-center rounded-full border",
+                  "flex size-6 lg:size-[1.667vw] shrink-0 items-center justify-center rounded-full border",
                   item.done
                     ? "border-transparent bg-secondary text-secondary-foreground"
                     : "border-foreground/25 text-transparent",
@@ -44,7 +44,7 @@ export function SetupChecklist({ items }: { items: ChecklistItem[] }) {
               </span>
               <span
                 className={cn(
-                  "flex-1 text-sm",
+                  "flex-1 text-sm lg:text-[0.972vw]",
                   item.done
                     ? "text-foreground/45 line-through"
                     : "font-medium text-foreground",
@@ -53,7 +53,7 @@ export function SetupChecklist({ items }: { items: ChecklistItem[] }) {
                 {item.label}
               </span>
               {!item.done && (
-                <span className="text-xs font-semibold text-primary group-hover:underline">
+                <span className="text-xs lg:text-[0.833vw] font-semibold text-primary group-hover:underline">
                   Do it
                 </span>
               )}

@@ -25,23 +25,23 @@ export function FileAttachment({ attachment, className }: Props) {
       rel="noopener noreferrer"
       download={attachment.originalFilename ?? undefined}
       className={cn(
-        'inline-flex max-w-md items-center gap-3 rounded-lg border border-border bg-background/60 px-3 py-2.5 text-left transition',
+        'inline-flex max-w-md lg:max-w-[31.108vw] items-center gap-3 lg:gap-[0.833vw] rounded-lg lg:rounded-[0.694vw] border border-border bg-background/60 px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] text-left transition',
         'hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         className,
       )}
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-        <Icon className="size-5 text-muted-foreground" />
+      <span className="flex size-10 lg:size-[2.778vw] shrink-0 items-center justify-center rounded-md lg:rounded-[0.556vw] bg-muted">
+        <Icon className="size-5 lg:size-[1.389vw] text-muted-foreground" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-foreground">
+        <span className="block truncate text-sm lg:text-[0.972vw] font-medium text-foreground">
           {attachment.originalFilename ?? 'Attachment'}
         </span>
-        <span className="block truncate text-[11px] text-muted-foreground">
+        <span className="block truncate text-[11px] lg:text-[0.764vw] text-muted-foreground">
           {formatBytes(attachment.sizeBytes)}
         </span>
       </span>
-      <Download className="size-4 shrink-0 text-muted-foreground" />
+      <Download className="size-4 lg:size-[1.111vw] shrink-0 text-muted-foreground" />
     </a>
   )
 }

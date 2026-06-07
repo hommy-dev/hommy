@@ -86,7 +86,7 @@ export function ImageUpload({
             </button>
           ) : (
             <Button type="button" variant="outline" onClick={() => open()}>
-              <Upload className="size-4" />
+              <Upload className="size-4 lg:size-[1.111vw]" />
               {maxFiles > 1 ? 'Upload files' : 'Upload'}
             </Button>
           )}
@@ -112,7 +112,7 @@ export function UploadedImagePreview({
   return (
     <div
       className={cn(
-        'group relative h-24 w-24 overflow-hidden rounded-md border border-border',
+        'group relative h-24 lg:h-[6.667vw] w-24 lg:w-[6.667vw] overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border',
         className
       )}
     >
@@ -126,10 +126,10 @@ export function UploadedImagePreview({
         <button
           type="button"
           onClick={onRemove}
-          className="absolute right-1 top-1 rounded-full bg-background/80 p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] rounded-full bg-background/80 p-0.5 lg:p-[0.139vw] opacity-0 transition-opacity group-hover:opacity-100"
           aria-label="Remove image"
         >
-          <X className="size-3.5 text-destructive" />
+          <X className="size-3.5 lg:size-[0.972vw] text-destructive" />
         </button>
       )}
     </div>

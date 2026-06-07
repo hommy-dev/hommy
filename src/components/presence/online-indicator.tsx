@@ -48,14 +48,14 @@ export function OnlineIndicator({
         <span
           aria-hidden
           className={cn(
-            'inline-block size-1.5 rounded-full bg-muted-foreground/30',
+            'inline-block size-1.5 lg:size-[0.417vw] rounded-full bg-muted-foreground/30',
             className,
           )}
         />
       )
     }
     return (
-      <span className={cn('text-[11px] text-muted-foreground', className)}>
+      <span className={cn('text-[11px] lg:text-[0.764vw] text-muted-foreground', className)}>
         {variant === 'dot-label' ? '• Offline' : 'Offline'}
       </span>
     )
@@ -65,7 +65,7 @@ export function OnlineIndicator({
     <span
       aria-hidden
       className={cn(
-        'inline-block size-1.5 rounded-full',
+        'inline-block size-1.5 lg:size-[0.417vw] rounded-full',
         online ? 'bg-emerald-500' : 'bg-muted-foreground/40',
       )}
     />
@@ -78,15 +78,15 @@ export function OnlineIndicator({
   const label = online ? 'Online now' : formatLastSeen(lastSeenAt)
 
   if (variant === 'label') {
-    return <span className={cn('text-[11px]', online ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground', className)}>{label}</span>
+    return <span className={cn('text-[11px] lg:text-[0.764vw]', online ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground', className)}>{label}</span>
   }
 
   return (
-    <span className={cn('inline-flex items-center gap-1.5', className)}>
+    <span className={cn('inline-flex items-center gap-1.5 lg:gap-[0.417vw]', className)}>
       {dot}
       <span
         className={cn(
-          'text-[11px]',
+          'text-[11px] lg:text-[0.764vw]',
           online ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground',
         )}
       >
@@ -126,7 +126,7 @@ export function AvatarOnlineDot({
     <span
       aria-hidden
       className={cn(
-        'absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background bg-emerald-500',
+        'absolute bottom-0 right-0 size-2.5 lg:size-[0.694vw] rounded-full border-2 border-background bg-emerald-500',
         className,
       )}
     />

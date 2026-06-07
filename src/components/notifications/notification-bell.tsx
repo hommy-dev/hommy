@@ -189,40 +189,40 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
         <button
           type="button"
           aria-label={`Notifications${unread > 0 ? ` (${unread} unread)` : ''}`}
-          className="relative flex size-9 items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="relative flex size-9 lg:size-[2.5vw] items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <Bell className="size-[18px]" />
+          <Bell className="size-[18px] lg:size-[1.25vw]" />
           {unread > 0 && (
-            <span className="absolute right-1 top-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground">
+            <span className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] flex min-w-4 lg:min-w-[1.111vw] items-center justify-center rounded-full bg-primary px-1 lg:px-[0.278vw] text-[10px] lg:text-[0.694vw] font-bold leading-none text-primary-foreground">
               {unread > 99 ? '99+' : unread}
             </span>
           )}
         </button>
       </PopoverTrigger>
 
-      <PopoverContent align="end" sideOffset={8} className="w-80 p-0">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h3 className="text-sm font-semibold">Notifications</h3>
+      <PopoverContent align="end" sideOffset={8} className="w-80 lg:w-[22.222vw] p-0">
+        <div className="flex items-center justify-between border-b border-border px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
+          <h3 className="text-sm lg:text-[0.972vw] font-semibold">Notifications</h3>
           {unread > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              className="flex items-center gap-1 lg:gap-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Check className="size-3" />
+              <Check className="size-3 lg:size-[0.833vw]" />
               Mark all read
             </button>
           )}
         </div>
 
-        <ScrollArea className="h-[380px]">
+        <ScrollArea className="h-[380px] lg:h-[26.389vw]">
           {!loaded && (
-            <div className="space-y-px p-2">
+            <div className="space-y-px lg:space-y-[0.069vw] p-2 lg:p-[0.556vw]">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-3 rounded-lg p-3">
-                  <div className="size-8 shrink-0 animate-pulse rounded-full bg-muted" />
-                  <div className="flex-1 space-y-2 py-1">
-                    <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-                    <div className="h-3 w-48 animate-pulse rounded bg-muted/60" />
+                <div key={i} className="flex items-start gap-3 lg:gap-[0.833vw] rounded-lg lg:rounded-[0.694vw] p-3 lg:p-[0.833vw]">
+                  <div className="size-8 lg:size-[2.222vw] shrink-0 animate-pulse rounded-full bg-muted" />
+                  <div className="flex-1 space-y-2 lg:space-y-[0.556vw] py-1 lg:py-[0.278vw]">
+                    <div className="h-3 lg:h-[0.833vw] w-32 lg:w-[8.889vw] animate-pulse rounded lg:rounded-[0.324vw] bg-muted" />
+                    <div className="h-3 lg:h-[0.833vw] w-48 lg:w-[13.333vw] animate-pulse rounded lg:rounded-[0.324vw] bg-muted/60" />
                   </div>
                 </div>
               ))}
@@ -230,17 +230,17 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
           )}
 
           {loaded && items.length === 0 && (
-            <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-              <Bell className="mb-3 size-8 text-muted-foreground/40" />
-              <p className="text-sm font-medium text-muted-foreground">No notifications yet</p>
-              <p className="mt-1 text-xs text-muted-foreground/60">
+            <div className="flex flex-col items-center justify-center px-4 lg:px-[1.111vw] py-12 lg:py-[3.333vw] text-center">
+              <Bell className="mb-3 lg:mb-[0.833vw] size-8 lg:size-[2.222vw] text-muted-foreground/40" />
+              <p className="text-sm lg:text-[0.972vw] font-medium text-muted-foreground">No notifications yet</p>
+              <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground/60">
                 New leads and updates will show up here.
               </p>
             </div>
           )}
 
           {loaded && items.length > 0 && (
-            <div className="p-1">
+            <div className="p-1 lg:p-[0.278vw]">
               {items.map((item) => {
                 const Icon = TYPE_ICONS[item.type] ?? Info
                 const colorClass = TYPE_COLORS[item.type] ?? TYPE_COLORS.SYSTEM
@@ -249,36 +249,36 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
                     key={item.id}
                     onClick={() => handleClick(item)}
                     className={cn(
-                      'flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors hover:bg-accent',
+                      'flex w-full items-start gap-3 lg:gap-[0.833vw] rounded-lg lg:rounded-[0.694vw] p-3 lg:p-[0.833vw] text-left transition-colors hover:bg-accent',
                       !item.isRead && 'bg-primary/5 hover:bg-primary/10',
                     )}
                   >
                     <span
                       className={cn(
-                        'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full',
+                        'mt-0.5 lg:mt-[0.139vw] flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-full',
                         colorClass,
                       )}
                     >
-                      <Icon className="size-3.5" />
+                      <Icon className="size-3.5 lg:size-[0.972vw]" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p
                         className={cn(
-                          'text-sm',
+                          'text-sm lg:text-[0.972vw]',
                           item.isRead ? 'text-muted-foreground' : 'font-medium text-foreground',
                         )}
                       >
                         {item.title}
                       </p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                      <p className="mt-0.5 lg:mt-[0.139vw] line-clamp-2 text-xs lg:text-[0.833vw] text-muted-foreground">
                         {item.body}
                       </p>
-                      <p className="mt-1 text-[10px] text-muted-foreground/60">
+                      <p className="mt-1 lg:mt-[0.278vw] text-[10px] lg:text-[0.694vw] text-muted-foreground/60">
                         {formatDistanceToNow(new Date(item.createdAt))}
                       </p>
                     </div>
                     {!item.isRead && (
-                      <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />
+                      <span className="mt-2 lg:mt-[0.556vw] size-2 lg:size-[0.556vw] shrink-0 rounded-full bg-primary" />
                     )}
                   </button>
                 )

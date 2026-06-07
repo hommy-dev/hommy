@@ -19,23 +19,23 @@ export default function HomeownerSignupPage() {
   return (
     <div className="flex min-h-svh bg-canvas text-foreground">
       {/* brand panel */}
-      <aside className="relative hidden w-[44%] shrink-0 flex-col justify-between overflow-hidden bg-foreground px-12 py-8 text-background lg:flex">
-        <Link href="/" className="relative font-sebenta text-xl font-bold">
+      <aside className="relative hidden w-[44%] shrink-0 flex-col justify-between overflow-hidden bg-foreground px-12 lg:px-[3.333vw] py-8 lg:py-[2.222vw] text-background lg:flex">
+        <Link href="/" className="relative font-sebenta text-xl lg:text-[1.389vw] font-bold">
           Homei
         </Link>
 
-        <div className="relative max-w-sm">
-          <h2 className="font-sebenta text-[2.4rem] font-bold leading-[1.05] tracking-tight">
+        <div className="relative max-w-sm lg:max-w-[26.664vw]">
+          <h2 className="font-sebenta text-[2.4rem] lg:text-[2.666vw] font-bold leading-[1.05] tracking-tight">
             The right roofer, without the guesswork.
           </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-background/65">
+          <p className="mt-4 lg:mt-[1.111vw] text-[15px] lg:text-[1.042vw] leading-relaxed text-background/65">
             Tell us about your project and we’ll connect you with trusted pros
             near you.
           </p>
-          <ul className="mt-7 space-y-3">
+          <ul className="mt-7 lg:mt-[1.944vw] space-y-3 lg:space-y-[0.833vw]">
             {POINTS.map((p) => (
-              <li key={p} className="flex items-center gap-3 text-[15px]">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+              <li key={p} className="flex items-center gap-3 lg:gap-[0.833vw] text-[15px] lg:text-[1.042vw]">
+                <span className="flex size-6 lg:size-[1.667vw] shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
                   <Check />
                 </span>
                 {p}
@@ -44,11 +44,11 @@ export default function HomeownerSignupPage() {
           </ul>
         </div>
 
-        <p className="relative text-xs text-background/40">© 2026 Homei</p>
+        <p className="relative text-xs lg:text-[0.833vw] text-background/40">© 2026 Homei</p>
       </aside>
 
       {/* form side */}
-      <main className="flex flex-1 items-center justify-center w-full max-w-md mx-auto py-8">
+      <main className="flex flex-1 items-center justify-center w-full max-w-md lg:max-w-[31.108vw] mx-auto py-8 lg:py-[2.222vw]">
         <ActivityResetKey>
           <HomeownerSignupForm />
         </ActivityResetKey>

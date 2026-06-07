@@ -1,7 +1,7 @@
 export function DaySeparator({ date }: { date: Date }) {
   return (
-    <div className="my-4 flex items-center justify-center">
-      <span className="rounded-full bg-muted px-3 py-0.5 text-[11px] font-medium text-muted-foreground">
+    <div className="my-4 lg:my-[1.111vw] flex items-center justify-center">
+      <span className="rounded-full bg-muted px-3 lg:px-[0.833vw] py-0.5 lg:py-[0.139vw] text-[11px] lg:text-[0.764vw] font-medium text-muted-foreground">
         {formatDay(date)}
       </span>
     </div>

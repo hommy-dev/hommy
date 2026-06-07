@@ -25,11 +25,11 @@ const FAQS = [
 
 export function Faq() {
   return (
-    <section id="faq" className="scroll-mt-20 bg-canvas py-24 lg:py-32">
-      <div className="mx-auto grid max-w-6xl gap-12 px-5 lg:grid-cols-[0.8fr_1.2fr]">
+    <section id="faq" className="scroll-mt-20 lg:scroll-mt-[5.556vw] bg-canvas py-24 lg:py-[8.889vw]">
+      <div className="mx-auto grid gap-12 lg:gap-[3.333vw] px-5 lg:px-[1.389vw] lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <Eyebrow>FAQ</Eyebrow>
-          <h2 className="mt-4 font-sebenta text-[2rem] font-bold leading-[1.06] tracking-tight sm:text-[2.6rem]">
+          <h2 className="mt-4 lg:mt-[1.111vw] font-sebenta text-[2rem] lg:text-[2.222vw] font-bold leading-[1.06] tracking-tight sm:text-[2.6rem]">
             Questions, answered.
           </h2>
         </div>
@@ -37,14 +37,14 @@ export function Faq() {
         <div className="border-t border-border">
           {FAQS.map((f) => (
             <details key={f.q} className="group border-b border-border">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-semibold marker:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 lg:gap-[1.667vw] py-5 lg:py-[1.389vw] text-[17px] lg:text-[1.181vw] font-semibold marker:hidden">
                 {f.q}
-                <span className="relative flex size-6 shrink-0 items-center justify-center rounded-full border border-foreground/20 text-foreground/60 transition-colors group-open:border-foreground group-open:bg-foreground group-open:text-background">
-                  <span className="absolute h-[1.5px] w-2.5 bg-current" />
-                  <span className="absolute h-2.5 w-[1.5px] bg-current transition-opacity group-open:opacity-0" />
+                <span className="relative flex size-6 lg:size-[1.667vw] shrink-0 items-center justify-center rounded-full border border-foreground/20 text-foreground/60 transition-colors group-open:border-foreground group-open:bg-foreground group-open:text-background">
+                  <span className="absolute h-[1.5px] lg:h-[0.104vw] w-2.5 lg:w-[0.694vw] bg-current" />
+                  <span className="absolute h-2.5 lg:h-[0.694vw] w-[1.5px] lg:w-[0.104vw] bg-current transition-opacity group-open:opacity-0" />
                 </span>
               </summary>
-              <p className="max-w-xl pb-5 text-[15px] leading-relaxed text-foreground/60">
+              <p className="max-w-xl lg:max-w-[39.996vw] pb-5 lg:pb-[1.389vw] text-[15px] lg:text-[1.042vw] leading-relaxed text-foreground/60">
                 {f.a}
               </p>
             </details>

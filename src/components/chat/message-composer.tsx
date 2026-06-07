@@ -299,12 +299,12 @@ export function MessageComposer({
   }
 
   return (
-    <div className="border-t border-border bg-background px-4 py-3">
+    <div className="border-t border-border bg-background px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
       {/* Reply banner. Rendered above everything else so it's visually
           attached to the composer — Discord/WhatsApp pattern. */}
       {replyingTo ? (
-        <div className="mb-2 flex items-center gap-2 rounded-md bg-muted/60 px-2.5 py-1.5 text-[12px]">
-          <CornerUpLeft className="size-3.5 shrink-0 text-muted-foreground" />
+        <div className="mb-2 lg:mb-[0.556vw] flex items-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] bg-muted/60 px-2.5 lg:px-[0.694vw] py-1.5 lg:py-[0.417vw] text-[12px] lg:text-[0.833vw]">
+          <CornerUpLeft className="size-3.5 lg:size-[0.972vw] shrink-0 text-muted-foreground" />
           <span className="shrink-0 text-muted-foreground">Replying to</span>
           <span className="shrink-0 font-semibold text-foreground">
             {replyingTo.senderName}
@@ -317,9 +317,9 @@ export function MessageComposer({
               type="button"
               onClick={onCancelReply}
               aria-label="Cancel reply"
-              className="inline-flex size-5 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="inline-flex size-5 lg:size-[1.389vw] shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              <X className="size-3" />
+              <X className="size-3 lg:size-[0.833vw]" />
             </button>
           ) : null}
         </div>
@@ -329,7 +329,7 @@ export function MessageComposer({
           Images + videos render from local blob URLs so the user sees
           what they picked instantly, even before Cloudinary finishes. */}
       {uploads.length > 0 ? (
-        <div className="mb-2 flex flex-wrap gap-2">
+        <div className="mb-2 lg:mb-[0.556vw] flex flex-wrap gap-2 lg:gap-[0.556vw]">
           {uploads.map((u) => (
             <UploadPreview
               key={u.id}
@@ -340,7 +340,7 @@ export function MessageComposer({
         </div>
       ) : null}
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2 lg:gap-[0.556vw]">
         {/* + popover */}
         <div className="relative">
           <Button
@@ -349,10 +349,10 @@ export function MessageComposer({
             variant="ghost"
             onClick={() => setPlusOpen((v) => !v)}
             aria-label="Attachment options"
-            className="size-10 rounded-full text-muted-foreground"
+            className="size-10 lg:size-[2.778vw] rounded-full text-muted-foreground"
           >
             <Plus
-              className={cn('size-5 transition-transform', plusOpen && 'rotate-45')}
+              className={cn('size-5 lg:size-[1.389vw] transition-transform', plusOpen && 'rotate-45')}
             />
           </Button>
           {plusOpen ? (
@@ -363,7 +363,7 @@ export function MessageComposer({
                 className="fixed inset-0 z-10"
                 onClick={() => setPlusOpen(false)}
               />
-              <div className="absolute bottom-12 left-0 z-20 w-48 overflow-hidden rounded-lg border border-border bg-popover shadow-xl">
+              <div className="absolute bottom-12 lg:bottom-[3.333vw] left-0 z-20 w-48 lg:w-[13.333vw] overflow-hidden rounded-lg lg:rounded-[0.694vw] border border-border bg-popover shadow-xl">
                 <MenuItem onClick={openImagePicker} icon={ImageIcon}>
                   Upload image
                 </MenuItem>
@@ -393,7 +393,7 @@ export function MessageComposer({
           rows={1}
           maxLength={MAX}
           disabled={disabled}
-          className="max-h-40 min-h-10 resize-none rounded-2xl bg-muted/60 px-4 py-2.5"
+          className="max-h-40 lg:max-h-[11.111vw] min-h-10 lg:min-h-[2.778vw] resize-none rounded-2xl lg:rounded-[1.111vw] bg-muted/60 px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw]"
         />
 
         <Button
@@ -402,9 +402,9 @@ export function MessageComposer({
           disabled={!canSend}
           size="icon"
           aria-label="Send message"
-          className="size-10 shrink-0 rounded-full"
+          className="size-10 lg:size-[2.778vw] shrink-0 rounded-full"
         >
-          <SendHorizonal className="size-4" />
+          <SendHorizonal className="size-4 lg:size-[1.111vw]" />
         </Button>
       </div>
 
@@ -443,7 +443,7 @@ export function MessageComposer({
       />
 
       {footerHint ? (
-        <div className="mt-1.5 flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="mt-1.5 lg:mt-[0.417vw] flex items-center justify-between text-[11px] lg:text-[0.764vw] text-muted-foreground">
           <span className="min-w-0 truncate">{footerHint}</span>
           <span className="shrink-0 tabular-nums">
             {value.length} / {MAX}
@@ -467,9 +467,9 @@ function MenuItem({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-foreground hover:bg-muted"
+      className="flex w-full items-center gap-2.5 lg:gap-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-left text-sm lg:text-[0.972vw] text-foreground hover:bg-muted"
     >
-      <Icon className="size-4 text-muted-foreground" />
+      <Icon className="size-4 lg:size-[1.111vw] text-muted-foreground" />
       {children}
     </button>
   )
@@ -493,12 +493,12 @@ function UploadPreview({
     return (
       <div
         className={cn(
-          'inline-flex items-center gap-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-[11px]',
+          'inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] border border-border bg-muted/40 px-2 lg:px-[0.556vw] py-1.5 lg:py-[0.417vw] text-[11px] lg:text-[0.764vw]',
           failed && 'border-destructive/40 text-destructive',
         )}
       >
-        <FileText className="size-3.5 text-muted-foreground" />
-        <span className="max-w-[160px] truncate">{upload.name}</span>
+        <FileText className="size-3.5 lg:size-[0.972vw] text-muted-foreground" />
+        <span className="max-w-[160px] lg:max-w-[11.111vw] truncate">{upload.name}</span>
         <span className="tabular-nums text-muted-foreground">
           {formatBytes(upload.size)}
         </span>
@@ -512,10 +512,10 @@ function UploadPreview({
         <button
           type="button"
           onClick={onRemove}
-          className="ml-0.5 inline-flex size-4 items-center justify-center rounded-full hover:bg-muted"
+          className="ml-0.5 lg:ml-[0.139vw] inline-flex size-4 lg:size-[1.111vw] items-center justify-center rounded-full hover:bg-muted"
           aria-label="Remove"
         >
-          <X className="size-3" />
+          <X className="size-3 lg:size-[0.833vw]" />
         </button>
       </div>
     )
@@ -524,7 +524,7 @@ function UploadPreview({
   return (
     <div
       className={cn(
-        'relative h-20 w-20 overflow-hidden rounded-lg border border-border bg-muted',
+        'relative h-20 lg:h-[5.556vw] w-20 lg:w-[5.556vw] overflow-hidden rounded-lg lg:rounded-[0.694vw] border border-border bg-muted',
         failed && 'border-destructive/60',
       )}
     >
@@ -546,11 +546,11 @@ function UploadPreview({
 
       {/* Progress / ready overlays */}
       {uploading ? (
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent py-1 text-[10px] font-semibold text-white">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent py-1 lg:py-[0.278vw] text-[10px] lg:text-[0.694vw] font-semibold text-white">
           {upload.progress}%
         </div>
       ) : failed ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-destructive/30 text-[10px] font-semibold text-destructive-foreground">
+        <div className="absolute inset-0 flex items-center justify-center bg-destructive/30 text-[10px] lg:text-[0.694vw] font-semibold text-destructive-foreground">
           Failed
         </div>
       ) : ready ? null : null}
@@ -558,10 +558,10 @@ function UploadPreview({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute right-1 top-1 inline-flex size-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+        className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] inline-flex size-5 lg:size-[1.389vw] items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
         aria-label="Remove"
       >
-        <X className="size-3" />
+        <X className="size-3 lg:size-[0.833vw]" />
       </button>
     </div>
   )

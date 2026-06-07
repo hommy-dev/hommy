@@ -22,7 +22,7 @@ type Initial = {
 }
 
 const inputCls =
-  "w-full rounded-xl border border-foreground/15 bg-card px-3.5 py-2.5 text-[15px] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
+  "w-full rounded-xl lg:rounded-[0.926vw] border border-foreground/15 bg-card px-3.5 lg:px-[0.972vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
 
 export function ProfileForm({ initial }: { initial: Initial }) {
   const router = useRouter()
@@ -82,20 +82,20 @@ export function ProfileForm({ initial }: { initial: Initial }) {
         : "Submit for review"
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-[1.667vw]">
       {/* Business profile */}
       <form
         onSubmit={saveProfile}
-        className="rounded-2xl border border-border bg-card p-6"
+        className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-6 lg:p-[1.667vw]"
       >
-        <h2 className="font-sebenta text-lg font-bold tracking-tight">
+        <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
           Business profile
         </h2>
-        <p className="mt-0.5 text-sm text-muted-foreground">
+        <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-muted-foreground">
           This is what homeowners see.
         </p>
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-5 lg:mt-[1.389vw] space-y-4 lg:space-y-[1.111vw]">
           <Field label="Company name">
             <input
               value={companyName}
@@ -115,11 +115,11 @@ export function ProfileForm({ initial }: { initial: Initial }) {
             />
           </Field>
           <Field label="Logo (optional)">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 lg:gap-[1.111vw]">
               {logoUrl ? (
                 <UploadedImagePreview url={logoUrl} onRemove={() => setLogoUrl(null)} />
               ) : (
-                <div className="grid size-24 place-items-center rounded-md border border-dashed border-foreground/20 text-xs text-muted-foreground">
+                <div className="grid size-24 lg:size-[6.667vw] place-items-center rounded-md lg:rounded-[0.556vw] border border-dashed border-foreground/20 text-xs lg:text-[0.833vw] text-muted-foreground">
                   No logo
                 </div>
               )}
@@ -128,7 +128,7 @@ export function ProfileForm({ initial }: { initial: Initial }) {
                 accept="image"
                 onUpload={(r) => setLogoUrl(r.secureUrl)}
               >
-                <span className="rounded-lg border border-foreground/15 px-3 py-2 text-sm font-medium transition-colors hover:bg-muted">
+                <span className="rounded-lg lg:rounded-[0.694vw] border border-foreground/15 px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-medium transition-colors hover:bg-muted">
                   {logoUrl ? "Change logo" : "Upload logo"}
                 </span>
               </ImageUpload>
@@ -136,11 +136,11 @@ export function ProfileForm({ initial }: { initial: Initial }) {
           </Field>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 lg:mt-[1.667vw]">
           <button
             type="submit"
             disabled={savingProfile}
-            className="rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+            className="rounded-xl lg:rounded-[0.926vw] bg-foreground px-5 lg:px-[1.389vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.972vw] font-semibold text-background transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
           >
             {savingProfile ? "Saving..." : "Save profile"}
           </button>
@@ -150,14 +150,14 @@ export function ProfileForm({ initial }: { initial: Initial }) {
       {/* Verification */}
       <form
         onSubmit={submit}
-        className="rounded-2xl border border-border bg-card p-6"
+        className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-6 lg:p-[1.667vw]"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3 lg:gap-[0.833vw]">
           <div>
-            <h2 className="font-sebenta text-lg font-bold tracking-tight">
+            <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
               Verification
             </h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
+            <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-muted-foreground">
               We verify every roofer before they can engage leads.
             </p>
           </div>
@@ -165,26 +165,26 @@ export function ProfileForm({ initial }: { initial: Initial }) {
         </div>
 
         {state === "verified" ? (
-          <p className="mt-5 rounded-xl bg-secondary/40 p-4 text-sm text-foreground/75">
+          <p className="mt-5 lg:mt-[1.389vw] rounded-xl lg:rounded-[0.926vw] bg-secondary/40 p-4 lg:p-[1.111vw] text-sm lg:text-[0.972vw] text-foreground/75">
             Your business is verified. You’re all set to engage leads and send
             quotes.
           </p>
         ) : (
           <>
             {state === "rejected" && (
-              <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+              <p className="mt-4 lg:mt-[1.111vw] rounded-xl lg:rounded-[0.926vw] bg-red-50 p-3 lg:p-[0.833vw] text-sm lg:text-[0.972vw] text-red-700 dark:bg-red-950/40 dark:text-red-300">
                 Your last submission needs attention. Update your details and
                 resubmit.
               </p>
             )}
             {state === "in_review" && (
-              <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+              <p className="mt-4 lg:mt-[1.111vw] rounded-xl lg:rounded-[0.926vw] bg-amber-50 p-3 lg:p-[0.833vw] text-sm lg:text-[0.972vw] text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
                 We’re reviewing your documents. You can update them while you
                 wait.
               </p>
             )}
 
-            <div className="mt-5 space-y-4">
+            <div className="mt-5 lg:mt-[1.389vw] space-y-4 lg:space-y-[1.111vw]">
               <DocField
                 label="License document"
                 url={licenseDocUrl}
@@ -198,11 +198,11 @@ export function ProfileForm({ initial }: { initial: Initial }) {
             </div>
 
             {showSubmit && (
-              <div className="mt-6">
+              <div className="mt-6 lg:mt-[1.667vw]">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+                  className="rounded-xl lg:rounded-[0.926vw] bg-primary px-5 lg:px-[1.389vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
                 >
                   {submitting ? "Submitting..." : submitLabel}
                 </button>
@@ -236,29 +236,29 @@ function DocField({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[13px] font-medium text-foreground/75">
+      <label className="mb-1.5 lg:mb-[0.417vw] block text-[13px] lg:text-[0.903vw] font-medium text-foreground/75">
         {label}
       </label>
       {url ? (
-        <div className="space-y-2.5">
-          <div className="overflow-hidden rounded-xl border border-border bg-muted/30">
+        <div className="space-y-2.5 lg:space-y-[0.694vw]">
+          <div className="overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-muted/30">
             {urlKind(url) === "image" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={url}
                 alt={label}
-                className="mx-auto max-h-56 w-full object-contain"
+                className="mx-auto max-h-56 lg:max-h-[15.556vw] w-full object-contain"
               />
             ) : urlKind(url) === "pdf" ? (
-              <iframe src={url} title={label} className="h-56 w-full" />
+              <iframe src={url} title={label} className="h-56 lg:h-[15.556vw] w-full" />
             ) : (
-              <div className="flex h-40 items-center justify-center text-foreground/40">
+              <div className="flex h-40 lg:h-[11.111vw] items-center justify-center text-foreground/40">
                 <FileGlyph />
               </div>
             )}
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
+            <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
               <ImageUpload
                 folder="documents"
                 accept="image+pdf"
@@ -280,7 +280,7 @@ function DocField({
               href={url}
               target="_blank"
               rel="noreferrer"
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-xs lg:text-[0.833vw] font-medium text-primary hover:underline"
             >
               Open
             </a>
@@ -293,12 +293,12 @@ function DocField({
           onUpload={(r) => onChange(r.secureUrl)}
           className="w-full [&>button]:w-full"
         >
-          <span className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-foreground/15 px-4 py-7 text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
-            <span className="flex size-10 items-center justify-center rounded-full bg-muted text-foreground/50">
+          <span className="flex w-full cursor-pointer flex-col items-center justify-center gap-2 lg:gap-[0.556vw] rounded-xl lg:rounded-[0.926vw] border-2 border-dashed border-foreground/15 px-4 lg:px-[1.111vw] py-7 lg:py-[1.944vw] text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
+            <span className="flex size-10 lg:size-[2.778vw] items-center justify-center rounded-full bg-muted text-foreground/50">
               <UploadGlyph />
             </span>
-            <span className="text-sm font-semibold">Click to upload</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm lg:text-[0.972vw] font-semibold">Click to upload</span>
+            <span className="text-xs lg:text-[0.833vw] text-muted-foreground">
               PDF or image, up to 10MB
             </span>
           </span>
@@ -362,7 +362,7 @@ function StatusBadge({ state }: { state: VerificationState }) {
   }
   const v = map[state]
   return (
-    <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold", v.cls)}>
+    <span className={cn("shrink-0 rounded-full px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-semibold", v.cls)}>
       {v.label}
     </span>
   )
@@ -376,8 +376,8 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] font-medium text-foreground/75">{label}</label>
+    <div className="space-y-1.5 lg:space-y-[0.417vw]">
+      <label className="text-[13px] lg:text-[0.903vw] font-medium text-foreground/75">{label}</label>
       {children}
     </div>
   )

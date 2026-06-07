@@ -93,19 +93,19 @@ export function PushNotificationsManager() {
       role="dialog"
       aria-label="Enable browser notifications"
       className={cn(
-        'fixed inset-x-3 bottom-3 z-40 mx-auto max-w-md rounded-2xl border border-border bg-popover p-4 shadow-lg',
+        'fixed inset-x-3 lg:inset-x-[0.833vw] bottom-3 lg:bottom-[0.833vw] z-40 mx-auto max-w-md lg:max-w-[31.108vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-popover p-4 lg:p-[1.111vw] shadow-lg',
         'sm:inset-x-auto sm:left-4 sm:bottom-4',
       )}
     >
-      <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Bell className="size-4" />
+      <div className="flex items-start gap-3 lg:gap-[0.833vw]">
+        <span className="flex size-9 lg:size-[2.5vw] shrink-0 items-center justify-center rounded-lg lg:rounded-[0.694vw] bg-primary/10 text-primary">
+          <Bell className="size-4 lg:size-[1.111vw]" />
         </span>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-sm font-medium text-foreground">
+        <div className="min-w-0 flex-1 space-y-1 lg:space-y-[0.278vw]">
+          <p className="text-sm lg:text-[0.972vw] font-medium text-foreground">
             Enable browser notifications
           </p>
-          <p className="text-xs leading-snug text-muted-foreground">
+          <p className="text-xs lg:text-[0.833vw] leading-snug text-muted-foreground">
             Get a desktop alert when a new lead, quote, or message arrives — even
             when this tab is closed.
           </p>
@@ -116,21 +116,21 @@ export function PushNotificationsManager() {
           className="text-muted-foreground hover:text-foreground"
           aria-label="Dismiss"
         >
-          <X className="size-4" />
+          <X className="size-4 lg:size-[1.111vw]" />
         </button>
       </div>
-      <div className="mt-3 flex items-center justify-end gap-2">
+      <div className="mt-3 lg:mt-[0.833vw] flex items-center justify-end gap-2 lg:gap-[0.556vw]">
         <Button variant="ghost" size="sm" onClick={dismiss} disabled={loading}>
           Not now
         </Button>
-        <Button size="sm" onClick={handleEnable} disabled={loading} className="gap-1.5">
+        <Button size="sm" onClick={handleEnable} disabled={loading} className="gap-1.5 lg:gap-[0.417vw]">
           {loading ? (
             <>
-              <Loader2 className="size-3.5 animate-spin" /> Enabling…
+              <Loader2 className="size-3.5 lg:size-[0.972vw] animate-spin" /> Enabling…
             </>
           ) : (
             <>
-              <BellOff className="size-3.5" />
+              <BellOff className="size-3.5 lg:size-[0.972vw]" />
               Enable
             </>
           )}

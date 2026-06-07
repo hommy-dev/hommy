@@ -118,7 +118,7 @@ export function LocalFilePicker({
   const canAddMore = files.length < maxFiles
 
   return (
-    <div className={cn('space-y-3', className)}>
+    <div className={cn('space-y-3 lg:space-y-[0.833vw]', className)}>
       {canAddMore && (
         <div
           role="button"
@@ -131,8 +131,8 @@ export function LocalFilePicker({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={cn(
-            'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors',
-            compact ? 'gap-1 px-4 py-4' : 'gap-2 px-6 py-8',
+            'flex cursor-pointer flex-col items-center justify-center rounded-lg lg:rounded-[0.694vw] border-2 border-dashed transition-colors',
+            compact ? 'gap-1 lg:gap-[0.278vw] px-4 lg:px-[1.111vw] py-4 lg:py-[1.111vw]' : 'gap-2 lg:gap-[0.556vw] px-6 lg:px-[1.667vw] py-8 lg:py-[2.222vw]',
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-border hover:border-primary/50 hover:bg-accent/50'
@@ -141,19 +141,19 @@ export function LocalFilePicker({
           <Upload
             className={cn(
               'text-muted-foreground',
-              compact ? 'size-5' : 'size-6'
+              compact ? 'size-5 lg:size-[1.389vw]' : 'size-6 lg:size-[1.667vw]'
             )}
           />
           <p
             className={cn(
               'font-medium text-foreground',
-              compact ? 'text-xs' : 'text-sm'
+              compact ? 'text-xs lg:text-[0.833vw]' : 'text-sm lg:text-[0.972vw]'
             )}
           >
             {label}
           </p>
           {description && (
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-xs lg:text-[0.833vw] text-muted-foreground text-center">
               {description}
             </p>
           )}
@@ -174,14 +174,14 @@ export function LocalFilePicker({
       {files.length > 0 && (
         <div
           className={cn(
-            'grid gap-2',
+            'grid gap-2 lg:gap-[0.556vw]',
             compact ? 'grid-cols-2' : 'grid-cols-3 sm:grid-cols-4'
           )}
         >
           {files.map((staged) => (
             <div
               key={staged.id}
-              className="group relative aspect-square overflow-hidden rounded-md border border-border bg-muted"
+              className="group relative aspect-square overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border bg-muted"
             >
               {isImageFile(staged.file) ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -191,9 +191,9 @@ export function LocalFilePicker({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-1 p-2">
-                  <FileText className="size-8 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground truncate max-w-full">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-1 lg:gap-[0.278vw] p-2 lg:p-[0.556vw]">
+                  <FileText className="size-8 lg:size-[2.222vw] text-muted-foreground" />
+                  <span className="text-[10px] lg:text-[0.694vw] text-muted-foreground truncate max-w-full">
                     {staged.file.name}
                   </span>
                 </div>
@@ -201,10 +201,10 @@ export function LocalFilePicker({
               <button
                 type="button"
                 onClick={() => removeFile(staged.id)}
-                className="absolute right-1 top-1 rounded-full bg-background/80 p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] rounded-full bg-background/80 p-0.5 lg:p-[0.139vw] opacity-0 transition-opacity group-hover:opacity-100"
                 aria-label={`Remove ${staged.file.name}`}
               >
-                <X className="size-3.5 text-destructive" />
+                <X className="size-3.5 lg:size-[0.972vw] text-destructive" />
               </button>
             </div>
           ))}

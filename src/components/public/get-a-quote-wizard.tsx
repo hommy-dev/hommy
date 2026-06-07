@@ -125,26 +125,26 @@ export function GetAQuoteWizard({
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas text-foreground">
-      <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-5">
-        <Link href="/" className="font-sebenta text-lg font-bold">
+      <header className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-between px-6 lg:px-[1.667vw] py-5 lg:py-[1.389vw]">
+        <Link href="/" className="font-sebenta text-lg lg:text-[1.25vw] font-bold">
           Homei
         </Link>
         <Link
           href="/"
-          className="text-xs font-medium text-foreground/50 transition-colors hover:text-foreground"
+          className="text-xs lg:text-[0.833vw] font-medium text-foreground/50 transition-colors hover:text-foreground"
         >
           Back to home
         </Link>
       </header>
 
-      <div className="mx-auto w-full max-w-2xl px-6">
-        <div className="flex items-center justify-between text-xs font-medium text-foreground/50">
+      <div className="mx-auto w-full max-w-2xl lg:max-w-[46.662vw] px-6 lg:px-[1.667vw]">
+        <div className="flex items-center justify-between text-xs lg:text-[0.833vw] font-medium text-foreground/50">
           <span>
             Step {stepIndex + 1} of {total}
           </span>
           <span>{Math.round(((stepIndex + 1) / total) * 100)}%</span>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+        <div className="mt-2 lg:mt-[0.556vw] h-1.5 lg:h-[0.417vw] overflow-hidden rounded-full bg-foreground/10">
           <div
             className="h-full rounded-full bg-primary transition-[width] duration-300"
             style={{ width: `${((stepIndex + 1) / total) * 100}%` }}
@@ -152,13 +152,13 @@ export function GetAQuoteWizard({
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-10">
+      <main className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] flex-1 flex-col px-6 lg:px-[1.667vw] py-10 lg:py-[2.778vw]">
         {current === "what" && (
           <Step
             title="What's going on with your roof?"
             sub="Pick what's closest — you can add details in a moment."
           >
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2.5 lg:gap-[0.694vw]">
               {subtypes.map((s) => {
                 const active = subtype === s
                 return (
@@ -167,7 +167,7 @@ export function GetAQuoteWizard({
                     type="button"
                     onClick={() => setSubtype(s)}
                     className={cn(
-                      "rounded-full border px-4 py-2.5 text-sm font-medium transition-colors",
+                      "rounded-full border px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.972vw] font-medium transition-colors",
                       active
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-foreground/15 bg-card text-foreground/70 hover:border-foreground/30",
@@ -224,14 +224,14 @@ export function GetAQuoteWizard({
               />
             </Field>
             {place && (
-              <p className="text-[13px] text-foreground/55">
+              <p className="text-[13px] lg:text-[0.903vw] text-foreground/55">
                 {[place.city, place.state, place.zipCode]
                   .filter(Boolean)
                   .join(", ")}
               </p>
             )}
             {isLoggedInHomeowner && loggedInName && lastStep && (
-              <p className="text-[13px] text-foreground/55">
+              <p className="text-[13px] lg:text-[0.903vw] text-foreground/55">
                 Posting as <span className="font-medium text-foreground">{loggedInName}</span>.
               </p>
             )}
@@ -255,7 +255,7 @@ export function GetAQuoteWizard({
                 autoFocus
               />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
               <Field label="Email" error={errors.email}>
                 <input
                   value={email}
@@ -283,7 +283,7 @@ export function GetAQuoteWizard({
                 />
               </Field>
             </div>
-            <p className="text-xs text-foreground/45">
+            <p className="text-xs lg:text-[0.833vw] text-foreground/45">
               Already have an account?{" "}
               <Link href="/auth/login" className="font-medium text-primary hover:underline">
                 Sign in
@@ -293,12 +293,12 @@ export function GetAQuoteWizard({
           </Step>
         )}
 
-        <div className="mt-auto flex items-center justify-between pt-10">
+        <div className="mt-auto flex items-center justify-between pt-10 lg:pt-[2.778vw]">
           <button
             type="button"
             onClick={() => setStepIndex((s) => Math.max(0, s - 1))}
             className={cn(
-              "text-sm font-medium text-foreground/55 transition-colors hover:text-foreground",
+              "text-sm lg:text-[0.972vw] font-medium text-foreground/55 transition-colors hover:text-foreground",
               stepIndex === 0 && "invisible",
             )}
           >
@@ -308,7 +308,7 @@ export function GetAQuoteWizard({
             type="button"
             onClick={next}
             disabled={!canAdvance || pending}
-            className="rounded-xl bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
+            className="rounded-xl lg:rounded-[0.926vw] bg-primary px-7 lg:px-[1.944vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
           >
             {!lastStep ? "Next" : pending ? "Posting…" : "Post & see matches"}
           </button>
@@ -319,7 +319,7 @@ export function GetAQuoteWizard({
 }
 
 const inputCls =
-  "w-full rounded-xl border border-foreground/15 bg-card px-3.5 py-3 text-[15px] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
+  "w-full rounded-xl lg:rounded-[0.926vw] border border-foreground/15 bg-card px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
 
 function Step({
   title,
@@ -332,11 +332,11 @@ function Step({
 }) {
   return (
     <div>
-      <h1 className="font-sebenta text-[2rem] font-bold leading-tight tracking-tight">
+      <h1 className="font-sebenta text-[2rem] lg:text-[2.222vw] font-bold leading-tight tracking-tight">
         {title}
       </h1>
-      <p className="mt-2 text-[15px] text-foreground/60">{sub}</p>
-      <div className="mt-8 space-y-5">{children}</div>
+      <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">{sub}</p>
+      <div className="mt-8 lg:mt-[2.222vw] space-y-5 lg:space-y-[1.389vw]">{children}</div>
     </div>
   )
 }
@@ -351,10 +351,10 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] font-medium text-foreground/75">{label}</label>
+    <div className="space-y-1.5 lg:space-y-[0.417vw]">
+      <label className="text-[13px] lg:text-[0.903vw] font-medium text-foreground/75">{label}</label>
       {children}
-      {error ? <p className="text-[13px] text-destructive">{error}</p> : null}
+      {error ? <p className="text-[13px] lg:text-[0.903vw] text-destructive">{error}</p> : null}
     </div>
   )
 }

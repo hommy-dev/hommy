@@ -81,7 +81,7 @@ export function VoicePlayer({ attachment, mine, className }: Props) {
   return (
     <div
       className={cn(
-        'inline-flex max-w-md items-center gap-2.5 rounded-full border px-2 py-1.5 shadow-sm',
+        'inline-flex max-w-md lg:max-w-[31.108vw] items-center gap-2.5 lg:gap-[0.694vw] rounded-full border px-2 lg:px-[0.556vw] py-1.5 lg:py-[0.417vw] shadow-sm',
         mine
           ? 'border-primary/20 bg-primary/10'
           : 'border-border bg-background/70',
@@ -111,14 +111,14 @@ export function VoicePlayer({ attachment, mine, className }: Props) {
       <button
         type="button"
         onClick={toggle}
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+        className="inline-flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
         aria-label={playing ? 'Pause' : 'Play'}
       >
-        {playing ? <Pause className="size-3.5" /> : <Play className="size-3.5 translate-x-px" />}
+        {playing ? <Pause className="size-3.5 lg:size-[0.972vw]" /> : <Play className="size-3.5 lg:size-[0.972vw] translate-x-px lg:translate-x-[0.069vw]" />}
       </button>
 
       <div
-        className="flex min-w-[140px] flex-1 cursor-pointer items-center gap-[2px]"
+        className="flex min-w-[140px] lg:min-w-[9.722vw] flex-1 cursor-pointer items-center gap-[2px] lg:gap-[0.139vw]"
         onClick={onScrub}
         role="slider"
         aria-label="Playback position"
@@ -149,14 +149,14 @@ export function VoicePlayer({ attachment, mine, className }: Props) {
         })}
       </div>
 
-      <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
+      <span className="shrink-0 tabular-nums text-[11px] lg:text-[0.764vw] text-muted-foreground">
         {formatDuration(playing || currentMs > 0 ? currentMs : totalMs)}
       </span>
 
       <button
         type="button"
         onClick={() => setSpeedIdx((i) => (i + 1) % SPEEDS.length)}
-        className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground hover:bg-muted/80"
+        className="shrink-0 rounded-full bg-muted px-1.5 lg:px-[0.417vw] py-0.5 lg:py-[0.139vw] text-[10px] lg:text-[0.694vw] font-semibold tabular-nums text-muted-foreground hover:bg-muted/80"
         aria-label="Change playback speed"
       >
         {SPEEDS[speedIdx]}x
@@ -168,7 +168,7 @@ export function VoicePlayer({ attachment, mine, className }: Props) {
         className="shrink-0 text-muted-foreground hover:text-foreground"
         aria-label={muted ? 'Unmute' : 'Mute'}
       >
-        {muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
+        {muted ? <VolumeX className="size-4 lg:size-[1.111vw]" /> : <Volume2 className="size-4 lg:size-[1.111vw]" />}
       </button>
     </div>
   )

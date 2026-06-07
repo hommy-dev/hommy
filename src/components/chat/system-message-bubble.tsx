@@ -46,15 +46,15 @@ export function SystemMessageBubble({ message, viewerRole }: Props) {
   const view = renderForType(payload, viewerRole, fallback)
 
   return (
-    <div className="my-3 flex justify-center px-4">
-      <div className="flex max-w-[80%] items-start gap-2 rounded-xl border border-dashed border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-        <div className="mt-0.5 shrink-0 text-primary">{view.icon}</div>
+    <div className="my-3 lg:my-[0.833vw] flex justify-center px-4 lg:px-[1.111vw]">
+      <div className="flex max-w-[80%] items-start gap-2 lg:gap-[0.556vw] rounded-xl lg:rounded-[0.926vw] border border-dashed border-border bg-muted/40 px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-xs lg:text-[0.833vw] text-muted-foreground">
+        <div className="mt-0.5 lg:mt-[0.139vw] shrink-0 text-primary">{view.icon}</div>
         <div className="min-w-0 flex-1">
           <p className="font-medium text-foreground">{view.title}</p>
           {view.subtitle ? (
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{view.subtitle}</p>
+            <p className="mt-0.5 lg:mt-[0.139vw] text-[11px] lg:text-[0.764vw] text-muted-foreground">{view.subtitle}</p>
           ) : null}
-          {view.cta ? <div className="mt-1.5">{view.cta}</div> : null}
+          {view.cta ? <div className="mt-1.5 lg:mt-[0.417vw]">{view.cta}</div> : null}
         </div>
       </div>
     </div>
@@ -79,7 +79,7 @@ function renderForType(
       const currency = stringOr(payload.currency, 'USD')
       const quoteId = stringOr(payload.quoteId, '')
       return {
-        icon: <FileSignature className="size-4" />,
+        icon: <FileSignature className="size-4 lg:size-[1.111vw]" />,
         title: 'Quote sent',
         subtitle: formatMoney(total, currency),
         cta:
@@ -93,7 +93,7 @@ function renderForType(
         ? (payload.proposedSlots as string[]).slice(0, 3)
         : []
       return {
-        icon: <CalendarCheck className="size-4" />,
+        icon: <CalendarCheck className="size-4 lg:size-[1.111vw]" />,
         title: 'Walkthrough requested',
         subtitle:
           slots.length > 0
@@ -108,7 +108,7 @@ function renderForType(
     case 'walkthrough.confirmed': {
       const at = stringOr(payload.scheduledAt, '')
       return {
-        icon: <CheckCircle2 className="size-4 text-green-600" />,
+        icon: <CheckCircle2 className="size-4 lg:size-[1.111vw] text-green-600" />,
         title: 'Walkthrough confirmed',
         subtitle: at ? formatSlotLong(at) : null,
       }
@@ -117,7 +117,7 @@ function renderForType(
       const total = numberOr(payload.agreedAmount, 0)
       const currency = stringOr(payload.currency, 'USD')
       return {
-        icon: <PartyPopper className="size-4 text-primary" />,
+        icon: <PartyPopper className="size-4 lg:size-[1.111vw] text-primary" />,
         title: 'Quote accepted',
         subtitle: `Agreed at ${formatMoney(total, currency)}`,
       }
@@ -127,14 +127,14 @@ function renderForType(
       const currency = stringOr(payload.currency, 'USD')
       const method = stringOr(payload.method, '')
       return {
-        icon: <Wallet className="size-4" />,
+        icon: <Wallet className="size-4 lg:size-[1.111vw]" />,
         title: 'Deposit sent',
         subtitle: method
           ? `${formatMoney(amt, currency)} via ${method}`
           : formatMoney(amt, currency),
         cta:
           viewerRole === 'CONTRACTOR' ? (
-            <span className="text-[11px] italic text-muted-foreground">
+            <span className="text-[11px] lg:text-[0.764vw] italic text-muted-foreground">
               Confirm receipt below
             </span>
           ) : null,
@@ -142,21 +142,21 @@ function renderForType(
     }
     case 'deposit.received': {
       return {
-        icon: <ShieldCheck className="size-4 text-green-600" />,
+        icon: <ShieldCheck className="size-4 lg:size-[1.111vw] text-green-600" />,
         title: 'Deposit received',
         subtitle: 'Contractor confirmed payment.',
       }
     }
     case 'cooling_off.expired': {
       return {
-        icon: <Sparkles className="size-4" />,
+        icon: <Sparkles className="size-4 lg:size-[1.111vw]" />,
         title: 'Cooling-off ended',
         subtitle: 'You can begin work.',
       }
     }
     case 'job.started': {
       return {
-        icon: <Hammer className="size-4" />,
+        icon: <Hammer className="size-4 lg:size-[1.111vw]" />,
         title: 'Job started',
       }
     }
@@ -165,33 +165,33 @@ function renderForType(
       const delta = numberOr(payload.amountDelta, 0)
       const currency = stringOr(payload.currency, 'USD')
       return {
-        icon: <ClipboardList className="size-4" />,
+        icon: <ClipboardList className="size-4 lg:size-[1.111vw]" />,
         title: 'Change order proposed',
         subtitle: `${reason ? reason + ' · ' : ''}${formatMoney(delta, currency, true)}`,
       }
     }
     case 'change_order.accepted': {
       return {
-        icon: <CheckCircle2 className="size-4 text-green-600" />,
+        icon: <CheckCircle2 className="size-4 lg:size-[1.111vw] text-green-600" />,
         title: 'Change order accepted',
       }
     }
     case 'change_order.rejected': {
       return {
-        icon: <MessageSquareWarning className="size-4 text-amber-600" />,
+        icon: <MessageSquareWarning className="size-4 lg:size-[1.111vw] text-amber-600" />,
         title: 'Change order rejected',
       }
     }
     case 'change_order.withdrawn': {
       return {
-        icon: <MessageSquareWarning className="size-4 text-muted-foreground" />,
+        icon: <MessageSquareWarning className="size-4 lg:size-[1.111vw] text-muted-foreground" />,
         title: 'Change order withdrawn',
       }
     }
     case 'fix_item.flagged': {
       const label = stringOr(payload.label, 'fix item')
       return {
-        icon: <Wrench className="size-4 text-amber-600" />,
+        icon: <Wrench className="size-4 lg:size-[1.111vw] text-amber-600" />,
         title: 'Item flagged for fix',
         subtitle: label,
       }
@@ -199,14 +199,14 @@ function renderForType(
     case 'fix_item.fixed': {
       const label = stringOr(payload.label, '')
       return {
-        icon: <CheckCircle2 className="size-4 text-green-600" />,
+        icon: <CheckCircle2 className="size-4 lg:size-[1.111vw] text-green-600" />,
         title: 'Item marked fixed',
         subtitle: label || null,
       }
     }
     case 'job.complete': {
       return {
-        icon: <ListTodo className="size-4" />,
+        icon: <ListTodo className="size-4 lg:size-[1.111vw]" />,
         title: 'Contractor marked job complete',
         subtitle:
           viewerRole === 'HOMEOWNER'
@@ -218,27 +218,27 @@ function renderForType(
       const amt = numberOr(payload.amount, 0)
       const currency = stringOr(payload.currency, 'USD')
       return {
-        icon: <CircleDollarSign className="size-4 text-green-600" />,
+        icon: <CircleDollarSign className="size-4 lg:size-[1.111vw] text-green-600" />,
         title: 'Payment released',
         subtitle: formatMoney(amt, currency),
       }
     }
     case 'review.window_opens': {
       return {
-        icon: <Star className="size-4" />,
+        icon: <Star className="size-4 lg:size-[1.111vw]" />,
         title: 'Reviews open',
         subtitle: 'Both sides can leave a review.',
       }
     }
     case 'review.go_live': {
       return {
-        icon: <Star className="size-4 text-primary" />,
+        icon: <Star className="size-4 lg:size-[1.111vw] text-primary" />,
         title: 'Reviews are now public',
       }
     }
     default: {
       return {
-        icon: <Receipt className="size-4" />,
+        icon: <Receipt className="size-4 lg:size-[1.111vw]" />,
         title: fallback,
       }
     }
@@ -249,7 +249,7 @@ function CTALink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-[11px] font-medium text-foreground hover:bg-muted"
+      className="inline-flex items-center gap-1 lg:gap-[0.278vw] rounded-md lg:rounded-[0.556vw] border border-border bg-background px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-[11px] lg:text-[0.764vw] font-medium text-foreground hover:bg-muted"
     >
       {children}
     </Link>

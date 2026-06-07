@@ -24,11 +24,11 @@ export function LogoMarquee({ className }: { className?: string }) {
         (className ?? "")
       }
     >
-      <div className="flex w-max animate-[homei-marquee_30s_linear_infinite] items-center gap-x-10 sm:gap-x-14">
+      <div className="flex w-max animate-[homei-marquee_30s_linear_infinite] items-center gap-x-10 lg:gap-x-[2.778vw] sm:gap-x-14">
         {[...BRANDS, ...BRANDS].map((brand, i) => (
           <span
             key={i}
-            className="whitespace-nowrap text-[15px] font-semibold uppercase tracking-[0.14em] text-current opacity-60"
+            className="whitespace-nowrap text-[15px] lg:text-[1.042vw] font-semibold uppercase tracking-[0.14em] text-current opacity-60"
           >
             {brand}
           </span>

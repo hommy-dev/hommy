@@ -36,7 +36,7 @@ export function QuoteForm({ className }: { className?: string }) {
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "flex flex-col overflow-hidden rounded-lg border border-foreground/15 bg-card shadow-sm transition-colors focus-within:border-foreground/30 sm:flex-row sm:items-stretch",
+        "flex flex-col overflow-hidden rounded-lg lg:rounded-[0.694vw] border border-foreground/15 bg-card shadow-sm transition-colors focus-within:border-foreground/30 sm:flex-row sm:items-stretch",
         className,
       )}
     >
@@ -45,7 +45,7 @@ export function QuoteForm({ className }: { className?: string }) {
           value={subtype}
           onChange={(e) => setSubtype(e.target.value)}
           aria-label="Type of work"
-          className="h-12 w-full cursor-pointer appearance-none bg-transparent pl-4 pr-9 text-[15px] font-medium text-foreground outline-none"
+          className="h-12 lg:h-[3.333vw] w-full cursor-pointer appearance-none bg-transparent pl-4 lg:pl-[1.111vw] pr-9 lg:pr-[2.5vw] text-[15px] lg:text-[1.042vw] font-medium text-foreground outline-none"
         >
           {SERVICES.map((s) => (
             <option key={s.subtype} value={s.subtype}>
@@ -53,7 +53,7 @@ export function QuoteForm({ className }: { className?: string }) {
             </option>
           ))}
         </select>
-        <Chevron className="pointer-events-none absolute right-3 text-foreground/40" />
+        <Chevron className="pointer-events-none absolute right-3 lg:right-[0.833vw] text-foreground/40" />
       </div>
 
       <input
@@ -61,13 +61,13 @@ export function QuoteForm({ className }: { className?: string }) {
         onChange={(e) => setWhere(e.target.value.slice(0, 80))}
         placeholder="Your city or ZIP"
         aria-label="Your city or area"
-        className="h-12 min-w-0 flex-1 bg-transparent px-4 text-[15px] text-foreground outline-none placeholder:text-foreground/40"
+        className="h-12 lg:h-[3.333vw] min-w-0 flex-1 bg-transparent px-4 lg:px-[1.111vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none placeholder:text-foreground/40"
       />
 
       <button
         type="submit"
         disabled={!whereValid || pending}
-        className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-foreground px-6 text-[15px] font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="group inline-flex h-12 lg:h-[3.333vw] shrink-0 items-center justify-center gap-2 lg:gap-[0.556vw] bg-foreground px-6 lg:px-[1.667vw] text-[15px] lg:text-[1.042vw] font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {pending ? "Matching…" : "Get quotes"}
         {!pending && <ArrowRight className="transition-transform group-hover:translate-x-0.5" />}

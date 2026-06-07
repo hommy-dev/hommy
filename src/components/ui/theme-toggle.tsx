@@ -18,8 +18,8 @@ const Skiper26 = () => {
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center">
-      <div className="mx-auto max-w-lg space-y-5">
-        <h2 className="mt-36 text-4xl font-medium tracking-tight">
+      <div className="mx-auto max-w-lg lg:max-w-[35.552vw] space-y-5 lg:space-y-[1.389vw]">
+        <h2 className="mt-36 lg:mt-[10vw] text-4xl lg:text-[2.5vw] font-medium tracking-tight">
           07.09.2025 <br />
           Skiper ui is live now
         </h2>
@@ -40,8 +40,8 @@ const Skiper26 = () => {
         </p>
       </div>
 
-      <div className="text-foreground grid content-start justify-items-center gap-6 py-20 text-center">
-        <span className="after:from-background after:to-foreground relative max-w-[12ch] text-xs uppercase leading-tight opacity-40 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:content-['']">
+      <div className="text-foreground grid content-start justify-items-center gap-6 lg:gap-[1.667vw] py-20 lg:py-[5.556vw] text-center">
+        <span className="after:from-background after:to-foreground relative max-w-[12ch] text-xs lg:text-[0.833vw] uppercase leading-tight opacity-40 after:absolute after:left-1/2 after:top-full after:h-16 after:w-px after:bg-gradient-to-b after:content-['']">
           Click to toggle the theme
         </span>
       </div>
@@ -96,26 +96,26 @@ const Options = ({
   return (
     <motion.div
       drag
-      className="top-30 border-foreground/10 bg-muted2 absolute right-1/2 flex w-[245px] translate-x-1/2 flex-col gap-3 rounded-3xl border p-3 backdrop-blur-sm lg:right-4 lg:translate-x-0"
+      className="top-30 lg:top-[8.333vw] border-foreground/10 bg-muted2 absolute right-1/2 flex w-[245px] lg:w-[17.014vw] translate-x-1/2 flex-col gap-3 lg:gap-[0.833vw] rounded-3xl lg:rounded-[1.574vw] border p-3 lg:p-[0.833vw] backdrop-blur-sm lg:right-[1.111vw] lg:translate-x-0"
     >
       <div className="flex items-center justify-between">
-        <span className="size-4 cursor-grab active:cursor-grabbing">
-          <GripHorizontal className="size-4 opacity-50" />
+        <span className="size-4 lg:size-[1.111vw] cursor-grab active:cursor-grabbing">
+          <GripHorizontal className="size-4 lg:size-[1.111vw] opacity-50" />
         </span>
 
-        <p className="group flex cursor-pointer items-center justify-center gap-1 rounded-lg px-2 py-1 text-sm opacity-50">
+        <p className="group flex cursor-pointer items-center justify-center gap-1 lg:gap-[0.278vw] rounded-lg lg:rounded-[0.694vw] px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-sm lg:text-[0.972vw] opacity-50">
           Options
         </p>
       </div>
 
       <div className="flex flex-col">
-        <div className="mt-1 flex justify-between py-1">
-          <p className="w-20 whitespace-nowrap text-sm opacity-50">variant :</p>
-          <div className="flex flex-wrap items-center justify-end gap-1">
+        <div className="mt-1 lg:mt-[0.278vw] flex justify-between py-1 lg:py-[0.278vw]">
+          <p className="w-20 lg:w-[5.556vw] whitespace-nowrap text-sm lg:text-[0.972vw] opacity-50">variant :</p>
+          <div className="flex flex-wrap items-center justify-end gap-1 lg:gap-[0.278vw]">
             <button
               onClick={() => setVariant("circle")}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 variant === "circle"
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -126,7 +126,7 @@ const Options = ({
             <button
               onClick={() => setVariant("rectangle")}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 variant === "rectangle"
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -137,7 +137,7 @@ const Options = ({
             <button
               onClick={() => setVariant("gif")}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 variant === "gif"
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -148,7 +148,7 @@ const Options = ({
             <button
               onClick={() => setVariant("polygon")}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 variant === "polygon"
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -159,7 +159,7 @@ const Options = ({
             <button
               onClick={() => setVariant("circle-blur")}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 variant === "circle-blur"
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -170,13 +170,13 @@ const Options = ({
           </div>
         </div>
 
-        <div className="mt-1 flex justify-between py-1">
-          <p className="w-20 whitespace-nowrap text-sm opacity-50">blur :</p>
-          <div className="flex flex-wrap items-center justify-end gap-1">
+        <div className="mt-1 lg:mt-[0.278vw] flex justify-between py-1 lg:py-[0.278vw]">
+          <p className="w-20 lg:w-[5.556vw] whitespace-nowrap text-sm lg:text-[0.972vw] opacity-50">blur :</p>
+          <div className="flex flex-wrap items-center justify-end gap-1 lg:gap-[0.278vw]">
             <button
               onClick={() => setBlur(false)}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 !blur
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -187,7 +187,7 @@ const Options = ({
             <button
               onClick={() => setBlur(true)}
               className={cn(
-                "cursor-pointer px-1 text-sm transition-opacity",
+                "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                 blur
                   ? "opacity-100"
                   : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -203,15 +203,15 @@ const Options = ({
           variant === "rectangle" ||
           variant === "polygon" ||
           variant === "circle-blur") && (
-          <div className="mt-1 flex justify-between py-1">
-            <p className="w-20 whitespace-nowrap text-sm opacity-50">start :</p>
-            <div className="flex flex-wrap items-center justify-end gap-1">
+          <div className="mt-1 lg:mt-[0.278vw] flex justify-between py-1 lg:py-[0.278vw]">
+            <p className="w-20 lg:w-[5.556vw] whitespace-nowrap text-sm lg:text-[0.972vw] opacity-50">start :</p>
+            <div className="flex flex-wrap items-center justify-end gap-1 lg:gap-[0.278vw]">
               {/* Show center option only for circle and circle-blur */}
               {(variant === "circle" || variant === "circle-blur") && (
                 <button
                   onClick={() => setStart("center")}
                   className={cn(
-                    "cursor-pointer px-1 text-sm transition-opacity",
+                    "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                     start === "center"
                       ? "opacity-100"
                       : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -227,7 +227,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("bottom-up")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "bottom-up"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -238,7 +238,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("top-down")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "top-down"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -249,7 +249,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("left-right")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "left-right"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -260,7 +260,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("right-left")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "right-left"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -279,7 +279,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("top-left")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "top-left"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -290,7 +290,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("top-right")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "top-right"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -304,7 +304,7 @@ const Options = ({
                       <button
                         onClick={() => setStart("bottom-left")}
                         className={cn(
-                          "cursor-pointer px-1 text-sm transition-opacity",
+                          "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                           start === "bottom-left"
                             ? "opacity-100"
                             : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -315,7 +315,7 @@ const Options = ({
                       <button
                         onClick={() => setStart("bottom-right")}
                         className={cn(
-                          "cursor-pointer px-1 text-sm transition-opacity",
+                          "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                           start === "bottom-right"
                             ? "opacity-100"
                             : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -334,7 +334,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("top-center")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "top-center"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -345,7 +345,7 @@ const Options = ({
                   <button
                     onClick={() => setStart("bottom-center")}
                     className={cn(
-                      "cursor-pointer px-1 text-sm transition-opacity",
+                      "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                       start === "bottom-center"
                         ? "opacity-100"
                         : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -361,9 +361,9 @@ const Options = ({
 
         {/* Show gif type options only for gif variant */}
         {variant === "gif" && (
-          <div className="mt-1 flex justify-between py-1">
-            <p className="w-20 text-sm opacity-50">gif type :</p>
-            <div className="flex flex-wrap items-center justify-end gap-1">
+          <div className="mt-1 lg:mt-[0.278vw] flex justify-between py-1 lg:py-[0.278vw]">
+            <p className="w-20 lg:w-[5.556vw] text-sm lg:text-[0.972vw] opacity-50">gif type :</p>
+            <div className="flex flex-wrap items-center justify-end gap-1 lg:gap-[0.278vw]">
               <button
                 onClick={() => {
                   setGifType("1");
@@ -372,7 +372,7 @@ const Options = ({
                   );
                 }}
                 className={cn(
-                  "cursor-pointer px-1 text-sm transition-opacity",
+                  "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                   gifType === "1"
                     ? "opacity-100"
                     : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -388,7 +388,7 @@ const Options = ({
                   );
                 }}
                 className={cn(
-                  "cursor-pointer px-1 text-sm transition-opacity",
+                  "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                   gifType === "2"
                     ? "opacity-100"
                     : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -404,7 +404,7 @@ const Options = ({
                   );
                 }}
                 className={cn(
-                  "cursor-pointer px-1 text-sm transition-opacity",
+                  "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                   gifType === "3"
                     ? "opacity-100"
                     : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -415,7 +415,7 @@ const Options = ({
               <button
                 onClick={() => setGifType("custom")}
                 className={cn(
-                  "cursor-pointer px-1 text-sm transition-opacity",
+                  "cursor-pointer px-1 lg:px-[0.278vw] text-sm lg:text-[0.972vw] transition-opacity",
                   gifType === "custom"
                     ? "opacity-100"
                     : "hover:bg-foreground/10 opacity-50 hover:opacity-100",
@@ -429,14 +429,14 @@ const Options = ({
 
         {/* Show input only when gif variant and custom type are selected */}
         {variant === "gif" && gifType === "custom" && (
-          <div className="mt-1 flex flex-col gap-1 py-1">
-            <p className="text-sm opacity-50">gif url :</p>
+          <div className="mt-1 lg:mt-[0.278vw] flex flex-col gap-1 lg:gap-[0.278vw] py-1 lg:py-[0.278vw]">
+            <p className="text-sm lg:text-[0.972vw] opacity-50">gif url :</p>
             <input
               type="text"
               value={gifUrl}
               onChange={(e) => setGifUrl(e.target.value)}
               placeholder="Enter GIF URL"
-              className="text-foreground placeholder:text-foreground/50 w-full rounded-lg bg-transparent px-2 py-1 text-xs focus:outline-none"
+              className="text-foreground placeholder:text-foreground/50 w-full rounded-lg lg:rounded-[0.694vw] bg-transparent px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] focus:outline-none"
             />
           </div>
         )}
@@ -1458,7 +1458,7 @@ export function ThemeToggleButton({
       <button
         type="button"
         className={cn(
-          "size-8 shrink-0 rounded-full bg-muted text-muted-foreground transition-all duration-300",
+          "size-8 lg:size-[2.222vw] shrink-0 rounded-full bg-muted text-muted-foreground transition-all duration-300",
           className,
         )}
         aria-label="Toggle color theme"
@@ -1473,7 +1473,7 @@ export function ThemeToggleButton({
     <button
       type="button"
       className={cn(
-        "size-8 shrink-0 rounded-full transition-all duration-300 active:scale-95",
+        "size-8 lg:size-[2.222vw] shrink-0 rounded-full transition-all duration-300 active:scale-95",
         isDark ? "bg-black text-white" : "bg-white text-black",
         className,
       )}

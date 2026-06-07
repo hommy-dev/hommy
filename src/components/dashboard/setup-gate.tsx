@@ -51,12 +51,12 @@ export function SetupGate({ initial }: { initial: Initial }) {
 
   return (
     <>
-      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/15 bg-accent/50 p-5">
+      <section className="flex flex-wrap items-center justify-between gap-4 lg:gap-[1.111vw] rounded-2xl lg:rounded-[1.111vw] border border-primary/15 bg-accent/50 p-5 lg:p-[1.389vw]">
         <div>
-          <h2 className="font-sebenta text-lg font-bold tracking-tight">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
             Finish setting up
           </h2>
-          <p className="mt-0.5 text-sm text-foreground/60">
+          <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-foreground/60">
             Add your details, license, and insurance to start winning jobs.
             Takes about a minute.
           </p>
@@ -64,7 +64,7 @@ export function SetupGate({ initial }: { initial: Initial }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          className="shrink-0 rounded-full bg-primary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
         >
           Finish setup
         </button>

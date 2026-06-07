@@ -24,9 +24,9 @@ export default async function HomeownerLayout({
         brandLabel="Homei"
         messagesHref="/homeowner/messages"
         topRight={
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
             <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />
-            <span className="mx-1 h-5 w-px bg-border" />
+            <span className="mx-1 lg:mx-[0.278vw] h-5 lg:h-[1.389vw] w-px lg:w-[0.069vw] bg-border" />
             <UserMenu
               user={{
                 email: user.email,

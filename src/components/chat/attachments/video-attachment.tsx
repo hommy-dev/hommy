@@ -64,7 +64,7 @@ export function VideoAttachment({ attachment, className }: Props) {
     <>
       <div
         className={cn(
-          'relative overflow-hidden rounded-lg border border-border bg-black/40',
+          'relative overflow-hidden rounded-lg lg:rounded-[0.694vw] border border-border bg-black/40',
           className,
         )}
         style={{ width: displayW, height: displayH }}
@@ -91,8 +91,8 @@ export function VideoAttachment({ attachment, className }: Props) {
             className="absolute inset-0 flex items-center justify-center bg-black/20 text-white transition hover:bg-black/30"
             aria-label="Play video"
           >
-            <span className="flex size-12 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-              <Play className="size-5 translate-x-0.5" />
+            <span className="flex size-12 lg:size-[3.333vw] items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
+              <Play className="size-5 lg:size-[1.389vw] translate-x-0.5 lg:translate-x-[0.139vw]" />
             </span>
           </button>
         ) : null}
@@ -103,14 +103,14 @@ export function VideoAttachment({ attachment, className }: Props) {
             inlineRef.current?.pause()
             setFullscreen(true)
           }}
-          className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-md bg-black/40 text-white backdrop-blur-sm hover:bg-black/60"
+          className="absolute right-2 lg:right-[0.556vw] top-2 lg:top-[0.556vw] inline-flex size-8 lg:size-[2.222vw] items-center justify-center rounded-md lg:rounded-[0.556vw] bg-black/40 text-white backdrop-blur-sm hover:bg-black/60"
           aria-label="Fullscreen"
         >
-          <Maximize2 className="size-4" />
+          <Maximize2 className="size-4 lg:size-[1.111vw]" />
         </button>
 
         {attachment.durationMs ? (
-          <span className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-white backdrop-blur-sm">
+          <span className="absolute bottom-2 lg:bottom-[0.556vw] left-2 lg:left-[0.556vw] rounded lg:rounded-[0.324vw] bg-black/60 px-1.5 lg:px-[0.417vw] py-0.5 lg:py-[0.139vw] text-[10px] lg:text-[0.694vw] font-medium tabular-nums text-white backdrop-blur-sm">
             {formatDuration(attachment.durationMs)}
           </span>
         ) : null}
@@ -143,19 +143,19 @@ function FullscreenPlayer({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 lg:p-[1.111vw]"
       onClick={onClose}
     >
       <button
         type="button"
-        className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+        className="absolute right-4 lg:right-[1.111vw] top-4 lg:top-[1.111vw] inline-flex size-10 lg:size-[2.778vw] items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
         onClick={(e) => {
           e.stopPropagation()
           onClose()
         }}
         aria-label="Close"
       >
-        <X className="size-5" />
+        <X className="size-5 lg:size-[1.389vw]" />
       </button>
 
       <div
@@ -171,16 +171,16 @@ function FullscreenPlayer({
           playsInline
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          className="max-h-[90vh] max-w-[90vw] rounded-lg"
+          className="max-h-[90vh] max-w-[90vw] rounded-lg lg:rounded-[0.694vw]"
         />
         {!playing ? (
           <button
             type="button"
             onClick={() => void ref.current?.play()}
-            className="absolute left-1/2 top-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+            className="absolute left-1/2 top-1/2 flex size-16 lg:size-[4.444vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
             aria-label="Play"
           >
-            <Play className="size-7 translate-x-0.5" />
+            <Play className="size-7 lg:size-[1.944vw] translate-x-0.5 lg:translate-x-[0.139vw]" />
           </button>
         ) : null}
       </div>

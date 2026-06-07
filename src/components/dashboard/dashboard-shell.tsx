@@ -86,18 +86,18 @@ export function DashboardShell({
       <SidebarProvider defaultOpen>
         <Sidebar collapsible="icon" variant="sidebar">
           {/* Logo at top */}
-          <SidebarHeader className="px-3 pt-4 pb-3">
+          <SidebarHeader className="px-3 lg:px-[0.833vw] pt-4 lg:pt-[1.111vw] pb-3 lg:pb-[0.833vw]">
             <Link
               href={brandHref}
               prefetch
               aria-label={brandLabel}
-              className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md"
+              className="flex items-center gap-2.5 lg:gap-[0.694vw] outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md lg:rounded-[0.556vw]"
             >
               <SVGIcon
                 src="/icons/logo.svg"
-                className="size-5 text-sidebar-primary"
+                className="size-5 lg:size-[1.389vw] text-sidebar-primary"
               />
-              <span className="truncate text-base font-semibold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden">
+              <span className="truncate text-base lg:text-[1.111vw] font-semibold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden">
                 {brandLabel}
               </span>
             </Link>
@@ -123,11 +123,11 @@ export function DashboardShell({
                           <Link
                             href={item.href}
                             prefetch
-                            className="flex w-full min-w-0 items-center gap-2.5"
+                            className="flex w-full min-w-0 items-center gap-2.5 lg:gap-[0.694vw]"
                           >
                             <Icon
                               name={item.icon}
-                              className="size-5 shrink-0"
+                              className="size-5 lg:size-[1.389vw] shrink-0"
                             />
                             <span className="min-w-0 flex-1 truncate">
                               {item.label}
@@ -151,18 +151,18 @@ export function DashboardShell({
           </SidebarContent>
 
           {/* Status / announcement at bottom */}
-          <SidebarFooter className="px-2 pb-3 pt-1">{notice}</SidebarFooter>
+          <SidebarFooter className="px-2 lg:px-[0.556vw] pb-3 lg:pb-[0.833vw] pt-1 lg:pt-[0.278vw]">{notice}</SidebarFooter>
 
           <SidebarRail />
         </Sidebar>
 
         <SidebarInset className="min-h-0 flex-1 overflow-hidden bg-background">
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border bg-background px-4">
+          <header className="flex h-14 lg:h-[3.889vw] shrink-0 items-center gap-2 lg:gap-[0.556vw] border-b border-border bg-background px-4 lg:px-[1.111vw]">
             <SidebarTrigger className="md:hidden" />
-            <div className="ml-auto flex items-center gap-2">{topRight}</div>
+            <div className="ml-auto flex items-center gap-2 lg:gap-[0.556vw]">{topRight}</div>
           </header>
 
-          <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6">
+          <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6 lg:p-[1.667vw]">
             {children}
           </div>
         </SidebarInset>

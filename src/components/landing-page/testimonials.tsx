@@ -27,15 +27,15 @@ export function Testimonials() {
   return (
     <section
       id="reviews"
-      className="mx-auto max-w-6xl scroll-mt-20 px-5 py-24 lg:py-32"
+      className="mx-auto scroll-mt-20 lg:scroll-mt-[5.556vw] px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]"
     >
       <SectionHead eyebrow="Reviews" title="Real homeowners. Real roofs." />
-      <div className="mt-12 grid gap-4 md:grid-cols-3">
+      <div className="mt-12 lg:mt-[3.333vw] grid gap-4 lg:gap-[1.111vw] md:grid-cols-3">
         {REVIEWS.map((r) => (
           <figure
             key={r.name}
             className={cn(
-              "flex flex-col rounded-2xl p-7",
+              "flex flex-col rounded-2xl lg:rounded-[1.111vw] p-7 lg:p-[1.944vw]",
               r.featured
                 ? "bg-foreground text-background"
                 : "border border-border bg-card text-foreground",
@@ -44,24 +44,24 @@ export function Testimonials() {
             <Stars />
             <blockquote
               className={cn(
-                "mt-5 flex-1 text-[15px] leading-relaxed",
-                r.featured ? "font-sebenta text-xl font-medium leading-snug" : "text-foreground/80",
+                "mt-5 lg:mt-[1.389vw] flex-1 text-[15px] lg:text-[1.042vw] leading-relaxed",
+                r.featured ? "font-sebenta text-xl lg:text-[1.389vw] font-medium leading-snug" : "text-foreground/80",
               )}
             >
               &ldquo;{r.quote}&rdquo;
             </blockquote>
-            <figcaption className="mt-6 flex items-center gap-3">
+            <figcaption className="mt-6 lg:mt-[1.667vw] flex items-center gap-3 lg:gap-[0.833vw]">
               <span
                 className={cn(
-                  "flex size-10 items-center justify-center rounded-full font-sebenta text-sm font-bold",
+                  "flex size-10 lg:size-[2.778vw] items-center justify-center rounded-full font-sebenta text-sm lg:text-[0.972vw] font-bold",
                   r.featured ? "bg-secondary text-secondary-foreground" : "bg-muted text-foreground/70",
                 )}
               >
                 {r.name.charAt(0)}
               </span>
               <span>
-                <span className="block text-sm font-semibold">{r.name}</span>
-                <span className={cn("block text-xs", r.featured ? "text-background/55" : "text-foreground/50")}>
+                <span className="block text-sm lg:text-[0.972vw] font-semibold">{r.name}</span>
+                <span className={cn("block text-xs lg:text-[0.833vw]", r.featured ? "text-background/55" : "text-foreground/50")}>
                   {r.city}
                 </span>
               </span>

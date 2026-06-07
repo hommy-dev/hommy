@@ -225,20 +225,20 @@ export function SetupModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[560px]">
         {done ? (
-          <div className="px-8 pb-8 pt-10 text-center">
-            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+          <div className="px-8 lg:px-[2.222vw] pb-8 lg:pb-[2.222vw] pt-10 lg:pt-[2.778vw] text-center">
+            <div className="mx-auto flex size-16 lg:size-[4.444vw] items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
               <BigCheck />
             </div>
-            <DialogTitle className="mt-5 font-sebenta text-2xl font-bold">
+            <DialogTitle className="mt-5 lg:mt-[1.389vw] font-sebenta text-2xl lg:text-[1.667vw] font-bold">
               You’re all set!
             </DialogTitle>
-            <DialogDescription className="mx-auto mt-2 max-w-xs text-[15px] leading-relaxed">
+            <DialogDescription className="mx-auto mt-2 lg:mt-[0.556vw] max-w-xs lg:max-w-[22.22vw] text-[15px] lg:text-[1.042vw] leading-relaxed">
               We’re reviewing your documents now. We’ll let you know the moment
               you’re verified, usually within a day.
             </DialogDescription>
             <Button
               size="lg"
-              className="mt-7 w-full"
+              className="mt-7 lg:mt-[1.944vw] w-full"
               onClick={() => {
                 onOpenChange(false);
                 reset();
@@ -251,13 +251,13 @@ export function SetupModal({
         ) : (
           <>
             {/* sticky header: close (from DialogContent) + progress */}
-            <div className="shrink-0 border-b border-border px-7 pb-6 pt-7">
-              <div className="flex items-center justify-start gap-2">
+            <div className="shrink-0 border-b border-border px-7 lg:px-[1.944vw] pb-6 lg:pb-[1.667vw] pt-7 lg:pt-[1.944vw]">
+              <div className="flex items-center justify-start gap-2 lg:gap-[0.556vw]">
                 {STEPS.map((_, i) => (
                   <span
                     key={i}
                     className={cn(
-                      "h-1 w-12 rounded-full transition-colors",
+                      "h-1 lg:h-[0.278vw] w-12 lg:w-[3.333vw] rounded-full transition-colors",
                       i <= step ? "bg-primary" : "bg-muted",
                     )}
                   />
@@ -266,29 +266,29 @@ export function SetupModal({
             </div>
 
             {/* scrollable middle */}
-            <div className="flex-1 overflow-y-auto px-7 py-6">
+            <div className="flex-1 overflow-y-auto px-7 lg:px-[1.944vw] py-6 lg:py-[1.667vw]">
               <DialogHeader>
                 <DialogTitle>{STEPS[step].title}</DialogTitle>
                 <DialogDescription>{STEPS[step].desc}</DialogDescription>
               </DialogHeader>
 
-              <div className="mt-7">
+              <div className="mt-7 lg:mt-[1.944vw]">
                 {step === 0 ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
+                  <div className="space-y-4 lg:space-y-[1.111vw]">
+                    <div className="flex items-center gap-4 lg:gap-[1.111vw]">
                       {logo.preview ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={logo.preview}
                           alt=""
-                          className="size-16 rounded-full border border-border object-cover"
+                          className="size-16 lg:size-[4.444vw] rounded-full border border-border object-cover"
                         />
                       ) : (
-                        <div className="grid size-16 place-items-center rounded-full border-2 border-dashed border-foreground/15 text-foreground/35">
+                        <div className="grid size-16 lg:size-[4.444vw] place-items-center rounded-full border-2 border-dashed border-foreground/15 text-foreground/35">
                           <ImageGlyph />
                         </div>
                       )}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
                         <Button asChild variant="outline" size="sm">
                           <label>
                             {logo.file || logo.url
@@ -345,7 +345,7 @@ export function SetupModal({
                     </Field>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 lg:space-y-[1.111vw]">
                     <FileField
                       label="License document"
                       slot={license}
@@ -362,7 +362,7 @@ export function SetupModal({
             </div>
 
             {/* sticky footer */}
-            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border px-7 py-4">
+            <div className="flex shrink-0 items-center justify-between gap-3 lg:gap-[0.833vw] border-t border-border px-7 lg:px-[1.944vw] py-4 lg:py-[1.111vw]">
               <Button
                 variant="ghost"
                 onClick={() => setStep(0)}
@@ -372,7 +372,7 @@ export function SetupModal({
               </Button>
               <Button
                 size="lg"
-                className="px-8"
+                className="px-8 lg:px-[2.222vw]"
                 disabled={
                   (step === 0 ? !step0Valid : !step1Valid) || submitting
                 }
@@ -408,31 +408,31 @@ function FileField({
 
   return (
     <div>
-      <Label className="mb-1.5">{label}</Label>
+      <Label className="mb-1.5 lg:mb-[0.417vw]">{label}</Label>
       {has ? (
-        <div className="space-y-2.5">
-          <div className="overflow-hidden rounded-xl border border-border bg-muted/30">
+        <div className="space-y-2.5 lg:space-y-[0.694vw]">
+          <div className="overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-muted/30">
             {kind === "image" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={slot.preview ?? undefined}
                 alt={label}
-                className="mx-auto max-h-56 w-full object-contain"
+                className="mx-auto max-h-56 lg:max-h-[15.556vw] w-full object-contain"
               />
             ) : kind === "pdf" ? (
               <iframe
                 src={slot.preview ?? undefined}
                 title={label}
-                className="h-56 w-full"
+                className="h-56 lg:h-[15.556vw] w-full"
               />
             ) : (
-              <div className="flex h-40 items-center justify-center text-foreground/40">
+              <div className="flex h-40 lg:h-[11.111vw] items-center justify-center text-foreground/40">
                 <FileGlyph />
               </div>
             )}
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
+            <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
               <Button asChild variant="outline" size="sm">
                 <label>
                   Replace
@@ -453,7 +453,7 @@ function FileField({
               </Button>
             </div>
             {slot.file ? (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs lg:text-[0.833vw] text-muted-foreground">
                 {fileMeta(slot.file)}
               </span>
             ) : slot.url ? (
@@ -461,7 +461,7 @@ function FileField({
                 href={slot.url}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs font-medium text-primary hover:underline"
+                className="text-xs lg:text-[0.833vw] font-medium text-primary hover:underline"
               >
                 Open
               </a>
@@ -469,18 +469,18 @@ function FileField({
           </div>
         </div>
       ) : (
-        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-foreground/15 px-4 py-7 text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
+        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 lg:gap-[0.556vw] rounded-xl lg:rounded-[0.926vw] border-2 border-dashed border-foreground/15 px-4 lg:px-[1.111vw] py-7 lg:py-[1.944vw] text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
           <input
             type="file"
             accept="image/png,image/jpeg,image/webp,application/pdf"
             className="hidden"
             onChange={onPick}
           />
-          <span className="flex size-10 items-center justify-center rounded-full bg-muted text-foreground/50">
+          <span className="flex size-10 lg:size-[2.778vw] items-center justify-center rounded-full bg-muted text-foreground/50">
             <UploadGlyph />
           </span>
-          <p className="text-sm font-semibold">Click to upload</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm lg:text-[0.972vw] font-semibold">Click to upload</p>
+          <p className="text-xs lg:text-[0.833vw] text-muted-foreground">
             PDF or image, up to 10MB
           </p>
         </label>
@@ -497,7 +497,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 lg:space-y-[0.417vw]">
       <Label>{label}</Label>
       {children}
     </div>

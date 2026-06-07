@@ -50,32 +50,32 @@ export function ChatSidebar({ viewer, basePath }: Props) {
 
   return (
     <aside className="flex min-h-0 w-full shrink-0 flex-col border-r border-border bg-background md:w-80">
-      <header className="border-b border-border px-4 py-4">
-        <h2 className="text-base font-semibold tracking-tight text-foreground">
+      <header className="border-b border-border px-4 lg:px-[1.111vw] py-4 lg:py-[1.111vw]">
+        <h2 className="text-base lg:text-[1.111vw] font-semibold tracking-tight text-foreground">
           Messages
         </h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
+        <p className="mt-0.5 lg:mt-[0.139vw] text-xs lg:text-[0.833vw] text-muted-foreground">
           {viewer === 'homeowner'
             ? 'Pre-hire questions and active jobs.'
             : 'Pre-hire chats on your quotes and active jobs.'}
         </p>
       </header>
 
-      <div className="border-b border-border p-3">
+      <div className="border-b border-border p-3 lg:p-[0.833vw]">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-3.5 lg:size-[0.972vw] -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search conversations"
-            className="h-9 pl-9"
+            className="h-9 lg:h-[2.5vw] pl-9 lg:pl-[2.5vw]"
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {filtered.length === 0 ? (
-          <div className="flex h-full items-center justify-center px-6 py-12 text-center text-xs text-muted-foreground">
+          <div className="flex h-full items-center justify-center px-6 lg:px-[1.667vw] py-12 lg:py-[3.333vw] text-center text-xs lg:text-[0.833vw] text-muted-foreground">
             {query
               ? 'No conversations match that search.'
               : viewer === 'homeowner'
@@ -125,22 +125,22 @@ function SidebarRow({
       <Link
         href={href}
         className={cn(
-          'flex items-start gap-3 border-b border-border/60 px-3 py-3 transition-colors',
+          'flex items-start gap-3 lg:gap-[0.833vw] border-b border-border/60 px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] transition-colors',
           active ? 'bg-muted/80' : 'hover:bg-muted/50',
         )}
       >
         <div className="relative shrink-0">
-          <Avatar size="default" className="size-10">
+          <Avatar size="default" className="size-10 lg:size-[2.778vw]">
             {otherAvatar ? <AvatarImage src={otherAvatar} alt="" /> : null}
-            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            <AvatarFallback className="text-xs lg:text-[0.833vw]">{initials}</AvatarFallback>
           </Avatar>
           <AvatarOnlineDot userId={otherUserId} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-baseline justify-between gap-2">
+          <div className="flex items-baseline justify-between gap-2 lg:gap-[0.556vw]">
             <p
               className={cn(
-                'truncate text-sm',
+                'truncate text-sm lg:text-[0.972vw]',
                 hasUnread
                   ? 'font-semibold text-foreground'
                   : 'font-medium text-foreground',
@@ -149,7 +149,7 @@ function SidebarRow({
               {otherName || 'Conversation'}
             </p>
             {c.lastMessageAt ? (
-              <span className="shrink-0 text-[11px] text-muted-foreground">
+              <span className="shrink-0 text-[11px] lg:text-[0.764vw] text-muted-foreground">
                 {formatShortTime(c.lastMessageAt)}
               </span>
             ) : null}
@@ -157,20 +157,20 @@ function SidebarRow({
 
           <p
             className={cn(
-              'mt-0.5 truncate text-xs',
+              'mt-0.5 lg:mt-[0.139vw] truncate text-xs lg:text-[0.833vw]',
               hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground',
             )}
           >
             {c.lastMessagePreview ?? 'No messages yet'}
           </p>
 
-          <p className="mt-1 truncate text-[11px] text-muted-foreground">
+          <p className="mt-1 lg:mt-[0.278vw] truncate text-[11px] lg:text-[0.764vw] text-muted-foreground">
             {statusLabel(c)}
           </p>
         </div>
 
         {hasUnread ? (
-          <span className="mt-1 inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground tabular-nums">
+          <span className="mt-1 lg:mt-[0.278vw] inline-flex min-w-5 lg:min-w-[1.389vw] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 lg:px-[0.417vw] text-[10px] lg:text-[0.694vw] font-semibold text-primary-foreground tabular-nums">
             {c.unreadCount > 99 ? '99+' : c.unreadCount}
           </span>
         ) : null}

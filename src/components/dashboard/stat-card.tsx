@@ -15,13 +15,13 @@ export function StatCard({
   tint?: string
 }) {
   return (
-    <div className="rounded-md border border-border bg-card p-5">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="rounded-md lg:rounded-[0.556vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+      <div className="flex items-start justify-between gap-3 lg:gap-[0.833vw]">
+        <p className="text-sm lg:text-[0.972vw] text-muted-foreground">{label}</p>
         {icon ? (
           <span
             className={cn(
-              "flex size-9 items-center justify-center rounded-xl",
+              "flex size-9 lg:size-[2.5vw] items-center justify-center rounded-xl lg:rounded-[0.926vw]",
               tint ?? "bg-muted text-muted-foreground",
             )}
           >
@@ -29,10 +29,10 @@ export function StatCard({
           </span>
         ) : null}
       </div>
-      <p className="mt-3 font-sebenta text-[1.75rem] font-bold leading-none tracking-tight tabular-nums">
+      <p className="mt-3 lg:mt-[0.833vw] font-sebenta text-[1.75rem] lg:text-[1.944vw] font-bold leading-none tracking-tight tabular-nums">
         {value}
       </p>
-      {hint ? <p className="mt-2 text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? <p className="mt-2 lg:mt-[0.556vw] text-xs lg:text-[0.833vw] text-muted-foreground">{hint}</p> : null}
     </div>
   )
 }

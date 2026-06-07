@@ -417,7 +417,7 @@ export function ChatWindow({
           strip — "Online now" moved to the avatar dot in the page
           header so it doesn't steal a whole line). */}
       {otherIsTyping ? (
-        <div className="flex h-5 items-center gap-1.5 border-b border-border/40 bg-background/60 px-4 text-[11px] text-muted-foreground">
+        <div className="flex h-5 lg:h-[1.389vw] items-center gap-1.5 lg:gap-[0.417vw] border-b border-border/40 bg-background/60 px-4 lg:px-[1.111vw] text-[11px] lg:text-[0.764vw] text-muted-foreground">
           <TypingDots />
           <span>typing…</span>
         </div>
@@ -436,13 +436,13 @@ export function ChatWindow({
         hasMoreOlder={hasMoreOlder}
         loadingOlder={loadingOlder}
         emptyState={
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm lg:text-[0.972vw] text-muted-foreground">
             No messages yet. Say hello.
           </div>
         }
       />
       {readOnlyReason ? (
-        <div className="border-t border-border bg-muted/40 p-3 text-center text-xs text-muted-foreground">
+        <div className="border-t border-border bg-muted/40 p-3 lg:p-[0.833vw] text-center text-xs lg:text-[0.833vw] text-muted-foreground">
           {readOnlyReason}
         </div>
       ) : (
@@ -461,10 +461,10 @@ export function ChatWindow({
 
 function TypingDots() {
   return (
-    <span aria-hidden className="inline-flex items-end gap-0.5">
-      <span className="inline-block size-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-      <span className="inline-block size-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-      <span className="inline-block size-1 animate-bounce rounded-full bg-muted-foreground" />
+    <span aria-hidden className="inline-flex items-end gap-0.5 lg:gap-[0.139vw]">
+      <span className="inline-block size-1 lg:size-[0.278vw] animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+      <span className="inline-block size-1 lg:size-[0.278vw] animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+      <span className="inline-block size-1 lg:size-[0.278vw] animate-bounce rounded-full bg-muted-foreground" />
     </span>
   )
 }

@@ -38,32 +38,32 @@ export function ConversationListRow({
     <Link
       href={href}
       className={cn(
-        'flex items-start gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40',
+        'flex items-start gap-3 lg:gap-[0.833vw] rounded-xl lg:rounded-[0.926vw] border border-border bg-card p-3 lg:p-[0.833vw] transition-colors hover:border-primary/40',
         hasUnread && 'ring-1 ring-primary/30',
       )}
     >
-      <Avatar size="default" className="size-10 shrink-0">
+      <Avatar size="default" className="size-10 lg:size-[2.778vw] shrink-0">
         {otherAvatar ? <AvatarImage src={otherAvatar} alt="" /> : null}
-        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        <AvatarFallback className="text-xs lg:text-[0.833vw]">{initials}</AvatarFallback>
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm font-medium text-foreground">
+        <div className="flex items-center justify-between gap-2 lg:gap-[0.556vw]">
+          <p className="truncate text-sm lg:text-[0.972vw] font-medium text-foreground">
             {otherName || 'Conversation'}
           </p>
           {c.lastMessageAt ? (
-            <span className="shrink-0 text-[11px] text-muted-foreground">
+            <span className="shrink-0 text-[11px] lg:text-[0.764vw] text-muted-foreground">
               {formatShortTime(c.lastMessageAt)}
             </span>
           ) : null}
         </div>
 
-        <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+        <p className="truncate text-xs lg:text-[0.833vw] text-muted-foreground">{subtitle}</p>
 
         <p
           className={cn(
-            'mt-0.5 truncate text-xs',
+            'mt-0.5 lg:mt-[0.139vw] truncate text-xs lg:text-[0.833vw]',
             hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground',
           )}
         >
@@ -72,7 +72,7 @@ export function ConversationListRow({
       </div>
 
       {hasUnread ? (
-        <span className="mt-1.5 inline-flex size-2 shrink-0 rounded-full bg-primary" />
+        <span className="mt-1.5 lg:mt-[0.417vw] inline-flex size-2 lg:size-[0.556vw] shrink-0 rounded-full bg-primary" />
       ) : null}
     </Link>
   )

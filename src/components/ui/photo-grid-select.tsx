@@ -54,7 +54,7 @@ export function PhotoGridSelect<T extends string>({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className={cn('grid grid-cols-2 gap-3', colsClass)}
+      className={cn('grid grid-cols-2 gap-3 lg:gap-[0.833vw]', colsClass)}
     >
       {options.map((opt) => {
         const selected = value === opt.value
@@ -66,7 +66,7 @@ export function PhotoGridSelect<T extends string>({
             aria-checked={selected}
             onClick={() => onChange(opt.value)}
             className={cn(
-              'group relative flex flex-col overflow-hidden rounded-xl border bg-background text-left outline-none transition-all',
+              'group relative flex flex-col overflow-hidden rounded-xl lg:rounded-[0.926vw] border bg-background text-left outline-none transition-all',
               'hover:border-primary/40 hover:shadow-sm',
               'focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
               selected
@@ -90,36 +90,36 @@ export function PhotoGridSelect<T extends string>({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
+                <div className="flex size-full items-center justify-center text-xs lg:text-[0.833vw] text-muted-foreground">
                   {opt.label}
                 </div>
               )}
 
               {selected ? (
-                <span className="absolute right-2 top-2 z-10 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-                  <Check className="size-3.5" />
+                <span className="absolute right-2 lg:right-[0.556vw] top-2 lg:top-[0.556vw] z-10 flex size-6 lg:size-[1.667vw] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                  <Check className="size-3.5 lg:size-[0.972vw]" />
                 </span>
               ) : null}
 
               {opt.warning ? (
-                <span className="absolute inset-x-0 bottom-0 z-10 truncate bg-amber-500/90 px-2 py-1 text-[11px] font-medium text-white">
+                <span className="absolute inset-x-0 bottom-0 z-10 truncate bg-amber-500/90 px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-[11px] lg:text-[0.764vw] font-medium text-white">
                   ⚠ {opt.warning}
                 </span>
               ) : null}
             </div>
 
             {/* Caption */}
-            <div className="flex flex-col gap-0.5 px-3 py-2.5">
+            <div className="flex flex-col gap-0.5 lg:gap-[0.139vw] px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw]">
               <span
                 className={cn(
-                  'text-sm font-medium',
+                  'text-sm lg:text-[0.972vw] font-medium',
                   selected ? 'text-foreground' : 'text-foreground/90',
                 )}
               >
                 {opt.label}
               </span>
               {opt.description ? (
-                <span className="text-xs leading-snug text-muted-foreground">
+                <span className="text-xs lg:text-[0.833vw] leading-snug text-muted-foreground">
                   {opt.description}
                 </span>
               ) : null}

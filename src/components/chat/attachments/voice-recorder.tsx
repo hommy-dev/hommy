@@ -233,10 +233,10 @@ export function VoiceRecorder({ conversationId, onCancel, onSend }: Props) {
   const busy = state === 'uploading'
 
   return (
-    <div className="border-t border-border bg-background px-4 py-3">
+    <div className="border-t border-border bg-background px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
       <div
         className={cn(
-          'flex items-center gap-3 rounded-full border border-border bg-muted/40 px-3 py-1.5',
+          'flex items-center gap-3 lg:gap-[0.833vw] rounded-full border border-border bg-muted/40 px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw]',
           busy && 'opacity-60',
         )}
       >
@@ -244,26 +244,26 @@ export function VoiceRecorder({ conversationId, onCancel, onSend }: Props) {
           type="button"
           onClick={handleCancel}
           disabled={busy}
-          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          className="inline-flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           aria-label="Cancel recording"
         >
-          <Trash2 className="size-4" />
+          <Trash2 className="size-4 lg:size-[1.111vw]" />
         </button>
 
-        <span className="flex size-2 shrink-0 items-center justify-center">
+        <span className="flex size-2 lg:size-[0.556vw] shrink-0 items-center justify-center">
           <span
             className={cn(
-              'inline-block size-2 rounded-full bg-destructive',
+              'inline-block size-2 lg:size-[0.556vw] rounded-full bg-destructive',
               state === 'recording' && 'animate-pulse',
             )}
           />
         </span>
 
-        <span className="shrink-0 tabular-nums text-[11px] font-medium text-foreground">
+        <span className="shrink-0 tabular-nums text-[11px] lg:text-[0.764vw] font-medium text-foreground">
           {formatMs(elapsedMs)}
         </span>
 
-        <div className="flex min-w-[120px] flex-1 items-center gap-[2px]">
+        <div className="flex min-w-[120px] lg:min-w-[8.333vw] flex-1 items-center gap-[2px] lg:gap-[0.139vw]">
           {liveBars.map((h, i) => (
             <span
               key={i}
@@ -281,17 +281,17 @@ export function VoiceRecorder({ conversationId, onCancel, onSend }: Props) {
           type="button"
           onClick={handleStopAndSend}
           disabled={busy}
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex size-9 lg:size-[2.5vw] shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           aria-label="Send voice message"
         >
           {busy ? (
-            <Mic className="size-4 animate-pulse" />
+            <Mic className="size-4 lg:size-[1.111vw] animate-pulse" />
           ) : (
-            <Send className="size-4" />
+            <Send className="size-4 lg:size-[1.111vw]" />
           )}
         </button>
       </div>
-      <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+      <p className="mt-1.5 lg:mt-[0.417vw] text-center text-[11px] lg:text-[0.764vw] text-muted-foreground">
         {busy
           ? 'Uploading…'
           : `Recording · max ${Math.floor(MAX_RECORDING_MS / 60000)} min`}

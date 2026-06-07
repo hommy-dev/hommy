@@ -158,7 +158,7 @@ export function MessageList({
     return (
       <div
         className={cn(
-          'flex flex-1 items-center justify-center p-8',
+          'flex flex-1 items-center justify-center p-8 lg:p-[2.222vw]',
           className,
         )}
       >
@@ -171,15 +171,15 @@ export function MessageList({
     <div
       ref={scrollRef}
       className={cn(
-        'flex-1 overflow-y-auto overscroll-contain px-4 py-3',
+        'flex-1 overflow-y-auto overscroll-contain px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]',
         className,
       )}
     >
       {onLoadOlder ? (
-        <div className="flex h-8 items-center justify-center text-[11px] text-muted-foreground">
+        <div className="flex h-8 lg:h-[2.222vw] items-center justify-center text-[11px] lg:text-[0.764vw] text-muted-foreground">
           {loadingOlder ? (
-            <span className="inline-flex items-center gap-1.5">
-              <Loader2 className="size-3 animate-spin" />
+            <span className="inline-flex items-center gap-1.5 lg:gap-[0.417vw]">
+              <Loader2 className="size-3 lg:size-[0.833vw] animate-spin" />
               Loading older messages…
             </span>
           ) : !hasMoreOlder && messages.length > 0 ? (

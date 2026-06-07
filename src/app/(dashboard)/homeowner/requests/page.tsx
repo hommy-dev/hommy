@@ -36,11 +36,11 @@ export default async function HomeownerRequestsPage() {
   const requests = ho ? await getHomeownerLeads(ho.id) : []
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-end justify-between gap-4">
+    <div className="space-y-6 lg:space-y-[1.667vw]">
+      <header className="flex items-end justify-between gap-4 lg:gap-[1.111vw]">
         <div>
-          <h1 className="font-sebenta text-2xl font-bold tracking-tight">My requests</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">My requests</h1>
+          <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
             Your posted projects and how many contractors we matched.
           </p>
         </div>
@@ -50,32 +50,32 @@ export default async function HomeownerRequestsPage() {
       </header>
 
       {requests.length === 0 ? (
-        <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-dashed border-border text-center">
-          <h2 className="font-sebenta text-lg font-semibold">No requests yet</h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl lg:rounded-[1.111vw] border border-dashed border-border text-center">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-semibold">No requests yet</h2>
+          <p className="mt-1 lg:mt-[0.278vw] max-w-sm lg:max-w-[26.664vw] text-sm lg:text-[0.972vw] text-muted-foreground">
             Post your first roofing project and start receiving quotes from
             vetted local contractors.
           </p>
-          <Button asChild size="lg" className="mt-5">
+          <Button asChild size="lg" className="mt-5 lg:mt-[1.389vw]">
             <Link href="/get-a-quote">Get a quote</Link>
           </Button>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3 lg:space-y-[0.833vw]">
           {requests.map((r) => {
             const status = STATUS_META[r.status] ?? STATUS_META.open
             const where = [r.city, r.state].filter(Boolean).join(", ")
             return (
               <li
                 key={r.id}
-                className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-foreground/20"
+                className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw] transition-colors hover:border-foreground/20"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-4 lg:gap-[1.111vw]">
                   <div className="min-w-0">
                     <h3 className="font-semibold capitalize">
                       {r.subtype ? r.subtype.replace(/_/g, " ") : r.serviceName}
                     </h3>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
+                    <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-muted-foreground">
                       {where || r.zipCode}
                       {" · "}
                       {URGENCY_LABEL[r.urgency] ?? r.urgency}
@@ -83,14 +83,14 @@ export default async function HomeownerRequestsPage() {
                   </div>
                   <span
                     className={cn(
-                      "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
+                      "shrink-0 rounded-full px-3 lg:px-[0.833vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-medium",
                       status.className,
                     )}
                   >
                     {status.label}
                   </span>
                 </div>
-                <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="mt-4 lg:mt-[1.111vw] flex items-center gap-2 lg:gap-[0.556vw] text-xs lg:text-[0.833vw] text-muted-foreground">
                   <span>Posted {timeAgo(r.createdAt)}</span>
                   <span aria-hidden>·</span>
                   <span>

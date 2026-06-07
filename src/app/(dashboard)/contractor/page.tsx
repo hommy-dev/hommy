@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   if (!contractor) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
         Your contractor profile isn’t set up yet. Finish onboarding to start
         receiving leads.
       </p>
@@ -31,8 +31,8 @@ export default async function DashboardPage() {
     verification === "not_started" || verification === "rejected";
 
   return (
-    <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-lg">
+    <div className="space-y-6 lg:space-y-[1.667vw]">
+      <header className="relative overflow-hidden rounded-lg lg:rounded-[0.694vw]">
         {/* background image */}
         <div
           aria-hidden
@@ -46,11 +46,11 @@ export default async function DashboardPage() {
           aria-hidden
           className="absolute inset-0 bg-linear-to-r from-black/85 via-black/55 to-transparent"
         />
-        <div className="relative flex min-h-52 flex-col justify-end p-6 sm:p-8">
-          <h1 className="font-sebenta text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        <div className="relative flex min-h-52 lg:min-h-[14.445vw] flex-col justify-end p-6 lg:p-[1.667vw] sm:p-8">
+          <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight text-white sm:text-3xl">
             {contractor.companyName ?? "Your dashboard"}
           </h1>
-          <p className="mt-1.5 max-w-md text-sm text-white/75">
+          <p className="mt-1.5 lg:mt-[0.417vw] max-w-md lg:max-w-[31.108vw] text-sm lg:text-[0.972vw] text-white/75">
             Here’s what’s happening with your leads and jobs.
           </p>
         </div>
@@ -87,7 +87,7 @@ async function StatsRow({ contractor }: { contractor: Contractor }) {
     : "—";
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
         label="Open offers"
         value={stats.openOffers}
@@ -125,24 +125,24 @@ async function RecentLeads({ contractorId }: { contractorId: string }) {
   const recent = leads.slice(0, 6);
 
   return (
-    <section className="rounded-md border border-border bg-card p-5">
+    <section className="rounded-md lg:rounded-[0.556vw] border border-border bg-card p-5 lg:p-[1.389vw]">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Recent leads</h2>
+        <h2 className="text-sm lg:text-[0.972vw] font-semibold">Recent leads</h2>
         <Link
           href="/contractor/leads"
           prefetch
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-sm lg:text-[0.972vw] font-medium text-primary hover:underline"
         >
           View all
         </Link>
       </div>
       {recent.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+        <div className="mt-4 lg:mt-[1.111vw] rounded-xl lg:rounded-[0.926vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
           No leads yet. New offers will appear here the moment they’re sent your
           way.
         </div>
       ) : (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 lg:mt-[1.111vw] grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
           {recent.map((lead) => (
             <LeadCard key={lead.id} lead={lead} />
           ))}
@@ -154,9 +154,9 @@ async function RecentLeads({ contractorId }: { contractorId: string }) {
 
 function StatsSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-[108px] rounded-2xl" />
+        <Skeleton key={i} className="h-[108px] lg:h-[7.5vw] rounded-2xl lg:rounded-[1.111vw]" />
       ))}
     </div>
   );
@@ -164,11 +164,11 @@ function StatsSkeleton() {
 
 function LeadsSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <Skeleton className="h-5 w-32" />
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+    <div className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+      <Skeleton className="h-5 lg:h-[1.389vw] w-32 lg:w-[8.889vw]" />
+      <div className="mt-4 lg:mt-[1.111vw] grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-lg" />
+          <Skeleton key={i} className="h-28 lg:h-[7.778vw] rounded-lg lg:rounded-[0.694vw]" />
         ))}
       </div>
     </div>

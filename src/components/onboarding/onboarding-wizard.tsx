@@ -98,25 +98,25 @@ export function OnboardingWizard({
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas text-foreground">
-      <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-5">
-        <span className="font-sebenta text-lg font-bold">Homei</span>
+      <header className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-between px-6 lg:px-[1.667vw] py-5 lg:py-[1.389vw]">
+        <span className="font-sebenta text-lg lg:text-[1.25vw] font-bold">Homei</span>
         <Link
           href="/contractor"
-          className="text-xs font-medium text-foreground/50 transition-colors hover:text-foreground"
+          className="text-xs lg:text-[0.833vw] font-medium text-foreground/50 transition-colors hover:text-foreground"
         >
           Skip for now
         </Link>
       </header>
 
       {/* progress */}
-      <div className="mx-auto w-full max-w-2xl px-6">
-        <div className="flex items-center justify-between text-xs font-medium text-foreground/50">
+      <div className="mx-auto w-full max-w-2xl lg:max-w-[46.662vw] px-6 lg:px-[1.667vw]">
+        <div className="flex items-center justify-between text-xs lg:text-[0.833vw] font-medium text-foreground/50">
           <span>
             Step {step + 1} of 3 · {STEP_TITLES[step]}
           </span>
           <span>{Math.round(((step + 1) / 3) * 100)}%</span>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+        <div className="mt-2 lg:mt-[0.556vw] h-1.5 lg:h-[0.417vw] overflow-hidden rounded-full bg-foreground/10">
           <div
             className="h-full rounded-full bg-primary transition-[width] duration-300"
             style={{ width: `${((step + 1) / 3) * 100}%` }}
@@ -124,7 +124,7 @@ export function OnboardingWizard({
         </div>
       </div>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-10">
+      <main className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] flex-1 flex-col px-6 lg:px-[1.667vw] py-10 lg:py-[2.778vw]">
         {step === 0 && (
           <Step
             title="Tell us about your company"
@@ -139,7 +139,7 @@ export function OnboardingWizard({
                 autoFocus
               />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
               <Field label="Phone (optional)">
                 <input
                   value={phone}
@@ -167,7 +167,7 @@ export function OnboardingWizard({
             title="What kind of roofing work do you do?"
             sub="Pick everything you handle. You can change this later."
           >
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2.5 lg:gap-[0.694vw]">
               {availableSubtypes.map((s) => {
                 const active = subtypes.includes(s)
                 return (
@@ -176,7 +176,7 @@ export function OnboardingWizard({
                     type="button"
                     onClick={() => toggleSubtype(s)}
                     className={cn(
-                      "rounded-full border px-4 py-2.5 text-sm font-medium transition-colors",
+                      "rounded-full border px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.972vw] font-medium transition-colors",
                       active
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-foreground/15 bg-card text-foreground/70 hover:border-foreground/30",
@@ -188,7 +188,7 @@ export function OnboardingWizard({
               })}
             </div>
             {subtypes.length === 0 && (
-              <p className="mt-4 text-xs text-foreground/45">
+              <p className="mt-4 lg:mt-[1.111vw] text-xs lg:text-[0.833vw] text-foreground/45">
                 Select at least one to continue.
               </p>
             )}
@@ -201,7 +201,7 @@ export function OnboardingWizard({
             sub="Add the areas you serve and how far you'll travel. We only send you leads inside them."
           >
             <Field label="Add an area you cover">
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-2 lg:gap-[0.556vw] sm:flex-row">
                 <div className="min-w-0 flex-1">
                   <GooglePlacesInput
                     key={pickerKey}
@@ -226,19 +226,19 @@ export function OnboardingWizard({
             </Field>
 
             {areas.length > 0 ? (
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 lg:mt-[1.111vw] space-y-2 lg:space-y-[0.556vw]">
                 {areas.map((a, i) => (
                   <div
                     key={`${a.label}-${i}`}
-                    className="flex items-center gap-3 rounded-xl border border-foreground/12 bg-card px-3.5 py-2.5"
+                    className="flex items-center gap-3 lg:gap-[0.833vw] rounded-xl lg:rounded-[0.926vw] border border-foreground/12 bg-card px-3.5 lg:px-[0.972vw] py-2.5 lg:py-[0.694vw]"
                   >
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                    <span className="min-w-0 flex-1 truncate text-sm lg:text-[0.972vw] font-medium">
                       {a.label}
                     </span>
                     <select
                       value={a.radiusMiles}
                       onChange={(e) => setAreaRadius(i, Number(e.target.value))}
-                      className="rounded-lg border border-foreground/15 bg-transparent px-2 py-1 text-xs font-medium text-foreground/70 outline-none"
+                      className="rounded-lg lg:rounded-[0.694vw] border border-foreground/15 bg-transparent px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-medium text-foreground/70 outline-none"
                       aria-label={`Radius for ${a.label}`}
                     >
                       {RADIUS_OPTIONS.map((r) => (
@@ -261,19 +261,19 @@ export function OnboardingWizard({
                 ))}
               </div>
             ) : (
-              <p className="mt-4 text-xs text-foreground/45">
+              <p className="mt-4 lg:mt-[1.111vw] text-xs lg:text-[0.833vw] text-foreground/45">
                 Search a city above to add it. Pick a radius for how far you travel.
               </p>
             )}
           </Step>
         )}
 
-        <div className="mt-auto flex items-center justify-between pt-10">
+        <div className="mt-auto flex items-center justify-between pt-10 lg:pt-[2.778vw]">
           <button
             type="button"
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             className={cn(
-              "text-sm font-medium text-foreground/55 transition-colors hover:text-foreground",
+              "text-sm lg:text-[0.972vw] font-medium text-foreground/55 transition-colors hover:text-foreground",
               step === 0 && "invisible",
             )}
           >
@@ -283,7 +283,7 @@ export function OnboardingWizard({
             type="button"
             onClick={next}
             disabled={!canAdvance || pending}
-            className="rounded-xl bg-primary px-7 py-3 text-sm font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
+            className="rounded-xl lg:rounded-[0.926vw] bg-primary px-7 lg:px-[1.944vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
           >
             {step < 2 ? "Next" : pending ? "Saving..." : "Finish setup"}
           </button>
@@ -294,7 +294,7 @@ export function OnboardingWizard({
 }
 
 const inputCls =
-  "w-full rounded-xl border border-foreground/15 bg-card px-3.5 py-3 text-[15px] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
+  "w-full rounded-xl lg:rounded-[0.926vw] border border-foreground/15 bg-card px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
 
 function Step({
   title,
@@ -307,11 +307,11 @@ function Step({
 }) {
   return (
     <div>
-      <h1 className="font-sebenta text-[2rem] font-bold leading-tight tracking-tight">
+      <h1 className="font-sebenta text-[2rem] lg:text-[2.222vw] font-bold leading-tight tracking-tight">
         {title}
       </h1>
-      <p className="mt-2 text-[15px] text-foreground/60">{sub}</p>
-      <div className="mt-8 space-y-4">{children}</div>
+      <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">{sub}</p>
+      <div className="mt-8 lg:mt-[2.222vw] space-y-4 lg:space-y-[1.111vw]">{children}</div>
     </div>
   )
 }
@@ -324,8 +324,8 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] font-medium text-foreground/75">{label}</label>
+    <div className="space-y-1.5 lg:space-y-[0.417vw]">
+      <label className="text-[13px] lg:text-[0.903vw] font-medium text-foreground/75">{label}</label>
       {children}
     </div>
   )

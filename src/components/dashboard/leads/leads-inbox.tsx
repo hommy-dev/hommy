@@ -21,8 +21,8 @@ export function LeadsInbox({ leads }: { leads: DashboardLead[] }) {
     filter === "all" ? leads : leads.filter((l) => l.urgency === filter)
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-4 lg:space-y-[1.111vw]">
+      <div className="flex flex-wrap gap-2 lg:gap-[0.556vw]">
         {FILTERS.map((f) => {
           const n =
             f.key === "all"
@@ -35,25 +35,25 @@ export function LeadsInbox({ leads }: { leads: DashboardLead[] }) {
               type="button"
               onClick={() => setFilter(f.key)}
               className={cn(
-                "rounded-full border px-3 py-1 text-sm transition-colors",
+                "rounded-full border px-3 lg:px-[0.833vw] py-1 lg:py-[0.278vw] text-sm lg:text-[0.972vw] transition-colors",
                 active
                   ? "border-foreground bg-foreground text-background"
                   : "border-border text-muted-foreground hover:text-foreground",
               )}
             >
               {f.label}
-              <span className="ml-1.5 tabular-nums opacity-70">{n}</span>
+              <span className="ml-1.5 lg:ml-[0.417vw] tabular-nums opacity-70">{n}</span>
             </button>
           )
         })}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg lg:rounded-[0.694vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
           No leads in this view.
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
           {filtered.map((lead) => (
             <LeadCard key={lead.id} lead={lead} />
           ))}

@@ -36,7 +36,7 @@ export function ImageAttachment({ attachment, className }: Props) {
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          'group relative overflow-hidden rounded-lg border border-border bg-muted/40 transition',
+          'group relative overflow-hidden rounded-lg lg:rounded-[0.694vw] border border-border bg-muted/40 transition',
           'hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
           className,
         )}
@@ -57,19 +57,19 @@ export function ImageAttachment({ attachment, className }: Props) {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 lg:p-[1.111vw]"
           onClick={() => setOpen(false)}
         >
           <button
             type="button"
-            className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-full bg-background/10 text-white hover:bg-background/20"
+            className="absolute right-4 lg:right-[1.111vw] top-4 lg:top-[1.111vw] inline-flex size-10 lg:size-[2.778vw] items-center justify-center rounded-full bg-background/10 text-white hover:bg-background/20"
             onClick={(e) => {
               e.stopPropagation()
               setOpen(false)
             }}
             aria-label="Close"
           >
-            <X className="size-5" />
+            <X className="size-5 lg:size-[1.389vw]" />
           </button>
           <div
             className="max-h-[90vh] max-w-[90vw]"
@@ -81,7 +81,7 @@ export function ImageAttachment({ attachment, className }: Props) {
               height={attachment.height ?? 1200}
               alt={attachment.originalFilename ?? 'Image attachment'}
               sizes="90vw"
-              className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
+              className="max-h-[90vh] max-w-[90vw] rounded-lg lg:rounded-[0.694vw] object-contain"
             />
           </div>
         </div>

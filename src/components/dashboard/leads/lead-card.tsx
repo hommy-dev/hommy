@@ -38,13 +38,13 @@ export function LeadCard({ lead }: { lead: DashboardLead }) {
   const when = lead.offeredAt ?? lead.createdAt
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 transition-colors hover:border-foreground/20">
-      <div className="flex items-start justify-between gap-3">
+    <div className="rounded-lg lg:rounded-[0.694vw] border border-border bg-card p-4 lg:p-[1.111vw] transition-colors hover:border-foreground/20">
+      <div className="flex items-start justify-between gap-3 lg:gap-[0.833vw]">
         <div className="min-w-0">
           <p className="truncate font-medium">
             {lead.homeownerName ?? "New homeowner"}
           </p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
+          <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-muted-foreground">
             {lead.serviceName}
             {lead.subtype ? ` · ${lead.subtype}` : ""}
           </p>
@@ -52,11 +52,11 @@ export function LeadCard({ lead }: { lead: DashboardLead }) {
         <Badge className={urgency.className}>{urgency.label}</Badge>
       </div>
       {lead.notes ? (
-        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+        <p className="mt-2 lg:mt-[0.556vw] line-clamp-2 text-sm lg:text-[0.972vw] text-muted-foreground">
           {lead.notes}
         </p>
       ) : null}
-      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+      <div className="mt-3 lg:mt-[0.833vw] flex items-center justify-between text-xs lg:text-[0.833vw] text-muted-foreground">
         <span className="truncate">{location}</span>
         <span className="shrink-0">{formatDistanceToNow(new Date(when))}</span>
       </div>

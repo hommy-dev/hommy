@@ -52,21 +52,21 @@ export function LoginForm() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2.5">
-        <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
+    <div className="space-y-8 lg:space-y-[2.222vw]">
+      <div className="space-y-2.5 lg:space-y-[0.694vw]">
+        <h1 className="text-3xl lg:text-[2.083vw] font-semibold leading-tight tracking-tight text-foreground">
           Welcome back
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
           Sign in to manage your quotes, jobs, and payouts.
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5" noValidate>
-        <div className="space-y-1.5">
+      <form onSubmit={onSubmit} className="space-y-5 lg:space-y-[1.389vw]" noValidate>
+        <div className="space-y-1.5 lg:space-y-[0.417vw]">
           <Label
             htmlFor="login-email"
-            className="text-xs font-medium text-foreground/80"
+            className="text-xs lg:text-[0.833vw] font-medium text-foreground/80"
           >
             Email
           </Label>
@@ -78,23 +78,23 @@ export function LoginForm() {
             placeholder="you@company.com"
             required
             disabled={pending}
-            className="h-11 bg-card"
+            className="h-11 lg:h-[3.056vw] bg-card"
             aria-invalid={!!fieldErrors.email}
             aria-describedby={
               fieldErrors.email ? 'login-email-error' : undefined
             }
           />
           {fieldErrors.email && (
-            <p id="login-email-error" className="text-xs text-destructive">
+            <p id="login-email-error" className="text-xs lg:text-[0.833vw] text-destructive">
               {fieldErrors.email}
             </p>
           )}
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 lg:space-y-[0.417vw]">
           <Label
             htmlFor="login-password"
-            className="text-xs font-medium text-foreground/80"
+            className="text-xs lg:text-[0.833vw] font-medium text-foreground/80"
           >
             Password
           </Label>
@@ -106,14 +106,14 @@ export function LoginForm() {
             placeholder="••••••••"
             required
             disabled={pending}
-            className="h-11 bg-card"
+            className="h-11 lg:h-[3.056vw] bg-card"
             aria-invalid={!!fieldErrors.password}
             aria-describedby={
               fieldErrors.password ? 'login-password-error' : undefined
             }
           />
           {fieldErrors.password && (
-            <p id="login-password-error" className="text-xs text-destructive">
+            <p id="login-password-error" className="text-xs lg:text-[0.833vw] text-destructive">
               {fieldErrors.password}
             </p>
           )}
@@ -122,7 +122,7 @@ export function LoginForm() {
         <Button
           type="submit"
           size="lg"
-          className="h-11 w-full text-sm font-semibold"
+          className="h-11 lg:h-[3.056vw] w-full text-sm lg:text-[0.972vw] font-semibold"
           disabled={pending}
         >
           {pending ? 'Signing in…' : 'Sign in'}
@@ -134,7 +134,7 @@ export function LoginForm() {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-background px-3 text-xs text-muted-foreground">
+          <span className="bg-background px-3 lg:px-[0.833vw] text-xs lg:text-[0.833vw] text-muted-foreground">
             New to Homei?
           </span>
         </div>
@@ -142,13 +142,13 @@ export function LoginForm() {
 
       <Link
         href="/auth/signup/contractor"
-        className="group flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3.5 text-sm transition-colors hover:border-foreground/15 hover:bg-accent"
+        className="group flex w-full items-center justify-between rounded-lg lg:rounded-[0.694vw] border border-border bg-card px-4 lg:px-[1.111vw] py-3.5 lg:py-[0.972vw] text-sm lg:text-[0.972vw] transition-colors hover:border-foreground/15 hover:bg-accent"
       >
         <span className="flex flex-col">
           <span className="font-medium text-foreground">
             Create a contractor account
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs lg:text-[0.833vw] text-muted-foreground">
             Free forever. Takes about 10 minutes.
           </span>
         </span>

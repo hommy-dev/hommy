@@ -66,20 +66,20 @@ export function SidebarNotice({
   return (
     <div
       className={cn(
-        "rounded-md border p-3 group-data-[collapsible=icon]:hidden",
+        "rounded-md lg:rounded-[0.556vw] border p-3 lg:p-[0.833vw] group-data-[collapsible=icon]:hidden",
         t.card,
         t.text,
       )}
     >
-      <p className="text-[13px] font-semibold leading-tight">{title}</p>
+      <p className="text-[13px] lg:text-[0.903vw] font-semibold leading-tight">{title}</p>
       {body ? (
-        <p className={cn("mt-1.5 text-[11px] leading-snug", t.body)}>{body}</p>
+        <p className={cn("mt-1.5 lg:mt-[0.417vw] text-[11px] lg:text-[0.764vw] leading-snug", t.body)}>{body}</p>
       ) : null}
       {cta ? (
         <Link
           href={cta.href}
           className={cn(
-            "mt-2.5 inline-flex w-full items-center justify-center rounded-md px-3 py-1.5 text-[11px] font-bold transition-colors",
+            "mt-2.5 lg:mt-[0.694vw] inline-flex w-full items-center justify-center rounded-md lg:rounded-[0.556vw] px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-[11px] lg:text-[0.764vw] font-bold transition-colors",
             t.cta,
           )}
         >

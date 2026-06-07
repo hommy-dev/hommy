@@ -98,8 +98,8 @@ export function MessageBubble({
     <div
       data-message-id={message.id}
       className={cn(
-        'group relative flex w-full gap-2 px-4 transition-colors',
-        grouped ? 'mt-0.5' : 'mt-4',
+        'group relative flex w-full gap-2 lg:gap-[0.556vw] px-4 lg:px-[1.111vw] transition-colors',
+        grouped ? 'mt-0.5 lg:mt-[0.139vw]' : 'mt-4 lg:mt-[1.111vw]',
         mine ? 'flex-row-reverse' : 'flex-row',
         highlighted && 'bg-primary/10',
       )}
@@ -110,23 +110,23 @@ export function MessageBubble({
         header is redundant. Kept commented so we can reinstate when a
         group / multi-member conversation UI lands.
 
-      <div className="w-10 shrink-0">
+      <div className="w-10 lg:w-[2.778vw] shrink-0">
         {grouped ? (
           <span
             className={cn(
-              'mt-2 hidden select-none text-[10px] tabular-nums text-muted-foreground group-hover:inline',
-              mine ? 'text-right pr-1' : 'pl-1',
+              'mt-2 lg:mt-[0.556vw] hidden select-none text-[10px] lg:text-[0.694vw] tabular-nums text-muted-foreground group-hover:inline',
+              mine ? 'text-right pr-1 lg:pr-[0.278vw]' : 'pl-1 lg:pl-[0.278vw]',
             )}
             aria-hidden
           >
             {formatHoverTime(message.createdAt)}
           </span>
         ) : (
-          <Avatar size="default" className="size-10">
+          <Avatar size="default" className="size-10 lg:size-[2.778vw]">
             {sender.avatarUrl ? (
               <AvatarImage src={sender.avatarUrl} alt="" />
             ) : null}
-            <AvatarFallback className="text-xs">
+            <AvatarFallback className="text-xs lg:text-[0.833vw]">
               {getInitials(sender.name)}
             </AvatarFallback>
           </Avatar>
@@ -148,7 +148,7 @@ export function MessageBubble({
         {!grouped ? (
           <div
             className={cn(
-              'mb-0.5 flex items-baseline gap-2 px-1 text-[11px]',
+              'mb-0.5 lg:mb-[0.139vw] flex items-baseline gap-2 lg:gap-[0.556vw] px-1 lg:px-[0.278vw] text-[11px] lg:text-[0.764vw]',
               mine && 'flex-row-reverse',
             )}
           >
@@ -212,7 +212,7 @@ export function MessageBubble({
                 {message.editedAt && !message.local ? (
                   <span
                     className={cn(
-                      'ml-1 select-none text-[10px]',
+                      'ml-1 lg:ml-[0.278vw] select-none text-[10px] lg:text-[0.694vw]',
                       mine ? 'text-primary-foreground/60' : 'text-muted-foreground',
                     )}
                     title={`Edited ${new Date(message.editedAt).toLocaleString()}`}
@@ -226,8 +226,8 @@ export function MessageBubble({
             {message.attachments.length > 0 ? (
               <div
                 className={cn(
-                  'flex flex-col gap-1.5',
-                  hasText ? 'mt-1' : '',
+                  'flex flex-col gap-1.5 lg:gap-[0.417vw]',
+                  hasText ? 'mt-1 lg:mt-[0.278vw]' : '',
                   mine ? 'items-end' : 'items-start',
                 )}
               >
@@ -240,27 +240,27 @@ export function MessageBubble({
             {message.local || (mine && message.isFlagged) ? (
               <div
                 className={cn(
-                  'mt-1 flex items-center gap-1 px-1 text-[10px] text-muted-foreground',
+                  'mt-1 lg:mt-[0.278vw] flex items-center gap-1 lg:gap-[0.278vw] px-1 lg:px-[0.278vw] text-[10px] lg:text-[0.694vw] text-muted-foreground',
                   mine && 'flex-row-reverse',
                 )}
               >
                 {message.local === 'pending' ? (
                   <>
-                    <Clock className="size-3" />
+                    <Clock className="size-3 lg:size-[0.833vw]" />
                     <span>Sending…</span>
                   </>
                 ) : message.local === 'failed' ? (
                   <>
-                    <AlertCircle className="size-3 text-destructive" />
+                    <AlertCircle className="size-3 lg:size-[0.833vw] text-destructive" />
                     <span className="text-destructive">Failed to send</span>
                   </>
                 ) : null}
                 {mine && message.isFlagged ? (
                   <span
-                    className="inline-flex items-center gap-0.5 text-amber-600 dark:text-amber-400"
+                    className="inline-flex items-center gap-0.5 lg:gap-[0.139vw] text-amber-600 dark:text-amber-400"
                     title="Flagged by moderation — visible to admin review"
                   >
-                    <AlertCircle className="size-3" />
+                    <AlertCircle className="size-3 lg:size-[0.833vw]" />
                     Flagged
                   </span>
                 ) : null}
@@ -304,10 +304,10 @@ function Bubble({
   return (
     <div
       className={cn(
-        'inline-block max-w-full rounded-2xl px-3.5 py-2 text-sm leading-relaxed shadow-2xs',
+        'inline-block max-w-full rounded-2xl lg:rounded-[1.111vw] px-3.5 lg:px-[0.972vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] leading-relaxed shadow-2xs',
         mine
-          ? 'rounded-br-md bg-primary text-primary-foreground'
-          : 'rounded-bl-md border border-border bg-background text-foreground',
+          ? 'rounded-br-md lg:rounded-br-[0.556vw] bg-primary text-primary-foreground'
+          : 'rounded-bl-md lg:rounded-bl-[0.556vw] border border-border bg-background text-foreground',
         muted && 'bg-muted text-muted-foreground border-transparent',
         pending && 'opacity-70',
         failed && 'ring-1 ring-destructive',
@@ -369,29 +369,29 @@ function HoverToolbar({
     <div
       className={cn(
         'absolute top-0 z-10',
-        mine ? 'left-2' : 'right-2',
+        mine ? 'left-2 lg:left-[0.556vw]' : 'right-2 lg:right-[0.556vw]',
         open ? 'flex' : 'hidden group-hover:flex',
       )}
     >
-      <div className="flex items-center rounded-md border border-border bg-popover shadow-md">
+      <div className="flex items-center rounded-md lg:rounded-[0.556vw] border border-border bg-popover shadow-md">
         {canReply ? (
           <button
             type="button"
             onClick={doReply}
             aria-label="Reply"
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex size-7 lg:size-[1.944vw] items-center justify-center rounded-md lg:rounded-[0.556vw] text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <CornerUpLeft className="size-4" />
+            <CornerUpLeft className="size-4 lg:size-[1.111vw]" />
           </button>
         ) : null}
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex size-7 lg:size-[1.944vw] items-center justify-center rounded-md lg:rounded-[0.556vw] text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="More actions"
           >
-            <MoreHorizontal className="size-4" />
+            <MoreHorizontal className="size-4 lg:size-[1.111vw]" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={mine ? 'start' : 'end'} className="w-48">
+          <DropdownMenuContent align={mine ? 'start' : 'end'} className="w-48 lg:w-[13.333vw]">
             {canReply ? (
               <DropdownMenuItem
                 onSelect={(e) => {
@@ -399,13 +399,13 @@ function HoverToolbar({
                   doReply()
                 }}
               >
-                <CornerUpLeft className="size-4" />
+                <CornerUpLeft className="size-4 lg:size-[1.111vw]" />
                 <span>Reply</span>
               </DropdownMenuItem>
             ) : null}
             {hasCopy ? (
               <DropdownMenuItem onSelect={() => void doCopy()}>
-                <Copy className="size-4" />
+                <Copy className="size-4 lg:size-[1.111vw]" />
                 <span>Copy Text</span>
               </DropdownMenuItem>
             ) : null}
@@ -417,7 +417,7 @@ function HoverToolbar({
                   onStartEdit()
                 }}
               >
-                <Pencil className="size-4" />
+                <Pencil className="size-4 lg:size-[1.111vw]" />
                 <span>Edit Message</span>
               </DropdownMenuItem>
             ) : null}
@@ -431,7 +431,7 @@ function HoverToolbar({
                   }}
                   className="text-destructive focus:text-destructive"
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 className="size-4 lg:size-[1.111vw]" />
                   <span>Delete Message</span>
                 </DropdownMenuItem>
               </>
@@ -500,11 +500,11 @@ function ParentQuote({
       onClick={handleClick}
       aria-label={`Jump to message from ${senderName}`}
       className={cn(
-        'mb-1 flex max-w-full items-center gap-1.5 rounded-md border-l-2 bg-muted/40 px-2 py-1 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted',
+        'mb-1 lg:mb-[0.278vw] flex max-w-full items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] border-l-2 bg-muted/40 px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-left text-[12px] lg:text-[0.833vw] text-muted-foreground transition-colors hover:bg-muted',
         mine ? 'border-primary' : 'border-border',
       )}
     >
-      <CornerUpLeft className="size-3 shrink-0 text-muted-foreground/70" />
+      <CornerUpLeft className="size-3 lg:size-[0.833vw] shrink-0 text-muted-foreground/70" />
       <span className="shrink-0 font-semibold text-foreground">
         {senderName}
       </span>
@@ -573,9 +573,9 @@ function InlineEditor({
         rows={1}
         maxLength={2000}
         disabled={saving}
-        className="max-h-40 min-h-10 resize-none rounded-2xl bg-muted/50 px-3 py-2 text-sm"
+        className="max-h-40 lg:max-h-[11.111vw] min-h-10 lg:min-h-[2.778vw] resize-none rounded-2xl lg:rounded-[1.111vw] bg-muted/50 px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw]"
       />
-      <div className="mt-1 px-1 text-[11px] text-muted-foreground">
+      <div className="mt-1 lg:mt-[0.278vw] px-1 lg:px-[0.278vw] text-[11px] lg:text-[0.764vw] text-muted-foreground">
         escape to{' '}
         <button
           type="button"

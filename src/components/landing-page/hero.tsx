@@ -21,22 +21,22 @@ export function Hero() {
 
       <div
         id="quote"
-        className="relative mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 py-16 text-center text-background"
+        className="relative mx-auto flex min-h-screen max-w-3xl lg:max-w-[53.328vw] flex-col items-center justify-center px-6 lg:px-[1.667vw] py-16 lg:py-[4.444vw] text-center text-background"
       >
-        <h1 className="font-sebenta text-[2.6rem] font-bold leading-[1.04] tracking-tight sm:text-6xl lg:text-[4.25rem]">
+        <h1 className="font-sebenta text-[2.6rem] font-bold leading-[1.04] tracking-tight sm:text-6xl lg:text-[4.722vw]">
           Find a roofer you can actually trust.
         </h1>
 
-        <LogoMarquee className="mt-10 w-full max-w-2xl" />
+        <LogoMarquee className="mt-10 lg:mt-[2.778vw] w-full max-w-2xl lg:max-w-[46.662vw]" />
 
         <Link
           href="/get-a-quote"
-          className="group mt-12 inline-flex items-center gap-2 rounded-lg border-2 bg-primary px-7 py-2.5 text-base font-semibold text-background transition-colors"
+          className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
         >
           Post a job
           <SVGIcon
             src="/icons/arrow-right.svg"
-            className="size-6 text-background transition-transform group-hover:translate-x-0.5"
+            className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
           />
         </Link>
       </div>
