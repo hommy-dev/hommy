@@ -8,8 +8,7 @@ import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Homei - Find Trusted Local Contractors",
-  description:
-    "Connect with vetted roofing contractors in your area",
+  description: "Connect with vetted roofing contractors in your area",
   manifest: "/manifest.json",
 };
 
@@ -22,13 +21,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "h-full antialiased font-sans",
+        "scrollbar-thin h-full antialiased font-sans",
         inter.variable,
         sebenta.variable,
       )}
       suppressHydrationWarning
     >
-      <body className="antialiased" suppressHydrationWarning>
+      <body className="antialiased " suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -38,7 +37,9 @@ export default function RootLayout({
           <ToastProvider>
             <AnchoredToastProvider>
               {/* Boundary for async layouts (auth) under Cache Components — see blocking-route */}
-              <Suspense fallback={null}>{children}</Suspense>
+              <Suspense fallback={null}>
+                <main>{children}</main>
+              </Suspense>
             </AnchoredToastProvider>
           </ToastProvider>
         </ThemeProvider>

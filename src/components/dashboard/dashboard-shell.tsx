@@ -162,7 +162,7 @@ export function DashboardShell({
             <div className="ml-auto flex items-center gap-2">{topRight}</div>
           </header>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6">
+          <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6">
             {children}
           </div>
         </SidebarInset>
