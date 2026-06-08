@@ -145,7 +145,7 @@ export function SiteHeader() {
       )}
     >
       {/* Main Header Row */}
-      <div className="relative w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto max-w-6xl lg:max-w-[79.992vw]">
+      <div className="relative w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto max-w-6xl lg:max-w-[90vw]">
         {/* Left: Logo */}
         <div className="flex-1 flex items-center">
           <Link
@@ -181,7 +181,7 @@ export function SiteHeader() {
                   href={dashboardHref}
                   className="relative flex items-center gap-1.5 lg:gap-[0.417vw] h-full cursor-pointer transition-all duration-300 group border-2 border-background/60 text-background hover:border-background/90 rounded-md lg:rounded-[0.556vw] px-4 lg:px-[1.111vw] py-1.5 lg:py-[0.417vw]"
                 >
-                  <span className="text-[15px] lg:text-[1.042vw] font-bold tracking-wide">
+                  <span className="text-[15px] lg:text-[1.042vw] tracking-wide">
                     Dashboard
                   </span>
                 </Link>

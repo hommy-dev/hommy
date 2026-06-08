@@ -1,5 +1,6 @@
-import Link from "next/link"
-import { Arrow } from "./shared"
+import Link from "next/link";
+import { Arrow } from "./shared";
+import { SVGIcon } from "../ui/svg-icon";
 
 const FOOTER = [
   {
@@ -26,29 +27,34 @@ const FOOTER = [
       { href: "#", label: "Privacy" },
     ],
   },
-]
+];
 
 export function SiteFooter() {
   return (
-    <footer className="bg-foreground text-background">
-      <div className="mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-[4.444vw]">
+    <footer className="bg-background">
+      <div className="max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-[4.444vw] pb-12 lg:pb-[2vw]">
         <div className="grid gap-10 lg:gap-[2.778vw] sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
-            <p className="font-sebenta text-xl lg:text-[1.389vw] font-bold">Homei</p>
-            <p className="mt-3 lg:mt-[0.833vw] max-w-xs lg:max-w-[22.22vw] text-sm lg:text-[0.972vw] leading-relaxed text-background/55">
+            <p className="font-sebenta text-xl lg:text-[1.389vw] font-bold">
+              Homei
+            </p>
+            <p className="mt-3 lg:mt-[0.833vw] max-w-xs lg:max-w-[22.22vw] text-sm lg:text-[0.972vw] leading-relaxed">
               Home services, done right. Starting with roofing.
             </p>
             <Link
               href="/get-a-quote"
-              className="mt-5 lg:mt-[1.389vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] bg-secondary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-semibold text-secondary-foreground"
+              className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 px-6 lg:px-[1.5vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw] transition-colors"
             >
               Post a job
-              <Arrow />
+              <SVGIcon
+                src="/icons/arrow-right.svg"
+                className="size-6 lg:size-[1.667vw] transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
           {FOOTER.map((col) => (
             <div key={col.title}>
-              <p className="text-xs lg:text-[0.833vw] font-semibold uppercase tracking-wider text-background/45">
+              <p className="text-xs lg:text-[0.833vw] font-semibold uppercase tracking-wider">
                 {col.title}
               </p>
               <ul className="mt-4 lg:mt-[1.111vw] space-y-2.5 lg:space-y-[0.694vw]">
@@ -56,7 +62,7 @@ export function SiteFooter() {
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="text-sm lg:text-[0.972vw] text-background/70 transition-colors hover:text-background"
+                      className="text-sm lg:text-[0.972vw] transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -68,15 +74,12 @@ export function SiteFooter() {
         </div>
 
         {/* big wordmark */}
-        <div className="mt-16 lg:mt-[4.444vw] border-t border-background/10 pt-8 lg:pt-[2.222vw]">
-          <p className="font-sebenta text-[18vw] font-bold leading-[0.8] tracking-tighter text-background/10 lg:text-[13.332vw]">
-            Homei
-          </p>
-          <p className="mt-6 lg:mt-[1.667vw] text-xs lg:text-[0.833vw] text-background/45">
+        <div className="mt-8 lg:mt-[2vw] border-t pt-4 lg:pt-[2vw]">
+          <p className="text-center text-xs lg:text-[0.833vw]">
             © 2026 Homei. Licensed and insured roofers only.
           </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

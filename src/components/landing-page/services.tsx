@@ -29,7 +29,7 @@ const SERVICES = [
 export function Services() {
   return (
     <section className="scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[6.667vw] bg-background">
-      <div className="mx-auto px-5 lg:px-[1.389vw]">
+      <div className="max-w-[90vw] mx-auto px-5 lg:px-[1.389vw]">
         <SectionHead
           eyebrow="What we cover"
           title="Whatever your roof needs."
@@ -49,13 +49,10 @@ export function Services() {
                 <div
                   className={cn(flip && "lg:order-1", "mt-8 lg:mt-0 lg:px-[2.778vw]")}
                 >
-                  <span className="font-sebenta text-sm lg:text-[0.972vw] font-bold text-foreground/25">
-                    0{i + 1}
-                  </span>
-                  <h3 className="mt-2 lg:mt-[0.556vw] font-sebenta text-[1.8rem] lg:text-[2vw] font-bold leading-tight tracking-tight sm:text-[2.1rem]">
+                  <h3 className="text-[1.8rem] lg:text-[3vw] font-bold leading-tight tracking-tight sm:text-[2.1rem]">
                     {s.title}
                   </h3>
-                  <p className="mt-3 lg:mt-[0.833vw] max-w-md lg:max-w-[31.108vw] text-[16px] lg:text-[1.111vw] leading-relaxed text-foreground/60">
+                  <p className="mt-3 lg:mt-[0.833vw] max-w-md lg:max-w-[31.108vw] font-semibold text-[16px] lg:text-[1.2vw] leading-relaxed text-foreground/90">
                     {s.body}
                   </p>
                   <Link

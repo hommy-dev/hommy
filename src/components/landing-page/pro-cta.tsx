@@ -1,34 +1,28 @@
-import Link from "next/link"
-import { Arrow } from "./shared"
+import Link from "next/link";
+import { SVGIcon } from "../ui/svg-icon";
 
 export function ProCta() {
   return (
-    <section className="mx-auto px-5 lg:px-[1.389vw] pb-20 lg:pb-[7.778vw]">
-      <div className="grid items-center gap-8 lg:gap-[2.222vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-card px-7 lg:px-[1.944vw] py-12 lg:py-[3.333vw] sm:px-12 lg:grid-cols-[1.4fr_0.6fr]">
-        <div>
-          <span className="inline-flex items-center gap-2 lg:gap-[0.556vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-[0.14em] text-foreground/45">
-            <span className="size-1.5 lg:size-[0.417vw] rounded-full bg-primary" />
-            Are you a roofer?
-          </span>
-          <h2 className="mt-4 lg:mt-[1.111vw] font-sebenta text-3xl lg:text-[2.083vw] font-bold leading-[1.1] tracking-tight sm:text-4xl">
-            Real leads. No upfront cost.
-          </h2>
-          <p className="mt-4 lg:mt-[1.111vw] max-w-xl lg:max-w-[39.996vw] text-[16px] lg:text-[1.111vw] leading-relaxed text-foreground/65">
-            Get matched with homeowners near you who actually need work done.
-            Free to receive a lead — you only pay when you win the job. Plus a
-            CRM built for how roofers really work.
-          </p>
-        </div>
-        <div className="lg:justify-self-end">
-          <Link
-            href="/contractors"
-            className="inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] bg-foreground px-6 lg:px-[1.667vw] py-3.5 lg:py-[0.972vw] text-sm lg:text-[0.972vw] font-semibold text-background transition-transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Join as a pro
-            <Arrow />
-          </Link>
-        </div>
+    <section className="max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] pb-20 lg:pb-[7.778vw]">
+      <div className="bg-primary rounded-lg lg:rounded-[1vw] border border-border px-7 lg:px-[1.944vw] py-12 lg:py-[5vw] sm:px-12 flex items-center flex-col text-center">
+        <h2 className="mt-4 lg:mt-[1.111vw] font-sebenta text-3xl lg:text-[2.083vw] font-bold leading-[1.1] tracking-tight sm:text-4xl text-background">
+          Real leads. No upfront cost.
+        </h2>
+        <p className="mt-4 lg:mt-[1.111vw] max-w-xl lg:max-w-[39.996vw] text-[16px] lg:text-[1.111vw] leading-relaxed font-medium text-background">
+          Built for roofers who want real jobs, not wasted calls. Get matched
+          with local homeowners, receive leads free, and only pay when you win.
+        </p>
+        <Link
+          href="/get-a-quote"
+          className="group mt-8 lg:mt-[3vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
+        >
+          Registered your Company
+          <SVGIcon
+            src="/icons/arrow-right.svg"
+            className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
+          />
+        </Link>
       </div>
     </section>
-  )
+  );
 }

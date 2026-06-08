@@ -1,74 +1,119 @@
-import { cn } from "@/lib/utils"
-import { SectionHead, Stars } from "./shared"
+"use client";
+
+import { useState } from "react";
+import { LandingImage } from "./shared";
+import { SVGIcon } from "../ui/svg-icon";
+import { Button } from "../ui/button";
 
 const REVIEWS = [
   {
     quote:
-      "I had three roofers out by the next afternoon. I went with the one who actually explained things instead of talking over my head. New roof in a week.",
+      "I had three roofers out by the next afternoon. I went with the one who actually explained things instead of talking over my head — new roof in a week.",
     name: "Maria A.",
-    city: "Dallas, TX",
-    featured: true,
+    image: "/bg/roof-replacement.jpg",
   },
   {
     quote:
-      "Leak in the middle of a storm and no clue who to call. Homei had someone at the house the next morning. No drama.",
+      "We had a leak in the middle of a storm and no clue who to call. Homei had someone at the house the next morning. No drama.",
     name: "James C.",
-    city: "Fort Worth, TX",
+    image: "/bg/storm-damage.jpg",
   },
   {
     quote:
       "I dreaded the spam, so I kept putting off quotes. This was just two local roofers, both solid, both upfront.",
     name: "Priya N.",
-    city: "Plano, TX",
+    image: "/bg/roof-repair.jpg",
   },
-]
+];
 
 export function Testimonials() {
+  const [i, setI] = useState(0);
+  const r = REVIEWS[i];
+  const go = (d: number) =>
+    setI((x) => (x + d + REVIEWS.length) % REVIEWS.length);
+
   return (
     <section
       id="reviews"
-      className="mx-auto scroll-mt-20 lg:scroll-mt-[5.556vw] px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]"
+      className="scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[6.667vw]"
     >
-      <SectionHead eyebrow="Reviews" title="Real homeowners. Real roofs." />
-      <div className="mt-12 lg:mt-[3.333vw] grid gap-4 lg:gap-[1.111vw] md:grid-cols-3">
-        {REVIEWS.map((r) => (
-          <figure
-            key={r.name}
-            className={cn(
-              "flex flex-col rounded-2xl lg:rounded-[1.111vw] p-7 lg:p-[1.944vw]",
-              r.featured
-                ? "bg-foreground text-background"
-                : "border border-border bg-card text-foreground",
-            )}
-          >
-            <Stars />
-            <blockquote
-              className={cn(
-                "mt-5 lg:mt-[1.389vw] flex-1 text-[15px] lg:text-[1.042vw] leading-relaxed",
-                r.featured ? "font-sebenta text-xl lg:text-[1.389vw] font-medium leading-snug" : "text-foreground/80",
-              )}
-            >
-              &ldquo;{r.quote}&rdquo;
-            </blockquote>
-            <figcaption className="mt-6 lg:mt-[1.667vw] flex items-center gap-3 lg:gap-[0.833vw]">
-              <span
-                className={cn(
-                  "flex size-10 lg:size-[2.778vw] items-center justify-center rounded-full font-sebenta text-sm lg:text-[0.972vw] font-bold",
-                  r.featured ? "bg-secondary text-secondary-foreground" : "bg-muted text-foreground/70",
-                )}
-              >
-                {r.name.charAt(0)}
-              </span>
-              <span>
-                <span className="block text-sm lg:text-[0.972vw] font-semibold">{r.name}</span>
-                <span className={cn("block text-xs lg:text-[0.833vw]", r.featured ? "text-background/55" : "text-foreground/50")}>
-                  {r.city}
+      <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw]">
+        {/* bottom row — testimonial left, image right */}
+        <div className="mt-16 lg:mt-[4.444vw] grid gap-10 lg:gap-[2.778vw] lg:grid-cols-2">
+          <div className="h-full flex flex-col justify-between gap-4 lg:gap-[2vw]">
+            <h2 className="font-sebenta text-[2.3rem] lg:text-[2.555vw] font-bold leading-[1.05] tracking-tight sm:text-5xl">
+              Hear from our
+              <br className="hidden sm:block" /> happy homeowners.
+            </h2>
+            <div>
+              <div className="flex items-center gap-3 lg:gap-[0.833vw]">
+                <span className="flex size-11 lg:size-[3.056vw] items-center justify-center rounded-full border bg-background font-sebenta text-base lg:text-[1.111vw] font-bold text-foreground/70">
+                  {r.name.charAt(0)}
                 </span>
-              </span>
-            </figcaption>
-          </figure>
-        ))}
+                <span className="text-[15px] lg:text-[1.042vw] font-semibold">
+                  {r.name}
+                </span>
+              </div>
+
+              <blockquote className="mt-5 lg:mt-[1.389vw] max-w-md lg:max-w-[31.108vw] font-medium text-[16px] lg:text-[1.3vw] leading-relaxed text-foreground/80">
+                &ldquo;{r.quote}&rdquo;
+              </blockquote>
+
+              <div className="mt-8 lg:mt-[2.222vw] flex items-center gap-3 lg:gap-[0.833vw]">
+                <Button
+                  onClick={() => go(-1)}
+                  aria-label="Previous review"
+                  variant="ghost"
+                  className="border border-foreground/30 rounded-full size-6 lg:size-[2.5vw] "
+                >
+                  <SVGIcon
+                    src="/icons/arrow-left.svg"
+                    className="size-4 lg:size-[1.5vw] text-muted-foreground"
+                  />
+                </Button>
+                <Button
+                  onClick={() => go(1)}
+                  aria-label="Next review"
+                  variant="ghost"
+                  className="border border-foreground/30 rounded-full size-6 lg:size-[2.5vw] "
+                >
+                  <SVGIcon
+                    src="/icons/arrow-right.svg"
+                    className="size-4 lg:size-[1.5vw] text-muted-foreground"
+                  />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <LandingImage
+            src={r.image}
+            alt={`${r.name}'s roofing project`}
+            className="aspect-[4/3] w-full rounded-lg lg:rounded-[0.694vw]"
+          />
+        </div>
       </div>
     </section>
-  )
+  );
+}
+
+function Chevron({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      className={dir === "left" ? "rotate-180" : ""}
+    >
+      <path
+        d="M6 3l5 5-5 5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
