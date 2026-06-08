@@ -31,7 +31,7 @@ const FOOTER = [
 
 export function SiteFooter() {
   return (
-    <footer className="bg-background">
+    <footer className="bg-canvas">
       <div className="max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-[4.444vw] pb-12 lg:pb-[2vw]">
         <div className="grid gap-10 lg:gap-[2.778vw] sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
@@ -43,12 +43,12 @@ export function SiteFooter() {
             </p>
             <Link
               href="/get-a-quote"
-              className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 px-6 lg:px-[1.5vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw] transition-colors"
+              className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 px-6 lg:px-[1.5vw] py-2.5 lg:py-[0.5vw] text-base lg:text-[1vw] transition-colors hover:border-foreground"
             >
               Post a job
               <SVGIcon
                 src="/icons/arrow-right.svg"
-                className="size-6 lg:size-[1.667vw] transition-transform group-hover:translate-x-0.5"
+                className="size-6 lg:size-[1.4vw] transition-transform group-hover:translate-x-0.5"
               />
             </Link>
           </div>

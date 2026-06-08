@@ -5,7 +5,6 @@ export function ServicesBento() {
   return (
     <section className="mx-auto px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]">
       <SectionHead
-        eyebrow="What we cover"
         title="Whatever your roof needs."
         sub="One roof, plenty of ways it can go wrong. There's a local pro for each of them."
       />

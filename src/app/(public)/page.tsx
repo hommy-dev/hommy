@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/landing-page/how-it-works";
 import { Services } from "@/components/landing-page/services";
 import { Storm } from "@/components/landing-page/storm";
 import { Testimonials } from "@/components/landing-page/testimonials";
+import { Faq } from "@/components/landing-page/faq";
 import { ProCta } from "@/components/landing-page/pro-cta";
 import { SiteFooter } from "@/components/landing-page/site-footer";
 
@@ -25,7 +26,8 @@ export default function HomePage() {
         <HowItWorks />
         <Services />
         <Storm />
-        <Testimonials />
+        {/* <Testimonials /> */}
+        <Faq />
         <ProCta />
       </main>
       <SiteFooter />

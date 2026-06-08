@@ -44,6 +44,9 @@ const nextConfig: NextConfig = {
 
   images: {
     minimumCacheTTL: 14400,
+    // Default optimizer quality is 75, which softens photos. Whitelist higher
+    // values so components can opt into crisper images via the `quality` prop.
+    qualities: [75, 90, 100],
     remotePatterns: [
       {
         protocol: "https",

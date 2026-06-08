@@ -1,27 +1,26 @@
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { SectionHead, LandingImage, Arrow } from "./shared";
+import Image from "next/image";
 import { SVGIcon } from "../ui/svg-icon";
 
 const SERVICES = [
   {
     title: "Roof repair",
-    body: "Leaks, missing shingles, that nagging spot you keep eyeing. Get it looked at and sorted before it turns into a bigger bill.",
+    body: "Leaks, missing shingles, or that spot you keep eyeing — sorted before it grows.",
     src: "/bg/roof-repair.jpg",
   },
   {
     title: "Full replacement",
-    body: "When the old roof is past saving, get straight numbers from roofers who'll stand behind the work — and the warranty.",
+    body: "Straight numbers from roofers who stand behind the work and the warranty.",
     src: "/bg/roof-replacement.jpg",
   },
   {
     title: "Storm damage",
-    body: "Hit by hail or high wind? Get inspected fast by a roofer who knows the damage and how to handle the insurance side.",
+    body: "Hail or high wind? Fast inspection, plus help with the insurance side.",
     src: "/bg/storm-damage.jpg",
   },
   {
     title: "Roof inspection",
-    body: "Buying, selling, or just want peace of mind. Find out exactly what shape your roof is in, no guesswork.",
+    body: "Buying, selling, or just unsure — find out exactly what shape it's in.",
     src: "/bg/roof-inspection.jpg",
   },
 ];
@@ -30,46 +29,69 @@ export function Services() {
   return (
     <section className="scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[6.667vw] bg-background">
       <div className="max-w-[90vw] mx-auto px-5 lg:px-[1.389vw]">
-        <SectionHead
-          eyebrow="What we cover"
-          title="Whatever your roof needs."
-        />
+        {/* header: copy left, CTA right on desktop */}
+        <div className="flex flex-col gap-6 lg:gap-[1.667vw] lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-xl lg:max-w-[50vw]">
+            <h2 className="mt-3 lg:mt-[0.833vw] font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold  tracking-tight">
+              Whatever your roof needs.
+            </h2>
+            <p className="mt-4 lg:mt-[1.111vw] lg:max-w-[40vw] font-medium text-base lg:text-[1.2vw] leading-relaxed text-muted-foreground">
+              From a quick fix to a full replacement — get matched with local
+              roofers who do exactly this.
+            </p>
+          </div>
 
-        <div className="mt-16 lg:mt-[5.556vw]">
-          {SERVICES.map((s, i) => {
-            const flip = i % 2 === 1;
-            return (
-              <div key={s.title} className="grid items-center lg:grid-cols-2">
-                <LandingImage
+          <Link
+            href="/get-a-quote"
+            className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
+          >
+            Post a job
+            <SVGIcon
+              src="/icons/arrow-right.svg"
+              className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
+            />
+          </Link>
+        </div>
+
+        {/* compact card grid */}
+        <div className="mt-12 lg:mt-[3.333vw] grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-[1.3vw] lg:gap-y-[2.222vw]">
+          {SERVICES.map((s) => (
+            <Link key={s.title} href="/get-a-quote" className="group block">
+              <div className="relative aspect-[4/4] w-full overflow-hidden rounded-md lg:rounded-[0.5vw] bg-muted">
+                <Image
                   src={s.src}
                   alt={s.title}
-                  className={cn("aspect-[4/3] w-full", flip && "lg:order-2")}
+                  fill
+                  quality={90}
+                  // Images are landscape but the card is portrait (4/5), so
+                  // object-cover renders them ~2x wider than the column. The
+                  // sizes hint is inflated to match, otherwise the browser
+                  // under-fetches and the photo looks soft/upscaled.
+                  sizes="(min-width: 1024px) 48vw, 100vw"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                 />
-
-                <div
-                  className={cn(flip && "lg:order-1", "mt-8 lg:mt-0 lg:px-[2.778vw]")}
-                >
-                  <h3 className="text-[1.8rem] lg:text-[3vw] font-bold leading-tight tracking-tight sm:text-[2.1rem]">
-                    {s.title}
-                  </h3>
-                  <p className="mt-3 lg:mt-[0.833vw] max-w-md lg:max-w-[31.108vw] font-semibold text-[16px] lg:text-[1.2vw] leading-relaxed text-foreground/90">
-                    {s.body}
-                  </p>
-                  <Link
-                    href="/get-a-quote"
-                    className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw] font-semibold text-background transition-colors"
-                  >
-                    Post a job
-                    <SVGIcon
-                      src="/icons/arrow-right.svg"
-                      className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
-                    />
-                  </Link>
-                </div>
               </div>
-            );
-          })}
+              <h3 className="mt-4 lg:mt-[1.111vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-lg lg:text-[1.389vw] font-bold tracking-tight">
+                {s.title}
+              </h3>
+              <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[1.042vw] leading-relaxed text-muted-foreground font-medium">
+                {s.body}
+              </p>
+            </Link>
+          ))}
         </div>
+
+        {/* CTA for mobile, where the header button is hidden */}
+        <Link
+          href="/get-a-quote"
+          className="group mt-10 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3 text-base font-semibold text-background sm:w-auto lg:hidden"
+        >
+          Post a job
+          <SVGIcon
+            src="/icons/arrow-right.svg"
+            className="size-6 text-background transition-transform group-hover:translate-x-0.5"
+          />
+        </Link>
       </div>
     </section>
   );

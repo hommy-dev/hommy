@@ -1,73 +1,94 @@
-import { SVGIcon } from "../ui/svg-icon";
-import { LandingImage, Arrow } from "./shared";
+"use client";
 
-const STEPS = [
+import { useState } from "react";
+import { StepsSection } from "../ui/steps-section";
+
+const HOMEOWNER_STEPS = [
   {
     step: "Step one",
     title: "Tell us about your roof",
-    asset: "Form illustration",
+    content:
+      "Post your job in a couple of minutes — what's going on, where you are, and when you need it done.",
+    image: "/bg/worker-1.jpeg",
   },
   {
     step: "Step two",
     title: "We match local pros",
-    asset: "Matching illustration",
+    content:
+      "Your job goes to a few licensed, insured roofers near you who actually cover your area.",
+    image: "/bg/roof-inspection.jpg",
   },
   {
     step: "Step three",
     title: "Compare & pick",
-    asset: "Quotes illustration",
+    content:
+      "Get quotes, compare them side by side, and choose the roofer you like. No pressure, no obligation.",
+    image: "/bg/roof-replacement.jpg",
   },
 ];
 
+const ROOFER_STEPS = [
+  {
+    step: "Step one",
+    title: "Get matched leads",
+    content:
+      "Receive jobs from homeowners near you that fit your services and coverage area — free to view.",
+    image: "/bg/worker-1.jpeg",
+  },
+  {
+    step: "Step two",
+    title: "Engage the ones you want",
+    content:
+      "Spend a credit to reach out and quote only the jobs worth your time. No wasted calls, no lead packs.",
+    image: "/bg/roof-repair.jpg",
+  },
+  {
+    step: "Step three",
+    title: "Win the work",
+    content:
+      "Get hired, build your reviews, and only pay the full fee when a homeowner accepts your quote.",
+    image: "/bg/roof-replacement.jpg",
+  },
+];
+
+const TABS = [
+  { id: "homeowner", label: "For homeowners" },
+  { id: "roofer", label: "For roofers" },
+];
+
+const CONTENT = {
+  homeowner: {
+    subtitle:
+      "Post your job in minutes and get quotes from verified local roofers. You compare, you choose, no pressure.",
+    steps: HOMEOWNER_STEPS,
+  },
+  roofer: {
+    subtitle:
+      "Get matched with nearby homeowners, engage the jobs you want, and only pay when you win the work.",
+    steps: ROOFER_STEPS,
+  },
+} as const;
+
+type TabId = keyof typeof CONTENT;
+
 export function HowItWorks() {
+  const [tab, setTab] = useState<TabId>("homeowner");
+  const active = CONTENT[tab];
+
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[6.667vw]"
+      className="scroll-mt-20 lg:scroll-mt-[5.556vw] bg-canvas py-16 lg:py-[5vw]"
     >
-      <div className="max-w-[90vw] mx-auto px-5 lg:px-[1.389vw]">
-        {/* centered head */}
-        <div className="flex flex-col items-center text-center">
-          <h2 className="mt-6 lg:mt-[1.667vw] font-sebenta text-[2.2rem] lg:text-[2.444vw] font-bold leading-[1.08] tracking-tight sm:text-[2.8rem]">
-            Here's How it works
-          </h2>
-          <p className="mx-auto mt-2 lg:mt-[0.556vw] max-w-md lg:max-w-[31.108vw] text-base lg:text-[1vw] font-medium leading-relaxed text-muted-foreground">
-            Post your job in minutes and get quotes from verified local roofers.
-            You compare, you choose, no pressure.
-          </p>
-        </div>
-
-        {/* one connected panel, divided into the steps */}
-        <div className="mt-14 lg:mt-[3.889vw] grid divide-y divide-border-dashaed border border-dashed overflow-hidden rounded-lg lg:rounded-[0.5vw] bg-card lg:grid-cols-3 lg:divide-x lg:divide-y-0">
-          {STEPS.map((s, i) => (
-            <div key={s.step} className="relative flex flex-col">
-              <div className="p-6 lg:p-[1.944vw]">
-                <p className="text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wider text-foreground/40">
-                  {s.step}
-                </p>
-                <h3 className="mt-1 lg:mt-[0.278vw] text-lg lg:text-[1.25vw] font-semibold">
-                  {s.title}
-                </h3>
-              </div>
-
-              <LandingImage
-                alt={s.title}
-                className="mt-5 lg:mt-[1.389vw] aspect-[4/3] w-full"
-              />
-
-              {/* arrow connector sitting on the divider */}
-              {i < STEPS.length - 1 ? (
-                <span className="absolute right-0 top-1/2 z-10 hidden p-2 lg:p-[0.3vw]  -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-foreground/60 text-background lg:flex">
-                  <SVGIcon
-                    src="/icons/right.svg"
-                    className="w-4 h-4 size-6 lg:size-[1.5vw]"
-                  />
-                </span>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
+      <StepsSection
+        title="Here's how it works"
+        subtitle={active.subtitle}
+        features={active.steps}
+        tabs={TABS}
+        activeTab={tab}
+        onTabChange={(id) => setTab(id as TabId)}
+        className="max-w-[90vw] mx-auto"
+      />
     </section>
   );
 }

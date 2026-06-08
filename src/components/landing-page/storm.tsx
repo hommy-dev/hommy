@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Eyebrow, Arrow, LandingImage } from "./shared";
+import { Arrow, LandingImage } from "./shared";
 import { SVGIcon } from "../ui/svg-icon";
 
 export function Storm() {
   return (
-    <section className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] pt-24 lg:pt-[8.889vw]">
+    <section className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]">
       <div className="grid overflow-hidden rounded-lg lg:rounded-[0.5vw] bg-primary text-primary-foreground lg:grid-cols-2">
         <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-[3.889vw]">
           <h2 className="mt-4 lg:mt-[1.111vw] font-sebenta text-3xl lg:text-[2.083vw] font-bold leading-[1.1] tracking-tight sm:text-4xl">

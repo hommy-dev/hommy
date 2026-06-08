@@ -21,10 +21,10 @@ export function TrustStrip() {
     <section className="bg-background">
       <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]">
         <div className="">
-          <h2 className="font-sebenta text-[2.3rem] lg:text-[2.555vw] font-bold leading-[1.06] tracking-tight sm:text-5xl">
+          <h2 className="font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold  tracking-tight">
             A better way to hire a roofer.
           </h2>
-          <p className="mt-2 lg:mt-[0.556vw] font-medium leading-relaxed text-foreground/55">
+          <p className="mt-2 lg:mt-[0.556vw] font-medium text-base lg:text-[1.2vw] leading-relaxed text-muted-foreground">
             A few vetted local pros, real quotes, zero pressure.
           </p>
         </div>

@@ -25,35 +25,13 @@ export function LandingImage({
   )
 }
 
-// Small lime-dot eyebrow used to label sections.
-export function Eyebrow({
-  children,
-  className,
-  dot = "bg-secondary",
-}: {
-  children: React.ReactNode
-  className?: string
-  dot?: string
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-2 lg:gap-[0.556vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-[0.16em] text-foreground/45",
-        className,
-      )}
-    >
-      <span className={cn("size-1.5 lg:size-[0.417vw] rounded-full", dot)} />
-      {children}
-    </span>
-  )
-}
+
 
 export function SectionHead({
   title,
   sub,
   className,
 }: {
-  eyebrow: string
   title: string
   sub?: string
   className?: string
