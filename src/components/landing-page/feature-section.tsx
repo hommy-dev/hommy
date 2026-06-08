@@ -15,7 +15,7 @@ type Feature = {
   title: string;
   body: string;
   points: string[];
-  accent: string; // card colour theme
+  background: string; // optional image or pattern for the card background
 };
 
 const FEATURES: Feature[] = [
@@ -23,17 +23,17 @@ const FEATURES: Feature[] = [
     icon: "/icons/category.svg",
     eyebrow: "Lead CRM",
     title: "Every lead in one inbox",
-    body: "New requests, the jobs you've engaged, and the ones you've won — organised in a single place instead of scattered across calls and texts.",
+    body: "New requests, the jobs you're chasing, and the ones you've won, all in one place instead of scattered across calls, texts, and sticky notes.",
     points: ["Filter by service & area", "See status at a glance"],
-    accent: "bg-primary text-primary-foreground",
+    background: "/bg/gradient-0.jpg",
   },
   {
     icon: "/icons/activity.svg",
     eyebrow: "Project management",
     title: "Track every job in real time",
-    body: "Stages, schedules, and updates that move as the work does — and keep the homeowner in the loop automatically.",
+    body: "Stages, schedules, and updates that move as the work does, and keep the homeowner in the loop without you lifting a finger.",
     points: ["Live job stages", "Automatic homeowner updates"],
-    accent: "bg-foreground text-background",
+    background: "/bg/gradient-0.jpg",
   },
   {
     icon: "/icons/chat.svg",
@@ -41,7 +41,7 @@ const FEATURES: Feature[] = [
     title: "One thread per job",
     body: "Chat, share photos, and send quotes without losing the conversation in a pile of texts and emails.",
     points: ["Photos & files inline", "Quotes in the same thread"],
-    accent: "bg-secondary text-foreground",
+    background: "/bg/gradient-0.jpg",
   },
   {
     icon: "/icons/danger-triangle.svg",
@@ -49,15 +49,15 @@ const FEATURES: Feature[] = [
     title: "Be first after the storm",
     body: "Get notified the moment severe weather rolls through your area, and reach the homeowners who need a roofer most.",
     points: ["Severe-weather watch", "Instant local alerts"],
-    accent: "bg-card text-foreground border border-border",
+    background: "/bg/gradient-0.jpg",
   },
   {
     icon: "/icons/wallet.svg",
     eyebrow: "Credits & billing",
     title: "Pay only for what you win",
-    body: "No lead packs, no monthly waste — just a simple credit balance you top up and control, charged when a quote is accepted.",
+    body: "No lead packs, no monthly waste. Just a simple credit balance you top up and control, charged only when a quote gets accepted.",
     points: ["Transparent per-lead cost", "Top up, never locked in"],
-    accent: "bg-primary text-primary-foreground",
+    background: "/bg/gradient-0.jpg",
   },
 ];
 
@@ -65,12 +65,14 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col justify-between gap-8 lg:gap-[2.222vw] overflow-hidden rounded-2xl lg:rounded-[1.111vw] p-8 sm:p-10 lg:flex-row lg:items-center lg:p-[3vw] shadow-xl lg:shadow-2xl",
-        feature.accent,
+        "relative flex h-full w-full flex-col justify-between gap-8 lg:gap-[2.222vw] overflow-hidden rounded-2xl lg:rounded-[1.111vw] bg-cover bg-center p-8 sm:p-10 lg:flex-row lg:items-center lg:p-[3vw] bg-[#ccc3ff]",
       )}
+      // style={{ backgroundImage: `url(${feature.background})` }}
     >
+     
+
       {/* copy */}
-      <div className="lg:max-w-[33vw]">
+      <div className="relative lg:max-w-[33vw]">
         <div className="flex items-center gap-3 lg:gap-[0.833vw]">
           <span className="flex size-11 lg:size-[3vw] items-center justify-center rounded-xl lg:rounded-[0.833vw] bg-current/15">
             <SVGIcon src={feature.icon} className="size-6 lg:size-[1.667vw]" />
@@ -108,7 +110,10 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
         <div className="absolute inset-0 flex flex-col gap-4 lg:gap-[1.111vw] p-6 lg:p-[2vw]">
           <div className="flex items-center gap-3 lg:gap-[0.833vw]">
             <span className="flex size-12 lg:size-[3.5vw] items-center justify-center rounded-lg lg:rounded-[0.694vw] bg-current/15">
-              <SVGIcon src={feature.icon} className="size-7 lg:size-[1.944vw]" />
+              <SVGIcon
+                src={feature.icon}
+                className="size-7 lg:size-[1.944vw]"
+              />
             </span>
             <div className="flex flex-col gap-2 lg:gap-[0.556vw]">
               <div className="h-2.5 lg:h-[0.694vw] w-28 lg:w-[10vw] rounded-full bg-current/25" />
@@ -147,24 +152,53 @@ export function FeatureSection() {
         const cards = cardsRef.current.filter(Boolean);
         if (cards.length < 2) return;
 
+        const last = cards.length - 1;
+
         // Every card after the first starts just below the stage, ready to rise.
         gsap.set(cards.slice(1), { yPercent: 100 });
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: pinRef.current,
-            start: "top top",
-            end: () => "+=" + window.innerHeight * (cards.length - 1),
-            pin: true,
-            scrub: 1,
-            invalidateOnRefresh: true,
-          },
-        });
+        // `current` = how many cards are stacked up. The scroll position only
+        // decides this target index (in whole steps); the cards themselves play
+        // their own smooth slide to fully cover — never glued to scroll velocity,
+        // so there's no track-slow-then-jump, just one clean motion per step.
+        let current = 0;
 
-        // Each card slides up and overlaps the one before it, one per scroll beat.
-        cards.forEach((card, i) => {
-          if (i === 0) return;
-          tl.to(card, { yPercent: 0, ease: "power2.out" }, i - 1);
+        const settle = (target: number) => {
+          if (target === current) return;
+          current = target;
+          cards.forEach((card, i) => {
+            if (i === 0) return;
+            gsap.to(card, {
+              yPercent: i <= target ? 0 : 100,
+              duration: 0.9,
+              ease: "power3.inOut",
+              overwrite: "auto",
+            });
+          });
+        };
+
+        ScrollTrigger.create({
+          trigger: pinRef.current,
+          start: "top top",
+          end: () => "+=" + window.innerHeight * last,
+          pin: true,
+          invalidateOnRefresh: true,
+          // Rest the scroll on whole-card stops so it never sits mid-step.
+          snap: {
+            snapTo: 1 / last,
+            duration: { min: 0.2, max: 0.5 },
+            ease: "power2.inOut",
+            directional: true,
+          },
+          onUpdate: (self) => {
+            // A little past a card's halfway point flips the target, and that
+            // card smoothly rises all the way up on its own.
+            settle(Math.round(self.progress * last));
+          },
+          onRefresh: () => {
+            current = 0;
+            gsap.set(cards, { yPercent: (i) => (i === 0 ? 0 : 100) });
+          },
         });
       });
 
@@ -183,8 +217,8 @@ export function FeatureSection() {
           One platform to run the work
         </h2>
         <p className="mx-auto mt-4 lg:mt-[1.111vw] max-w-xl lg:max-w-[41.66vw] text-base lg:text-[1.2vw] font-medium leading-relaxed text-muted-foreground">
-          From the first lead to the final invoice — everything a roofer needs
-          to win jobs and keep them on track, in one place.
+          From the first lead to the final invoice, everything a roofer needs to
+          win jobs and keep them on track, all in one place.
         </p>
       </div>
 

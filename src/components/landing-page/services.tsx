@@ -5,12 +5,12 @@ import { SVGIcon } from "../ui/svg-icon";
 const SERVICES = [
   {
     title: "Roof repair",
-    body: "Leaks, missing shingles, or that spot you keep eyeing — sorted before it grows.",
+    body: "Leaks, missing shingles, or that spot you keep eyeing. Get it looked at before it turns into a bigger bill.",
     src: "/bg/roof-repair.jpg",
   },
   {
     title: "Full replacement",
-    body: "Straight numbers from roofers who stand behind the work and the warranty.",
+    body: "Honest numbers from roofers who stand behind both the work and the warranty.",
     src: "/bg/roof-replacement.jpg",
   },
   {
@@ -20,7 +20,7 @@ const SERVICES = [
   },
   {
     title: "Roof inspection",
-    body: "Buying, selling, or just unsure — find out exactly what shape it's in.",
+    body: "Buying, selling, or just not sure? Find out exactly what shape your roof is in, no guesswork.",
     src: "/bg/roof-inspection.jpg",
   },
 ];
@@ -36,27 +36,16 @@ export function Services() {
               Whatever your roof needs.
             </h2>
             <p className="mt-4 lg:mt-[1.111vw] lg:max-w-[40vw] font-medium text-base lg:text-[1.2vw] leading-relaxed text-muted-foreground">
-              From a quick fix to a full replacement — get matched with local
-              roofers who do exactly this.
+              From a quick patch to a full tear-off, we match you with local
+              roofers who do exactly this kind of work, day in and day out.
             </p>
           </div>
-
-          <Link
-            href="/get-a-quote"
-            className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
-          >
-            Post a job
-            <SVGIcon
-              src="/icons/arrow-right.svg"
-              className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
-            />
-          </Link>
         </div>
 
         {/* compact card grid */}
         <div className="mt-12 lg:mt-[3.333vw] grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-[1.3vw] lg:gap-y-[2.222vw]">
           {SERVICES.map((s) => (
-            <Link key={s.title} href="/get-a-quote" className="group block">
+            <div key={s.title} className="group block">
               <div className="relative aspect-[4/4] w-full overflow-hidden rounded-md lg:rounded-[0.5vw] bg-muted">
                 <Image
                   src={s.src}
@@ -77,7 +66,17 @@ export function Services() {
               <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[1.042vw] leading-relaxed text-muted-foreground font-medium">
                 {s.body}
               </p>
-            </Link>
+              <Link
+                href="/get-a-quote"
+                className="w-full mt-4 lg:mt-[1vw] inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 border-primary/10 group-hover:border-primary/50 px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.8vw] text-base lg:text-[1.111vw] text-primary transition-colors"
+              >
+                Post a job
+                <SVGIcon
+                  src="/icons/arrow-right.svg"
+                  className="size-6 lg:size-[1.667vw] text-primary transition-transform group-hover:translate-x-0.5"
+                />
+              </Link>
+            </div>
           ))}
         </div>
 

@@ -91,7 +91,7 @@ export function StepsSection({
 
           {tabs && tabs.length > 0 ? (
             <div className="mt-6 lg:mt-[1.667vw] flex justify-center">
-              <div className="inline-flex rounded-full border bg-muted/50 p-1 lg:p-[0.278vw]">
+              <div className="inline-flex rounded-full border bg-background p-1 lg:p-[0.278vw]">
                 {tabs.map((t) => (
                   <button
                     key={t.id}
@@ -99,9 +99,9 @@ export function StepsSection({
                     onClick={() => onTabChange?.(t.id)}
                     aria-pressed={activeTab === t.id}
                     className={cn(
-                      "rounded-full px-5 lg:px-[1.389vw] py-2 lg:py-[0.556vw] text-sm lg:text-[1.042vw] font-semibold transition-colors",
+                      "bg-background rounded-full px-5 lg:px-[1.389vw] py-2 lg:py-[0.556vw] text-sm lg:text-[1.042vw] font-semibold transition-colors",
                       activeTab === t.id
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-secondary/50 text-secondary-foreground"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
@@ -126,7 +126,7 @@ export function StepsSection({
                   className={cn(
                     "w-8 h-8 md:w-10 md:h-10 lg:w-[2.778vw] lg:h-[2.778vw] rounded-full flex shrink-0 items-center justify-center border-2 transition-all duration-700 ease-in-out",
                     index === currentFeature
-                      ? "bg-primary border-primary text-primary-foreground scale-110"
+                      ? "bg-secondary/50 border-secondary text-secondary-foreground scale-110"
                       : "bg-muted border-border text-muted-foreground scale-100",
                   )}
                 >

@@ -2,17 +2,17 @@ const STATS = [
   {
     label: "Hear back in",
     value: "24h",
-    desc: "Most homeowners get their first reply within the hour.",
+    desc: "Most homeowners hear from a roofer within the hour of posting.",
   },
   {
     label: "Always",
     value: "100%",
-    desc: "Licensed & insured roofers — checked before they can quote.",
+    desc: "Every roofer is licensed and insured, and we check it before they can quote.",
   },
   {
     label: "You pay",
     value: "Free",
-    desc: "Free for homeowners. No fees, no obligation, ever.",
+    desc: "Free for homeowners. No fees, no catch, no obligation, ever.",
   },
 ];
 
@@ -25,7 +25,7 @@ export function TrustStrip() {
             A better way to hire a roofer.
           </h2>
           <p className="mt-2 lg:mt-[0.556vw] font-medium text-base lg:text-[1.2vw] leading-relaxed text-muted-foreground">
-            A few vetted local pros, real quotes, zero pressure.
+            A handful of vetted local pros. Real quotes. Zero pressure.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export function TrustStrip() {
               <p className="mt-2 lg:mt-[0.556vw] font-sebenta text-primary text-[4rem] lg:text-[4.444vw] font-bold leading-none tracking-tight">
                 {s.value}
               </p>
-              <p className="mt-6 lg:mt-[1.667vw] leading-relaxed text-muted-foreground">
+              <p className="mt-6 lg:mt-[1.667vw] leading-relaxed text-muted-foreground lg:text-[1.111vw]">
                 {s.desc}
               </p>
             </div>

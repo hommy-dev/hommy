@@ -8,21 +8,21 @@ const HOMEOWNER_STEPS = [
     step: "Step one",
     title: "Tell us about your roof",
     content:
-      "Post your job in a couple of minutes — what's going on, where you are, and when you need it done.",
+      "Tell us what's going on, where you are, and when you need it done. Takes about two minutes.",
     image: "/bg/worker-1.jpeg",
   },
   {
     step: "Step two",
     title: "We match local pros",
     content:
-      "Your job goes to a few licensed, insured roofers near you who actually cover your area.",
+      "Your job goes straight to a handful of licensed, insured roofers who actually work in your neighborhood.",
     image: "/bg/roof-inspection.jpg",
   },
   {
     step: "Step three",
     title: "Compare & pick",
     content:
-      "Get quotes, compare them side by side, and choose the roofer you like. No pressure, no obligation.",
+      "Compare the quotes side by side and go with the roofer that feels right. No pressure, no obligation.",
     image: "/bg/roof-replacement.jpg",
   },
 ];
@@ -32,21 +32,21 @@ const ROOFER_STEPS = [
     step: "Step one",
     title: "Get matched leads",
     content:
-      "Receive jobs from homeowners near you that fit your services and coverage area — free to view.",
+      "See jobs from homeowners near you that fit what you do and where you work. Free to look, every time.",
     image: "/bg/worker-1.jpeg",
   },
   {
     step: "Step two",
     title: "Engage the ones you want",
     content:
-      "Spend a credit to reach out and quote only the jobs worth your time. No wasted calls, no lead packs.",
+      "Spend a credit to reach out and quote the jobs worth your time. No wasted calls, no buying lead packs.",
     image: "/bg/roof-repair.jpg",
   },
   {
     step: "Step three",
     title: "Win the work",
     content:
-      "Get hired, build your reviews, and only pay the full fee when a homeowner accepts your quote.",
+      "Get hired, earn reviews, and pay the full fee only when a homeowner says yes to your quote.",
     image: "/bg/roof-replacement.jpg",
   },
 ];
@@ -59,12 +59,12 @@ const TABS = [
 const CONTENT = {
   homeowner: {
     subtitle:
-      "Post your job in minutes and get quotes from verified local roofers. You compare, you choose, no pressure.",
+      "Post your job in a few minutes and get real quotes from local roofers. You compare, you choose, and there's never any pressure.",
     steps: HOMEOWNER_STEPS,
   },
   roofer: {
     subtitle:
-      "Get matched with nearby homeowners, engage the jobs you want, and only pay when you win the work.",
+      "Get matched with homeowners nearby, go after the jobs you actually want, and pay only when you win the work.",
     steps: ROOFER_STEPS,
   },
 } as const;
