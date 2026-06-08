@@ -4,7 +4,7 @@ import { Hero } from "@/components/landing-page/hero";
 import { TrustStrip } from "@/components/landing-page/trust-strip";
 import { HowItWorks } from "@/components/landing-page/how-it-works";
 import { Services } from "@/components/landing-page/services";
-import { Storm } from "@/components/landing-page/storm";
+import { FeatureSection } from "@/components/landing-page/feature-section";
 import { Testimonials } from "@/components/landing-page/testimonials";
 import { Faq } from "@/components/landing-page/faq";
 import { ProCta } from "@/components/landing-page/pro-cta";
@@ -25,7 +25,7 @@ export default function HomePage() {
         <TrustStrip />
         <HowItWorks />
         <Services />
-        <Storm />
+        <FeatureSection />
         {/* <Testimonials /> */}
         <Faq />
         <ProCta />
