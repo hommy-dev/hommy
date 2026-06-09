@@ -19,6 +19,7 @@ import {
   services,
   users,
 } from '@/lib/db/schema'
+import { subtypeLabel } from '@/lib/leads/subtype'
 
 export type Contractor = typeof contractors.$inferSelect
 
@@ -83,12 +84,12 @@ export async function getContractorLeads(
     .orderBy(desc(leadRecipients.offeredAt))
 
   return rows.map((r) => {
-    const subtype = r.serviceDetails?.subtype
+    const subtype = subtypeLabel(r.serviceDetails)
     return {
       id: r.id,
       recipientStatus: r.recipientStatus,
       urgency: r.urgency,
-      subtype: typeof subtype === 'string' ? subtype : null,
+      subtype,
       notes: r.notes,
       serviceName: r.serviceName,
       homeownerName: r.homeownerName,

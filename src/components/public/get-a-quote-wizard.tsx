@@ -1,27 +1,30 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createLead } from "@/lib/actions/leads"
 import {
-  GooglePlacesInput,
-  type PlaceResult,
-} from "@/components/ui/google-places-input"
+  checkEmailRegistered,
+  startHomeownerGoogleSignup,
+} from "@/lib/actions/auth"
+import { type PlaceResult } from "@/components/ui/google-places-input"
 import { showToast } from "@/components/ui/toast"
+import { NOT_SURE_SUBTYPE } from "@/lib/leads/subtype"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { EMAIL_RE, type StepKey, type FieldErrors } from "./get-a-quote/constants"
+import { WhatStep } from "./get-a-quote/what-step"
+import { WhereStep } from "./get-a-quote/where-step"
+import { ContactStep } from "./get-a-quote/contact-step"
+import {
+  LoginDialog,
+  type HomeownerContact,
+} from "./get-a-quote/login-dialog"
 
-const URGENCY = [
-  { value: "emergency", label: "Emergency — need someone now" },
-  { value: "within_week", label: "Within a week" },
-  { value: "within_month", label: "Within a month" },
-  { value: "planning", label: "Just planning / getting prices" },
-] as const
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-type StepKey = "what" | "where" | "you"
-type FieldErrors = Record<string, string>
+// Where we stash the in-progress job before a Google round-trip, so it can be
+// restored when the now-signed-in homeowner lands back on the wizard.
+const DRAFT_KEY = "homei:get-a-quote:draft"
 
 export function GetAQuoteWizard({
   subtypes,
@@ -38,6 +41,7 @@ export function GetAQuoteWizard({
 }) {
   const router = useRouter()
   const [pending, startSubmit] = useTransition()
+  const [googlePending, startGoogle] = useTransition()
 
   // Guests fill all three steps; logged-in homeowners skip the contact step.
   const stepKeys: StepKey[] = isLoggedInHomeowner
@@ -49,7 +53,10 @@ export function GetAQuoteWizard({
   const [stepIndex, setStepIndex] = useState(initialSubtype ? 1 : 0)
   const current = stepKeys[Math.min(stepIndex, total - 1)]
 
-  const [subtype, setSubtype] = useState(initialSubtype)
+  // Multiple subtypes allowed; "Not sure" is exclusive (clears the rest).
+  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(
+    initialSubtype ? [initialSubtype] : [],
+  )
   const [urgency, setUrgency] = useState<string>("within_month")
   const [notes, setNotes] = useState("")
   const [place, setPlace] = useState<PlaceResult | null>(null)
@@ -58,25 +65,116 @@ export function GetAQuoteWizard({
   const [phone, setPhone] = useState("")
   const [errors, setErrors] = useState<FieldErrors>({})
 
+  // Inline existing-account flow. A single account is one role (see
+  // docs/HOMEI_PLATFORM.md §5): a known homeowner is prompted to sign in inline;
+  // a contractor/admin email is blocked with a "use a different email" note.
+  // `emailStatus` also keeps Post disabled WHILE we're checking, so the button
+  // never flips enabled → disabled once the result lands.
+  //  - "free"      → no account, OK to post as a guest
+  //  - "homeowner" → existing homeowner, offer inline sign-in
+  //  - "other"     → contractor/admin email, can't post under it
+  const [emailStatus, setEmailStatus] = useState<
+    "idle" | "checking" | "free" | "homeowner" | "other"
+  >("idle")
+  const [signedIn, setSignedIn] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
+
+  // If a homeowner signed in via Google mid-flow, they return here already
+  // authenticated — restore the job they'd started and drop them on the last
+  // step to review and post.
+  useEffect(() => {
+    if (!isLoggedInHomeowner) return
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY)
+      if (!raw) return
+      const d = JSON.parse(raw) as {
+        selectedSubtypes?: string[]
+        urgency?: string
+        notes?: string
+        place?: PlaceResult | null
+      }
+      if (Array.isArray(d.selectedSubtypes)) setSelectedSubtypes(d.selectedSubtypes)
+      if (typeof d.urgency === "string") setUrgency(d.urgency)
+      if (typeof d.notes === "string") setNotes(d.notes)
+      if (d.place) setPlace(d.place)
+      setStepIndex(stepKeys.length - 1)
+    } catch {
+      // Corrupt/blocked storage — just start fresh.
+    } finally {
+      try {
+        sessionStorage.removeItem(DRAFT_KEY)
+      } catch {}
+    }
+    // Run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const emailValid = EMAIL_RE.test(email.trim())
   const phoneValid = phone.replace(/\D/g, "").length >= 7
+  const emailChecking = emailStatus === "checking"
+  const emailIsHomeowner = emailStatus === "homeowner"
+  const emailIsOther = emailStatus === "other"
+
+  // Debounced background check: is this email already registered, and as what?
+  useEffect(() => {
+    if (signedIn) return
+    const value = email.trim().toLowerCase()
+    if (!EMAIL_RE.test(value)) {
+      setEmailStatus("idle")
+      return
+    }
+    let cancelled = false
+    setEmailStatus("checking")
+    const t = setTimeout(async () => {
+      try {
+        const res = await checkEmailRegistered(value)
+        if (cancelled) return
+        if (!res.exists) setEmailStatus("free")
+        else if (res.role === "homeowner") setEmailStatus("homeowner")
+        else setEmailStatus("other")
+      } catch {
+        // Network/transient failure — don't block; the submit-time guard catches
+        // a genuinely-taken email.
+        if (!cancelled) setEmailStatus("free")
+      }
+    }, 400)
+    return () => {
+      cancelled = true
+      clearTimeout(t)
+    }
+  }, [email, signedIn])
 
   const canAdvance =
-    (current === "what" && subtype.length > 0) ||
+    (current === "what" && selectedSubtypes.length > 0) ||
     (current === "where" && place !== null) ||
     (current === "you" &&
-      fullName.trim().length >= 2 &&
-      emailValid &&
-      phoneValid)
+      (signedIn ||
+        (fullName.trim().length >= 2 &&
+          emailValid &&
+          phoneValid &&
+          emailStatus === "free")))
 
   function clearError(key: string) {
     setErrors((e) => (e[key] ? { ...e, [key]: "" } : e))
   }
 
+  // Toggle a subtype chip. "Not sure" is mutually exclusive with the specifics.
+  function toggleSubtype(s: string) {
+    setSelectedSubtypes((prev) => {
+      if (s === NOT_SURE_SUBTYPE) {
+        return prev.includes(NOT_SURE_SUBTYPE) ? [] : [NOT_SURE_SUBTYPE]
+      }
+      const withoutUnsure = prev.filter((v) => v !== NOT_SURE_SUBTYPE)
+      return withoutUnsure.includes(s)
+        ? withoutUnsure.filter((v) => v !== s)
+        : [...withoutUnsure, s]
+    })
+  }
+
   function stepOfField(field: string): number {
     if (field === "fullName" || field === "email" || field === "phone")
       return stepKeys.indexOf("you")
-    if (field === "subtype" || field === "urgency" || field === "notes")
+    if (field === "subtypes" || field === "urgency" || field === "notes")
       return stepKeys.indexOf("what")
     return stepKeys.indexOf("where")
   }
@@ -84,7 +182,7 @@ export function GetAQuoteWizard({
   function submit() {
     startSubmit(async () => {
       const res = await createLead({
-        subtype,
+        subtypes: selectedSubtypes,
         urgency,
         notes: notes.trim(),
         address: place?.formattedAddress ?? "",
@@ -93,10 +191,32 @@ export function GetAQuoteWizard({
         zipCode: place?.zipCode ?? "",
         lat: place?.lat ?? null,
         lng: place?.lng ?? null,
-        ...(isLoggedInHomeowner ? {} : { fullName, email, phone }),
+        ...(isLoggedInHomeowner || signedIn ? {} : { fullName, email, phone }),
       })
 
       if (!res.success) {
+        // Email already belongs to an account — don't dead-end. Drop the user on
+        // the contact step and resolve the role so we show the right prompt:
+        // homeowner → sign-in popup; contractor/admin → use a different email.
+        const emailInUse =
+          /already|registered|sign in/i.test(res.fieldErrors?.email ?? "") ||
+          /already have an account/i.test(res.error)
+        if (emailInUse) {
+          setStepIndex(stepKeys.indexOf("you"))
+          try {
+            const chk = await checkEmailRegistered(email.trim().toLowerCase())
+            if (chk.exists && chk.role !== "homeowner") {
+              setEmailStatus("other")
+            } else {
+              setEmailStatus("homeowner")
+              setLoginOpen(true)
+            }
+          } catch {
+            setEmailStatus("homeowner")
+            setLoginOpen(true)
+          }
+          return
+        }
         showToast(res.error, { type: "error" })
         if (res.fieldErrors) {
           setErrors(res.fieldErrors)
@@ -107,6 +227,9 @@ export function GetAQuoteWizard({
         }
         return
       }
+      try {
+        sessionStorage.removeItem(DRAFT_KEY)
+      } catch {}
       router.push(res.data.redirectTo)
       router.refresh()
     })
@@ -121,240 +244,148 @@ export function GetAQuoteWizard({
     submit()
   }
 
+  // Called when the inline login popup signs the homeowner in. We auto-fill the
+  // contact fields and drop the existing-account prompt; the next Post posts
+  // under their authenticated session.
+  function onSignedIn(contact: HomeownerContact) {
+    setSignedIn(true)
+    setEmailStatus("free")
+    setLoginOpen(false)
+    setFullName(contact.fullName)
+    setEmail(contact.email)
+    setPhone(contact.phone)
+    setErrors({})
+    showToast("You're signed in — review and post your job.", { type: "success" })
+  }
+
+  // Google sign-in leaves the page, so stash the in-progress job first; the
+  // mount effect above restores it when they return authenticated.
+  function onGoogle() {
+    try {
+      sessionStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ selectedSubtypes, urgency, notes, place }),
+      )
+    } catch {}
+    startGoogle(async () => {
+      const res = await startHomeownerGoogleSignup("/get-a-quote")
+      if (!res.success || !res.data) {
+        showToast(res.success ? "Could not start Google sign-in." : res.error, {
+          type: "error",
+        })
+        return
+      }
+      window.location.href = res.data.url
+    })
+  }
+
   const lastStep = stepIndex === total - 1
 
   return (
-    <div className="flex min-h-svh flex-col bg-canvas text-foreground">
-      <header className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-between px-6 lg:px-[1.667vw] py-5 lg:py-[1.389vw]">
-        <Link href="/" className="font-sebenta text-lg lg:text-[1.25vw] font-bold">
-          Homei
-        </Link>
+    <div className="flex min-h-svh flex-col bg-canvas text-foreground pt-10 lg:pt-[1.2vw]">
+      <header className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-center px-6 lg:px-[1.667vw] py-5 lg:py-[1.389vw]">
         <Link
           href="/"
-          className="text-xs lg:text-[0.833vw] font-medium text-foreground/50 transition-colors hover:text-foreground"
+          className="text-muted-foreground font-sebenta text-lg lg:text-[2vw] font-bold"
         >
-          Back to home
+          Homei
         </Link>
       </header>
 
-      <div className="mx-auto w-full max-w-2xl lg:max-w-[46.662vw] px-6 lg:px-[1.667vw]">
-        <div className="flex items-center justify-between text-xs lg:text-[0.833vw] font-medium text-foreground/50">
-          <span>
-            Step {stepIndex + 1} of {total}
-          </span>
-          <span>{Math.round(((stepIndex + 1) / total) * 100)}%</span>
-        </div>
-        <div className="mt-2 lg:mt-[0.556vw] h-1.5 lg:h-[0.417vw] overflow-hidden rounded-full bg-foreground/10">
-          <div
-            className="h-full rounded-full bg-primary transition-[width] duration-300"
-            style={{ width: `${((stepIndex + 1) / total) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      <main className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] flex-1 flex-col px-6 lg:px-[1.667vw] py-10 lg:py-[2.778vw]">
+      <main className="mx-auto bg-background flex w-full max-w-2xl lg:max-w-[45vw] flex-1 flex-col text-center px-6 lg:px-[1.667vw] py-10 lg:py-[2.778vw] rounded-lg lg:rounded-[1vw]">
         {current === "what" && (
-          <Step
-            title="What's going on with your roof?"
-            sub="Pick what's closest — you can add details in a moment."
-          >
-            <div className="flex flex-wrap gap-2.5 lg:gap-[0.694vw]">
-              {subtypes.map((s) => {
-                const active = subtype === s
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSubtype(s)}
-                    className={cn(
-                      "rounded-full border px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.972vw] font-medium transition-colors",
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-foreground/15 bg-card text-foreground/70 hover:border-foreground/30",
-                    )}
-                  >
-                    {s}
-                  </button>
-                )
-              })}
-            </div>
-
-            <Field label="How soon do you need it?">
-              <select
-                value={urgency}
-                onChange={(e) => setUrgency(e.target.value)}
-                className={inputCls}
-              >
-                {URGENCY.map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {u.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            <Field label="Anything else? (optional)">
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value.slice(0, 1000))}
-                placeholder="e.g. leak over the garage after last week's storm"
-                rows={3}
-                className={cn(inputCls, "resize-none")}
-              />
-            </Field>
-          </Step>
+          <WhatStep
+            subtypes={subtypes}
+            selectedSubtypes={selectedSubtypes}
+            onToggleSubtype={toggleSubtype}
+            urgency={urgency}
+            onUrgencyChange={setUrgency}
+            notes={notes}
+            onNotesChange={setNotes}
+          />
         )}
 
         {current === "where" && (
-          <Step
-            title="Where's the property?"
-            sub="We match you with roofers who cover this address."
-          >
-            <Field label="Property address" error={errors.zipCode || errors.address}>
-              <GooglePlacesInput
-                mode="address"
-                placeholder="Start typing your address…"
-                value={place ? place.formattedAddress : initialWhere}
-                onPlaceSelect={(p) => {
-                  setPlace(p)
-                  clearError("zipCode")
-                  clearError("address")
-                }}
-                aria-invalid={!!(errors.zipCode || errors.address)}
-              />
-            </Field>
-            {place && (
-              <p className="text-[13px] lg:text-[0.903vw] text-foreground/55">
-                {[place.city, place.state, place.zipCode]
-                  .filter(Boolean)
-                  .join(", ")}
-              </p>
-            )}
-            {isLoggedInHomeowner && loggedInName && lastStep && (
-              <p className="text-[13px] lg:text-[0.903vw] text-foreground/55">
-                Posting as <span className="font-medium text-foreground">{loggedInName}</span>.
-              </p>
-            )}
-          </Step>
+          <WhereStep
+            value={place ? place.formattedAddress : initialWhere}
+            error={errors.zipCode || errors.address}
+            onPlaceSelect={(p) => {
+              setPlace(p)
+              clearError("zipCode")
+              clearError("address")
+            }}
+            summary={
+              place
+                ? [place.city, place.state, place.zipCode]
+                    .filter(Boolean)
+                    .join(", ")
+                : null
+            }
+            postingAsName={
+              isLoggedInHomeowner && loggedInName && lastStep ? loggedInName : null
+            }
+          />
         )}
 
         {current === "you" && (
-          <Step
-            title="Where should roofers reach you?"
-            sub="We create your free account so you can compare quotes and message contractors."
-          >
-            <Field label="Full name" error={errors.fullName}>
-              <input
-                value={fullName}
-                onChange={(e) => {
-                  setFullName(e.target.value)
-                  clearError("fullName")
-                }}
-                placeholder="Jordan Smith"
-                className={inputCls}
-                autoFocus
-              />
-            </Field>
-            <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
-              <Field label="Email" error={errors.email}>
-                <input
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value)
-                    clearError("email")
-                  }}
-                  type="email"
-                  inputMode="email"
-                  placeholder="you@email.com"
-                  className={inputCls}
-                />
-              </Field>
-              <Field label="Phone" error={errors.phone}>
-                <input
-                  value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value)
-                    clearError("phone")
-                  }}
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="(214) 555-0100"
-                  className={inputCls}
-                />
-              </Field>
-            </div>
-            <p className="text-xs lg:text-[0.833vw] text-foreground/45">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="font-medium text-primary hover:underline">
-                Sign in
-              </Link>{" "}
-              first to post under it.
-            </p>
-          </Step>
+          <ContactStep
+            signedIn={signedIn}
+            fullName={fullName}
+            email={email}
+            phone={phone}
+            onFullNameChange={(v) => {
+              setFullName(v)
+              clearError("fullName")
+            }}
+            onEmailChange={(v) => {
+              setEmail(v)
+              clearError("email")
+            }}
+            onPhoneChange={(v) => {
+              setPhone(v)
+              clearError("phone")
+            }}
+            errors={errors}
+            emailChecking={emailChecking}
+            emailIsHomeowner={emailIsHomeowner}
+            emailIsOther={emailIsOther}
+            onOpenLogin={() => setLoginOpen(true)}
+          />
         )}
-
-        <div className="mt-auto flex items-center justify-between pt-10 lg:pt-[2.778vw]">
-          <button
-            type="button"
-            onClick={() => setStepIndex((s) => Math.max(0, s - 1))}
-            className={cn(
-              "text-sm lg:text-[0.972vw] font-medium text-foreground/55 transition-colors hover:text-foreground",
-              stepIndex === 0 && "invisible",
-            )}
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            disabled={!canAdvance || pending}
-            className="rounded-xl lg:rounded-[0.926vw] bg-primary px-7 lg:px-[1.944vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
-          >
-            {!lastStep ? "Next" : pending ? "Posting…" : "Post & see matches"}
-          </button>
-        </div>
       </main>
-    </div>
-  )
-}
 
-const inputCls =
-  "w-full rounded-xl lg:rounded-[0.926vw] border border-foreground/15 bg-card px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
+      <footer className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-between gap-3 lg:gap-[0.833vw] px-6 lg:px-[1.667vw] py-6 lg:py-[1.667vw]">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          onClick={() => setStepIndex((s) => Math.max(0, s - 1))}
+          className={cn(
+            stepIndex === 0 && "invisible",
+            "bg-background hover:bg-background hover:border-foreground/50 px-7 lg:px-[2.5vw] font-semibold",
+          )}
+        >
+          Back
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          onClick={next}
+          disabled={!canAdvance || pending}
+          className="px-7 lg:px-[2.5vw] font-semibold"
+        >
+          {!lastStep ? "Next" : pending ? "Posting…" : "Post & see matches"}
+        </Button>
+      </footer>
 
-function Step({
-  title,
-  sub,
-  children,
-}: {
-  title: string
-  sub: string
-  children: React.ReactNode
-}) {
-  return (
-    <div>
-      <h1 className="font-sebenta text-[2rem] lg:text-[2.222vw] font-bold leading-tight tracking-tight">
-        {title}
-      </h1>
-      <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">{sub}</p>
-      <div className="mt-8 lg:mt-[2.222vw] space-y-5 lg:space-y-[1.389vw]">{children}</div>
-    </div>
-  )
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string
-  error?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="space-y-1.5 lg:space-y-[0.417vw]">
-      <label className="text-[13px] lg:text-[0.903vw] font-medium text-foreground/75">{label}</label>
-      {children}
-      {error ? <p className="text-[13px] lg:text-[0.903vw] text-destructive">{error}</p> : null}
+      <LoginDialog
+        open={loginOpen}
+        onOpenChange={setLoginOpen}
+        email={email}
+        onSuccess={onSignedIn}
+        onGoogle={onGoogle}
+        googlePending={googlePending}
+      />
     </div>
   )
 }

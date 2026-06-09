@@ -7,6 +7,7 @@
 import { db } from '@/lib/db'
 import { count, desc, eq, inArray } from 'drizzle-orm'
 import { homeowners, leadRecipients, leads, services } from '@/lib/db/schema'
+import { subtypeLabel } from '@/lib/leads/subtype'
 
 /** Map an authenticated user → their 1:1 homeowner profile. */
 export async function getHomeownerForUser(
@@ -70,11 +71,11 @@ export async function getHomeownerLeads(
   const countByLead = new Map(counts.map((c) => [c.leadId, c.value]))
 
   return rows.map((r) => {
-    const subtype = r.serviceDetails?.subtype
+    const subtype = subtypeLabel(r.serviceDetails)
     return {
       id: r.id,
       serviceName: r.serviceName,
-      subtype: typeof subtype === 'string' ? subtype : null,
+      subtype,
       urgency: r.urgency,
       status: r.status,
       city: r.city,

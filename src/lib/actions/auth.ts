@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { provisionContractor, provisionHomeowner } from '@/lib/auth/provisioning'
@@ -96,6 +96,97 @@ export async function loginAction(
     ROLE_DEFAULT_PATH[row.role as keyof typeof ROLE_DEFAULT_PATH] ?? '/'
 
   return { success: true, data: { redirectTo } }
+}
+
+/**
+ * Lightweight check used by the post-a-job wizard: is this email already taken
+ * by ANY account? Lets us prompt the person to sign in inline instead of failing
+ * only at submit time. Case-insensitive. Auth emails are globally unique across
+ * roles, so we don't filter by role here — the inline login then steers
+ * homeowners through and tells contractors to use their own sign-in.
+ */
+export async function checkEmailRegistered(
+  email: string,
+): Promise<{ exists: boolean; role: 'contractor' | 'homeowner' | 'admin' | null }> {
+  const normalized = typeof email === 'string' ? email.trim().toLowerCase() : ''
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+    return { exists: false, role: null }
+  }
+
+  const [row] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(sql`lower(${users.email}) = ${normalized}`)
+    .limit(1)
+
+  return {
+    exists: !!row,
+    role: (row?.role as 'contractor' | 'homeowner' | 'admin') ?? null,
+  }
+}
+
+/**
+ * Inline sign-in for the post-a-job wizard. Authenticates an EXISTING homeowner
+ * without leaving the wizard and returns their contact details so the form can
+ * auto-fill. The session cookie is set here, so the subsequent createLead posts
+ * under the now-authenticated homeowner.
+ */
+export async function loginHomeownerInline(
+  formData: FormData,
+): Promise<ActionResult<{ fullName: string; email: string; phone: string }>> {
+  const parsed = LoginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  })
+  if (!parsed.success) {
+    return { success: false, error: 'Enter your email and password.' }
+  }
+
+  const supabase = await createClient()
+  const { data: signInData, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
+  if (error || !signInData.user) {
+    return { success: false, error: 'Wrong email or password. Please try again.' }
+  }
+
+  const [row] = await db
+    .select({
+      role: users.role,
+      fullName: users.fullName,
+      email: users.email,
+      phone: users.phone,
+    })
+    .from(users)
+    .where(eq(users.id, signInData.user.id))
+    .limit(1)
+
+  if (!row) {
+    await supabase.auth.signOut()
+    return {
+      success: false,
+      error: 'Your account is not fully set up. Please contact support.',
+    }
+  }
+
+  if (row.role !== 'homeowner') {
+    // Don't strand a non-homeowner in a half-signed-in state mid-wizard.
+    await supabase.auth.signOut()
+    return {
+      success: false,
+      error: 'This email is registered as a contractor. Use the contractor sign-in.',
+    }
+  }
+
+  return {
+    success: true,
+    data: {
+      fullName: row.fullName ?? '',
+      email: row.email,
+      phone: row.phone ?? '',
+    },
+  }
 }
 
 const ContractorSignupSchema = z.object({
@@ -264,14 +355,18 @@ export async function signupHomeowner(
  * Returns a Google OAuth URL for homeowner signup. The callback (intent=homeowner)
  * provisions the homeowner profile after the session is established.
  */
-export async function startHomeownerGoogleSignup(): Promise<
-  ActionResult<{ url: string }>
-> {
+export async function startHomeownerGoogleSignup(
+  next: string = '/homeowner',
+): Promise<ActionResult<{ url: string }>> {
   const supabase = await createClient()
   const origin = getAppOrigin()
+  // Only allow same-app relative paths as the post-login destination.
+  const safeNext = next.startsWith('/') ? next : '/homeowner'
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${origin}/auth/callback?intent=homeowner&next=/homeowner` },
+    options: {
+      redirectTo: `${origin}/auth/callback?intent=homeowner&next=${encodeURIComponent(safeNext)}`,
+    },
   })
   if (error || !data.url) {
     return { success: false, error: error?.message || 'Could not start Google sign-in' }

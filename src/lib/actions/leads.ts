@@ -16,6 +16,7 @@ import { createGuestHomeowner } from '@/lib/auth/guest-homeowner'
 import { findEligibleContractors } from '@/lib/leads/matching'
 import { getLeadPricing } from '@/lib/leads/pricing'
 import { normalizePostalCode } from '@/lib/geo/postal'
+import { NOT_SURE_SUBTYPE } from '@/lib/leads/subtype'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { homeowners, leadRecipients, leads, services } from '@/lib/db/schema'
 
@@ -33,7 +34,7 @@ type CreateLeadData = {
 const SLA_HOURS = 48
 
 const CreateLeadSchema = z.object({
-  subtype: z.string().trim().min(1, 'Choose the type of work'),
+  subtypes: z.array(z.string().trim().min(1)).min(1, 'Choose the type of work'),
   urgency: z.enum(['emergency', 'within_week', 'within_month', 'planning']),
   address: z.string().trim().min(3, 'Enter the property address'),
   // City/state/postal are display-only and optional (Google doesn't always
@@ -77,13 +78,22 @@ export async function createLead(
   if (!roofing) {
     return { success: false, error: 'Service is temporarily unavailable. Please try again later.' }
   }
-  if (!roofing.subtypes.includes(d.subtype)) {
+  // Each pick must be a real service subtype, or the "Not sure" sentinel.
+  const invalidSubtypes = d.subtypes.filter(
+    (s) => s !== NOT_SURE_SUBTYPE && !roofing.subtypes.includes(s),
+  )
+  if (invalidSubtypes.length > 0) {
     return {
       success: false,
-      error: 'Please pick a valid type of work.',
-      fieldErrors: { subtype: 'Pick one of the listed options' },
+      error: 'Please pick valid types of work.',
+      fieldErrors: { subtypes: 'Pick from the listed options' },
     }
   }
+  // "Not sure" is mutually exclusive with specific picks — collapse defensively
+  // in case a client sent both.
+  const subtypes = d.subtypes.includes(NOT_SURE_SUBTYPE)
+    ? [NOT_SURE_SUBTYPE]
+    : d.subtypes
 
   // Geographic matching needs coordinates; the address picker always supplies
   // them when an address is selected from the suggestions.
@@ -159,7 +169,7 @@ export async function createLead(
         .values({
           homeownerId: ho.id,
           serviceId: roofing.id,
-          serviceDetails: { subtype: d.subtype },
+          serviceDetails: { subtypes },
           urgency: d.urgency,
           address: d.address,
           city: d.city || null,
