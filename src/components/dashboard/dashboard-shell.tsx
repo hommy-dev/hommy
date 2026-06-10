@@ -52,6 +52,8 @@ export type DashboardShellProps = {
   messagesHref?: string;
   /** Slot rendered on the right of the inset header (e.g. NotificationBell). */
   topRight?: React.ReactNode;
+  /** Slot rendered under the brand in the sidebar (e.g. the workspace chip). */
+  workspace?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -63,6 +65,7 @@ export function DashboardShell({
   navUnreadCounts,
   messagesHref,
   topRight,
+  workspace,
   children,
 }: DashboardShellProps) {
   const pathname = usePathname() ?? "";
@@ -101,6 +104,9 @@ export function DashboardShell({
                 {brandLabel}
               </span>
             </Link>
+            {workspace ? (
+              <div className="mt-3 lg:mt-[0.833vw]">{workspace}</div>
+            ) : null}
           </SidebarHeader>
 
           {/* Nav */}

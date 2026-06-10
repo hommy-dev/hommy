@@ -96,6 +96,12 @@ export const users = pgTable('users', {
   role: userRole('role').notNull(),
   // false for auto-created homeowners until they set a password (deferred-password flow)
   passwordSet: boolean('password_set').notNull().default(false),
+  // The company a multi-company contractor is currently operating as. Null →
+  // fall back to their first active membership. (set null if that company is gone)
+  activeContractorId: uuid('active_contractor_id').references(
+    (): import('drizzle-orm/pg-core').AnyPgColumn => contractors.id,
+    { onDelete: 'set null' },
+  ),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

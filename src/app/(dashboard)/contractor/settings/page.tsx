@@ -1,10 +1,5 @@
-import { ComingSoon } from "@/components/dashboard/coming-soon"
+import { redirect } from "next/navigation"
 
-export default function SettingsPage() {
-  return (
-    <ComingSoon
-      title="Settings"
-      description="Account, notification preferences, and billing."
-    />
-  )
+export default function ContractorSettingsIndex() {
+  redirect("/contractor/settings/account")
 }

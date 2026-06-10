@@ -15,6 +15,7 @@ const ProfileSchema = z.object({
   phone: z.string().trim().max(30).optional(),
   bio: z.string().trim().max(600).optional().default(''),
   logoUrl: z.string().url().nullable().optional(),
+  yearsInBusiness: z.coerce.number().int().min(0).max(200).nullable().optional(),
 })
 
 export async function updateBusinessProfile(input: unknown): Promise<Result> {
@@ -31,7 +32,14 @@ export async function updateBusinessProfile(input: unknown): Promise<Result> {
   await db.transaction(async (tx) => {
     await tx
       .update(contractors)
-      .set({ companyName: d.companyName, bio: d.bio || null, logoUrl: d.logoUrl ?? null })
+      .set({
+        companyName: d.companyName,
+        bio: d.bio || null,
+        logoUrl: d.logoUrl ?? null,
+        ...(d.yearsInBusiness !== undefined
+          ? { yearsInBusiness: d.yearsInBusiness }
+          : {}),
+      })
       .where(eq(contractors.id, contractor.id))
     if (d.phone !== undefined) {
       await tx.update(users).set({ phone: d.phone || null }).where(eq(users.id, user.id))

@@ -17,7 +17,6 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor/messages", label: "Messages", icon: "chat" },
   { href: "/contractor/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
   { href: "/contractor/reviews", label: "Reviews", icon: "star" },
-  { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },
 ]
 
@@ -26,7 +25,7 @@ export const HOMEOWNER_NAV: DashboardNavItem[] = [
   { href: "/homeowner/requests", label: "My requests", icon: "paper" },
   { href: "/homeowner/quotes", label: "Quotes", icon: "discount" },
   { href: "/homeowner/messages", label: "Messages", icon: "chat" },
-  { href: "/homeowner/profile", label: "Profile", icon: "profile" },
+  { href: "/homeowner/settings", label: "Settings", icon: "setting" },
 ]
 
 export const ADMIN_NAV: DashboardNavItem[] = [

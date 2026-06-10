@@ -1,5 +1,6 @@
-import { ComingSoon } from "@/components/dashboard/coming-soon"
+import { redirect } from "next/navigation"
 
-export default function Page() {
-  return <ComingSoon title="Profile" description="Your contact details and account settings." />
+// Profile folded into the Settings hub.
+export default function HomeownerProfileRedirect() {
+  redirect("/homeowner/settings/account")
 }

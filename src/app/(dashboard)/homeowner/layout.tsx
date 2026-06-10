@@ -33,7 +33,7 @@ export default async function HomeownerLayout({
                 fullName: user.fullName || user.email,
                 avatarUrl: null,
               }}
-              settingsHref="/homeowner/profile"
+              settingsHref="/homeowner/settings/account"
               compact
             />
           </div>

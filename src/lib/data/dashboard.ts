@@ -23,11 +23,16 @@ import { subtypeLabel } from '@/lib/leads/subtype'
 
 export type Contractor = typeof contractors.$inferSelect
 
-/** Map an authenticated user → the company they actively belong to (one for now). */
+/**
+ * The company a user is currently operating as. A user can belong to several
+ * companies; `users.active_contractor_id` selects which one, falling back to
+ * their first active membership when it's null or no longer valid (e.g. they
+ * were removed from it). Returns null only when they belong to no company.
+ */
 export async function getContractorForUser(
   userId: string,
 ): Promise<Contractor | null> {
-  const [row] = await db
+  const rows = await db
     .select(getTableColumns(contractors))
     .from(contractors)
     .innerJoin(contractorMembers, eq(contractorMembers.contractorId, contractors.id))
@@ -37,8 +42,118 @@ export async function getContractorForUser(
         eq(contractorMembers.status, 'active'),
       ),
     )
+    .orderBy(contractorMembers.createdAt)
+  if (rows.length === 0) return null
+
+  const [u] = await db
+    .select({ activeId: users.activeContractorId })
+    .from(users)
+    .where(eq(users.id, userId))
     .limit(1)
-  return row ?? null
+
+  const active = u?.activeId ? rows.find((r) => r.id === u.activeId) : undefined
+  return active ?? rows[0]
+}
+
+export type UserCompany = {
+  id: string
+  name: string | null
+  logoUrl: string | null
+  role: MemberRole
+}
+
+/** Every company the user is an active member of — for the workspace switcher. */
+export async function getUserCompanies(userId: string): Promise<UserCompany[]> {
+  return db
+    .select({
+      id: contractors.id,
+      name: contractors.companyName,
+      logoUrl: contractors.logoUrl,
+      role: contractorMembers.role,
+    })
+    .from(contractors)
+    .innerJoin(contractorMembers, eq(contractorMembers.contractorId, contractors.id))
+    .where(
+      and(
+        eq(contractorMembers.userId, userId),
+        eq(contractorMembers.status, 'active'),
+      ),
+    )
+    .orderBy(contractorMembers.createdAt)
+}
+
+export type MemberRole = (typeof contractorMembers.role.enumValues)[number]
+
+/** The viewer's role within a company — gates who can edit company settings. */
+export async function getMembershipRole(
+  userId: string,
+  contractorId: string,
+): Promise<MemberRole | null> {
+  const [row] = await db
+    .select({ role: contractorMembers.role })
+    .from(contractorMembers)
+    .where(
+      and(
+        eq(contractorMembers.userId, userId),
+        eq(contractorMembers.contractorId, contractorId),
+        eq(contractorMembers.status, 'active'),
+      ),
+    )
+    .limit(1)
+  return row?.role ?? null
+}
+
+export type ServiceArea = {
+  id: string
+  label: string | null
+  lat: number | null
+  lng: number | null
+  radiusMiles: number
+}
+
+/** The company's coverage areas (center point + radius), oldest first. */
+export async function getServiceAreas(
+  contractorId: string,
+): Promise<ServiceArea[]> {
+  return db
+    .select({
+      id: serviceAreas.id,
+      label: serviceAreas.label,
+      lat: serviceAreas.lat,
+      lng: serviceAreas.lng,
+      radiusMiles: serviceAreas.radiusMiles,
+    })
+    .from(serviceAreas)
+    .where(eq(serviceAreas.contractorId, contractorId))
+    .orderBy(serviceAreas.createdAt)
+}
+
+/** The roofing subtypes this company handles. */
+export async function getContractorSubtypes(
+  contractorId: string,
+): Promise<string[]> {
+  const [row] = await db
+    .select({ subtypes: contractorServices.subtypes })
+    .from(contractorServices)
+    .innerJoin(services, eq(services.id, contractorServices.serviceId))
+    .where(
+      and(
+        eq(contractorServices.contractorId, contractorId),
+        eq(services.slug, 'roofing'),
+      ),
+    )
+    .limit(1)
+  return row?.subtypes ?? []
+}
+
+/** All subtypes the roofing service offers (the pick-from list). */
+export async function getRoofingSubtypes(): Promise<string[]> {
+  const [row] = await db
+    .select({ subtypes: services.subtypes })
+    .from(services)
+    .where(eq(services.slug, 'roofing'))
+    .limit(1)
+  return row?.subtypes ?? []
 }
 
 export type DashboardLead = {

@@ -93,7 +93,7 @@ export function PushNotificationsManager() {
       role="dialog"
       aria-label="Enable browser notifications"
       className={cn(
-        'fixed inset-x-3 lg:inset-x-[0.833vw] bottom-3 lg:bottom-[0.833vw] z-40 mx-auto max-w-md lg:max-w-[31.108vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-popover p-4 lg:p-[1.111vw] shadow-lg',
+        'fixed inset-x-3 lg:inset-x-[0.833vw] bottom-3 lg:bottom-[0.833vw] z-40 mx-auto max-w-md lg:max-w-[31.108vw] rounded-md lg:rounded-[0.6vw] border border-border bg-popover p-4 lg:p-[1.111vw] shadow-lg',
         'sm:inset-x-auto sm:left-4 sm:bottom-4',
       )}
     >

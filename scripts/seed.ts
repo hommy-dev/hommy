@@ -54,7 +54,7 @@ const ROOFING = {
 }
 
 const PLANS = [
-  { slug: 'free', name: 'Free', priceCents: 0, monthlyCredits: 10, maxMembers: 1, sortOrder: 0, features: {} },
+  { slug: 'free', name: 'Free', priceCents: 0, monthlyCredits: 10, maxMembers: 3, sortOrder: 0, features: {} },
   { slug: 'starter', name: 'Starter', priceCents: 9900, monthlyCredits: 60, maxMembers: 3, sortOrder: 1, features: { storm_alerts: true } },
   { slug: 'growth', name: 'Growth', priceCents: 24900, monthlyCredits: 200, maxMembers: 8, sortOrder: 2, features: { storm_alerts: true, analytics: true } },
   { slug: 'pro', name: 'Pro', priceCents: 49900, monthlyCredits: 600, maxMembers: 25, sortOrder: 3, features: { storm_alerts: true, analytics: true, ai_agent: true, marketing: true } },
