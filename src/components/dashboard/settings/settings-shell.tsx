@@ -14,8 +14,8 @@ export function SettingsShell({
   children: React.ReactNode
 }) {
   return (
-    <div className="mx-auto w-full max-w-5xl lg:max-w-[68vw]">
-      <header className="mb-6 lg:mb-[1.667vw]">
+    <div className="mx-auto w-full">
+      {/* <header className="mb-6 lg:mb-[1.667vw]">
         <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
           {title}
         </h1>
@@ -24,7 +24,7 @@ export function SettingsShell({
             {description}
           </p>
         ) : null}
-      </header>
+      </header> */}
 
       <div className="grid gap-8 lg:gap-[2.222vw] md:grid-cols-[14rem_minmax(0,1fr)] lg:grid-cols-[15vw_minmax(0,1fr)]">
         <aside className="h-fit md:sticky md:top-0">

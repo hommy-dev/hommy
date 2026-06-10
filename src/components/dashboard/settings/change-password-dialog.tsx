@@ -1,42 +1,52 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons"
 import { setPassword } from "@/lib/actions/account"
 import { showToast } from "@/components/ui/toast"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { EditDialog, Field } from "./edit-dialog"
 
-export function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
+export function ChangePasswordDialog({ hasPassword }: { hasPassword: boolean }) {
   const [pw, setPw] = useState("")
   const [show, setShow] = useState(false)
   const [error, setError] = useState("")
-  const [pending, start] = useTransition()
 
-  function save() {
+  function reset() {
+    setPw("")
+    setShow(false)
     setError("")
-    start(async () => {
-      const res = await setPassword({ password: pw })
-      if (!res.success) {
-        setError(res.error)
-        return
-      }
-      setPw("")
-      showToast(hasPassword ? "Password updated" : "Password set", {
-        type: "success",
-      })
-    })
+  }
+
+  async function save(): Promise<boolean> {
+    setError("")
+    const res = await setPassword({ password: pw })
+    if (!res.success) {
+      setError(res.error)
+      return false
+    }
+    showToast(hasPassword ? "Password updated" : "Password set", { type: "success" })
+    return true
   }
 
   return (
-    <div className="space-y-4 lg:space-y-[1.111vw]">
-      <div className="space-y-1.5 lg:space-y-[0.417vw]">
-        <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
-          {hasPassword ? "New password" : "Password"}
-        </Label>
-        <div className="relative max-w-md lg:max-w-[28vw]">
+    <EditDialog
+      title={hasPassword ? "Change password" : "Set a password"}
+      description={
+        hasPassword
+          ? undefined
+          : "Set a password so you can sign in with your email."
+      }
+      triggerLabel={hasPassword ? "Change" : "Set password"}
+      triggerIcon="lock"
+      onOpen={reset}
+      onSave={save}
+      canSave={pw.length >= 8}
+      saveLabel={hasPassword ? "Update password" : "Set password"}
+    >
+      <Field label={hasPassword ? "New password" : "Password"} error={error}>
+        <div className="relative">
           <Input
             value={pw}
             onChange={(e) => {
@@ -63,19 +73,7 @@ export function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
             />
           </button>
         </div>
-        {error ? (
-          <p className="text-xs lg:text-[0.833vw] text-destructive">{error}</p>
-        ) : null}
-      </div>
-
-      <Button
-        onClick={save}
-        disabled={pending || pw.length < 8}
-        size="lg"
-        className="font-semibold"
-      >
-        {pending ? "Saving…" : hasPassword ? "Update password" : "Set password"}
-      </Button>
-    </div>
+      </Field>
+    </EditDialog>
   )
 }

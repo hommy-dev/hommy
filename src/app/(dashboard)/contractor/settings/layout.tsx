@@ -31,7 +31,7 @@ export default async function ContractorSettingsLayout({
   return (
     <SettingsShell
       title="Settings"
-      description="Manage your account and company."
+      // description="Manage your account and company."
       groups={CONTRACTOR_SETTINGS_GROUPS}
     >
       {children}

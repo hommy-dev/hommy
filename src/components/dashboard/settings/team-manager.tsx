@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
-  inviteMember,
   cancelInvitation,
   changeMemberRole,
   removeMember,
@@ -14,8 +13,7 @@ import type { MemberRole, TeamData } from "@/lib/data/team"
 import { showToast } from "@/components/ui/toast"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { InviteDialog } from "./invite-dialog"
 import { cn } from "@/lib/utils"
 
 export function TeamManager({
@@ -34,29 +32,7 @@ export function TeamManager({
   const seatsLeft = seats.max - seats.used
   const ownersCount = members.filter((m) => m.role === "owner").length
 
-  // Invite form
-  const [email, setEmail] = useState("")
-  const [inviteRole, setInviteRole] = useState<"admin" | "member">("member")
-  const [inviteError, setInviteError] = useState("")
-  const [lastLink, setLastLink] = useState<string | null>(null)
-  const [pendingInvite, startInvite] = useTransition()
   const [pendingRow, startRow] = useTransition()
-
-  function invite() {
-    setInviteError("")
-    setLastLink(null)
-    startInvite(async () => {
-      const res = await inviteMember({ email: email.trim(), role: inviteRole })
-      if (!res.success || !res.data) {
-        setInviteError(res.success ? "Could not send invite." : res.error)
-        return
-      }
-      setLastLink(`${window.location.origin}/invite/${res.data.token}`)
-      setEmail("")
-      showToast("Invitation created", { type: "success" })
-      router.refresh()
-    })
-  }
 
   function onRole(userId: string, role: MemberRole) {
     startRow(async () => {
@@ -128,84 +104,24 @@ export function TeamManager({
 
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
-      <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-        <span className="font-medium text-foreground">
-          {seats.used} of {seats.max}
-        </span>{" "}
-        seat{seats.max === 1 ? "" : "s"} used · {seats.planName} plan
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3 lg:gap-[0.833vw]">
+        <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {seats.used} of {seats.max}
+          </span>{" "}
+          seat{seats.max === 1 ? "" : "s"} used · {seats.planName} plan
+        </p>
+        {canManage && seatsLeft > 0 ? (
+          <InviteDialog canInviteAdmin={viewerRole === "owner"} />
+        ) : null}
+      </div>
 
-      {/* Invite */}
-      {canManage && (
-        <div className="space-y-3 lg:space-y-[0.833vw] rounded-md lg:rounded-[0.556vw] border border-border bg-card p-4 lg:p-[1.111vw]">
-          {seatsLeft > 0 ? (
-            <>
-              <div className="grid gap-3 lg:gap-[0.833vw] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
-                <div className="space-y-1.5 lg:space-y-[0.417vw]">
-                  <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
-                    Invite by email
-                  </Label>
-                  <Input
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value)
-                      setInviteError("")
-                    }}
-                    type="email"
-                    inputMode="email"
-                    placeholder="teammate@email.com"
-                    className="h-11 lg:h-[3.056vw] bg-background"
-                    aria-invalid={!!inviteError}
-                  />
-                </div>
-                <div className="space-y-1.5 lg:space-y-[0.417vw]">
-                  <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
-                    Role
-                  </Label>
-                  <select
-                    value={inviteRole}
-                    onChange={(e) =>
-                      setInviteRole(e.target.value as "admin" | "member")
-                    }
-                    className="h-11 lg:h-[3.056vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-background px-3 lg:px-[0.833vw] text-sm lg:text-[0.972vw] outline-none"
-                  >
-                    <option value="member">Member</option>
-                    {viewerRole === "owner" ? (
-                      <option value="admin">Admin</option>
-                    ) : null}
-                  </select>
-                </div>
-                <Button
-                  onClick={invite}
-                  disabled={pendingInvite || email.trim().length === 0}
-                  size="lg"
-                  className="font-semibold"
-                >
-                  {pendingInvite ? "Inviting…" : "Send invite"}
-                </Button>
-              </div>
-              {inviteError ? (
-                <p className="text-xs lg:text-[0.833vw] text-destructive">{inviteError}</p>
-              ) : null}
-              {lastLink ? (
-                <div className="flex flex-wrap items-center justify-between gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] bg-muted/60 px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw]">
-                  <span className="min-w-0 truncate text-[13px] lg:text-[0.903vw] text-muted-foreground">
-                    {lastLink}
-                  </span>
-                  <Button variant="outline" size="sm" onClick={() => copy(lastLink)}>
-                    Copy link
-                  </Button>
-                </div>
-              ) : null}
-            </>
-          ) : (
-            <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-              You’ve used all {seats.max} seat{seats.max === 1 ? "" : "s"} on the{" "}
-              {seats.planName} plan. Upgrade your plan to add teammates.
-            </p>
-          )}
-        </div>
-      )}
+      {canManage && seatsLeft <= 0 ? (
+        <p className="rounded-md lg:rounded-[0.556vw] border border-border bg-muted/40 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+          You’ve used all {seats.max} seat{seats.max === 1 ? "" : "s"} on the{" "}
+          {seats.planName} plan. Upgrade your plan to add teammates.
+        </p>
+      ) : null}
 
       {/* Members */}
       <div>

@@ -17,6 +17,7 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor/messages", label: "Messages", icon: "chat" },
   { href: "/contractor/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
   { href: "/contractor/reviews", label: "Reviews", icon: "star" },
+  { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },
 ]
 

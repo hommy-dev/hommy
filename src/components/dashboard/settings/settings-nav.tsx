@@ -29,7 +29,7 @@ export function SettingsNav({ groups }: { groups: SettingsNavGroup[] }) {
       {groups.map((group, i) => (
         <div key={group.label ?? i} className="space-y-1 lg:space-y-[0.278vw]">
           {group.label ? (
-            <p className="px-3 lg:px-[0.833vw] pb-1 lg:pb-[0.278vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="pb-1 lg:pb-[0.278vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wider text-muted-foreground">
               {group.label}
             </p>
           ) : null}
@@ -40,13 +40,13 @@ export function SettingsNav({ groups }: { groups: SettingsNavGroup[] }) {
 
             const inner = (
               <>
-                <Icon name={item.icon} className="size-4 lg:size-[1.111vw] shrink-0" />
+                <Icon name={item.icon} className="size-5 lg:size-[1.389vw] shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
               </>
             )
 
             const base =
-              "flex items-center gap-2.5 lg:gap-[0.694vw] rounded-md lg:rounded-[0.556vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-medium transition-colors"
+              "flex items-center gap-2.5 lg:gap-[0.694vw] rounded-md lg:rounded-[0.4vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-medium transition-colors"
 
             if (item.disabled) {
               return (
