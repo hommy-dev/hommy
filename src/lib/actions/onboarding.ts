@@ -20,14 +20,14 @@ const OnboardingSchema = z.object({
   phone: z.string().trim().max(30).optional().default(''),
   yearsInBusiness: z.number().int().min(0).max(100).nullable().optional(),
   subtypes: z.array(z.string().trim().min(1)).min(1, 'Pick at least one type of work'),
-  // Coverage = center point + radius (miles). Geographic matching, worldwide.
+  // Coverage = center point + radius (km). Geographic matching, worldwide.
   areas: z
     .array(
       z.object({
         label: z.string().trim().min(1).max(160),
         lat: z.number(),
         lng: z.number(),
-        radiusMiles: z.number().int().min(1).max(500),
+        radiusKm: z.number().positive().max(800),
       }),
     )
     .min(1, 'Add at least one coverage area'),
@@ -87,9 +87,10 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
         d.areas.map((a) => ({
           contractorId: contractor.id,
           label: a.label,
+          areaType: 'circle' as const,
           lat: a.lat,
           lng: a.lng,
-          radiusMiles: a.radiusMiles,
+          radiusKm: a.radiusKm,
         })),
       )
     })

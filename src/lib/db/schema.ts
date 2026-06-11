@@ -41,8 +41,19 @@ import {
   index,
   uniqueIndex,
   primaryKey,
+  customType,
 } from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
+
+// PostGIS geography column (SRID 4326). Stored as the canonical, spatially
+// indexed shape used for lead matching; the app never reads it directly (it's
+// derived from lat/lng/radius or polygon by a DB trigger — see migration 0006),
+// so the TS type is just an opaque WKT string.
+const geography = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return 'geography(Geometry, 4326)'
+  },
+})
 
 // ============================================================
 // ENUMS
@@ -83,6 +94,9 @@ export const reviewerType = pgEnum('reviewer_type', ['homeowner', 'contractor'])
 export const activityActor = pgEnum('activity_actor', ['system', 'contractor', 'homeowner'])
 export const stormEventType = pgEnum('storm_event_type', ['hail', 'high_wind', 'storm'])
 
+// Portfolio media: a plain single image ("signal") or a before/after pair.
+export const portfolioImageKind = pgEnum('portfolio_image_kind', ['single', 'before_after'])
+
 // ============================================================
 // IDENTITY
 // ============================================================
@@ -112,6 +126,7 @@ export const contractors = pgTable('contractors', {
   companyName: text('company_name'),
   bio: text('bio'),
   logoUrl: text('logo_url'),
+  bannerUrl: text('banner_url'),
   licenseNumber: text('license_number'),
   licenseDocUrl: text('license_doc_url'),
   insuranceProvider: text('insurance_provider'),
@@ -243,21 +258,33 @@ export const creditTransactions = pgTable('credit_transactions', {
 // SUPPLY-SIDE (company-scoped)
 // ============================================================
 
-// service_areas — a company's coverage as CENTER POINT + RADIUS (miles). A lead
-// matches when its lat/lng is within radiusMiles of any of the company's areas
-// (Haversine). zipCode is optional/display only — matching is geographic, not
-// postal-string based, so it works worldwide. label is the human name ("Dallas, TX").
+// service_areas — a company's coverage region. Two shapes:
+//   • 'circle'  — CENTER POINT (lat/lng) + RADIUS (radiusKm).
+//   • 'polygon' — an arbitrary ring of points (polygon: [{lat,lng}, …]).
+// Both are projected into `geom` (a PostGIS geography) by a DB trigger, and lead
+// matching tests the lead's point against `geom` (ST_Covers) — so circle and
+// polygon areas match through one indexed predicate, worldwide. zipCode is
+// optional/display only. label is the human name ("Dallas, TX").
 export const serviceAreas = pgTable('service_areas', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }),
   label: text('label'),
   zipCode: text('zip_code'),
+  areaType: text('area_type').notNull().default('circle'), // 'circle' | 'polygon'
+  // Circle areas:
   lat: doublePrecision('lat'),
   lng: doublePrecision('lng'),
+  radiusKm: doublePrecision('radius_km'),
+  /** @deprecated Superseded by radiusKm (km). Kept for back-compat; no longer read/written by the app. */
   radiusMiles: integer('radius_miles').notNull().default(25),
+  // Polygon areas: ordered ring of vertices (lng/lat pairs as {lat,lng}).
+  polygon: jsonb('polygon').$type<{ lat: number; lng: number }[]>(),
+  // Canonical matchable shape, maintained by trigger from the fields above.
+  geom: geography('geom'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('service_areas_contractor_idx').on(t.contractorId),
+  index('service_areas_geom_gist').using('gist', t.geom),
 ])
 
 export const contractorServices = pgTable('contractor_services', {
@@ -267,6 +294,39 @@ export const contractorServices = pgTable('contractor_services', {
 }, (t) => [
   primaryKey({ columns: [t.contractorId, t.serviceId] }),
   index('contractor_services_service_idx').on(t.serviceId),
+])
+
+// portfolio_projects — a company's showcased work (case studies). Public on the
+// contractor profile when published. Each holds one or more media items.
+export const portfolioProjects = pgTable('portfolio_projects', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description'),
+  serviceSubtype: text('service_subtype'),
+  location: text('location'),
+  coverImageUrl: text('cover_image_url'),
+  isPublished: boolean('is_published').notNull().default(true),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('portfolio_projects_contractor_idx').on(t.contractorId),
+])
+
+// portfolio_images — media within a case study. `single` = one image (image_url);
+// `before_after` = a pair (before_url + image_url(after)) rendered with a slider.
+export const portfolioImages = pgTable('portfolio_images', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  projectId: uuid('project_id').notNull().references(() => portfolioProjects.id, { onDelete: 'cascade' }),
+  kind: portfolioImageKind('kind').notNull().default('single'),
+  imageUrl: text('image_url').notNull(),
+  beforeUrl: text('before_url'),
+  caption: text('caption'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('portfolio_images_project_idx').on(t.projectId),
 ])
 
 // ============================================================

@@ -106,26 +106,35 @@ export async function getMembershipRole(
 export type ServiceArea = {
   id: string
   label: string | null
+  areaType: "circle" | "polygon"
   lat: number | null
   lng: number | null
-  radiusMiles: number
+  radiusKm: number | null
+  polygon: { lat: number; lng: number }[] | null
 }
 
-/** The company's coverage areas (center point + radius), oldest first. */
+/** The company's coverage areas (circle or polygon), oldest first. */
 export async function getServiceAreas(
   contractorId: string,
 ): Promise<ServiceArea[]> {
-  return db
+  const rows = await db
     .select({
       id: serviceAreas.id,
       label: serviceAreas.label,
+      areaType: serviceAreas.areaType,
       lat: serviceAreas.lat,
       lng: serviceAreas.lng,
-      radiusMiles: serviceAreas.radiusMiles,
+      radiusKm: serviceAreas.radiusKm,
+      polygon: serviceAreas.polygon,
     })
     .from(serviceAreas)
     .where(eq(serviceAreas.contractorId, contractorId))
     .orderBy(serviceAreas.createdAt)
+  return rows.map((r) => ({
+    ...r,
+    areaType: r.areaType === "polygon" ? "polygon" : "circle",
+    polygon: r.polygon ?? null,
+  }))
 }
 
 /** The roofing subtypes this company handles. */

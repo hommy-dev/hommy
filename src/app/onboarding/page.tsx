@@ -40,7 +40,7 @@ export default async function OnboardingPage() {
       label: serviceAreas.label,
       lat: serviceAreas.lat,
       lng: serviceAreas.lng,
-      radiusMiles: serviceAreas.radiusMiles,
+      radiusKm: serviceAreas.radiusKm,
     })
     .from(serviceAreas)
     .where(eq(serviceAreas.contractorId, contractor.id))
@@ -60,7 +60,7 @@ export default async function OnboardingPage() {
             label: a.label ?? "Coverage area",
             lat: a.lat as number,
             lng: a.lng as number,
-            radiusMiles: a.radiusMiles,
+            radiusKm: a.radiusKm ?? 40,
           })),
       }}
     />

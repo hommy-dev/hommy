@@ -145,7 +145,7 @@ export function SiteHeader() {
       )}
     >
       {/* Main Header Row */}
-      <div className="relative w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto max-w-6xl lg:max-w-[90vw]">
+      <div className="relative w-full max-w-[90vww] mx-auto flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
         {/* Left: Logo */}
         <div className="flex-1 flex items-center">
           <Link
@@ -253,7 +253,7 @@ export function SiteHeader() {
           "transition-[max-height] duration-300 ease-out",
         )}
       >
-        <nav className="mx-auto flex max-w-6xl lg:max-w-[79.992vw] flex-col gap-1 lg:gap-[0.278vw] px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
+        <nav className="mx-auto flex flex-col gap-1 lg:gap-[0.278vw] px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
           {LINKS.map((l) => (
             <Link
               key={l.href}

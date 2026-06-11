@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
+import { importLibrary } from '@googlemaps/js-api-loader'
+import { ensureGoogleMapsOptions } from '@/lib/google-maps'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
@@ -36,17 +37,6 @@ type Suggestion = {
   primary: string
   secondary: string
   prediction: google.maps.places.PlacePrediction
-}
-
-let optionsSet = false
-
-function ensureOptions() {
-  if (optionsSet) return
-  setOptions({
-    key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '',
-    v: 'weekly',
-  })
-  optionsSet = true
 }
 
 function componentText(
@@ -96,6 +86,7 @@ export function GooglePlacesInput({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [loading, setLoading] = useState(false)
 
   // Sync internal text when the controlled `value` changes externally (parent
   // reset). Set-state-during-render is React's documented pattern for this.
@@ -108,7 +99,7 @@ export function GooglePlacesInput({
 
   // Load the Places library once.
   useEffect(() => {
-    ensureOptions()
+    ensureGoogleMapsOptions()
     importLibrary('places').then(() => setIsLoaded(true))
   }, [])
 
@@ -160,11 +151,13 @@ export function GooglePlacesInput({
         setSuggestions(mapped)
         setActiveIndex(-1)
         setOpen(mapped.length > 0)
+        setLoading(false)
       } catch (err) {
         if (requestId !== requestIdRef.current) return
         console.error('[GooglePlacesInput] suggestion fetch failed', err)
         setSuggestions([])
         setOpen(false)
+        setLoading(false)
       }
     },
     [mode, countries],
@@ -182,9 +175,11 @@ export function GooglePlacesInput({
     if (trimmed.length < 3) {
       setSuggestions([])
       setOpen(false)
+      setLoading(false)
       requestIdRef.current++
       return
     }
+    setLoading(true)
     const t = setTimeout(() => {
       void fetchSuggestions(trimmed)
     }, 250)
@@ -231,6 +226,7 @@ export function GooglePlacesInput({
       skipNextFetchRef.current = true
       setInputValue(result.formattedAddress)
       setSuggestions([])
+      setLoading(false)
       // A selection ends the autocomplete session — start a fresh token next time.
       sessionTokenRef.current = null
       onPlaceSelect(result)
@@ -275,6 +271,16 @@ export function GooglePlacesInput({
         aria-expanded={open}
         aria-autocomplete="list"
       />
+
+      {loading && (
+        <div className="pointer-events-none absolute right-3 lg:right-[0.833vw] top-1/2 -translate-y-1/2">
+          <span
+            aria-hidden="true"
+            className="block size-4 lg:size-[1.111vw] animate-spin rounded-full border-2 border-foreground/20 border-t-foreground/70"
+          />
+          <span className="sr-only">Searching…</span>
+        </div>
+      )}
 
       {open && suggestions.length > 0 && (
         <ul

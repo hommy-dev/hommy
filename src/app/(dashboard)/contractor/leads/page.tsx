@@ -23,8 +23,8 @@ export default async function LeadsPage() {
   const canEngage = canEngageLeads(contractor)
 
   return (
-    <div className="mx-auto max-w-5xl lg:max-w-[71.104vw] space-y-6 lg:space-y-[1.667vw]">
-      <header>
+    <div className="space-y-6 lg:space-y-[1.667vw]">
+      <header className="w-full">
         <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">Leads</h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
           Leads offered to you. Respond fast, the first few to engage win the

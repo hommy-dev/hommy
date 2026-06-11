@@ -12,9 +12,15 @@ import {
 } from "@/components/ui/google-places-input"
 import { showToast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { coverageSummary } from "@/lib/coverage"
+import {
+  CoverageAreaEditor,
+  type CoverageChange,
+} from "./coverage-area-editor"
 
-const RADII = [10, 25, 50, 100] as const
+const DEFAULT_RADIUS_KM = 40
 
 export function CoverageAreasForm({
   initialAreas,
@@ -26,32 +32,54 @@ export function CoverageAreasForm({
   const [areas, setAreas] = useState<ServiceAreaRow[]>(initialAreas)
   const [place, setPlace] = useState<PlaceResult | null>(null)
   const [pickerKey, setPickerKey] = useState(0)
-  const [radius, setRadius] = useState<number>(25)
+  // The (possibly map-edited) centre and radius of the area being added.
+  const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null)
+  const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS_KM)
   const [pendingAdd, startAdd] = useTransition()
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [pendingRemove, startRemove] = useTransition()
 
+  function selectPlace(p: PlaceResult) {
+    setPlace(p)
+    setCenter({ lat: p.lat, lng: p.lng })
+  }
+
+  function onEdit(c: CoverageChange) {
+    setCenter({ lat: c.lat, lng: c.lng })
+    setRadiusKm(c.radiusKm)
+  }
+
+  function resetDraft() {
+    setPlace(null)
+    setCenter(null)
+    setPickerKey((k) => k + 1)
+  }
+
   function add() {
-    if (!place) return
+    if (!place || !center) return
+    if (!(radiusKm >= 1)) {
+      showToast("Enter a radius of at least 1 km.", { type: "error" })
+      return
+    }
     const label =
       place.formattedAddress ||
       [place.city, place.state].filter(Boolean).join(", ") ||
       "Coverage area"
+
     startAdd(async () => {
       const res = await addServiceArea({
+        type: "circle",
         label,
-        lat: place.lat,
-        lng: place.lng,
-        radiusMiles: radius,
+        lat: center.lat,
+        lng: center.lng,
+        radiusKm,
       })
       if (!res.success || !res.data) {
         showToast(res.success ? "Could not add area." : res.error, { type: "error" })
         return
       }
-      const created = res.data
-      setAreas((a) => [...a, created])
-      setPlace(null)
-      setPickerKey((k) => k + 1)
+      setAreas((a) => [...a, res.data!])
+      resetDraft()
       showToast("Coverage area added", { type: "success" })
     })
   }
@@ -73,36 +101,58 @@ export function CoverageAreasForm({
   return (
     <div className="space-y-5 lg:space-y-[1.389vw]">
       {canManage && (
-        <div className="grid gap-3 lg:gap-[0.833vw] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
-          <div className="space-y-1.5 lg:space-y-[0.417vw]">
-            <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
-              Add a city or region
-            </Label>
-            <GooglePlacesInput
-              key={pickerKey}
-              mode="cities"
-              placeholder="Search a city or town…"
-              onPlaceSelect={setPlace}
-              className="h-11 lg:h-[3.056vw] bg-card text-left"
-            />
+        <div className="space-y-3 lg:space-y-[0.833vw]">
+          <div className="grid gap-3 lg:gap-[0.833vw] sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <div className="space-y-1.5 lg:space-y-[0.417vw]">
+              <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
+                Add a place or area
+              </Label>
+              <GooglePlacesInput
+                key={pickerKey}
+                mode="address"
+                placeholder="Search a city, area, or place…"
+                onPlaceSelect={selectPlace}
+                className="h-11 lg:h-[3.056vw] bg-card text-left"
+              />
+            </div>
+
+            <div className="space-y-1.5 lg:space-y-[0.417vw]">
+              <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
+                Radius (km)
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                max={800}
+                step="any"
+                value={Number.isFinite(radiusKm) ? radiusKm : ""}
+                onChange={(e) => setRadiusKm(Number(e.target.value))}
+                className="h-11 lg:h-[3.056vw] w-28 lg:w-[8vw] bg-card"
+              />
+            </div>
           </div>
 
-          <div className="space-y-1.5 lg:space-y-[0.417vw]">
-            <Label className="text-sm lg:text-[0.972vw] font-medium text-foreground/80">
-              Radius
-            </Label>
-            <select
-              value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
-              className="h-11 lg:h-[3.056vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] text-sm lg:text-[0.972vw] outline-none"
-            >
-              {RADII.map((r) => (
-                <option key={r} value={r}>
-                  {r} mi
-                </option>
-              ))}
-            </select>
-          </div>
+          {place && center ? (
+            <div className="space-y-1.5 lg:space-y-[0.417vw]">
+              <CoverageAreaEditor
+                center={center}
+                radiusKm={radiusKm}
+                onChange={onEdit}
+                className="h-64 lg:h-[18vw] w-full"
+              />
+              <p className="text-xs lg:text-[0.833vw] text-muted-foreground">
+                Serving a {Number.isFinite(radiusKm) ? radiusKm : 0} km radius around{" "}
+                <span className="font-medium text-foreground/80">
+                  {place.city || place.formattedAddress}
+                </span>
+                . Drag the circle to fine-tune, then add it.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs lg:text-[0.833vw] text-muted-foreground">
+              Search a place or area to set the region you want leads from.
+            </p>
+          )}
 
           <Button
             onClick={add}
@@ -110,7 +160,7 @@ export function CoverageAreasForm({
             size="lg"
             className="font-semibold"
           >
-            {pendingAdd ? "Adding…" : "Add"}
+            {pendingAdd ? "Adding…" : "Add coverage area"}
           </Button>
         </div>
       )}
@@ -132,7 +182,7 @@ export function CoverageAreasForm({
                   {a.label ?? "Coverage area"}
                 </p>
                 <p className="text-[13px] lg:text-[0.903vw] text-muted-foreground">
-                  {a.radiusMiles} mi radius
+                  {coverageSummary(a)}
                 </p>
               </div>
               {canManage && (

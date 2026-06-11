@@ -4,7 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { updateServiceSubtypes } from "@/lib/actions/contractor-coverage"
 import { showToast } from "@/components/ui/toast"
-import { Button } from "@/components/ui/button"
+import { OptionCard } from "@/components/ui/option-card"
+import { SUBTYPE_META } from "@/components/public/get-a-quote/constants"
 import { EditDialog } from "./edit-dialog"
 
 export function EditServicesDialog({
@@ -42,21 +43,19 @@ export function EditServicesDialog({
       onOpen={reset}
       onSave={save}
       canSave={selected.length > 0}
+      wide
     >
-      <div className="flex flex-wrap gap-2 lg:gap-[0.556vw]">
-        {available.map((s) => {
-          const active = selected.includes(s)
-          return (
-            <Button
-              key={s}
-              type="button"
-              variant={active ? "default" : "outline"}
-              onClick={() => toggle(s)}
-            >
-              {s}
-            </Button>
-          )
-        })}
+      <div className="grid gap-2.5 lg:gap-[0.694vw] sm:grid-cols-2">
+        {available.map((s) => (
+          <OptionCard
+            key={s}
+            label={s}
+            icon={SUBTYPE_META[s]?.icon}
+            desc={SUBTYPE_META[s]?.desc}
+            active={selected.includes(s)}
+            onClick={() => toggle(s)}
+          />
+        ))}
       </div>
       {selected.length === 0 ? (
         <p className="text-xs lg:text-[0.833vw] text-destructive">

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/google-places-input"
 import { cn } from "@/lib/utils"
 
-type Area = { label: string; lat: number; lng: number; radiusMiles: number }
+type Area = { label: string; lat: number; lng: number; radiusKm: number }
 
 type Initial = {
   companyName: string
@@ -22,7 +22,7 @@ type Initial = {
 }
 
 const STEP_TITLES = ["Your company", "What you do", "Where you work"]
-const RADIUS_OPTIONS = [10, 25, 50, 100] as const
+const DEFAULT_RADIUS_KM = 40
 
 export function OnboardingWizard({
   availableSubtypes,
@@ -42,7 +42,7 @@ export function OnboardingWizard({
   )
   const [subtypes, setSubtypes] = useState<string[]>(initial.subtypes)
   const [areas, setAreas] = useState<Area[]>(initial.areas)
-  const [radius, setRadius] = useState<number>(25)
+  const [radius, setRadius] = useState<number>(DEFAULT_RADIUS_KM)
   const [pickerKey, setPickerKey] = useState(0) // bump to clear the address input
 
   function toggleSubtype(s: string) {
@@ -59,13 +59,14 @@ export function OnboardingWizard({
     if (!Number.isFinite(place.lat) || !Number.isFinite(place.lng)) return
     setAreas((cur) => {
       if (cur.some((a) => a.label === label)) return cur
-      return [...cur, { label, lat: place.lat, lng: place.lng, radiusMiles: radius }]
+      return [...cur, { label, lat: place.lat, lng: place.lng, radiusKm: radius }]
     })
     setPickerKey((k) => k + 1) // reset the autocomplete for the next area
   }
 
   function setAreaRadius(index: number, r: number) {
-    setAreas((cur) => cur.map((a, i) => (i === index ? { ...a, radiusMiles: r } : a)))
+    if (!Number.isFinite(r) || r < 1) return
+    setAreas((cur) => cur.map((a, i) => (i === index ? { ...a, radiusKm: r } : a)))
   }
 
   const canAdvance =
@@ -205,23 +206,26 @@ export function OnboardingWizard({
                 <div className="min-w-0 flex-1">
                   <GooglePlacesInput
                     key={pickerKey}
-                    mode="cities"
-                    placeholder="Search a city or town…"
+                    mode="address"
+                    placeholder="Search a city, area, or place…"
                     onPlaceSelect={addArea}
                   />
                 </div>
-                <select
-                  value={radius}
-                  onChange={(e) => setRadius(Number(e.target.value))}
-                  className={cn(inputCls, "sm:w-40")}
-                  aria-label="Coverage radius for the next area"
-                >
-                  {RADIUS_OPTIONS.map((r) => (
-                    <option key={r} value={r}>
-                      within {r} mi
-                    </option>
-                  ))}
-                </select>
+                <div className="relative sm:w-40">
+                  <input
+                    type="number"
+                    min={1}
+                    max={800}
+                    step="any"
+                    value={Number.isFinite(radius) ? radius : ""}
+                    onChange={(e) => setRadius(Number(e.target.value))}
+                    className={cn(inputCls, "pr-12 lg:pr-[3.333vw]")}
+                    aria-label="Coverage radius in kilometres for the next area"
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 lg:right-[0.833vw] flex items-center text-sm lg:text-[0.972vw] text-foreground/45">
+                    km
+                  </span>
+                </div>
               </div>
             </Field>
 
@@ -235,18 +239,21 @@ export function OnboardingWizard({
                     <span className="min-w-0 flex-1 truncate text-sm lg:text-[0.972vw] font-medium">
                       {a.label}
                     </span>
-                    <select
-                      value={a.radiusMiles}
-                      onChange={(e) => setAreaRadius(i, Number(e.target.value))}
-                      className="rounded-lg lg:rounded-[0.694vw] border border-foreground/15 bg-transparent px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-medium text-foreground/70 outline-none"
-                      aria-label={`Radius for ${a.label}`}
-                    >
-                      {RADIUS_OPTIONS.map((r) => (
-                        <option key={r} value={r}>
-                          within {r} mi
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex items-center gap-1 lg:gap-[0.278vw] rounded-lg lg:rounded-[0.694vw] border border-foreground/15 px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw]">
+                      <input
+                        type="number"
+                        min={1}
+                        max={800}
+                        step="any"
+                        value={a.radiusKm}
+                        onChange={(e) => setAreaRadius(i, Number(e.target.value))}
+                        className="w-12 lg:w-[3.5vw] bg-transparent text-xs lg:text-[0.833vw] font-medium text-foreground/70 outline-none"
+                        aria-label={`Radius in kilometres for ${a.label}`}
+                      />
+                      <span className="text-xs lg:text-[0.833vw] font-medium text-foreground/45">
+                        km
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setAreas((cur) => cur.filter((_, x) => x !== i))}
@@ -262,7 +269,7 @@ export function OnboardingWizard({
               </div>
             ) : (
               <p className="mt-4 lg:mt-[1.111vw] text-xs lg:text-[0.833vw] text-foreground/45">
-                Search a city above to add it. Pick a radius for how far you travel.
+                Search a city above to add it. Set a radius (km) for how far you travel.
               </p>
             )}
           </Step>

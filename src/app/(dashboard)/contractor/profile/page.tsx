@@ -6,7 +6,11 @@ import {
   getServiceAreas,
   getContractorSubtypes,
 } from "@/lib/data/dashboard"
+import { getPortfolio } from "@/lib/data/portfolio"
+import { coverageBadge } from "@/lib/coverage"
+import { ServiceTag } from "@/components/ui/service-tag"
 import { getVerificationState } from "@/lib/contractor/verification"
+import { PortfolioGallery } from "@/components/dashboard/portfolio/portfolio-gallery"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
@@ -29,10 +33,11 @@ export default async function ContractorProfilePage() {
     )
   }
 
-  const [role, subtypes, areas] = await Promise.all([
+  const [role, subtypes, areas, portfolio] = await Promise.all([
     getMembershipRole(user.id, c.id),
     getContractorSubtypes(c.id),
     getServiceAreas(c.id),
+    getPortfolio(c.id, { publishedOnly: true }),
   ])
   const canManage = role === "owner" || role === "admin"
   const name = c.companyName ?? "Your company"
@@ -44,60 +49,82 @@ export default async function ContractorProfilePage() {
   const rating = c.avgRating ? Number(c.avgRating) : null
 
   return (
-    <div className="mx-auto w-full max-w-4xl lg:max-w-[60vw] space-y-6 lg:space-y-[1.667vw]">
-      {canManage ? (
-        <p className="text-xs lg:text-[0.833vw] text-muted-foreground">
-          This is how homeowners see your company.
-        </p>
-      ) : null}
-
-      {/* Header */}
-      <div className="flex flex-col gap-4 lg:gap-[1.111vw] rounded-lg lg:rounded-[0.833vw] border border-border bg-card p-6 lg:p-[1.667vw] sm:flex-row sm:items-center">
-        <Avatar className="size-20 lg:size-[5.556vw] rounded-lg lg:rounded-[0.833vw]">
-          {c.logoUrl ? (
-            <AvatarImage src={c.logoUrl} alt="" className="rounded-lg lg:rounded-[0.833vw]" />
-          ) : null}
-          <AvatarFallback className="rounded-lg lg:rounded-[0.833vw] bg-muted text-xl lg:text-[1.667vw] font-semibold text-foreground/70">
-            {initials(name)}
-          </AvatarFallback>
-        </Avatar>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 lg:gap-[0.556vw]">
-            <h1 className="font-sebenta text-2xl lg:text-[1.944vw] font-bold tracking-tight">
-              {name}
-            </h1>
-            {verified ? (
-              <span className="inline-flex items-center gap-1 lg:gap-[0.278vw] rounded-full bg-secondary px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-semibold text-secondary-foreground">
-                <Icon name="shield-done" className="size-3.5 lg:size-[0.972vw]" />
-                Verified
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-            {c.yearsInBusiness != null
-              ? `Roofing · ${c.yearsInBusiness} year${c.yearsInBusiness === 1 ? "" : "s"} in business`
-              : "Roofing contractor"}
-            {areas[0]?.label ? ` · ${areas[0].label}` : ""}
-          </p>
+    <div className="mx-auto w-full space-y-8 lg:space-y-[2.222vw]">
+      {/* Header — banner + overlapping logo, sitting open on the page */}
+      <header>
+        <div className="relative h-36 lg:h-[12vw] w-full overflow-hidden rounded-xl lg:rounded-[1vw]">
+          {c.bannerUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={c.bannerUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <>
+              <div className="size-full bg-gradient-to-tr from-primary/30 via-primary/15 to-secondary/25" />
+              <div className="absolute inset-0 bg-[radial-gradient(80%_140%_at_85%_-20%,rgba(255,255,255,0.4),transparent_60%)]" />
+            </>
+          )}
         </div>
 
-        {canManage ? (
-          <Button asChild variant="outline" className="gap-1.5 lg:gap-[0.417vw]">
-            <Link href="/contractor/settings/company">
-              <Icon name="edit" className="size-4 lg:size-[1.111vw]" />
-              Edit profile
-            </Link>
-          </Button>
-        ) : null}
-      </div>
+        <div className="flex flex-col gap-4 lg:gap-[1.111vw] px-1 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-end gap-4 lg:gap-[1.111vw]">
+            <div className="relative -mt-12 lg:-mt-[5vw] shrink-0">
+              <Avatar className="size-24 lg:size-[7vw] rounded-2xl lg:rounded-[1.111vw] ring-4 lg:ring-[0.278vw] ring-background">
+                {c.logoUrl ? (
+                  <AvatarImage src={c.logoUrl} alt="" className="rounded-2xl lg:rounded-[1.111vw]" />
+                ) : null}
+                <AvatarFallback className="rounded-2xl lg:rounded-[1.111vw] bg-muted text-2xl lg:text-[2vw] font-semibold text-foreground/70">
+                  {initials(name)}
+                </AvatarFallback>
+              </Avatar>
+              {verified ? (
+                <span
+                  className="absolute -bottom-1 -right-1 lg:-bottom-[0.278vw] lg:-right-[0.278vw] flex size-6 lg:size-[1.667vw] items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 lg:ring-[0.139vw] ring-background"
+                  title="Verified company"
+                >
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="lg:size-[0.764vw]">
+                    <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              ) : null}
+            </div>
 
-      <div className="grid gap-6 lg:gap-[1.667vw] lg:grid-cols-[1.6fr_1fr]">
-        {/* Left: about + services */}
-        <div className="space-y-6 lg:space-y-[1.667vw]">
-          <Card title="About">
+            <div className="min-w-0 pb-1 lg:pb-[0.278vw]">
+              <div className="flex flex-wrap items-center gap-2 lg:gap-[0.556vw]">
+                <h1 className="font-sebenta text-2xl lg:text-[1.944vw] font-bold tracking-tight">
+                  {name}
+                </h1>
+                {verified ? (
+                  <span className="inline-flex items-center gap-1 lg:gap-[0.278vw] rounded-full bg-secondary px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-semibold text-secondary-foreground">
+                    <Icon name="shield-done" className="size-3.5 lg:size-[0.972vw]" />
+                    Verified
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+                {c.yearsInBusiness != null
+                  ? `Roofing · ${c.yearsInBusiness} year${c.yearsInBusiness === 1 ? "" : "s"} in business`
+                  : "Roofing contractor"}
+                {areas[0]?.label ? ` · ${areas[0].label}` : ""}
+              </p>
+            </div>
+          </div>
+
+          {canManage ? (
+            <Button asChild variant="outline" className="shrink-0 gap-1.5 lg:gap-[0.417vw]">
+              <Link href="/contractor/settings/company">
+                <Icon name="edit" className="size-4 lg:size-[1.111vw]" />
+                Edit profile
+              </Link>
+            </Button>
+          ) : null}
+        </div>
+      </header>
+
+      {/* Body — open two columns, one light divider, no per-section boxes */}
+      <div className="grid gap-y-8 lg:gap-y-[2.222vw] lg:grid-cols-[1.7fr_1fr] lg:gap-x-10">
+        <div className="space-y-8 lg:space-y-[2.222vw]">
+          <Section title="About">
             {c.bio ? (
-              <p className="text-sm lg:text-[0.972vw] leading-relaxed text-foreground/80">
+              <p className="max-w-prose text-[15px] lg:text-[1.042vw] leading-relaxed text-foreground/80">
                 {c.bio}
               </p>
             ) : (
@@ -105,18 +132,13 @@ export default async function ContractorProfilePage() {
                 No description yet.
               </p>
             )}
-          </Card>
+          </Section>
 
-          <Card title="Services">
+          <Section title="Services">
             {subtypes.length > 0 ? (
               <div className="flex flex-wrap gap-2 lg:gap-[0.556vw]">
                 {subtypes.map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full border border-border px-3 lg:px-[0.833vw] py-1 lg:py-[0.278vw] text-sm lg:text-[0.972vw] font-medium"
-                  >
-                    {s}
-                  </span>
+                  <ServiceTag key={s} label={s} />
                 ))}
               </div>
             ) : (
@@ -124,48 +146,51 @@ export default async function ContractorProfilePage() {
                 No services listed yet.
               </p>
             )}
-          </Card>
+          </Section>
         </div>
 
-        {/* Right: trust + coverage + stats */}
-        <div className="space-y-6 lg:space-y-[1.667vw]">
-          <Card title="Trust">
-            <ul className="space-y-2.5 lg:space-y-[0.694vw] text-sm lg:text-[0.972vw]">
-              <li className="flex items-center gap-2 lg:gap-[0.556vw]">
+        <aside className="space-y-8 lg:space-y-[2.222vw] lg:border-l lg:border-border lg:pl-10">
+          <Section title="At a glance">
+            <ul className="space-y-3 lg:space-y-[0.833vw] text-sm lg:text-[0.972vw]">
+              <li className="flex items-center gap-2.5 lg:gap-[0.694vw]">
                 <Icon
                   name={verified ? "shield-done" : "shield-fail"}
-                  className={verified ? "size-4 lg:size-[1.111vw] text-secondary" : "size-4 lg:size-[1.111vw] text-muted-foreground"}
+                  className={
+                    verified
+                      ? "size-4 lg:size-[1.111vw] text-secondary"
+                      : "size-4 lg:size-[1.111vw] text-muted-foreground"
+                  }
                 />
                 {verified ? "Licensed & insured" : "Verification pending"}
               </li>
               {rating && c.totalReviews > 0 ? (
-                <li className="flex items-center gap-2 lg:gap-[0.556vw]">
+                <li className="flex items-center gap-2.5 lg:gap-[0.694vw]">
                   <Icon name="star" className="size-4 lg:size-[1.111vw] text-amber-400" />
                   {rating.toFixed(1)} · {c.totalReviews} review
                   {c.totalReviews === 1 ? "" : "s"}
                 </li>
               ) : (
-                <li className="flex items-center gap-2 lg:gap-[0.556vw] text-muted-foreground">
+                <li className="flex items-center gap-2.5 lg:gap-[0.694vw] text-muted-foreground">
                   <Icon name="star" className="size-4 lg:size-[1.111vw]" />
                   No reviews yet
                 </li>
               )}
-              <li className="flex items-center gap-2 lg:gap-[0.556vw] text-muted-foreground">
+              <li className="flex items-center gap-2.5 lg:gap-[0.694vw] text-muted-foreground">
                 <Icon name="time-circle" className="size-4 lg:size-[1.111vw]" />
                 On Homei since {memberSince}
               </li>
             </ul>
-          </Card>
+          </Section>
 
-          <Card title="Coverage">
+          <Section title="Coverage">
             {areas.length > 0 ? (
-              <ul className="space-y-2 lg:space-y-[0.556vw] text-sm lg:text-[0.972vw]">
+              <ul className="space-y-3 lg:space-y-[0.833vw] text-sm lg:text-[0.972vw]">
                 {areas.map((a) => (
-                  <li key={a.id} className="flex items-center gap-2 lg:gap-[0.556vw]">
-                    <Icon name="location" className="size-4 lg:size-[1.111vw] text-muted-foreground" />
+                  <li key={a.id} className="flex items-center gap-2.5 lg:gap-[0.694vw]">
+                    <Icon name="location" className="size-4 lg:size-[1.111vw] shrink-0 text-muted-foreground" />
                     <span className="min-w-0 truncate">{a.label ?? "Area"}</span>
-                    <span className="ml-auto shrink-0 text-[13px] lg:text-[0.903vw] text-muted-foreground">
-                      {a.radiusMiles} mi
+                    <span className="ml-auto shrink-0 text-[13px] lg:text-[0.903vw] font-medium text-muted-foreground">
+                      {coverageBadge(a)}
                     </span>
                   </li>
                 ))}
@@ -175,16 +200,29 @@ export default async function ContractorProfilePage() {
                 No coverage areas yet.
               </p>
             )}
-          </Card>
-        </div>
+          </Section>
+        </aside>
       </div>
+
+      {portfolio.length > 0 ? (
+        <Section title="Recent work">
+          <PortfolioGallery items={portfolio} />
+        </Section>
+      ) : null}
     </div>
   )
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+// Open section: a small label heading + content, no bordered box.
+function Section({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
   return (
-    <section className="rounded-lg lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+    <section>
       <h2 className="mb-3 lg:mb-[0.833vw] text-xs lg:text-[0.833vw] font-semibold uppercase tracking-wider text-muted-foreground">
         {title}
       </h2>

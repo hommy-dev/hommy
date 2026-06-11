@@ -19,10 +19,10 @@ import { getLeadPricing } from '@/lib/leads/pricing'
  *   Run:  pnpm test:db:up && pnpm test:integration
  */
 
-// Dallas City Hall ≈ the seed contractor's turf. NYC is ~1,370 mi away.
+// Dallas City Hall ≈ the seed contractor's turf. NYC is ~2,200 km away.
 const DALLAS = { lat: 32.7767, lng: -96.797 }
 const NYC = { lat: 40.7128, lng: -74.006 }
-// ~0.5° latitude ≈ 34.5 miles — just outside a 25mi radius, inside a 50mi one.
+// ~0.5° latitude ≈ 55.5 km — just outside a 40km radius, inside an 80km one.
 const HALF_DEGREE_NORTH = { lat: DALLAS.lat + 0.5, lng: DALLAS.lng }
 
 async function seedRoofingService(): Promise<string> {
@@ -35,9 +35,12 @@ async function seedRoofingService(): Promise<string> {
 
 async function seedContractor(opts: {
   serviceId: string
-  lat: number
-  lng: number
-  radiusMiles: number
+  // Circle area:
+  lat?: number
+  lng?: number
+  radiusKm?: number
+  // Polygon area (alternative to circle):
+  polygon?: { lat: number; lng: number }[]
   verified?: boolean
   profileScore?: number
   offersService?: boolean
@@ -59,13 +62,23 @@ async function seedContractor(opts: {
     })
   }
 
-  await db.insert(serviceAreas).values({
-    contractorId: c.id,
-    label: 'Coverage area',
-    lat: opts.lat,
-    lng: opts.lng,
-    radiusMiles: opts.radiusMiles,
-  })
+  if (opts.polygon) {
+    await db.insert(serviceAreas).values({
+      contractorId: c.id,
+      label: 'Coverage area',
+      areaType: 'polygon',
+      polygon: opts.polygon,
+    })
+  } else {
+    await db.insert(serviceAreas).values({
+      contractorId: c.id,
+      label: 'Coverage area',
+      areaType: 'circle',
+      lat: opts.lat,
+      lng: opts.lng,
+      radiusKm: opts.radiusKm,
+    })
+  }
 
   return c.id
 }
@@ -83,9 +96,9 @@ describe('lead matching (radius)', () => {
 
   it('matches a verified contractor whose radius covers the job', async () => {
     const serviceId = await seedRoofingService()
-    const id = await seedContractor({ serviceId, ...DALLAS, radiusMiles: 25 })
+    const id = await seedContractor({ serviceId, ...DALLAS, radiusKm: 40 })
 
-    // Job ~3.5mi from the contractor's centre — well inside 25mi.
+    // Job ~5.5km from the contractor's centre — well inside 40km.
     const eligible = await findEligibleContractors({
       serviceId,
       lat: DALLAS.lat + 0.05,
@@ -97,30 +110,30 @@ describe('lead matching (radius)', () => {
 
   it('does NOT match when the job is outside every radius', async () => {
     const serviceId = await seedRoofingService()
-    await seedContractor({ serviceId, ...DALLAS, radiusMiles: 25 })
+    await seedContractor({ serviceId, ...DALLAS, radiusKm: 40 })
 
     const eligible = await findEligibleContractors({ serviceId, lat: NYC.lat, lng: NYC.lng })
 
     expect(eligible).toHaveLength(0)
   })
 
-  it('honours each area’s own radius (34mi away: 25mi misses, 50mi hits)', async () => {
+  it('honours each area’s own radius (55km away: 40km misses, 80km hits)', async () => {
     const serviceId = await seedRoofingService()
-    await seedContractor({ serviceId, ...HALF_DEGREE_NORTH, radiusMiles: 25 })
+    await seedContractor({ serviceId, ...HALF_DEGREE_NORTH, radiusKm: 40 })
 
-    // From Dallas, the 25mi contractor (34mi away) should NOT match.
+    // From Dallas, the 40km contractor (~55km away) should NOT match.
     let eligible = await findEligibleContractors({ serviceId, ...DALLAS })
     expect(eligible).toHaveLength(0)
 
-    // Add a contractor at the same spot but with a 50mi radius — now it reaches.
-    const wide = await seedContractor({ serviceId, ...HALF_DEGREE_NORTH, radiusMiles: 50 })
+    // Add a contractor at the same spot but with an 80km radius — now it reaches.
+    const wide = await seedContractor({ serviceId, ...HALF_DEGREE_NORTH, radiusKm: 80 })
     eligible = await findEligibleContractors({ serviceId, ...DALLAS })
     expect(eligible.map((e) => e.contractorId)).toContain(wide)
   })
 
   it('excludes unverified contractors', async () => {
     const serviceId = await seedRoofingService()
-    await seedContractor({ serviceId, ...DALLAS, radiusMiles: 25, verified: false })
+    await seedContractor({ serviceId, ...DALLAS, radiusKm: 40, verified: false })
 
     const eligible = await findEligibleContractors({ serviceId, ...DALLAS })
 
@@ -129,7 +142,7 @@ describe('lead matching (radius)', () => {
 
   it('excludes contractors that do not offer the service', async () => {
     const serviceId = await seedRoofingService()
-    await seedContractor({ serviceId, ...DALLAS, radiusMiles: 25, offersService: false })
+    await seedContractor({ serviceId, ...DALLAS, radiusKm: 40, offersService: false })
 
     const eligible = await findEligibleContractors({ serviceId, ...DALLAS })
 
@@ -138,13 +151,31 @@ describe('lead matching (radius)', () => {
 
   it('ranks higher-score contractors first', async () => {
     const serviceId = await seedRoofingService()
-    const low = await seedContractor({ serviceId, ...DALLAS, radiusMiles: 25, profileScore: 10 })
-    const high = await seedContractor({ serviceId, ...DALLAS, radiusMiles: 25, profileScore: 90 })
+    const low = await seedContractor({ serviceId, ...DALLAS, radiusKm: 40, profileScore: 10 })
+    const high = await seedContractor({ serviceId, ...DALLAS, radiusKm: 40, profileScore: 90 })
 
     const eligible = await findEligibleContractors({ serviceId, ...DALLAS })
     const order = eligible.map((e) => e.contractorId)
 
     expect(order.indexOf(high)).toBeLessThan(order.indexOf(low))
+  })
+
+  it('matches a polygon area that contains the job, and excludes one that does not', async () => {
+    const serviceId = await seedRoofingService()
+    // A ~0.4° box around Dallas (covers DALLAS, excludes the NYC point).
+    const box = [
+      { lat: DALLAS.lat - 0.2, lng: DALLAS.lng - 0.2 },
+      { lat: DALLAS.lat - 0.2, lng: DALLAS.lng + 0.2 },
+      { lat: DALLAS.lat + 0.2, lng: DALLAS.lng + 0.2 },
+      { lat: DALLAS.lat + 0.2, lng: DALLAS.lng - 0.2 },
+    ]
+    const inside = await seedContractor({ serviceId, polygon: box })
+
+    const eligible = await findEligibleContractors({ serviceId, ...DALLAS })
+    expect(eligible.map((e) => e.contractorId)).toContain(inside)
+
+    const farEligible = await findEligibleContractors({ serviceId, ...NYC })
+    expect(farEligible.map((e) => e.contractorId)).not.toContain(inside)
   })
 
   it('prices roofing leads from config', () => {

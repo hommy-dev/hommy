@@ -21,7 +21,7 @@ export function Hero() {
 
       <div
         id="quote"
-        className="relative mx-auto flex min-h-screen max-w-3xl lg:max-w-[53.328vw] flex-col items-center justify-center px-6 lg:px-[1.667vw] py-16 lg:py-[4.444vw] text-center text-background"
+        className="relative mx-auto flex min-h-screen flex-col items-center justify-center px-6 lg:px-[1.667vw] py-16 lg:py-[4.444vw] text-center text-background"
       >
         <h1 className="font-sebenta text-[2.6rem] font-bold leading-[1.04] tracking-tight sm:text-6xl lg:text-[4.722vw]">
           Find a roofer you can actually trust.

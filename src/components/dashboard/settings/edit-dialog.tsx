@@ -77,7 +77,7 @@ export function EditDialog({
       </DialogTrigger>
 
       <DialogContent
-        className={wide ? "sm:max-w-lg lg:max-w-[42vw]" : "sm:max-w-md lg:max-w-[34vw]"}
+        className={wide ? "sm:max-w-lg lg:max-w-[42vw] max-h-[95vh] overflow-y-auto" : "sm:max-w-md lg:max-w-[34vw]  max-h-[95vh] overflow-y-auto"}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

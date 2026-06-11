@@ -1,6 +1,7 @@
 services:
   postgres-test:
-    image: postgres:15-alpine
+    # PostGIS-enabled image — lead matching uses ST_Covers on a geography column.
+    image: postgis/postgis:15-3.4-alpine
     container_name: homei-postgres-test
     restart: unless-stopped
     environment:

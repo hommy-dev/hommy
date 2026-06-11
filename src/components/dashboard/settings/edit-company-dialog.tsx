@@ -13,6 +13,7 @@ type Initial = {
   companyName: string
   bio: string
   logoUrl: string | null
+  bannerUrl: string | null
   yearsInBusiness: number | null
 }
 
@@ -21,6 +22,7 @@ export function EditCompanyDialog({ initial }: { initial: Initial }) {
   const [companyName, setCompanyName] = useState(initial.companyName)
   const [bio, setBio] = useState(initial.bio)
   const [logoUrl, setLogoUrl] = useState<string | null>(initial.logoUrl)
+  const [bannerUrl, setBannerUrl] = useState<string | null>(initial.bannerUrl)
   const [years, setYears] = useState(
     initial.yearsInBusiness != null ? String(initial.yearsInBusiness) : "",
   )
@@ -29,6 +31,7 @@ export function EditCompanyDialog({ initial }: { initial: Initial }) {
     setCompanyName(initial.companyName)
     setBio(initial.bio)
     setLogoUrl(initial.logoUrl)
+    setBannerUrl(initial.bannerUrl)
     setYears(initial.yearsInBusiness != null ? String(initial.yearsInBusiness) : "")
   }
 
@@ -37,6 +40,7 @@ export function EditCompanyDialog({ initial }: { initial: Initial }) {
       companyName: companyName.trim(),
       bio: bio.trim(),
       logoUrl,
+      bannerUrl,
       yearsInBusiness: years.trim() === "" ? null : Number(years),
     })
     if (!res.success) {
@@ -56,6 +60,36 @@ export function EditCompanyDialog({ initial }: { initial: Initial }) {
       canSave={companyName.trim().length >= 2}
       wide
     >
+      <Field label="Cover banner" hint="A wide image shown across the top of your profile. ~1600×400 looks best.">
+        <div className="space-y-2.5 lg:space-y-[0.694vw]">
+          <div className="relative aspect-[4/1] w-full overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border bg-muted">
+            {bannerUrl ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={bannerUrl} alt="" className="size-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setBannerUrl(null)}
+                  className="absolute right-2 lg:right-[0.556vw] top-2 lg:top-[0.556vw] rounded-full bg-background/85 px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-medium text-destructive shadow-sm transition-colors hover:bg-background"
+                >
+                  Remove
+                </button>
+              </>
+            ) : (
+              <div
+                className="size-full bg-gradient-to-br from-primary/25 via-primary/10 to-secondary/20"
+                aria-hidden="true"
+              />
+            )}
+          </div>
+          <ImageUpload folder="banners" accept="image" onUpload={(r) => setBannerUrl(r.secureUrl)}>
+            <span className="inline-block rounded-md lg:rounded-[0.556vw] border border-border bg-card px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-medium transition-colors hover:border-foreground/30">
+              {bannerUrl ? "Change banner" : "Upload banner"}
+            </span>
+          </ImageUpload>
+        </div>
+      </Field>
+
       <Field label="Logo">
         <div className="flex items-center gap-4 lg:gap-[1.111vw]">
           {logoUrl ? (

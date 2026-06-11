@@ -12,7 +12,7 @@ export default function SandboxPage() {
 
   return (
     <div className="min-h-svh bg-canvas text-foreground">
-      <div className="mx-auto max-w-3xl lg:max-w-[53.328vw] space-y-8 lg:space-y-[2.222vw] px-6 lg:px-[1.667vw] py-12 lg:py-[3.333vw]">
+      <div className="mx-auto space-y-8 lg:space-y-[2.222vw] px-6 lg:px-[1.667vw] py-12 lg:py-[3.333vw]">
         <header>
           <h1 className="font-sebenta text-3xl lg:text-[2.083vw] font-bold tracking-tight">
             Component sandbox

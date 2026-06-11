@@ -65,20 +65,50 @@ export async function updateServiceSubtypes(input: unknown): Promise<Result> {
   return { success: true }
 }
 
-const AreaSchema = z.object({
+// A coverage area is either a circle (centre + radius in km) or a drawn polygon
+// (a ring of points). The DB trigger derives the matchable `geom` from whichever
+// shape is stored — see migration 0006.
+const CircleAreaSchema = z.object({
+  type: z.literal('circle'),
   label: z.string().trim().min(1).max(160),
   lat: z.number(),
   lng: z.number(),
-  radiusMiles: z.number().int().min(1).max(500),
+  radiusKm: z.number().positive().max(800),
 })
+
+const PolygonAreaSchema = z.object({
+  type: z.literal('polygon'),
+  label: z.string().trim().min(1).max(160),
+  polygon: z
+    .array(z.object({ lat: z.number(), lng: z.number() }))
+    .min(3, 'A drawn area needs at least 3 points.')
+    .max(500),
+})
+
+const AreaSchema = z.discriminatedUnion('type', [
+  CircleAreaSchema,
+  PolygonAreaSchema,
+])
 
 export type ServiceAreaRow = {
   id: string
   label: string | null
+  areaType: 'circle' | 'polygon'
   lat: number | null
   lng: number | null
-  radiusMiles: number
+  radiusKm: number | null
+  polygon: { lat: number; lng: number }[] | null
 }
+
+const RETURNING = {
+  id: serviceAreas.id,
+  label: serviceAreas.label,
+  areaType: serviceAreas.areaType,
+  lat: serviceAreas.lat,
+  lng: serviceAreas.lng,
+  radiusKm: serviceAreas.radiusKm,
+  polygon: serviceAreas.polygon,
+} as const
 
 export async function addServiceArea(
   input: unknown,
@@ -87,27 +117,34 @@ export async function addServiceArea(
   if (!ctx.ok) return { success: false, error: ctx.error }
 
   const parsed = AreaSchema.safeParse(input)
-  if (!parsed.success) return { success: false, error: 'Pick a valid area.' }
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Pick a valid area.' }
+  }
   const d = parsed.data
 
-  const [row] = await db
-    .insert(serviceAreas)
-    .values({
-      contractorId: ctx.contractorId,
-      label: d.label,
-      lat: d.lat,
-      lng: d.lng,
-      radiusMiles: d.radiusMiles,
-    })
-    .returning({
-      id: serviceAreas.id,
-      label: serviceAreas.label,
-      lat: serviceAreas.lat,
-      lng: serviceAreas.lng,
-      radiusMiles: serviceAreas.radiusMiles,
-    })
+  const values =
+    d.type === 'circle'
+      ? {
+          contractorId: ctx.contractorId,
+          label: d.label,
+          areaType: 'circle' as const,
+          lat: d.lat,
+          lng: d.lng,
+          radiusKm: d.radiusKm,
+        }
+      : {
+          contractorId: ctx.contractorId,
+          label: d.label,
+          areaType: 'polygon' as const,
+          polygon: d.polygon,
+        }
 
-  return { success: true, data: row }
+  const [row] = await db.insert(serviceAreas).values(values).returning(RETURNING)
+
+  return {
+    success: true,
+    data: { ...row, areaType: row.areaType === 'polygon' ? 'polygon' : 'circle', polygon: row.polygon ?? null },
+  }
 }
 
 export async function removeServiceArea(id: string): Promise<Result> {

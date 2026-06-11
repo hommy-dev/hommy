@@ -6,6 +6,8 @@ import {
   getContractorSubtypes,
   getRoofingSubtypes,
 } from "@/lib/data/dashboard"
+import { coverageSummary } from "@/lib/coverage"
+import { ServiceTag } from "@/components/ui/service-tag"
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
 import { Empty } from "@/components/dashboard/settings/edit-dialog"
 import { EditServicesDialog } from "@/components/dashboard/settings/edit-services-dialog"
@@ -44,12 +46,7 @@ export default async function ContractorServiceAreaPage() {
         {selected.length > 0 ? (
           <div className="flex flex-wrap gap-2 lg:gap-[0.556vw]">
             {selected.map((s) => (
-              <span
-                key={s}
-                className="rounded-full bg-muted px-3 lg:px-[0.833vw] py-1 lg:py-[0.278vw] text-sm lg:text-[0.972vw] font-medium text-foreground"
-              >
-                {s}
-              </span>
+              <ServiceTag key={s} label={s} />
             ))}
           </div>
         ) : (
@@ -73,7 +70,7 @@ export default async function ContractorServiceAreaPage() {
                   {a.label ?? "Coverage area"}
                 </span>
                 <span className="shrink-0 text-[13px] lg:text-[0.903vw] text-muted-foreground">
-                  {a.radiusMiles} mi radius
+                  {coverageSummary(a)}
                 </span>
               </li>
             ))}

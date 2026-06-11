@@ -193,15 +193,15 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
         >
           <Bell className="size-[18px] lg:size-[1.25vw]" />
           {unread > 0 && (
-            <span className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] flex min-w-4 lg:min-w-[1.111vw] items-center justify-center rounded-full bg-primary px-1 lg:px-[0.278vw] text-[10px] lg:text-[0.694vw] font-bold leading-none text-primary-foreground">
+            <span className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] flex items-center justify-center rounded-full bg-primary p-1 lg:p-[0.278vw] text-[10px] lg:text-[0.694vw] font-bold leading-1 text-primary-foreground">
               {unread > 99 ? '99+' : unread}
             </span>
           )}
         </button>
       </PopoverTrigger>
 
-      <PopoverContent align="end" sideOffset={8} className="w-80 lg:w-[22.222vw] p-0">
-        <div className="flex items-center justify-between border-b border-border px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
+      <PopoverContent align="end" sideOffset={8} className="w-80 lg:w-[22.222vw] p-0 lg:p-0 gap-0 lg:gap-0">
+        <div className="flex items-center justify-between border-b border-border p-3 lg:p-[0.833vw]">
           <h3 className="text-sm lg:text-[0.972vw] font-semibold">Notifications</h3>
           {unread > 0 && (
             <button
@@ -214,12 +214,12 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
           )}
         </div>
 
-        <ScrollArea className="h-[380px] lg:h-[26.389vw]">
+        <ScrollArea className="h-[380px] lg:h-[26.389vw] ">
           {!loaded && (
             <div className="space-y-px lg:space-y-[0.069vw] p-2 lg:p-[0.556vw]">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-3 lg:gap-[0.833vw] rounded-lg lg:rounded-[0.694vw] p-3 lg:p-[0.833vw]">
-                  <div className="size-8 lg:size-[2.222vw] shrink-0 animate-pulse rounded-full bg-muted" />
+                <div key={i} className="flex items-start gap-3 lg:gap-[0.833vw] rounded-md lg:rounded-[0.5vw] p-3 lg:p-[0.833vw]">
+                  <div className="size-8 lg:size-[2.222vw] shrink-0 animate-pulse rounded-md lg:rounded-[0.5vw] bg-muted" />
                   <div className="flex-1 space-y-2 lg:space-y-[0.556vw] py-1 lg:py-[0.278vw]">
                     <div className="h-3 lg:h-[0.833vw] w-32 lg:w-[8.889vw] animate-pulse rounded lg:rounded-[0.324vw] bg-muted" />
                     <div className="h-3 lg:h-[0.833vw] w-48 lg:w-[13.333vw] animate-pulse rounded lg:rounded-[0.324vw] bg-muted/60" />
@@ -249,13 +249,13 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
                     key={item.id}
                     onClick={() => handleClick(item)}
                     className={cn(
-                      'flex w-full items-start gap-3 lg:gap-[0.833vw] rounded-lg lg:rounded-[0.694vw] p-3 lg:p-[0.833vw] text-left transition-colors hover:bg-accent',
+                      'flex w-full items-start gap-3 lg:gap-[0.833vw] rounded-md lg:rounded-[0.5vw] p-3 lg:p-[0.833vw] text-left transition-colors hover:bg-accent',
                       !item.isRead && 'bg-primary/5 hover:bg-primary/10',
                     )}
                   >
                     <span
                       className={cn(
-                        'mt-0.5 lg:mt-[0.139vw] flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-full',
+                        'mt-0.5 lg:mt-[0.139vw] flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-md lg:rounded-[0.5vw]',
                         colorClass,
                       )}
                     >

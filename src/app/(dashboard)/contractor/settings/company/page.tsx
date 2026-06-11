@@ -1,11 +1,18 @@
 import Link from "next/link"
 import { getRequiredUser } from "@/lib/auth/session"
-import { getContractorForUser, getMembershipRole } from "@/lib/data/dashboard"
+import {
+  getContractorForUser,
+  getMembershipRole,
+  getRoofingSubtypes,
+} from "@/lib/data/dashboard"
+import { getPortfolio, getPortfolioCap } from "@/lib/data/portfolio"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Icon } from "@/components/ui/icon"
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
 import { Empty } from "@/components/dashboard/settings/edit-dialog"
 import { EditCompanyDialog } from "@/components/dashboard/settings/edit-company-dialog"
+import { PortfolioManager } from "@/components/dashboard/portfolio/portfolio-manager"
+import { PortfolioGallery } from "@/components/dashboard/portfolio/portfolio-gallery"
 
 function initials(name: string) {
   const p = name.trim().split(/\s+/).filter(Boolean)
@@ -25,11 +32,17 @@ export default async function ContractorCompanyPage() {
     )
   }
 
-  const role = await getMembershipRole(user.id, c.id)
+  const [role, portfolio, cap, subtypes] = await Promise.all([
+    getMembershipRole(user.id, c.id),
+    getPortfolio(c.id),
+    getPortfolioCap(c.id),
+    getRoofingSubtypes(),
+  ])
   const canManage = role === "owner" || role === "admin"
   const name = c.companyName ?? "Your company"
 
   return (
+    <div className="space-y-8 lg:space-y-[2.222vw]">
     <SettingsSection
       title="Company profile"
       description="What homeowners see about your business."
@@ -40,6 +53,7 @@ export default async function ContractorCompanyPage() {
               companyName: c.companyName ?? "",
               bio: c.bio ?? "",
               logoUrl: c.logoUrl,
+              bannerUrl: c.bannerUrl,
               yearsInBusiness: c.yearsInBusiness,
             }}
           />
@@ -86,5 +100,17 @@ export default async function ContractorCompanyPage() {
         </Link>
       </div>
     </SettingsSection>
+
+      <SettingsSection
+        title="Work"
+        description="Showcase completed jobs. Homeowners see these on your profile."
+      >
+        {canManage ? (
+          <PortfolioManager initial={portfolio} cap={cap} subtypes={subtypes} />
+        ) : (
+          <PortfolioGallery items={portfolio.filter((p) => p.isPublished)} />
+        )}
+      </SettingsSection>
+    </div>
   )
 }

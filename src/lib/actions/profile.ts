@@ -15,6 +15,7 @@ const ProfileSchema = z.object({
   phone: z.string().trim().max(30).optional(),
   bio: z.string().trim().max(600).optional().default(''),
   logoUrl: z.string().url().nullable().optional(),
+  bannerUrl: z.string().url().nullable().optional(),
   yearsInBusiness: z.coerce.number().int().min(0).max(200).nullable().optional(),
 })
 
@@ -36,6 +37,7 @@ export async function updateBusinessProfile(input: unknown): Promise<Result> {
         companyName: d.companyName,
         bio: d.bio || null,
         logoUrl: d.logoUrl ?? null,
+        bannerUrl: d.bannerUrl ?? null,
         ...(d.yearsInBusiness !== undefined
           ? { yearsInBusiness: d.yearsInBusiness }
           : {}),

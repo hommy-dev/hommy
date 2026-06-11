@@ -1,26 +1,20 @@
 'use client'
 
-import { CldUploadWidget } from 'next-cloudinary'
-import type {
-  CloudinaryUploadWidgetResults,
-  CloudinaryUploadWidgetError,
-} from 'next-cloudinary'
+import { useRef, useState } from 'react'
 import { Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { showToast } from '@/components/ui/toast'
-import {
-  CLOUDINARY_FOLDERS,
-  parseWidgetResult,
-  type CloudinaryFolder,
-  type UploadResult,
-} from '@/lib/cloudinary/config'
+import { uploadToCloudinary } from '@/lib/cloudinary/upload'
+import { type CloudinaryFolder, type UploadResult } from '@/lib/cloudinary/config'
 import { cn } from '@/lib/utils'
 
 type ImageUploadAccept = 'image' | 'image+pdf'
 
-const FORMAT_MAP: Record<ImageUploadAccept, string[]> = {
-  image: ['jpg', 'jpeg', 'png', 'webp'],
-  'image+pdf': ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+// Native file-picker accept lists — opening the OS picker directly (and on
+// mobile, the camera) rather than the Cloudinary widget UI.
+const ACCEPT_ATTR: Record<ImageUploadAccept, string> = {
+  image: 'image/png,image/jpeg,image/webp',
+  'image+pdf': 'image/png,image/jpeg,image/webp,application/pdf',
 }
 
 interface ImageUploadProps {
@@ -42,57 +36,90 @@ export function ImageUpload({
   className,
   children,
 }: ImageUploadProps) {
-  function handleSuccess(results: CloudinaryUploadWidgetResults) {
-    if (
-      results.event !== 'success' ||
-      !results.info ||
-      typeof results.info === 'string'
-    ) {
-      return
-    }
-    const parsed = parseWidgetResult(results.info as Record<string, unknown>)
-    onUpload(parsed)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  function pick() {
+    if (uploading) return
+    inputRef.current?.click()
   }
 
-  function handleError(error: CloudinaryUploadWidgetError) {
-    const message =
-      typeof error === 'string'
-        ? error
-        : error?.statusText ?? 'Upload failed'
-    showToast(message, { type: 'error' })
+  async function handleFiles(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return
+    const files = Array.from(fileList).slice(0, maxFiles)
+    setUploading(true)
+    try {
+      // Sequential so onUpload fires in the picked order (callers may treat the
+      // first as a cover image).
+      for (const file of files) {
+        if (file.size > maxFileSize) {
+          showToast(
+            `${file.name} is too large (max ${Math.round(maxFileSize / 1_048_576)}MB).`,
+            { type: 'error' },
+          )
+          continue
+        }
+        try {
+          const r = await uploadToCloudinary(file, folder)
+          onUpload({ ...r, originalFilename: file.name })
+        } catch (err) {
+          console.error('[ImageUpload] upload failed', err)
+          showToast(`Couldn't upload ${file.name}. Please try again.`, {
+            type: 'error',
+          })
+        }
+      }
+    } finally {
+      setUploading(false)
+      // Reset so picking the same file again still fires onChange.
+      if (inputRef.current) inputRef.current.value = ''
+    }
   }
 
   return (
-    <CldUploadWidget
-      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-      options={{
-        folder: CLOUDINARY_FOLDERS[folder],
-        maxFiles,
-        multiple: maxFiles > 1,
-        clientAllowedFormats: FORMAT_MAP[accept],
-        maxFileSize,
-        sources: ['local', 'camera', 'url'],
-        singleUploadAutoClose: true,
-        showPoweredBy: false,
-      }}
-      onSuccess={handleSuccess}
-      onError={handleError}
-    >
-      {({ open }) => (
-        <div className={cn('inline-flex', className)}>
-          {children ? (
-            <button type="button" onClick={() => open()}>
-              {children}
-            </button>
-          ) : (
-            <Button type="button" variant="outline" onClick={() => open()}>
-              <Upload className="size-4 lg:size-[1.111vw]" />
-              {maxFiles > 1 ? 'Upload files' : 'Upload'}
-            </Button>
+    <div className={cn('inline-flex', className)}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPT_ATTR[accept]}
+        multiple={maxFiles > 1}
+        className="hidden"
+        onChange={(e) => void handleFiles(e.target.files)}
+      />
+      {children ? (
+        <button
+          type="button"
+          onClick={pick}
+          disabled={uploading}
+          className="relative disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {children}
+          {uploading && (
+            <span className="absolute inset-0 flex items-center justify-center rounded-md lg:rounded-[0.556vw] bg-background/60">
+              <Spinner />
+            </span>
           )}
-        </div>
+        </button>
+      ) : (
+        <Button type="button" variant="outline" onClick={pick} disabled={uploading}>
+          {uploading ? (
+            <Spinner />
+          ) : (
+            <Upload className="size-4 lg:size-[1.111vw]" />
+          )}
+          {uploading ? 'Uploading…' : maxFiles > 1 ? 'Upload files' : 'Upload'}
+        </Button>
       )}
-    </CldUploadWidget>
+    </div>
+  )
+}
+
+function Spinner() {
+  return (
+    <span
+      aria-hidden="true"
+      className="block size-4 lg:size-[1.111vw] animate-spin rounded-full border-2 border-foreground/20 border-t-foreground/70"
+    />
   )
 }
 
@@ -113,15 +140,11 @@ export function UploadedImagePreview({
     <div
       className={cn(
         'group relative h-24 lg:h-[6.667vw] w-24 lg:w-[6.667vw] overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border',
-        className
+        className,
       )}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={url}
-        alt={alt}
-        className="h-full w-full object-cover"
-      />
+      <img src={url} alt={alt} className="h-full w-full object-cover" />
       {onRemove && (
         <button
           type="button"
