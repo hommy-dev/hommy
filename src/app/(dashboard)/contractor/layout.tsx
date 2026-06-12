@@ -3,6 +3,7 @@ import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser, getUserCompanies } from "@/lib/data/dashboard"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { getUnreadCountAction } from "@/lib/notifications/actions"
+import { countUnreadConversations } from "@/lib/data/conversations"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { DashboardHeaderActions } from "@/components/dashboard/dashboard-header-actions"
 import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
@@ -24,13 +25,17 @@ export default async function DashboardLayout({
   }
   const companies = await getUserCompanies(user.id)
   const personName = user.fullName || user.email
-  const unreadCount = await getUnreadCountAction()
+  const [unreadCount, unreadMessages] = await Promise.all([
+    getUnreadCountAction(),
+    countUnreadConversations(user.id),
+  ])
 
   return (
     <>
       <DashboardShell
         navItems={CONTRACTOR_NAV}
         notice={buildNotice(contractor)}
+        navUnreadCounts={{ "/contractor/messages": unreadMessages }}
         workspace={
           contractor ? (
             <WorkspaceChip

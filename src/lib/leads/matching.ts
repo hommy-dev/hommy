@@ -10,7 +10,7 @@
 // Ranked by profile_score, capped at OFFER_CAP.
 
 import { db } from '@/lib/db'
-import { and, desc, eq, isNotNull, sql } from 'drizzle-orm'
+import { and, desc, eq, isNotNull, notInArray, sql } from 'drizzle-orm'
 import { contractors, contractorServices, serviceAreas } from '@/lib/db/schema'
 
 // Accepts either the base client or an open transaction so matching can run
@@ -27,11 +27,14 @@ export type EligibleContractor = { contractorId: string }
 export async function findEligibleContractors(
   { serviceId, lat, lng }: { serviceId: string; lat: number; lng: number },
   executor: DbExecutor = db,
+  opts: { excludeContractorIds?: string[]; limit?: number } = {},
 ): Promise<EligibleContractor[]> {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return []
 
   // The lead's location as a geography point (lng, lat order for ST_MakePoint).
   const leadPoint = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography`
+
+  const exclude = opts.excludeContractorIds ?? []
 
   const rows = await executor
     .selectDistinct({
@@ -53,10 +56,12 @@ export async function findEligibleContractors(
         isNotNull(serviceAreas.geom),
         // the lead's point lies inside this area's coverage shape
         sql`ST_Covers(${serviceAreas.geom}, ${leadPoint})`,
+        // cascade: skip companies already offered this lead
+        exclude.length > 0 ? notInArray(contractors.id, exclude) : undefined,
       ),
     )
     .orderBy(desc(contractors.profileScore))
-    .limit(OFFER_CAP)
+    .limit(opts.limit ?? OFFER_CAP)
 
   return rows.map((r) => ({ contractorId: r.contractorId }))
 }

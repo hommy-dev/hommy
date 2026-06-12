@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   "/contractors", // contractor recruitment landing + /contractors/signup
   "/roofing-contractors", // SEO location pages: /roofing-contractors/[city]-[state]
   "/review", // tokenized public review submission flow
+  "/accept", // tokenized public quote-acceptance flow
   "/auth/login",
   "/auth/signup",
   "/auth/callback",

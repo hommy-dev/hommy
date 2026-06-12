@@ -27,7 +27,6 @@ import {
   type DashboardNavItem,
   isDashboardNavActive,
 } from "@/components/dashboard/dashboard-nav";
-import { useTotalUnread, useViewerId } from "@/components/chat/chat-store";
 
 export type DashboardShellUser = {
   email: string;
@@ -41,15 +40,12 @@ export type DashboardShellProps = {
   brandLabel?: string;
   /** Status / announcement card rendered at the bottom of the sidebar. */
   notice?: React.ReactNode;
-  /** Unread totals keyed by nav `href` (e.g. `/contractor/chat`). */
-  navUnreadCounts?: Partial<Record<string, number>>;
   /**
-   * When set, the badge for this href is driven by the reactive chat
-   * store (so it updates live as new messages arrive without a full
-   * page refresh). SSR value from `navUnreadCounts` is used until the
-   * store hydrates, then the store value takes over.
+   * Unread totals keyed by nav `href` (e.g. `/contractor/messages`).
+   * Computed server-side; the role layout's realtime hook re-renders on
+   * `message:new`, so these badges stay live without a client store.
    */
-  messagesHref?: string;
+  navUnreadCounts?: Partial<Record<string, number>>;
   /** Slot rendered on the right of the inset header (e.g. NotificationBell). */
   topRight?: React.ReactNode;
   /** Slot rendered under the brand in the sidebar (e.g. the workspace chip). */
@@ -63,26 +59,12 @@ export function DashboardShell({
   brandLabel = "Homei",
   notice,
   navUnreadCounts,
-  messagesHref,
   topRight,
   workspace,
   children,
 }: DashboardShellProps) {
   const pathname = usePathname() ?? "";
-  // Reactive chat badge. While the store is pre-hydration (viewer id
-  // unknown) we fall back to the server-computed count so the first
-  // paint matches SSR. Once hydrated, updates are instant across the
-  // whole app — not just the messages page.
-  const storeViewerId = useViewerId();
-  const storeTotalUnread = useTotalUnread();
-  const getUnreadForHref = (href: string) => {
-    if (messagesHref && href === messagesHref) {
-      return storeViewerId === null
-        ? navUnreadCounts?.[href] ?? 0
-        : storeTotalUnread;
-    }
-    return navUnreadCounts?.[href] ?? 0;
-  };
+  const getUnreadForHref = (href: string) => navUnreadCounts?.[href] ?? 0;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -124,7 +106,7 @@ export function DashboardShell({
                           asChild
                           isActive={active}
                           tooltip={item.label}
-                          className="text-sidebar-foreground/70 hover:text-sidebar-foreground data-active:bg-sidebar-accent data-active:text-sidebar-foreground data-active:font-medium data-active:shadow-[var(--shadow-xs)]"
+                          className="text-sidebar-foreground/70 hover:text-sidebar-foreground data-active:bg-sidebar-accent data-active:text-sidebar-foreground data-active:font-medium"
                         >
                           <Link
                             href={item.href}

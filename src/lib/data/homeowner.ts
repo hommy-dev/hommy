@@ -8,6 +8,7 @@ import { cache } from 'react'
 import { db } from '@/lib/db'
 import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import {
+  contractors,
   estimates,
   homeowners,
   leadRecipients,
@@ -124,4 +125,81 @@ export async function getHomeownerLeads(
     quoteCount: quotesBy.get(r.id) ?? 0,
     createdAt: r.createdAt,
   }))
+}
+
+export type LeadStatus = (typeof leads.status.enumValues)[number]
+export type EstimateStatus = (typeof estimates.status.enumValues)[number]
+
+export type HomeownerQuote = {
+  estimateId: string
+  contractorName: string | null
+  status: EstimateStatus
+  total: string | null
+  lineItems: Array<{ label: string; amount: string }>
+  scopeNotes: string | null
+  validUntil: Date | null
+}
+
+export type HomeownerQuoteGroup = {
+  leadId: string
+  serviceName: string
+  subtype: string | null
+  leadStatus: LeadStatus
+  city: string | null
+  state: string | null
+  quotes: HomeownerQuote[]
+}
+
+/** A homeowner's received quotes, grouped by request. Only sent/accepted shown. */
+export async function getHomeownerQuotes(homeownerId: string): Promise<HomeownerQuoteGroup[]> {
+  const rows = await db
+    .select({
+      estimateId: estimates.id,
+      status: estimates.status,
+      total: estimates.total,
+      lineItems: estimates.lineItems,
+      scopeNotes: estimates.scopeNotes,
+      validUntil: estimates.validUntil,
+      contractorName: contractors.companyName,
+      leadId: leads.id,
+      leadStatus: leads.status,
+      serviceName: services.name,
+      serviceDetails: leads.serviceDetails,
+      city: leads.city,
+      state: leads.state,
+    })
+    .from(estimates)
+    .innerJoin(projects, eq(projects.id, estimates.projectId))
+    .innerJoin(contractors, eq(contractors.id, projects.contractorId))
+    .innerJoin(leads, eq(leads.id, projects.leadId))
+    .innerJoin(services, eq(services.id, leads.serviceId))
+    .where(and(eq(leads.homeownerId, homeownerId), inArray(estimates.status, ['sent', 'accepted'])))
+    .orderBy(desc(estimates.createdAt))
+
+  const groups = new Map<string, HomeownerQuoteGroup>()
+  for (const r of rows) {
+    let group = groups.get(r.leadId)
+    if (!group) {
+      group = {
+        leadId: r.leadId,
+        serviceName: r.serviceName,
+        subtype: subtypeLabel(r.serviceDetails),
+        leadStatus: r.leadStatus,
+        city: r.city,
+        state: r.state,
+        quotes: [],
+      }
+      groups.set(r.leadId, group)
+    }
+    group.quotes.push({
+      estimateId: r.estimateId,
+      contractorName: r.contractorName,
+      status: r.status,
+      total: r.total,
+      lineItems: r.lineItems,
+      scopeNotes: r.scopeNotes,
+      validUntil: r.validUntil,
+    })
+  }
+  return [...groups.values()]
 }

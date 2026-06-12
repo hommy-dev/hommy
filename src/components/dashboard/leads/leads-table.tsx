@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { DashboardLead } from "@/lib/data/dashboard";
+import { engageLead } from "@/lib/actions/engage";
 import { formatDistanceToNow } from "@/lib/format";
 import { showToast } from "@/components/ui/toast";
 import {
@@ -14,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { SlaCountdown } from "./sla-countdown";
+import { DeclineLeadDialog } from "./decline-lead-dialog";
 
 const URGENCY: Record<
   DashboardLead["urgency"],
@@ -91,6 +94,8 @@ export function LeadsTable({
   leads: DashboardLead[];
   canEngage: boolean;
 }) {
+  const router = useRouter();
+  const [isEngaging, startEngage] = useTransition();
   const [group, setGroup] = useState<Group>("all");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -106,8 +111,9 @@ export function LeadsTable({
     };
     const trend = (dates: (Date | null)[]) => ({
       value: dates.filter((d) => inWindow(d, now - PERIOD_MS, now + 1)).length,
-      prev: dates.filter((d) => inWindow(d, now - 2 * PERIOD_MS, now - PERIOD_MS))
-        .length,
+      prev: dates.filter((d) =>
+        inWindow(d, now - 2 * PERIOD_MS, now - PERIOD_MS)
+      ).length,
     });
     const wonDates = leads
       .filter((l) => l.recipientStatus === "won")
@@ -167,12 +173,44 @@ export function LeadsTable({
   }
 
   function engage(ids: string[]) {
-    showToast(
-      `Engaging ${
-        ids.length > 1 ? `${ids.length} leads` : "this lead"
-      } arrives in the next update.`,
-      { type: "info" }
-    );
+    if (ids.length === 0 || isEngaging) return;
+    startEngage(async () => {
+      let won = 0;
+      let lastError: string | null = null;
+      let needsCredits = false;
+      for (const id of ids) {
+        const res = await engageLead(id);
+        if (res.ok) {
+          won += 1;
+        } else {
+          lastError = res.message;
+          if (res.error === "INSUFFICIENT_CREDITS") needsCredits = true;
+        }
+      }
+
+      if (won > 0) {
+        showToast(
+          won > 1
+            ? `Engaged ${won} leads — conversations started.`
+            : "Engaged — conversation started with the homeowner.",
+          { type: "success" }
+        );
+        setSelected(new Set());
+        router.refresh();
+      }
+
+      if (won < ids.length && lastError) {
+        showToast(lastError, {
+          type: needsCredits ? "warning" : "error",
+          ...(needsCredits
+            ? {
+                actionLabel: "Buy credits",
+                onAction: () => router.push("/contractor/settings/billing"),
+              }
+            : {}),
+        });
+      }
+    });
   }
 
   function exportCsv(ids: string[]) {
@@ -212,43 +250,38 @@ export function LeadsTable({
   return (
     <div className="space-y-4 lg:space-y-[1.111vw]">
       {/* KPIs — last 30 days, with momentum */}
-      <div>
-        <p className="mb-2 lg:mb-[0.556vw] text-xs lg:text-[0.833vw] font-medium text-muted-foreground">
-          Last 30 days
-        </p>
-        <div className="grid grid-cols-2 gap-3 lg:gap-[0.833vw] sm:grid-cols-4">
-          <Stat
-            label="New leads"
-            value={stats.newL.value}
-            last={stats.newL.value}
-            prev={stats.newL.prev}
-          />
-          <Stat
-            label="Engaged"
-            value={stats.engaged.value}
-            last={stats.engaged.value}
-            prev={stats.engaged.prev}
-          />
-          <Stat
-            label="Won"
-            value={stats.won.value}
-            last={stats.won.value}
-            prev={stats.won.prev}
-          />
-          <Stat
-            label="Win rate"
-            value={stats.winRate === null ? "—" : `${stats.winRate}%`}
-            sub={
-              stats.winDen > 0
-                ? `${stats.winNum} of ${stats.winDen} won`
-                : "No outcomes yet"
-            }
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-3 lg:gap-[0.833vw] sm:grid-cols-4">
+        <Stat
+          label="New leads"
+          value={stats.newL.value}
+          last={stats.newL.value}
+          prev={stats.newL.prev}
+        />
+        <Stat
+          label="Engaged"
+          value={stats.engaged.value}
+          last={stats.engaged.value}
+          prev={stats.engaged.prev}
+        />
+        <Stat
+          label="Won"
+          value={stats.won.value}
+          last={stats.won.value}
+          prev={stats.won.prev}
+        />
+        <Stat
+          label="Win rate"
+          value={stats.winRate === null ? "—" : `${stats.winRate}%`}
+          sub={
+            stats.winDen > 0
+              ? `${stats.winNum} of ${stats.winDen} won`
+              : "No outcomes yet"
+          }
+        />
       </div>
 
       {/* Toolbar — search first, then filter */}
-      <div className="flex flex-wrap items-center gap-2 lg:gap-[0.556vw]">
+      <div className="mt-4 lg:mt-[3vw] flex flex-wrap items-center gap-2 lg:gap-[0.556vw]">
         <div className="relative min-w-0 flex-1 sm:max-w-xs lg:sm:max-w-[20vw]">
           <Search
             className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
@@ -303,7 +336,7 @@ export function LeadsTable({
                 <Th>Status</Th>
                 <Th>Time left</Th>
                 <Th>Cost</Th>
-                <th className="w-28 lg:w-[9vw] px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] pr-4 lg:pr-[1.111vw] text-right font-medium">
+                <th className="w-44 lg:w-[13vw] px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] pr-4 lg:pr-[1.111vw] text-right font-medium">
                   Offered
                 </th>
               </tr>
@@ -354,7 +387,7 @@ export function LeadsTable({
                           l.subtypes.map((s) => (
                             <span
                               key={s}
-                              className="rounded-md lg:rounded-[0.417vw] bg-muted px-1.5 lg:px-[0.417vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.764vw] font-medium text-foreground/75"
+                              className="rounded-md lg:rounded-[0.3vw] bg-muted px-1.5 lg:px-[0.417vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.8vw] font-medium text-muted-foreground"
                             >
                               {s}
                             </span>
@@ -390,20 +423,22 @@ export function LeadsTable({
                           }`
                         : "—"}
                     </td>
-                    <td className="w-28 lg:w-[9vw] px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] pr-4 lg:pr-[1.111vw] align-middle text-right whitespace-nowrap">
+                    <td className="w-44 lg:w-[13vw] px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] pr-4 lg:pr-[1.111vw] align-middle text-right whitespace-nowrap">
                       {showEngage ? (
-                        <>
+                        <span className="inline-flex items-center justify-end gap-2 lg:gap-[0.417vw]">
                           <span className="text-muted-foreground group-hover:hidden">
                             {formatDistanceToNow(new Date(l.offeredAt))}
                           </span>
+                          <DeclineLeadDialog leadId={l.id} />
                           <button
                             type="button"
                             onClick={() => engage([l.id])}
-                            className="hidden rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 group-hover:inline-flex"
+                            disabled={isEngaging}
+                            className="hidden rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:opacity-60 disabled:cursor-not-allowed group-hover:inline-flex"
                           >
-                            Engage
+                            {isEngaging ? "Engaging…" : "Engage"}
                           </button>
-                        </>
+                        </span>
                       ) : (
                         <span className="text-muted-foreground">
                           {formatDistanceToNow(new Date(l.offeredAt))}
@@ -430,9 +465,10 @@ export function LeadsTable({
               <button
                 type="button"
                 onClick={() => engage([...selected])}
-                className="font-medium transition-opacity hover:opacity-80"
+                disabled={isEngaging}
+                className="font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
               >
-                Engage
+                {isEngaging ? "Engaging…" : "Engage"}
               </button>
             ) : null}
             <button
@@ -548,7 +584,7 @@ function Pill({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md lg:rounded-[0.417vw] px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium whitespace-nowrap",
+        "inline-flex items-center rounded-md lg:rounded-[0.3vw] px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium whitespace-nowrap",
         className
       )}
     >
