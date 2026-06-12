@@ -5,6 +5,7 @@
 // connection (RLS bypassed); authorization is enforced by scoping every query to
 // the caller's contractorId — resolved from their active membership.
 
+import { cache } from 'react'
 import { db } from '@/lib/db'
 import { and, count, desc, eq, getTableColumns, inArray } from 'drizzle-orm'
 import {
@@ -29,9 +30,11 @@ export type Contractor = typeof contractors.$inferSelect
  * their first active membership when it's null or no longer valid (e.g. they
  * were removed from it). Returns null only when they belong to no company.
  */
-export async function getContractorForUser(
+// React cache() dedupes per request — the dashboard layout and the page both
+// resolve the active company, so without this it runs twice (2 queries each).
+export const getContractorForUser = cache(async (
   userId: string,
-): Promise<Contractor | null> {
+): Promise<Contractor | null> => {
   const rows = await db
     .select(getTableColumns(contractors))
     .from(contractors)
@@ -53,7 +56,7 @@ export async function getContractorForUser(
 
   const active = u?.activeId ? rows.find((r) => r.id === u.activeId) : undefined
   return active ?? rows[0]
-}
+})
 
 export type UserCompany = {
   id: string
@@ -85,10 +88,10 @@ export async function getUserCompanies(userId: string): Promise<UserCompany[]> {
 export type MemberRole = (typeof contractorMembers.role.enumValues)[number]
 
 /** The viewer's role within a company — gates who can edit company settings. */
-export async function getMembershipRole(
+export const getMembershipRole = cache(async (
   userId: string,
   contractorId: string,
-): Promise<MemberRole | null> {
+): Promise<MemberRole | null> => {
   const [row] = await db
     .select({ role: contractorMembers.role })
     .from(contractorMembers)
@@ -101,7 +104,7 @@ export async function getMembershipRole(
     )
     .limit(1)
   return row?.role ?? null
-}
+})
 
 export type ServiceArea = {
   id: string

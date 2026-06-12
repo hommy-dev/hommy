@@ -4,6 +4,7 @@
 // moment they post and as contractors engage, so they must be read fresh.
 // Authorization is enforced by scoping every query to the caller's homeownerId.
 
+import { cache } from 'react'
 import { db } from '@/lib/db'
 import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import {
@@ -16,17 +17,17 @@ import {
 } from '@/lib/db/schema'
 import { subtypeLabel } from '@/lib/leads/subtype'
 
-/** Map an authenticated user → their 1:1 homeowner profile. */
-export async function getHomeownerForUser(
+/** Map an authenticated user → their 1:1 homeowner profile. Deduped per request. */
+export const getHomeownerForUser = cache(async (
   userId: string,
-): Promise<{ id: string } | null> {
+): Promise<{ id: string } | null> => {
   const [row] = await db
     .select({ id: homeowners.id })
     .from(homeowners)
     .where(eq(homeowners.userId, userId))
     .limit(1)
   return row ?? null
-}
+})
 
 export type HomeownerLead = {
   id: string
