@@ -5,8 +5,15 @@
 // Authorization is enforced by scoping every query to the caller's homeownerId.
 
 import { db } from '@/lib/db'
-import { count, desc, eq, inArray } from 'drizzle-orm'
-import { homeowners, leadRecipients, leads, services } from '@/lib/db/schema'
+import { and, count, desc, eq, inArray } from 'drizzle-orm'
+import {
+  estimates,
+  homeowners,
+  leadRecipients,
+  leads,
+  projects,
+  services,
+} from '@/lib/db/schema'
 import { subtypeLabel } from '@/lib/leads/subtype'
 
 /** Map an authenticated user → their 1:1 homeowner profile. */
@@ -30,7 +37,12 @@ export type HomeownerLead = {
   city: string | null
   state: string | null
   zipCode: string | null
+  /** How many companies the lead was offered to. */
   matchedCount: number
+  /** How many engaged (started a conversation) — "interested" to the homeowner. */
+  interestedCount: number
+  /** How many quotes have been sent for this request. */
+  quoteCount: number
   createdAt: Date
 }
 
@@ -56,33 +68,59 @@ export async function getHomeownerLeads(
     .orderBy(desc(leads.createdAt))
 
   if (rows.length === 0) return []
+  const leadIds = rows.map((r) => r.id)
 
-  // One grouped count instead of N per-lead queries.
-  const counts = await db
-    .select({ leadId: leadRecipients.leadId, value: count() })
-    .from(leadRecipients)
-    .where(
-      inArray(
-        leadRecipients.leadId,
-        rows.map((r) => r.id),
-      ),
-    )
-    .groupBy(leadRecipients.leadId)
-  const countByLead = new Map(counts.map((c) => [c.leadId, c.value]))
+  // Grouped counts (one query each) instead of N per-lead queries:
+  //  • matched   = every offer row
+  //  • interested = offers that engaged (started a conversation)
+  const [matched, interested, quotes] = await Promise.all([
+    db
+      .select({ leadId: leadRecipients.leadId, value: count() })
+      .from(leadRecipients)
+      .where(inArray(leadRecipients.leadId, leadIds))
+      .groupBy(leadRecipients.leadId),
+    db
+      .select({ leadId: leadRecipients.leadId, value: count() })
+      .from(leadRecipients)
+      .where(
+        and(
+          inArray(leadRecipients.leadId, leadIds),
+          inArray(leadRecipients.status, ['engaged', 'won', 'lost']),
+        ),
+      )
+      .groupBy(leadRecipients.leadId),
+    // Quotes actually sent to the homeowner, via the engaged contractor's project.
+    db
+      .select({ leadId: projects.leadId, value: count() })
+      .from(estimates)
+      .innerJoin(projects, eq(projects.id, estimates.projectId))
+      .where(
+        and(
+          inArray(projects.leadId, leadIds),
+          inArray(estimates.status, ['sent', 'accepted']),
+        ),
+      )
+      .groupBy(projects.leadId),
+  ])
 
-  return rows.map((r) => {
-    const subtype = subtypeLabel(r.serviceDetails)
-    return {
-      id: r.id,
-      serviceName: r.serviceName,
-      subtype,
-      urgency: r.urgency,
-      status: r.status,
-      city: r.city,
-      state: r.state,
-      zipCode: r.zipCode,
-      matchedCount: countByLead.get(r.id) ?? 0,
-      createdAt: r.createdAt,
-    }
-  })
+  const matchedBy = new Map(matched.map((c) => [c.leadId, c.value]))
+  const interestedBy = new Map(interested.map((c) => [c.leadId, c.value]))
+  const quotesBy = new Map(
+    quotes.map((c) => [c.leadId as string, c.value]),
+  )
+
+  return rows.map((r) => ({
+    id: r.id,
+    serviceName: r.serviceName,
+    subtype: subtypeLabel(r.serviceDetails),
+    urgency: r.urgency,
+    status: r.status,
+    city: r.city,
+    state: r.state,
+    zipCode: r.zipCode,
+    matchedCount: matchedBy.get(r.id) ?? 0,
+    interestedCount: interestedBy.get(r.id) ?? 0,
+    quoteCount: quotesBy.get(r.id) ?? 0,
+    createdAt: r.createdAt,
+  }))
 }

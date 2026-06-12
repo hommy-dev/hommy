@@ -145,7 +145,7 @@ export function SiteHeader() {
       )}
     >
       {/* Main Header Row */}
-      <div className="relative w-full max-w-[90vww] mx-auto flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
+      <div className="relative w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
         {/* Left: Logo */}
         <div className="flex-1 flex items-center">
           <Link

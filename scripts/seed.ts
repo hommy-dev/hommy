@@ -76,8 +76,8 @@ const PLANS = [
   { slug: 'pro', name: 'Pro', priceCents: 49900, monthlyCredits: 600, maxMembers: 25, sortOrder: 3, features: { storm_alerts: true, analytics: true, ai_agent: true, marketing: true } },
 ]
 
-const DEV_CONTRACTOR_EMAIL = 'dev.contractor@homei.test'
-const DEV_PASSWORD = 'DevPass123!'
+const DEV_CONTRACTOR_EMAIL = 'web.dev.haseeb@gmail.com'
+const DEV_PASSWORD = 'Haseeb,.12'
 
 const ID = {
   contractor: '11111111-1111-4111-8111-111111111111',
@@ -100,7 +100,7 @@ const ID = {
 // Four homeowners, each with a fixed profile id + a posted lead + an offer.
 const HOMEOWNERS = [
   { hoId: '31111111-1111-4111-8111-111111111111', leadId: '41111111-1111-4111-8111-111111111111', recipientId: '42111111-1111-4111-8111-111111111111',
-    email: 'maria.alvarez@homei.test', fullName: 'Maria Alvarez', phone: '+12145550111',
+    email: 'haseeb.figmenta@gmail.com', fullName: 'Maria Alvarez', phone: '+12145550111',
     address: '1820 Live Oak St', zip: '75201', city: 'Dallas', state: 'TX', lat: 32.7876, lng: -96.7994,
     subtype: 'Replacement', sqft: 2200, urgency: 'within_week' as const, engaged: true,
     notes: 'Old asphalt shingle roof, several leaks after last storm.' },

@@ -12,14 +12,20 @@ export const NOT_SURE_SUBTYPE = 'Not sure'
  * tolerating both the current shape ({ subtypes: string[] }) and the legacy
  * single ({ subtype: string }). Returns a comma-joined label, or null.
  */
-export function subtypeLabel(
+export function subtypeList(
   serviceDetails: Record<string, unknown> | null | undefined,
-): string | null {
+): string[] {
   const sd = serviceDetails ?? {}
-  const list = Array.isArray(sd.subtypes)
+  return Array.isArray(sd.subtypes)
     ? sd.subtypes.filter((s): s is string => typeof s === 'string')
     : typeof sd.subtype === 'string'
       ? [sd.subtype]
       : []
+}
+
+export function subtypeLabel(
+  serviceDetails: Record<string, unknown> | null | undefined,
+): string | null {
+  const list = subtypeList(serviceDetails)
   return list.length > 0 ? list.join(', ') : null
 }

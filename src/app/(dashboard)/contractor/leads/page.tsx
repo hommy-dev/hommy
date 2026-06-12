@@ -5,7 +5,7 @@ import {
   getContractorLeads,
 } from "@/lib/data/dashboard"
 import { canEngageLeads } from "@/lib/contractor/verification"
-import { LeadsInbox } from "@/components/dashboard/leads/leads-inbox"
+import { LeadsTable } from "@/components/dashboard/leads/leads-table"
 
 export default async function LeadsPage() {
   const user = await getRequiredUser("contractor")
@@ -57,7 +57,7 @@ export default async function LeadsPage() {
         </div>
       )}
 
-      <LeadsInbox leads={leads} />
+      <LeadsTable leads={leads} canEngage={canEngage} />
     </div>
   )
 }

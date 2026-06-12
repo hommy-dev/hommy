@@ -19,7 +19,7 @@ import {
   services,
   users,
 } from '@/lib/db/schema'
-import { subtypeLabel } from '@/lib/leads/subtype'
+import { subtypeLabel, subtypeList } from '@/lib/leads/subtype'
 
 export type Contractor = typeof contractors.$inferSelect
 
@@ -168,15 +168,30 @@ export async function getRoofingSubtypes(): Promise<string[]> {
 export type DashboardLead = {
   id: string
   recipientStatus: (typeof leadRecipients.status.enumValues)[number]
+  leadStatus: (typeof leads.status.enumValues)[number]
   urgency: (typeof leads.urgency.enumValues)[number]
   subtype: string | null
+  subtypes: string[]
   notes: string | null
+  photoUrl: string | null
   serviceName: string
   homeownerName: string | null
   city: string | null
   state: string | null
   zipCode: string | null
+  /** Cost to engage this lead, in credits. */
+  engagementCreditCost: number
+  /** Max contractors that may engage (capped competition). */
+  engageSlots: number
+  /** How many have already engaged — slotsUsed of engageSlots. */
+  slotsUsed: number
+  /** When this offer expires under the SLA (drives the countdown). */
+  slaDeadline: Date | null
   offeredAt: Date
+  /** When this company engaged the lead (null if not yet). */
+  engagedAt: Date | null
+  /** When the lead was awarded (to anyone) — used for win trends. */
+  awardedAt: Date | null
   createdAt: Date
 }
 
@@ -188,15 +203,22 @@ export async function getContractorLeads(
     .select({
       id: leads.id,
       recipientStatus: leadRecipients.status,
+      leadStatus: leads.status,
       urgency: leads.urgency,
       serviceDetails: leads.serviceDetails,
       notes: leads.notes,
+      photoUrl: leads.photoUrl,
       serviceName: services.name,
       homeownerName: users.fullName,
       city: leads.city,
       state: leads.state,
       zipCode: leads.zipCode,
+      engagementCreditCost: leads.engagementCreditCost,
+      engageSlots: leads.engageSlots,
+      slaDeadline: leadRecipients.slaDeadline,
       offeredAt: leadRecipients.offeredAt,
+      engagedAt: leadRecipients.engagedAt,
+      awardedAt: leads.awardedAt,
       createdAt: leads.createdAt,
     })
     .from(leadRecipients)
@@ -207,23 +229,47 @@ export async function getContractorLeads(
     .where(eq(leadRecipients.contractorId, contractorId))
     .orderBy(desc(leadRecipients.offeredAt))
 
-  return rows.map((r) => {
-    const subtype = subtypeLabel(r.serviceDetails)
-    return {
-      id: r.id,
-      recipientStatus: r.recipientStatus,
-      urgency: r.urgency,
-      subtype,
-      notes: r.notes,
-      serviceName: r.serviceName,
-      homeownerName: r.homeownerName,
-      city: r.city,
-      state: r.state,
-      zipCode: r.zipCode,
-      offeredAt: r.offeredAt,
-      createdAt: r.createdAt,
-    }
-  })
+  if (rows.length === 0) return []
+
+  // How many companies have engaged each lead (the filled slots).
+  const used = await db
+    .select({ leadId: leadRecipients.leadId, value: count() })
+    .from(leadRecipients)
+    .where(
+      and(
+        inArray(
+          leadRecipients.leadId,
+          rows.map((r) => r.id),
+        ),
+        inArray(leadRecipients.status, ['engaged', 'won']),
+      ),
+    )
+    .groupBy(leadRecipients.leadId)
+  const usedByLead = new Map(used.map((u) => [u.leadId, u.value]))
+
+  return rows.map((r) => ({
+    id: r.id,
+    recipientStatus: r.recipientStatus,
+    leadStatus: r.leadStatus,
+    urgency: r.urgency,
+    subtype: subtypeLabel(r.serviceDetails),
+    subtypes: subtypeList(r.serviceDetails),
+    notes: r.notes,
+    photoUrl: r.photoUrl,
+    serviceName: r.serviceName,
+    homeownerName: r.homeownerName,
+    city: r.city,
+    state: r.state,
+    zipCode: r.zipCode,
+    engagementCreditCost: r.engagementCreditCost,
+    engageSlots: r.engageSlots,
+    slotsUsed: usedByLead.get(r.id) ?? 0,
+    slaDeadline: r.slaDeadline,
+    offeredAt: r.offeredAt,
+    engagedAt: r.engagedAt,
+    awardedAt: r.awardedAt,
+    createdAt: r.createdAt,
+  }))
 }
 
 const OPEN_OFFER_STATUSES = ['offered', 'viewed', 'engaged'] as const
