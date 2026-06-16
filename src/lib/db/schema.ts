@@ -72,16 +72,16 @@ export const creditTxnKind = pgEnum('credit_txn_kind', [
 ])
 
 export const leadUrgency = pgEnum('lead_urgency', ['emergency', 'within_week', 'within_month', 'planning'])
-export const leadStatus = pgEnum('lead_status', ['open', 'filled', 'awarded', 'closed', 'expired'])
+export const leadStatus = pgEnum('lead_status', ['open', 'awarded', 'closed', 'expired'])
 export const leadRecipientStatus = pgEnum('lead_recipient_status', [
   'offered', 'viewed', 'engaged', 'declined', 'expired', 'lost', 'won',
 ])
 export const projectStage = pgEnum('project_stage', [
-  'new_lead', 'contacted', 'estimate_sent', 'in_progress', 'completed', 'lost',
+  'new_lead', 'estimate_sent', 'in_progress', 'completed', 'lost',
 ])
 export const estimateStatus = pgEnum('estimate_status', ['draft', 'sent', 'accepted', 'rejected'])
 
-export const conversationType = pgEnum('conversation_type', ['direct', 'lead', 'engagement', 'support'])
+export const conversationType = pgEnum('conversation_type', ['direct', 'lead'])
 export const participantType = pgEnum('participant_type', ['user', 'contractor'])
 export const messageSenderType = pgEnum('message_sender_type', ['user', 'contractor', 'system'])
 export const messageChannel = pgEnum('message_channel', ['platform', 'sms', 'email'])

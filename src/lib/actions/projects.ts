@@ -15,11 +15,10 @@ import { getContractorForUser } from '@/lib/data/dashboard'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import type { ProjectStage } from '@/lib/data/projects'
 
-// Allowed manual moves. `estimate_sent` is normally set by sendEstimate and
-// `in_progress`/`lost` by acceptEstimate — those aren't manual here.
+// Allowed manual moves. `estimate_sent` is set by sendEstimate and
+// `in_progress`/`lost` by acceptEstimate — those aren't manual. The only manual
+// move left is marking a won job completed.
 const ALLOWED: Partial<Record<ProjectStage, ProjectStage[]>> = {
-  new_lead: ['contacted'],
-  contacted: ['estimate_sent'],
   in_progress: ['completed'],
 }
 

@@ -554,10 +554,10 @@ async function seedDevFixtures(serviceId: string, growthPlanId: string): Promise
         id: h.leadId, homeownerId: h.hoId, serviceId,
         serviceDetails: { subtype: h.subtype, roofSizeSqft: h.sqft },
         urgency: h.urgency, address: h.address, zipCode: h.zip, city: h.city, state: h.state, lat: h.lat, lng: h.lng,
-        notes: h.notes, status: h.engaged ? 'filled' : 'open',
+        notes: h.notes, status: 'open',
         engageSlots: 3, engagementCreditCost: 2, awardCreditCost: 20,
       })
-      .onConflictDoUpdate({ target: leads.id, set: { status: h.engaged ? 'filled' : 'open', notes: h.notes } })
+      .onConflictDoUpdate({ target: leads.id, set: { status: 'open', notes: h.notes } })
 
     await db
       .insert(leadRecipients)

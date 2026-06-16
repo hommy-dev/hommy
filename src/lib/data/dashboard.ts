@@ -276,7 +276,7 @@ export async function getContractorLeads(
 }
 
 const OPEN_OFFER_STATUSES = ['offered', 'viewed', 'engaged'] as const
-const ACTIVE_PROJECT_STAGES = ['new_lead', 'contacted', 'estimate_sent', 'in_progress'] as const
+const ACTIVE_PROJECT_STAGES = ['new_lead', 'estimate_sent', 'in_progress'] as const
 
 export type DashboardStats = {
   openOffers: number
