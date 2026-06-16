@@ -29,11 +29,7 @@ export default async function ContractorSettingsLayout({
 }) {
   await getRequiredUser("contractor")
   return (
-    <SettingsShell
-      title="Settings"
-      // description="Manage your account and company."
-      groups={CONTRACTOR_SETTINGS_GROUPS}
-    >
+    <SettingsShell groups={CONTRACTOR_SETTINGS_GROUPS}>
       {children}
     </SettingsShell>
   )

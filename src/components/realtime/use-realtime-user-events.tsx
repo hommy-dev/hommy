@@ -22,7 +22,9 @@ export type Role = 'contractor' | 'homeowner' | 'admin'
 export function useRealtimeUserEvents(userId: string, _role: Role) {
   const router = useRouter()
   const routerRef = useRef(router)
-  routerRef.current = router
+  useEffect(() => {
+    routerRef.current = router
+  }, [router])
 
   // Coalesce bursts — many events in a short window collapse to one refresh.
   const scheduledRef = useRef(false)

@@ -37,9 +37,9 @@ const ROOFER_STEPS = [
   },
   {
     step: "Step two",
-    title: "Engage the ones you want",
+    title: "Message the ones you want",
     content:
-      "Spend a credit to reach out and quote the jobs worth your time. No wasted calls, no buying lead packs.",
+      "Spend a credit to start a chat and quote the jobs worth your time. No wasted calls, no buying lead packs.",
     image: "/bg/roof-repair.jpg",
   },
   {

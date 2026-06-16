@@ -35,6 +35,7 @@ export function PushNotificationsManager() {
   const [mounted, setMounted] = useState(false)
   const [dismissed, setDismissed] = useState<boolean>(false)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe init: read localStorage only after mount
     setMounted(true)
     try {
       if (localStorage.getItem(DISMISS_KEY) === '1') setDismissed(true)

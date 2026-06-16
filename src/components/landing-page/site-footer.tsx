@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Arrow } from "./shared";
 import { SVGIcon } from "../ui/svg-icon";
 
 const FOOTER = [

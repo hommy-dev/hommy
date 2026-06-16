@@ -41,6 +41,7 @@ export function DashboardHeaderActions({
 function HeaderThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time post-hydration mount flag (next-themes is client-only)
   useEffect(() => setMounted(true), []);
   if (!mounted) return <span className="size-9 lg:size-[2.5vw] shrink-0" aria-hidden />;
   const isDark = resolvedTheme === "dark";

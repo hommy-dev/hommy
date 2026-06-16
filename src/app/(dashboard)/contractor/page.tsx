@@ -83,7 +83,7 @@ async function StatsRow({ contractor }: { contractor: Contractor }) {
         icon={<TargetIcon />}
       />
       <StatCard
-        label="Active projects"
+        label="Active jobs"
         value={stats.activeProjects}
         hint="In your pipeline now"
         tint="bg-foreground/5 text-foreground"

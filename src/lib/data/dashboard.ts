@@ -312,22 +312,3 @@ export async function getDashboardStats(
     activeProjects: projectRows[0]?.value ?? 0,
   }
 }
-
-export type SetupStatus = { hasServices: boolean; hasAreas: boolean }
-
-export async function getSetupStatus(contractorId: string): Promise<SetupStatus> {
-  const [svcRows, areaRows] = await Promise.all([
-    db
-      .select({ value: count() })
-      .from(contractorServices)
-      .where(eq(contractorServices.contractorId, contractorId)),
-    db
-      .select({ value: count() })
-      .from(serviceAreas)
-      .where(eq(serviceAreas.contractorId, contractorId)),
-  ])
-  return {
-    hasServices: (svcRows[0]?.value ?? 0) > 0,
-    hasAreas: (areaRows[0]?.value ?? 0) > 0,
-  }
-}

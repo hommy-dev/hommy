@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { SetupModal, type SetupData } from "@/components/dashboard/setup-modal"
 import {
@@ -24,14 +24,8 @@ type Initial = {
  */
 export function SetupGate({ initial }: { initial: Initial }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const autoOpened = useRef(false)
-  useEffect(() => {
-    if (!autoOpened.current) {
-      autoOpened.current = true
-      setOpen(true)
-    }
-  }, [])
+  // Auto-open once on mount so the contractor can finish setup in place.
+  const [open, setOpen] = useState(true)
 
   async function handleSubmit(data: SetupData) {
     const profile = await updateBusinessProfile({

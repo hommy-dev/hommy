@@ -22,6 +22,7 @@ export function SVGIcon({ src, className, preserveColors = false, ...props }: SV
   if (preserveColors) {
     // Render as img to preserve original colors
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- raw SVG icon loader; next/image adds no value for inline icons
       <img
         src={src}
         alt=""

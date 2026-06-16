@@ -28,6 +28,7 @@ export default async function InvitePage({
   const valid =
     invite &&
     !invite.acceptedAt &&
+    // eslint-disable-next-line react-hooks/purity -- server component; evaluated once per request, not re-rendered
     (!invite.expiresAt || invite.expiresAt.getTime() > Date.now())
 
   const user = await getOptionalUser()

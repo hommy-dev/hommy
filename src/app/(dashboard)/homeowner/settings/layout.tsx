@@ -19,11 +19,7 @@ export default async function HomeownerSettingsLayout({
 }) {
   await getRequiredUser("homeowner")
   return (
-    <SettingsShell
-      title="Settings"
-      description="Manage your account and preferences."
-      groups={HOMEOWNER_SETTINGS_GROUPS}
-    >
+    <SettingsShell groups={HOMEOWNER_SETTINGS_GROUPS}>
       {children}
     </SettingsShell>
   )

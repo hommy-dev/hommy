@@ -7,9 +7,9 @@ export type DashboardNavItem = {
   icon: IconName
 }
 
-// Homei contractor CRM lives under /dashboard (see docs/HOMEI_PLATFORM.md §13).
-// "Jobs" is the single unified board (new leads → won jobs); Leads + Projects
-// were merged into it.
+// Homei dashboard nav. Contractors and homeowners both have an authenticated
+// dashboard (docs/HOMEI_PLATFORM.md §5). "Jobs" is the contractor's single
+// unified board (new leads → won jobs); Leads + Projects were merged into it.
 export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor", label: "Dashboard", icon: "category" },
   { href: "/contractor/jobs", label: "Jobs", icon: "work" },

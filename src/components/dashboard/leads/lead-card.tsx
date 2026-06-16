@@ -140,7 +140,7 @@ export function LeadCard({ lead }: { lead: DashboardLead }) {
           <span className="shrink-0 font-medium text-foreground/80">
             {locked
               ? "Awarded"
-              : `${lead.engagementCreditCost} credit${lead.engagementCreditCost === 1 ? "" : "s"} to engage`}
+              : `${lead.engagementCreditCost} credit${lead.engagementCreditCost === 1 ? "" : "s"} to chat`}
           </span>
         </div>
       </div>

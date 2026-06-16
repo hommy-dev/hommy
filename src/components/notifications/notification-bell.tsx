@@ -114,11 +114,14 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
   }, [loaded])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch-on-open; state is set after the await, not synchronously
     if (open) loadItems()
   }, [open, loadItems])
 
   const routerRef = useRef(router)
-  routerRef.current = router
+  useEffect(() => {
+    routerRef.current = router
+  }, [router])
 
   // Live updates on the private user:{userId} channel (same channel the
   // realtime refresh hook uses). RLS in drizzle/0001 scopes it to its owner.

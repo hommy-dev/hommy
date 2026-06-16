@@ -165,6 +165,7 @@ export function GooglePlacesInput({
 
   // Debounce predictions as the user types.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- debounced async search reacting to the typed value */
     if (!isLoaded) return
     // A programmatic change (a selection) — don't refetch / reopen.
     if (skipNextFetchRef.current) {
@@ -180,6 +181,7 @@ export function GooglePlacesInput({
       return
     }
     setLoading(true)
+    /* eslint-enable react-hooks/set-state-in-effect */
     const t = setTimeout(() => {
       void fetchSuggestions(trimmed)
     }, 250)

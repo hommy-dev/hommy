@@ -6,9 +6,7 @@ import { Statement } from "@/components/landing-page/statement";
 import { HowItWorks } from "@/components/landing-page/how-it-works";
 import { Services } from "@/components/landing-page/services";
 import { FeatureSection } from "@/components/landing-page/feature-section";
-import { Testimonials } from "@/components/landing-page/testimonials";
 import { Faq } from "@/components/landing-page/faq";
-import { ProCta } from "@/components/landing-page/pro-cta";
 import { FinalCta } from "@/components/landing-page/final-cta";
 import { SiteFooter } from "@/components/landing-page/site-footer";
 

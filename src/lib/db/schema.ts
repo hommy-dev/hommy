@@ -458,7 +458,7 @@ export const estimates = pgTable('estimates', {
 export const conversations = pgTable('conversations', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   type: conversationType('type').notNull().default('direct'),
-  contextType: text('context_type'), // 'lead' | 'project' | 'engagement'
+  contextType: text('context_type'), // 'project' (the lead/job workspace) — null for direct chats
   contextId: uuid('context_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

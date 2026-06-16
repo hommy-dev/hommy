@@ -36,6 +36,7 @@ export function useCyclePhase({ active, cycleMsBase, speed = 1 }: UseCyclePhaseO
 
   useEffect(() => {
     if (!active) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset animation phase when it stops
       setPhase(0);
       return;
     }
@@ -124,6 +125,7 @@ export function useSteppedCycle({
     if (!active) {
       activeRef.current = false;
       currentStepRef.current = idleStep;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset to idle frame when the animation stops
       setStep(idleStep);
       return;
     }

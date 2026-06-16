@@ -1207,10 +1207,6 @@ export const ThemeToggleButton1 = ({
 //..................................................... //
 export const ThemeToggleButton2 = ({
   className = "",
-  variant,
-  start,
-  blur,
-  gifUrl,
 }: {
   variant: AnimationVariant;
   start: AnimationStart;

@@ -68,8 +68,10 @@ export function StepsSection({
   // When the feature set swaps (e.g. switching tabs), restart from step one so
   // the new content animates in cleanly instead of resuming mid-sequence.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- intentional animation reset when the `features` prop changes */
     setLayers([{ id: 0, index: 0 }])
     setProgress(0)
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [features])
 
   return (
