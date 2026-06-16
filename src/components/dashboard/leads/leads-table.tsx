@@ -83,8 +83,9 @@ const PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 function isOpenOffer(l: DashboardLead) {
   return l.recipientStatus === "offered" || l.recipientStatus === "viewed";
 }
+// Engagement is uncapped — a lead only locks once it's awarded to someone.
 function isLocked(l: DashboardLead) {
-  return l.leadStatus === "filled" || l.leadStatus === "awarded";
+  return l.leadStatus === "awarded";
 }
 
 export function LeadsTable({

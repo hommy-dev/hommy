@@ -55,10 +55,8 @@ export function LeadCard({ lead }: { lead: DashboardLead }) {
     lead.leadStatus === "open" &&
     (lead.recipientStatus === "offered" || lead.recipientStatus === "viewed")
 
-  const locked = lead.leadStatus === "filled" || lead.leadStatus === "awarded"
-  const spotsLeft = Math.max(0, lead.engageSlots - lead.slotsUsed)
-  const isOpenOffer =
-    lead.recipientStatus === "offered" || lead.recipientStatus === "viewed"
+  // Engagement is uncapped — a lead only locks once it's awarded to someone.
+  const locked = lead.leadStatus === "awarded"
 
   return (
     <article className="relative overflow-hidden rounded-xl lg:rounded-[0.833vw] border border-border bg-card transition-colors hover:border-foreground/25">
@@ -140,10 +138,8 @@ export function LeadCard({ lead }: { lead: DashboardLead }) {
             <span className="shrink-0">{formatDistanceToNow(new Date(when))}</span>
           </span>
           <span className="shrink-0 font-medium text-foreground/80">
-            {isOpenOffer
-              ? locked
-                ? "Locked · full"
-                : `${lead.engagementCreditCost} credit${lead.engagementCreditCost === 1 ? "" : "s"} · ${spotsLeft} left`
+            {locked
+              ? "Awarded"
               : `${lead.engagementCreditCost} credit${lead.engagementCreditCost === 1 ? "" : "s"} to engage`}
           </span>
         </div>

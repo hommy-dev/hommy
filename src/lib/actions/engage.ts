@@ -1,10 +1,15 @@
 'use server'
 
 // Engage — the contractor's first move on a lead (docs/HOMEI_PLATFORM.md §4.1
-// step 3). In one atomic transaction we: row-lock the lead, verify a free slot,
-// reserve+charge credits, flip the recipient to `engaged`, and spin up the CRM
-// workspace (contact + project + conversation with the homeowner). When the last
-// slot fills, the lead locks (`filled`). Async comms fire afterward via Inngest.
+// step 3). In one atomic transaction we: row-lock the lead, reserve+charge
+// credits, flip the recipient to `engaged`, and spin up the CRM workspace
+// (contact + project + conversation with the homeowner). Async comms fire
+// afterward via Inngest.
+//
+// NO hard engage cap: `engageSlots` only sizes the initial fan-out (how many
+// companies we offer to at once). It does NOT limit who can engage — a company
+// that reaches an open lead (a later offer, a cascade, or browsing leads) can
+// always engage. A lead only stops accepting engagement once it is `awarded`.
 //
 // Affordability rule (D2, docs §4.2): we BLOCK engage unless the company can
 // cover BOTH the small engagement fee AND the full award fee — the engagement
@@ -12,7 +17,7 @@
 // accept can always charge the win.
 
 import { z } from 'zod'
-import { and, count, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import {
@@ -56,7 +61,7 @@ const MESSAGES: Record<EngageError, string> = {
   NO_COMPANY: 'Set up your company before engaging leads.',
   NOT_VERIFIED: 'Verify your business to engage leads.',
   NOT_OFFERED: 'This lead is no longer available to you.',
-  LEAD_LOCKED: 'This lead is full — another contractor took the last slot.',
+  LEAD_LOCKED: 'This lead is no longer open — it has already been awarded.',
   ALREADY_ENGAGED: 'You have already engaged this lead.',
   INSUFFICIENT_CREDITS: 'Not enough credits. Top up to engage this lead.',
   DB_ERROR: 'Could not engage this lead. Please try again.',
@@ -86,7 +91,6 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
           status: leads.status,
           serviceId: leads.serviceId,
           homeownerId: leads.homeownerId,
-          engageSlots: leads.engageSlots,
           engagementCreditCost: leads.engagementCreditCost,
           awardCreditCost: leads.awardCreditCost,
         })
@@ -107,13 +111,6 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
       if (!recipient) return { code: 'NOT_OFFERED' }
       if (recipient.status === 'engaged' || recipient.status === 'won') return { code: 'ALREADY_ENGAGED' }
       if (recipient.status !== 'offered' && recipient.status !== 'viewed') return { code: 'NOT_OFFERED' }
-
-      // Race-safe slot check: how many have already taken a slot?
-      const [{ used }] = await tx
-        .select({ used: count() })
-        .from(leadRecipients)
-        .where(and(eq(leadRecipients.leadId, leadId), inArray(leadRecipients.status, ['engaged', 'won'])))
-      if (used >= lead.engageSlots) return { code: 'LEAD_LOCKED' }
 
       // Affordability (D2): must cover engagement fee + reserved award fee.
       const required = lead.engagementCreditCost + lead.awardCreditCost
@@ -169,11 +166,6 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
           { conversationId: conversation.id, participantType: 'contractor' as const, participantId: contractor.id },
         ].filter((v): v is NonNullable<typeof v> => v !== null),
       )
-
-      // Lock the lead when this engage fills the last slot.
-      if (used + 1 >= lead.engageSlots) {
-        await tx.update(leads).set({ status: 'filled' }).where(eq(leads.id, leadId))
-      }
 
       await recordScoreEvent(tx, {
         contractorId: contractor.id,
