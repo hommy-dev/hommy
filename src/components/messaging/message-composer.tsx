@@ -56,9 +56,10 @@ export function MessageComposer({
         onClick={submit}
         disabled={disabled || value.trim().length === 0}
         aria-label="Send message"
-        className="grid size-9 lg:size-[2.5vw] shrink-0 place-items-center rounded-md lg:rounded-[0.556vw] bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+        className="inline-flex h-9 lg:h-[2.5vw] shrink-0 items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-primary px-3.5 lg:px-[1vw] text-sm lg:text-[0.903vw] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         <SendHorizontal className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+        <span className="hidden sm:inline">Send</span>
       </button>
     </div>
   )

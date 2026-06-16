@@ -81,6 +81,6 @@ export async function declineLead(leadId: string, reason?: string): Promise<Decl
     }
   }
 
-  revalidatePath('/contractor/leads')
+  revalidatePath('/contractor/jobs')
   return { ok: true }
 }

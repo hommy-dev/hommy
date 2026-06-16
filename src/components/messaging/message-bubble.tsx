@@ -1,5 +1,7 @@
 import { cn } from '@/lib/utils'
-import type { ThreadMessage } from '@/lib/data/conversations'
+import type { ThreadMessage, ParticipantIdentity } from '@/lib/data/conversations'
+import { QuoteCard } from './quote-card'
+import { ParticipantAvatar } from './participant-avatar'
 
 export type DisplayMessage = ThreadMessage & { pending?: boolean; failed?: boolean }
 
@@ -10,9 +12,23 @@ function timeLabel(iso: string): string {
 
 /**
  * One message row. System messages render as a centered note; user/contractor
- * messages render as left/right bubbles. Flat, lightly-rounded, no shadow.
+ * messages render as left/right bubbles (the other party gets an avatar). Flat,
+ * lightly-rounded, no shadow.
  */
-export function MessageBubble({ message }: { message: DisplayMessage }) {
+export function MessageBubble({
+  message,
+  viewerType,
+  otherName,
+}: {
+  message: DisplayMessage
+  viewerType?: ParticipantIdentity['type']
+  otherName?: string
+}) {
+  // Rich quote payload → card the homeowner (a 'user' participant) can accept.
+  if (message.meta?.kind === 'quote') {
+    return <QuoteCard meta={message.meta} canAccept={viewerType === 'user'} />
+  }
+
   if (message.senderType === 'system') {
     return (
       <div className="flex justify-center py-1 lg:py-[0.278vw]">
@@ -25,7 +41,10 @@ export function MessageBubble({ message }: { message: DisplayMessage }) {
 
   const mine = message.isMine
   return (
-    <div className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
+    <div className={cn('flex items-end gap-2 lg:gap-[0.556vw]', mine ? 'justify-end' : 'justify-start')}>
+      {!mine ? (
+        <ParticipantAvatar name={otherName ?? '?'} className="size-7 lg:size-[2vw] self-end" />
+      ) : null}
       <div
         className={cn(
           'max-w-[78%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] leading-relaxed',
@@ -47,4 +66,25 @@ export function MessageBubble({ message }: { message: DisplayMessage }) {
       </div>
     </div>
   )
+}
+
+/** Centered day divider between message groups. */
+export function DayDivider({ iso }: { iso: string }) {
+  return (
+    <div className="flex justify-center py-2 lg:py-[0.556vw]">
+      <span className="rounded-full bg-muted px-3 lg:px-[0.833vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.764vw] font-medium text-muted-foreground">
+        {dayLabel(iso)}
+      </span>
+    </div>
+  )
+}
+
+function dayLabel(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (d.toDateString() === today.toDateString()) return 'Today'
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday'
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }

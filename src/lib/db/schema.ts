@@ -479,6 +479,15 @@ export const conversationParticipants = pgTable('conversation_participants', {
   index('conversation_participants_lookup_idx').on(t.participantType, t.participantId),
 ])
 
+// Structured payload attached to a message so the thread can render a rich card
+// (e.g. a quote) instead of plain text. Nullable — most messages have no meta.
+export type MessageMeta = {
+  kind: 'quote'
+  estimateId: string
+  total: string | null
+  status: 'draft' | 'sent' | 'accepted' | 'rejected'
+}
+
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
@@ -487,6 +496,7 @@ export const messages = pgTable('messages', {
   body: text('body').notNull(),
   channel: messageChannel('channel').notNull().default('platform'),
   externalId: text('external_id'),
+  meta: jsonb('meta').$type<MessageMeta>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('messages_conversation_created_idx').on(t.conversationId, t.createdAt),

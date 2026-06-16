@@ -28,7 +28,6 @@ export const quoteAccepted = inngest.createFunction(
     const estimateId = event.data.estimateId as string | undefined
     const leadId = event.data.leadId as string | undefined
     const winnerContractorId = event.data.winnerContractorId as string | undefined
-    const projectId = event.data.projectId as string | undefined
     if (!leadId || !winnerContractorId) return { ok: false, reason: 'missing event data' }
 
     await step.run('notify-winner', async () => {
@@ -41,8 +40,8 @@ export const quoteAccepted = inngest.createFunction(
             userId,
             type: 'ESTIMATE',
             title: 'You won the job! 🎉',
-            body: 'The homeowner accepted your quote. Open the project to get started.',
-            actionUrl: projectId ? `/contractor/projects/${projectId}` : '/contractor/projects',
+            body: 'The homeowner accepted your quote. Open the job to get started.',
+            actionUrl: '/contractor/jobs',
             entityType: 'ESTIMATE',
             entityId: estimateId,
             sendSms: true,
@@ -67,7 +66,7 @@ export const quoteAccepted = inngest.createFunction(
             type: 'LEAD',
             title: 'Lead closed',
             body: 'The homeowner hired another contractor for this lead.',
-            actionUrl: '/contractor/leads',
+            actionUrl: '/contractor/jobs',
             entityType: 'LEAD',
             entityId: leadId,
             dedupKey: `lead_lost:${leadId}:${userId}`,

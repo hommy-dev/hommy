@@ -16,7 +16,8 @@ import {
   projects,
   services,
 } from '@/lib/db/schema'
-import { subtypeLabel } from '@/lib/leads/subtype'
+import { subtypeLabel, subtypeList } from '@/lib/leads/subtype'
+import { listConversationsForUser } from '@/lib/data/conversations'
 
 /** Map an authenticated user → their 1:1 homeowner profile. Deduped per request. */
 export const getHomeownerForUser = cache(async (
@@ -129,6 +130,147 @@ export async function getHomeownerLeads(
 
 export type LeadStatus = (typeof leads.status.enumValues)[number]
 export type EstimateStatus = (typeof estimates.status.enumValues)[number]
+
+/** The five columns of the homeowner "My requests" board. */
+export type HomeownerRequestStatus = 'posted' | 'interested' | 'quotes' | 'hired' | 'done'
+
+/** Derive the board column from the lead status + match/interest/quote counts. */
+export function deriveRequestStatus(args: {
+  status: LeadStatus
+  interestedCount: number
+  quoteCount: number
+}): HomeownerRequestStatus {
+  if (args.status === 'awarded') return 'hired'
+  if (args.status === 'closed' || args.status === 'expired') return 'done'
+  if (args.quoteCount > 0) return 'quotes'
+  if (args.interestedCount > 0) return 'interested'
+  return 'posted'
+}
+
+export type RequestContractor = {
+  contractorId: string
+  contractorName: string | null
+  conversationId: string | null
+  quoteTotal: string | null
+  quoteStatus: EstimateStatus | null
+  hasUnread: boolean
+}
+
+export type HomeownerRequestDetail = {
+  leadId: string
+  serviceName: string
+  subtype: string | null
+  subtypes: string[]
+  status: LeadStatus
+  requestStatus: HomeownerRequestStatus
+  urgency: (typeof leads.urgency.enumValues)[number]
+  address: string | null
+  city: string | null
+  state: string | null
+  zipCode: string | null
+  notes: string | null
+  interestedCount: number
+  quoteCount: number
+  /** One row per contractor who started a conversation — each is its own chat. */
+  contractors: RequestContractor[]
+  createdAt: Date
+}
+
+/**
+ * One request's full detail for the right-side Sheet: the request itself plus the
+ * interested contractors, each linking to its own chat (a request fans out to
+ * many contractor conversations). Authorized by scoping to the caller's
+ * homeownerId; `userId` is only used to resolve unread + conversation ids.
+ */
+export async function getHomeownerRequestDetail(
+  leadId: string,
+  homeownerId: string,
+  userId: string,
+): Promise<HomeownerRequestDetail | null> {
+  const [lead] = await db
+    .select({
+      id: leads.id,
+      serviceName: services.name,
+      serviceDetails: leads.serviceDetails,
+      urgency: leads.urgency,
+      status: leads.status,
+      address: leads.address,
+      city: leads.city,
+      state: leads.state,
+      zipCode: leads.zipCode,
+      notes: leads.notes,
+      createdAt: leads.createdAt,
+    })
+    .from(leads)
+    .innerJoin(services, eq(leads.serviceId, services.id))
+    .where(and(eq(leads.id, leadId), eq(leads.homeownerId, homeownerId)))
+    .limit(1)
+  if (!lead) return null
+
+  const projRows = await db
+    .select({
+      projectId: projects.id,
+      contractorId: projects.contractorId,
+      contractorName: contractors.companyName,
+    })
+    .from(projects)
+    .innerJoin(contractors, eq(contractors.id, projects.contractorId))
+    .where(eq(projects.leadId, leadId))
+
+  const projectIds = projRows.map((p) => p.projectId)
+  const latest = projectIds.length
+    ? await db
+        .selectDistinctOn([estimates.projectId], {
+          projectId: estimates.projectId,
+          total: estimates.total,
+          status: estimates.status,
+        })
+        .from(estimates)
+        .where(inArray(estimates.projectId, projectIds))
+        .orderBy(estimates.projectId, desc(estimates.createdAt))
+    : []
+  const latestByProject = new Map(latest.map((l) => [l.projectId, l]))
+
+  const summaries = await listConversationsForUser(userId)
+  const convByProject = new Map(
+    summaries.filter((s) => s.contextId).map((s) => [s.contextId as string, s]),
+  )
+
+  const contractorList: RequestContractor[] = projRows.map((p) => {
+    const est = latestByProject.get(p.projectId)
+    const conv = convByProject.get(p.projectId)
+    return {
+      contractorId: p.contractorId,
+      contractorName: p.contractorName,
+      conversationId: conv?.id ?? null,
+      quoteTotal: est?.total ?? null,
+      quoteStatus: est?.status ?? null,
+      hasUnread: conv?.hasUnread ?? false,
+    }
+  })
+
+  const interestedCount = contractorList.length
+  const quoteCount = contractorList.filter((c) => c.quoteStatus != null).length
+
+  return {
+    leadId: lead.id,
+    serviceName: lead.serviceName,
+    subtype: subtypeLabel(lead.serviceDetails),
+    subtypes: subtypeList(lead.serviceDetails),
+    status: lead.status,
+    requestStatus: deriveRequestStatus({ status: lead.status, interestedCount, quoteCount }),
+    urgency: lead.urgency,
+    address: lead.address,
+    city: lead.city,
+    state: lead.state,
+    zipCode: lead.zipCode,
+    notes: lead.notes,
+    interestedCount,
+    quoteCount,
+    contractors: contractorList,
+    createdAt: lead.createdAt,
+  }
+}
 
 export type HomeownerQuote = {
   estimateId: string

@@ -80,7 +80,7 @@ export const leadCreated = inngest.createFunction(
             type: 'LEAD',
             title: isEmergency ? 'Emergency lead in your area' : 'New lead in your area',
             body,
-            actionUrl: '/contractor/leads',
+            actionUrl: '/contractor/jobs',
             entityType: 'LEAD',
             entityId: leadId,
             dedupKey: `lead_offer:${leadId}:${userId}`,

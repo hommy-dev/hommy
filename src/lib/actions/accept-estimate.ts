@@ -18,7 +18,7 @@ import { getHomeownerForUser } from '@/lib/data/homeowner'
 import { spendCredits } from '@/lib/credits/ledger'
 import { recordScoreEvent } from '@/lib/reputation/score'
 import { SCORE_DELTAS } from '@/lib/config/tunables'
-import { getProjectConversationId, postSystemMessage } from '@/lib/messaging/system'
+import { getProjectConversationId, markQuoteMessageAccepted, postSystemMessage } from '@/lib/messaging/system'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
 type AcceptError =
@@ -202,6 +202,7 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
   if (outcome.code !== 'OK') return fail(outcome.code)
 
   // Post-commit side effects — best-effort.
+  await markQuoteMessageAccepted(estimateId)
   const winnerConvo = await getProjectConversationId(outcome.winnerProjectId)
   if (winnerConvo) {
     await postSystemMessage(winnerConvo, 'Quote accepted — you won the job! 🎉').catch(() => {})
@@ -229,8 +230,8 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
 
   revalidatePath('/homeowner/quotes')
   revalidatePath('/homeowner/requests')
-  revalidatePath('/contractor/projects')
-  revalidatePath('/contractor/leads')
+  revalidatePath('/contractor/jobs')
+  revalidatePath('/contractor/messages')
 
   return { ok: true, projectId: outcome.winnerProjectId }
 }

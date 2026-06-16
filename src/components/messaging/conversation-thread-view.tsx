@@ -13,18 +13,21 @@ export function ConversationThreadView({
   detail,
   initialMessages,
   basePath,
+  panel,
 }: {
   detail: ConversationDetail
   initialMessages: DisplayMessage[]
   basePath: string
+  /** Optional control-room panel rendered between the header and the thread. */
+  panel?: React.ReactNode
 }) {
   return (
-    <div className="flex h-[calc(100dvh-9.5rem)] lg:h-[calc(100dvh-9vw)] flex-col overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border bg-background">
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-background">
       <header className="flex items-center gap-3 lg:gap-[0.833vw] border-b border-border px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
         <Link
           href={basePath}
           aria-label="Back to messages"
-          className="grid size-8 lg:size-[2.222vw] shrink-0 place-items-center rounded-md lg:rounded-[0.556vw] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="grid size-8 lg:size-[2.222vw] shrink-0 place-items-center rounded-md lg:rounded-[0.556vw] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
         >
           <ArrowLeft className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
         </Link>
@@ -36,7 +39,13 @@ export function ConversationThreadView({
           </p>
         </div>
       </header>
-      <MessageThread conversationId={detail.id} me={detail.me} initialMessages={initialMessages} />
+      {panel}
+      <MessageThread
+        conversationId={detail.id}
+        me={detail.me}
+        initialMessages={initialMessages}
+        otherName={detail.otherName}
+      />
     </div>
   )
 }

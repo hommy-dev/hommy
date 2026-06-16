@@ -1,23 +1,20 @@
-import { getRequiredUser } from "@/lib/auth/session"
-import { listConversationsForUser } from "@/lib/data/conversations"
-import { ConversationList } from "@/components/messaging/conversation-list"
+import { MessageSquare } from "lucide-react"
 
-export default async function ContractorMessagesPage() {
-  const user = await getRequiredUser("contractor")
-  const conversations = await listConversationsForUser(user.id)
-
+// The conversation rail lives in this route's layout; this index just fills the
+// right pane with a prompt (visible on desktop — mobile shows the rail instead).
+export default function ContractorMessagesIndex() {
   return (
-    <div className="space-y-6 lg:space-y-[1.667vw]">
-      <header className="w-full">
-        <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
-          Messages
-        </h1>
-        <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Your conversations with homeowners on engaged leads.
+    <div className="grid flex-1 place-items-center p-10 lg:p-[2.778vw] text-center">
+      <div className="space-y-2 lg:space-y-[0.556vw]">
+        <MessageSquare
+          className="mx-auto size-8 lg:size-[2.222vw] text-muted-foreground/60"
+          strokeWidth={1.5}
+        />
+        <p className="font-medium lg:text-[1.042vw]">Select a conversation</p>
+        <p className="text-sm lg:text-[0.903vw] text-muted-foreground">
+          Pick a chat from the left to start messaging.
         </p>
-      </header>
-
-      <ConversationList conversations={conversations} basePath="/contractor/messages" />
+      </div>
     </div>
   )
 }

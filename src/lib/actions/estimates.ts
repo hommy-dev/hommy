@@ -17,7 +17,7 @@ import { estimates, projects } from '@/lib/db/schema'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
 import { computeTotals, lineItemAmount } from '@/lib/estimates/compute'
-import { getProjectConversationId, postSystemMessage } from '@/lib/messaging/system'
+import { getProjectConversationId, postQuoteMessage } from '@/lib/messaging/system'
 import { formatCurrency } from '@/lib/format'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import type { Tx } from '@/lib/credits/ledger'
@@ -69,7 +69,7 @@ export async function saveEstimateDraft(rawInput: unknown): Promise<SaveDraftRes
 
   try {
     const { estimateId } = await upsertDraft(db, ctx.contractorId, ctx.input)
-    revalidatePath(`/contractor/projects/${ctx.input.projectId}`)
+    revalidatePath('/contractor/jobs')
     return { ok: true, estimateId }
   } catch (err) {
     if (err instanceof EstimateError) return fail(err.code)
@@ -106,12 +106,16 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
     return fail('DB_ERROR')
   }
 
-  // Post-commit side effects — best-effort.
+  // Post-commit side effects — best-effort. Post a rich quote card so both
+  // parties see (and the homeowner can accept) the quote inside the thread.
   const conversationId = await getProjectConversationId(ctx.input.projectId)
   if (conversationId) {
-    await postSystemMessage(conversationId, `Quote sent — ${formatCurrency(total)}`).catch((e) =>
-      console.error('[sendEstimate] system message failed', e),
-    )
+    await postQuoteMessage(conversationId, `Quote sent — ${formatCurrency(total)}`, {
+      kind: 'quote',
+      estimateId,
+      total,
+      status: 'sent',
+    }).catch((e) => console.error('[sendEstimate] quote message failed', e))
   }
   try {
     await inngest.send({
@@ -122,7 +126,8 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
     console.error('[sendEstimate] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath(`/contractor/projects/${ctx.input.projectId}`)
+  revalidatePath('/contractor/jobs')
+  revalidatePath('/contractor/messages')
   revalidatePath('/homeowner/quotes')
   return { ok: true, estimateId }
 }

@@ -120,7 +120,7 @@ async function RecentLeads({ contractorId }: { contractorId: string }) {
           Recent leads
         </h2>
         <Link
-          href="/contractor/leads"
+          href="/contractor/jobs"
           prefetch
           className="text-sm lg:text-[0.972vw] font-medium text-primary hover:underline"
         >

@@ -82,7 +82,7 @@ export async function advanceProjectStage(projectId: string, toStage: string): P
     }
   }
 
-  revalidatePath(`/contractor/projects/${projectId}`)
-  revalidatePath('/contractor/projects')
+  revalidatePath('/contractor/jobs')
+  revalidatePath('/contractor/messages')
   return { ok: true }
 }

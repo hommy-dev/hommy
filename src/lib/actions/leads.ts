@@ -216,7 +216,7 @@ export async function createLead(
     console.error('[createLead] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath('/contractor/leads')
+  revalidatePath('/contractor/jobs')
   revalidatePath('/homeowner/requests')
 
   return {

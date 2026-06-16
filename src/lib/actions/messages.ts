@@ -58,6 +58,7 @@ export async function sendMessage(conversationId: string, rawBody: string): Prom
     senderType: me.type,
     senderId: me.id,
     body,
+    meta: null,
     createdAt: row.createdAt.toISOString(),
     isMine: true,
   }

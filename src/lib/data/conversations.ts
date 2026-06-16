@@ -18,6 +18,7 @@ import {
   conversations,
   messages,
   users,
+  type MessageMeta,
 } from '@/lib/db/schema'
 
 export type ParticipantIdentity = { type: 'user' | 'contractor'; id: string }
@@ -39,6 +40,8 @@ export type ThreadMessage = {
   senderType: 'user' | 'contractor' | 'system'
   senderId: string | null
   body: string
+  /** Structured payload for rich messages (e.g. a quote card). Null for plain text. */
+  meta: MessageMeta | null
   createdAt: string // ISO — bound for client components
   isMine: boolean
 }
@@ -270,6 +273,7 @@ export async function listMessages(
       senderType: messages.senderType,
       senderId: messages.senderId,
       body: messages.body,
+      meta: messages.meta,
       createdAt: messages.createdAt,
     })
     .from(messages)
@@ -291,6 +295,7 @@ export async function listMessages(
       senderType: r.senderType,
       senderId: r.senderId,
       body: r.body,
+      meta: r.meta ?? null,
       createdAt: r.createdAt.toISOString(),
       isMine: r.senderType === me.type && r.senderId === me.id,
     })),

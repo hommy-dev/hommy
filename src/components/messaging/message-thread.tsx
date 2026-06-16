@@ -1,12 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { ParticipantIdentity } from '@/lib/data/conversations'
 import { sendMessage, markConversationRead } from '@/lib/actions/messages'
 import { showToast } from '@/components/ui/toast'
-import { MessageBubble, type DisplayMessage } from './message-bubble'
+import { MessageBubble, DayDivider, type DisplayMessage } from './message-bubble'
 import { MessageComposer } from './message-composer'
 import { useConversationStream } from './use-conversation-stream'
+
+function sameDay(a: string, b: string): boolean {
+  return new Date(a).toDateString() === new Date(b).toDateString()
+}
 
 /**
  * A single conversation thread: live `chat:{id}` subscription, optimistic send,
@@ -17,10 +21,12 @@ export function MessageThread({
   conversationId,
   me,
   initialMessages,
+  otherName,
 }: {
   conversationId: string
   me: ParticipantIdentity
   initialMessages: DisplayMessage[]
+  otherName?: string
 }) {
   const [messages, setMessages] = useState<DisplayMessage[]>(initialMessages)
   const tempCounter = useRef(0)
@@ -66,6 +72,7 @@ export function MessageThread({
         senderType: me.type,
         senderId: me.id,
         body,
+        meta: null,
         createdAt: new Date().toISOString(),
         isMine: true,
         pending: true,
@@ -101,7 +108,16 @@ export function MessageThread({
             No messages yet. Say hello.
           </p>
         ) : (
-          messages.map((m) => <MessageBubble key={m.id} message={m} />)
+          messages.map((m, i) => {
+            const prev = messages[i - 1]
+            const showDay = !prev || !sameDay(prev.createdAt, m.createdAt)
+            return (
+              <Fragment key={m.id}>
+                {showDay ? <DayDivider iso={m.createdAt} /> : null}
+                <MessageBubble message={m} viewerType={me.type} otherName={otherName} />
+              </Fragment>
+            )
+          })
         )}
         <div ref={endRef} />
       </div>

@@ -3,9 +3,9 @@
 // actions. System events are plain `messages` rows with sender_type='system'
 // and a human-readable body (D5: no separate payload column).
 
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { conversations, messages } from '@/lib/db/schema'
+import { conversations, messages, type MessageMeta } from '@/lib/db/schema'
 import { sendRealtimeBroadcast } from '@/lib/realtime/broadcast'
 import { broadcastUserEvent } from '@/lib/realtime/user-events'
 import { getConversationRecipientUserIds } from '@/lib/data/conversations'
@@ -22,9 +22,44 @@ export async function getProjectConversationId(projectId: string): Promise<strin
 
 /** Insert a system message and broadcast it live (thread + every participant's inbox). */
 export async function postSystemMessage(conversationId: string, body: string): Promise<void> {
+  await postSystemMessageWithMeta(conversationId, body, null)
+}
+
+/**
+ * A system message that carries a rich payload (e.g. a quote) so the thread can
+ * render a card instead of plain text. Falls back gracefully to the body text.
+ */
+export async function postQuoteMessage(
+  conversationId: string,
+  body: string,
+  meta: MessageMeta,
+): Promise<void> {
+  await postSystemMessageWithMeta(conversationId, body, meta)
+}
+
+/**
+ * Flip an already-posted quote card to "accepted" so it stops offering an Accept
+ * button. Best-effort: a stale card would still be guarded server-side anyway.
+ */
+export async function markQuoteMessageAccepted(estimateId: string): Promise<void> {
+  try {
+    await db
+      .update(messages)
+      .set({ meta: sql`jsonb_set(${messages.meta}, '{status}', '"accepted"'::jsonb)` })
+      .where(sql`${messages.meta} ->> 'estimateId' = ${estimateId}`)
+  } catch (e) {
+    console.error('[markQuoteMessageAccepted] failed', e)
+  }
+}
+
+async function postSystemMessageWithMeta(
+  conversationId: string,
+  body: string,
+  meta: MessageMeta | null,
+): Promise<void> {
   const [row] = await db
     .insert(messages)
-    .values({ conversationId, senderType: 'system', senderId: null, body, channel: 'platform' })
+    .values({ conversationId, senderType: 'system', senderId: null, body, channel: 'platform', meta })
     .returning({ id: messages.id, createdAt: messages.createdAt })
 
   void sendRealtimeBroadcast({
@@ -35,6 +70,7 @@ export async function postSystemMessage(conversationId: string, body: string): P
       senderType: 'system',
       senderId: null,
       body,
+      meta,
       createdAt: row.createdAt.toISOString(),
       isMine: false,
     },

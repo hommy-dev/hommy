@@ -210,8 +210,7 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
     console.error('[engageLead] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath('/contractor/leads')
-  revalidatePath('/contractor/projects')
+  revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
   revalidatePath('/homeowner/requests')
 
