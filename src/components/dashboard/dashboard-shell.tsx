@@ -50,6 +50,8 @@ export type DashboardShellProps = {
   topRight?: React.ReactNode;
   /** Slot rendered under the brand in the sidebar (e.g. the workspace chip). */
   workspace?: React.ReactNode;
+  /** Account nav pinned to the very bottom of the sidebar (the user menu). */
+  footerUser?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -61,6 +63,7 @@ export function DashboardShell({
   navUnreadCounts,
   topRight,
   workspace,
+  footerUser,
   children,
 }: DashboardShellProps) {
   const pathname = usePathname() ?? "";
@@ -138,8 +141,15 @@ export function DashboardShell({
             </SidebarGroup>
           </SidebarContent>
 
-          {/* Status / announcement at bottom */}
-          <SidebarFooter className="px-2 lg:px-[0.556vw] pb-3 lg:pb-[0.833vw] pt-1 lg:pt-[0.278vw]">{notice}</SidebarFooter>
+          {/* Status / announcement + account nav at bottom */}
+          <SidebarFooter className="gap-2 lg:gap-[0.556vw] px-2 lg:px-[0.556vw] pb-3 lg:pb-[0.833vw] pt-1 lg:pt-[0.278vw]">
+            {notice}
+            {footerUser ? (
+              <div className="border-t border-sidebar-border pt-2 lg:pt-[0.556vw]">
+                {footerUser}
+              </div>
+            ) : null}
+          </SidebarFooter>
 
           <SidebarRail />
         </Sidebar>
@@ -147,7 +157,9 @@ export function DashboardShell({
         <SidebarInset className="min-h-0 flex-1 overflow-hidden bg-background">
           <header className="flex h-14 lg:h-[3.889vw] shrink-0 items-center gap-2 lg:gap-[0.556vw] border-b border-border bg-background px-4 lg:px-[1.111vw]">
             <SidebarTrigger className="md:hidden" />
-            <div className="ml-auto flex items-center gap-2 lg:gap-[0.556vw]">{topRight}</div>
+            <div className="ml-auto flex items-center gap-2 lg:gap-[0.556vw]">
+              {topRight}
+            </div>
           </header>
 
           <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6 lg:p-[1.667vw]">

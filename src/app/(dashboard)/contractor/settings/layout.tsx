@@ -7,7 +7,7 @@ const CONTRACTOR_SETTINGS_GROUPS: SettingsNavGroup[] = [
   {
     label: "Account",
     items: [
-      { href: "/contractor/settings/account", label: "My account", icon: "profile" },
+      { href: "/contractor/settings", label: "My account", icon: "profile", exact: true },
     ],
   },
   {

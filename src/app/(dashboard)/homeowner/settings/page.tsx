@@ -1,5 +1,16 @@
-import { redirect } from "next/navigation"
+import { getRequiredUser } from "@/lib/auth/session"
+import { AccountSettings } from "@/components/dashboard/settings/account-settings"
 
-export default function HomeownerSettingsIndex() {
-  redirect("/homeowner/settings/account")
+export default async function HomeownerSettingsPage() {
+  const user = await getRequiredUser("homeowner")
+  return (
+    <AccountSettings
+      user={{
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        passwordSet: user.passwordSet,
+      }}
+    />
+  )
 }

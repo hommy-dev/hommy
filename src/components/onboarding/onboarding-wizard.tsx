@@ -234,7 +234,7 @@ export function OnboardingWizard({
                 {areas.map((a, i) => (
                   <div
                     key={`${a.label}-${i}`}
-                    className="flex items-center gap-3 lg:gap-[0.833vw] rounded-xl lg:rounded-[0.926vw] border border-foreground/12 bg-card px-3.5 lg:px-[0.972vw] py-2.5 lg:py-[0.694vw]"
+                    className="flex items-center gap-3 lg:gap-[0.833vw] rounded-md lg:rounded-[0.4vw] border border-foreground/12 bg-card px-3.5 lg:px-[0.972vw] py-2.5 lg:py-[0.694vw]"
                   >
                     <span className="min-w-0 flex-1 truncate text-sm lg:text-[0.972vw] font-medium">
                       {a.label}
@@ -290,7 +290,7 @@ export function OnboardingWizard({
             type="button"
             onClick={next}
             disabled={!canAdvance || pending}
-            className="rounded-xl lg:rounded-[0.926vw] bg-primary px-7 lg:px-[1.944vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
+            className="rounded-md lg:rounded-[0.4vw] bg-primary px-7 lg:px-[1.944vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-[transform,opacity] hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50"
           >
             {step < 2 ? "Next" : pending ? "Saving..." : "Finish setup"}
           </button>
@@ -301,7 +301,7 @@ export function OnboardingWizard({
 }
 
 const inputCls =
-  "w-full rounded-xl lg:rounded-[0.926vw] border border-foreground/15 bg-card px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
+  "w-full rounded-md lg:rounded-[0.4vw] border border-foreground/15 bg-card px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-[15px] lg:text-[1.042vw] text-foreground outline-none transition-colors placeholder:text-foreground/30 focus:border-primary/60 focus:ring-2 focus:ring-primary/15"
 
 function Step({
   title,

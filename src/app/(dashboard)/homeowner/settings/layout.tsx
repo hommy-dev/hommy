@@ -7,7 +7,7 @@ const HOMEOWNER_SETTINGS_GROUPS: SettingsNavGroup[] = [
   {
     label: "Account",
     items: [
-      { href: "/homeowner/settings/account", label: "My profile", icon: "profile" },
+      { href: "/homeowner/settings", label: "My profile", icon: "profile", exact: true },
     ],
   },
 ]

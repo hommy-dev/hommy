@@ -7,10 +7,13 @@ import {
   getContractorSubtypes,
 } from "@/lib/data/dashboard"
 import { getPortfolio } from "@/lib/data/portfolio"
+import { getContractorReviews } from "@/lib/data/reviews"
 import { coverageBadge } from "@/lib/coverage"
 import { ServiceTag } from "@/components/ui/service-tag"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { PortfolioGallery } from "@/components/dashboard/portfolio/portfolio-gallery"
+import { ReviewsSummaryCard } from "@/components/dashboard/reviews/reviews-summary"
+import { ReviewList } from "@/components/dashboard/reviews/review-list"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
@@ -33,11 +36,12 @@ export default async function ContractorProfilePage() {
     )
   }
 
-  const [role, subtypes, areas, portfolio] = await Promise.all([
+  const [role, subtypes, areas, portfolio, reviews] = await Promise.all([
     getMembershipRole(user.id, c.id),
     getContractorSubtypes(c.id),
     getServiceAreas(c.id),
     getPortfolio(c.id, { publishedOnly: true }),
+    getContractorReviews(c.id),
   ])
   const canManage = role === "owner" || role === "admin"
   const name = c.companyName ?? "Your company"
@@ -207,6 +211,23 @@ export default async function ContractorProfilePage() {
       {portfolio.length > 0 ? (
         <Section title="Recent work">
           <PortfolioGallery items={portfolio} />
+        </Section>
+      ) : null}
+
+      {reviews.total > 0 ? (
+        <Section title="Reviews">
+          <div className="space-y-5 lg:space-y-[1.389vw]">
+            <ReviewsSummaryCard summary={reviews} />
+            <ReviewList reviews={reviews.reviews.slice(0, 4)} />
+            {reviews.total > 4 ? (
+              <Link
+                href="/contractor/reviews"
+                className="inline-block text-sm lg:text-[0.903vw] font-medium text-primary hover:underline"
+              >
+                View all {reviews.total} reviews
+              </Link>
+            ) : null}
+          </div>
         </Section>
       ) : null}
     </div>

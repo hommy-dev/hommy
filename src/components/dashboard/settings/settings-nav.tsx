@@ -11,6 +11,8 @@ export type SettingsNavItem = {
   icon: IconName
   /** Render muted + non-interactive (e.g. a section a `member` can't open). */
   disabled?: boolean
+  /** Match the path exactly (for an index item whose href prefixes its siblings). */
+  exact?: boolean
 }
 
 export type SettingsNavGroup = {
@@ -35,8 +37,9 @@ export function SettingsNav({ groups }: { groups: SettingsNavGroup[] }) {
           ) : null}
 
           {group.items.map((item) => {
-            const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`)
+            const active = item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(`${item.href}/`)
 
             const inner = (
               <>

@@ -16,11 +16,11 @@ function DocPreview({ label, url }: { label: string; url: string | null }) {
     <div>
       <p className="mb-1.5 lg:mb-[0.417vw] text-xs lg:text-[0.833vw] font-medium text-foreground/80">{label}</p>
       {!url ? (
-        <div className="flex h-40 lg:h-[11.111vw] items-center justify-center rounded-xl lg:rounded-[0.926vw] border border-dashed border-border text-xs lg:text-[0.833vw] text-muted-foreground">
+        <div className="flex h-40 lg:h-[11.111vw] items-center justify-center rounded-md lg:rounded-[0.4vw] border border-dashed border-border text-xs lg:text-[0.833vw] text-muted-foreground">
           Not provided
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-muted/30">
+        <div className="overflow-hidden rounded-md lg:rounded-[0.4vw] border border-border bg-muted/30">
           {isImageUrl(url) ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={url} alt={label} className="mx-auto max-h-48 lg:max-h-[13.333vw] w-full object-contain" />

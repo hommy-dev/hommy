@@ -16,6 +16,7 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet";
+import { DeclineLeadDialog } from "../leads/decline-lead-dialog";
 import { JobDetailContent } from "./job-detail-content";
 import { BOARD_META } from "./board-meta";
 
@@ -105,17 +106,20 @@ export function JobDetailSheet({
         {shown ? (
           <SheetFooter className="border-t border-border">
             {isNew ? (
-              <button
-                type="button"
-                onClick={startChat}
-                disabled={engaging}
-                className="inline-flex items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
-                {engaging
-                  ? "Starting…"
-                  : `Chat with homeowner · ${shown.engagementCreditCost} credit${shown.engagementCreditCost === 1 ? "" : "s"}`}
-              </button>
+              <div className="flex items-center gap-2 lg:gap-[0.556vw]">
+                <button
+                  type="button"
+                  onClick={startChat}
+                  disabled={engaging}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                  {engaging
+                    ? "Starting…"
+                    : `Chat with homeowner · ${shown.engagementCreditCost} credit${shown.engagementCreditCost === 1 ? "" : "s"}`}
+                </button>
+                <DeclineLeadDialog leadId={shown.leadId} />
+              </div>
             ) : shown.conversationId ? (
               <Link
                 href={`/contractor/messages/${shown.conversationId}`}

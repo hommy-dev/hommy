@@ -411,7 +411,7 @@ function FileField({
       <Label className="mb-1.5 lg:mb-[0.417vw]">{label}</Label>
       {has ? (
         <div className="space-y-2.5 lg:space-y-[0.694vw]">
-          <div className="overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-muted/30">
+          <div className="overflow-hidden rounded-md lg:rounded-[0.4vw] border border-border bg-muted/30">
             {kind === "image" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -469,7 +469,7 @@ function FileField({
           </div>
         </div>
       ) : (
-        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 lg:gap-[0.556vw] rounded-xl lg:rounded-[0.926vw] border-2 border-dashed border-foreground/15 px-4 lg:px-[1.111vw] py-7 lg:py-[1.944vw] text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
+        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.4vw] border-2 border-dashed border-foreground/15 px-4 lg:px-[1.111vw] py-7 lg:py-[1.944vw] text-center transition-colors hover:border-primary/50 hover:bg-muted/40">
           <input
             type="file"
             accept="image/png,image/jpeg,image/webp,application/pdf"

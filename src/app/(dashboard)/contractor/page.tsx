@@ -128,7 +128,7 @@ async function RecentLeads({ contractorId }: { contractorId: string }) {
         </Link>
       </div>
       {recent.length === 0 ? (
-        <div className="mt-4 lg:mt-[1.111vw] rounded-xl lg:rounded-[0.926vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
+        <div className="mt-4 lg:mt-[1.111vw] rounded-md lg:rounded-[0.4vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
           No leads yet. New offers will appear here the moment they’re sent your
           way.
         </div>

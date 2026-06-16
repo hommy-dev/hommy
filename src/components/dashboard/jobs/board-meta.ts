@@ -12,6 +12,16 @@ export const BOARD_META: Record<BoardStatus, { label: string; pill: string }> = 
   lost: { label: "Lost", pill: "bg-muted text-muted-foreground" },
 };
 
+/** Left-edge accent color per status (matches the pill semantics). */
+export const BOARD_ACCENT: Record<BoardStatus, string> = {
+  new: "bg-secondary",
+  talking: "bg-muted-foreground/40",
+  quoted: "bg-info",
+  won: "bg-primary",
+  done: "bg-success",
+  lost: "bg-muted-foreground/30",
+};
+
 export const URGENCY_LABEL: Record<LeadUrgency, string> = {
   emergency: "Emergency",
   within_week: "This week",

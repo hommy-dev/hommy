@@ -3,7 +3,7 @@ import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser } from "@/lib/data/dashboard"
 import { getContractorJobs } from "@/lib/data/jobs"
 import { canEngageLeads } from "@/lib/contractor/verification"
-import { JobsBoard } from "@/components/dashboard/jobs/jobs-board"
+import { JobsTable } from "@/components/dashboard/jobs/jobs-table"
 
 export default async function JobsPage() {
   const user = await getRequiredUser("contractor")
@@ -57,7 +57,7 @@ export default async function JobsPage() {
         </div>
       )}
 
-      <JobsBoard jobs={jobs} canEngage={canEngage} />
+      <JobsTable jobs={jobs} canEngage={canEngage} />
     </div>
   )
 }

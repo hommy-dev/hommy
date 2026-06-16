@@ -6,8 +6,8 @@ import { getUnreadCountAction } from "@/lib/notifications/actions"
 import { countUnreadConversations } from "@/lib/data/conversations"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { DashboardHeaderActions } from "@/components/dashboard/dashboard-header-actions"
+import { UserMenu } from "@/components/dashboard/user-menu"
 import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
-import { WorkspaceChip } from "@/components/dashboard/settings/workspace-chip"
 import { NoCompany } from "@/components/dashboard/no-company"
 import { CONTRACTOR_NAV } from "@/components/dashboard/dashboard-nav"
 import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount"
@@ -25,6 +25,11 @@ export default async function DashboardLayout({
   }
   const companies = await getUserCompanies(user.id)
   const personName = user.fullName || user.email
+  const navCompanies = companies.map((c) => ({
+    id: c.id,
+    name: c.name ?? "Your company",
+    logoUrl: c.logoUrl,
+  }))
   const [unreadCount, unreadMessages] = await Promise.all([
     getUnreadCountAction(),
     countUnreadConversations(user.id),
@@ -36,29 +41,23 @@ export default async function DashboardLayout({
         navItems={CONTRACTOR_NAV}
         notice={buildNotice(contractor)}
         navUnreadCounts={{ "/contractor/messages": unreadMessages }}
-        workspace={
-          contractor ? (
-            <WorkspaceChip
-              activeId={contractor.id}
-              companies={companies.map((c) => ({
-                id: c.id,
-                name: c.name ?? "Your company",
-                logoUrl: c.logoUrl,
-              }))}
-              manageHref="/contractor/settings/company"
-            />
-          ) : undefined
-        }
-        topRight={
-          <DashboardHeaderActions
+        footerUser={
+          <UserMenu
             user={{
               email: user.email,
               fullName: personName,
               avatarUrl: contractor?.logoUrl ?? null,
             }}
+            settingsHref="/contractor/settings"
+            workspaces={navCompanies}
+            activeWorkspaceId={contractor.id}
+            manageHref="/contractor/settings/company"
+          />
+        }
+        topRight={
+          <DashboardHeaderActions
             userId={user.id}
             unreadCount={unreadCount}
-            settingsHref="/contractor/settings"
             credits={contractor?.creditBalance ?? 0}
           />
         }

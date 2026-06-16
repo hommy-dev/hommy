@@ -28,19 +28,17 @@ export default async function HomeownerLayout({
         brandLabel="Homei"
         navUnreadCounts={{ "/homeowner/messages": unreadMessages }}
         topRight={
-          <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
-            <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />
-            <span className="mx-1 lg:mx-[0.278vw] h-5 lg:h-[1.389vw] w-px lg:w-[0.069vw] bg-border" />
-            <UserMenu
-              user={{
-                email: user.email,
-                fullName: user.fullName || user.email,
-                avatarUrl: null,
-              }}
-              settingsHref="/homeowner/settings/account"
-              compact
-            />
-          </div>
+          <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />
+        }
+        footerUser={
+          <UserMenu
+            user={{
+              email: user.email,
+              fullName: user.fullName || user.email,
+              avatarUrl: null,
+            }}
+            settingsHref="/homeowner/settings"
+          />
         }
       >
         {children}

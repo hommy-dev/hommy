@@ -16,7 +16,7 @@ export default async function AdminLayout({
       navItems={ADMIN_NAV}
       brandHref="/admin"
       brandLabel="Homei Admin"
-      topRight={
+      footerUser={
         <UserMenu
           user={{
             email: user.email,
@@ -24,7 +24,6 @@ export default async function AdminLayout({
             avatarUrl: null,
           }}
           settingsHref="/admin/settings"
-          compact
         />
       }
     >
