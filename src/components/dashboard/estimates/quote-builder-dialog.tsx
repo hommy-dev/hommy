@@ -24,9 +24,12 @@ const blankRow = (): Row => ({ label: "", amount: "" });
 export function QuoteBuilderDialog({
   projectId,
   triggerLabel = "Build quote",
+  triggerClassName,
 }: {
   projectId: string;
   triggerLabel?: string;
+  /** Override the trigger button styling (e.g. to match a button cluster). */
+  triggerClassName?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -96,7 +99,10 @@ export function QuoteBuilderDialog({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="rounded-md lg:rounded-[0.556vw] bg-primary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          className={
+            triggerClassName ??
+            "rounded-md lg:rounded-[0.556vw] bg-primary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          }
         >
           {triggerLabel}
         </button>

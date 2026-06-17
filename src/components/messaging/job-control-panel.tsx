@@ -7,7 +7,6 @@ import type { JobPanel } from "@/lib/data/jobs";
 import { acceptEstimate } from "@/lib/actions/accept-estimate";
 import { advanceProjectStage } from "@/lib/actions/projects";
 import { showToast } from "@/components/ui/toast";
-import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -20,10 +19,11 @@ import { JobDetailContent } from "@/components/dashboard/jobs/job-detail-content
 import { BOARD_META } from "@/components/dashboard/jobs/board-meta";
 
 /**
- * The chat "control room" bar: a slim row under the header with the job status,
- * the quote total, the action this viewer may take, and a Details button that
- * opens the full job detail in a right-side Sheet. Actions are gated on the
- * panel's server-resolved permissions, never the URL.
+ * The chat "control room" controls: a compact inline cluster shown on the RIGHT
+ * of the conversation header — the job status, the quote total, the action this
+ * viewer may take, and a Details button that opens the full job detail in a
+ * right-side Sheet. Actions are gated on the panel's server-resolved
+ * permissions, never the URL.
  */
 export function JobControlPanel({ panel }: { panel: JobPanel }) {
   const router = useRouter();
@@ -59,61 +59,39 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
     });
   }
 
+  // One size for every button in the cluster so the row reads as a set.
+  const btnBase =
+    "inline-flex h-8 lg:h-[2.222vw] shrink-0 items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] px-3 lg:px-[0.833vw] text-sm lg:text-[0.833vw] font-medium transition-colors disabled:opacity-60";
+  const btnPrimary = cn(btnBase, "bg-primary text-primary-foreground hover:bg-primary/90");
+  const btnOutline = cn(btnBase, "border border-border bg-card text-foreground hover:bg-muted");
+
   return (
-    <div className="flex items-center gap-3 lg:gap-[0.833vw] border-b border-border bg-muted/30 px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw]">
-      <span
-        className={cn(
-          "shrink-0 rounded-full px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium",
-          meta.pill,
-        )}
-      >
-        {meta.label}
-      </span>
-      <span className="hidden min-w-0 flex-1 truncate text-sm lg:text-[0.903vw] text-muted-foreground sm:block">
-        {detail.lead.subtypes.join(", ") || detail.serviceName}
-      </span>
-      {quote ? (
-        <span className="shrink-0 text-sm lg:text-[0.903vw] font-semibold tabular-nums">
-          {quote.total ? formatCurrency(quote.total) : "—"}
-        </span>
+    <div className="flex shrink-0 items-center gap-2 lg:gap-[0.556vw]">
+      {panel.canAccept ? (
+        <button type="button" onClick={accept} disabled={pending} className={btnPrimary}>
+          {pending ? "Accepting…" : "Accept quote"}
+        </button>
+      ) : null}
+      {panel.canQuote && detail.projectId ? (
+        <QuoteBuilderDialog
+          projectId={detail.projectId}
+          triggerLabel={quote ? "Update quote" : "Send quote"}
+          triggerClassName={btnPrimary}
+        />
+      ) : null}
+      {panel.canComplete ? (
+        <button type="button" onClick={markCompleted} disabled={pending} className={btnOutline}>
+          {pending ? "Saving…" : "Mark completed"}
+        </button>
       ) : null}
 
-      <div className="ml-auto flex shrink-0 items-center gap-2 lg:gap-[0.556vw] sm:ml-0">
-        {panel.canAccept ? (
-          <button
-            type="button"
-            onClick={accept}
-            disabled={pending}
-            className="rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:opacity-60"
-          >
-            {pending ? "Accepting…" : "Accept quote"}
-          </button>
-        ) : null}
-        {panel.canQuote && detail.projectId ? (
-          <QuoteBuilderDialog
-            projectId={detail.projectId}
-            triggerLabel={quote ? "Update quote" : "Send quote"}
-          />
-        ) : null}
-        {panel.canComplete ? (
-          <button
-            type="button"
-            onClick={markCompleted}
-            disabled={pending}
-            className="rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-medium transition-colors hover:bg-muted disabled:opacity-60"
-          >
-            {pending ? "Saving…" : "Mark completed"}
-          </button>
-        ) : null}
-
-        <button
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] border border-border px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <PanelRightOpen className="size-4 lg:size-[1.111vw]" strokeWidth={2} /> Details
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setSheetOpen(true)}
+        className={cn(btnOutline, "text-muted-foreground hover:text-foreground")}
+      >
+        <PanelRightOpen className="size-4 lg:size-[1.111vw]" strokeWidth={2} /> Details
+      </button>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="data-[side=right]:sm:max-w-md lg:data-[side=right]:sm:max-w-[34vw]">

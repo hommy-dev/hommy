@@ -10,13 +10,18 @@ import { db } from '@/lib/db'
 import { contractorMembers, conversationParticipants, messages, users } from '@/lib/db/schema'
 import { getRequiredUserId } from '@/lib/auth/session'
 import {
+  getConversationForUser,
   getConversationRecipientUserIds,
+  listConversationsForUser,
   listMessages,
   meConditionForUser,
   resolveParticipantForUser,
+  type ConversationDetail,
+  type ConversationSummary,
   type ParticipantIdentity,
   type ThreadMessage,
 } from '@/lib/data/conversations'
+import { getJobPanelForConversation, type JobPanel } from '@/lib/data/jobs'
 import { sendNotification } from '@/lib/notifications'
 import { broadcastUserEvent } from '@/lib/realtime/user-events'
 import { sendRealtimeBroadcast } from '@/lib/realtime/broadcast'
@@ -109,6 +114,40 @@ export async function markConversationRead(conversationId: string): Promise<Mark
     console.error('[markConversationRead] failed', err)
     return { ok: false, error: 'DB_ERROR', message: 'Could not update.' }
   }
+}
+
+/** The viewer's inbox rows — fetched client-side so the rail chrome paints first. */
+export async function listConversationSummaries(): Promise<ConversationSummary[]> {
+  const userId = await getRequiredUserId()
+  return listConversationsForUser(userId)
+}
+
+export type FetchThreadResult =
+  | {
+      ok: true
+      detail: ConversationDetail
+      messages: ThreadMessage[]
+      hasMore: boolean
+      panel: JobPanel | null
+    }
+  | { ok: false }
+
+/**
+ * Everything the client thread needs in one round-trip: the header detail, the
+ * first page of messages, and the job control panel — fetched in parallel. The
+ * client caches the result so revisits are instant; this is the only call a
+ * conversation switch makes (no full page navigation).
+ */
+export async function fetchThread(conversationId: string): Promise<FetchThreadResult> {
+  const userId = await getRequiredUserId()
+  const detail = await getConversationForUser(conversationId, userId)
+  if (!detail) return { ok: false }
+
+  const [page, panel] = await Promise.all([
+    listMessages(conversationId, detail.me, { limit: 40 }),
+    getJobPanelForConversation(conversationId, userId),
+  ])
+  return { ok: true, detail, messages: page.messages, hasMore: page.hasMore, panel }
 }
 
 export type LoadOlderResult =

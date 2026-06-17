@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { SVGIcon } from "@/components/ui/svg-icon";
 import { Icon } from "@/components/ui/icon";
+import { cn } from "@/lib/utils";
 import { formatUnreadBadge } from "@/utils/format/unread";
 import {
   type DashboardNavItem,
@@ -68,6 +69,9 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname() ?? "";
   const getUnreadForHref = (href: string) => navUnreadCounts?.[href] ?? 0;
+  // The messaging surface manages its own scroll and fills the inset edge-to-edge
+  // (no page padding / panel frame). Other routes keep the comfortable padding.
+  const isFullBleed = /\/messages(\/|$)/.test(pathname);
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -162,7 +166,14 @@ export function DashboardShell({
             </div>
           </header>
 
-          <div className="scrollbar-thin flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden p-6 lg:p-[1.667vw]">
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col",
+              isFullBleed
+                ? "overflow-hidden"
+                : "scrollbar-thin overflow-y-auto overflow-x-hidden p-6 lg:p-[1.667vw]",
+            )}
+          >
             {children}
           </div>
         </SidebarInset>

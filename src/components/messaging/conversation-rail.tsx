@@ -5,38 +5,56 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import type { ConversationSummary } from "@/lib/data/conversations";
+import { listConversationSummaries } from "@/lib/actions/messages";
 import { createClient } from "@/lib/supabase/client";
 import { USER_EVENTS, type UserEventPayload } from "@/lib/realtime/user-events";
 import { formatDistanceToNow } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SVGIcon } from "@/components/ui/svg-icon";
 import { ParticipantAvatar } from "./participant-avatar";
+import { publishSummaries, prefetchThread } from "./messaging-store";
 
 /**
- * The conversation rail: search box + the list of conversations. Holds the
- * client-side search filter and a live subscription to the viewer's `user:{id}`
- * channel, so a new message patches the matching row in place (preview, time,
- * unread dot, reorder) without waiting for a server round-trip — for messages
- * the viewer receives AND ones they send themselves.
+ * The conversation rail. The chrome (title + search) renders instantly; only the
+ * conversation LIST loads — fetched client-side and then kept live by a
+ * subscription to the viewer's `user:{id}` channel (each message patches the
+ * matching row in place: preview, time, unread dot, reorder). A message for an
+ * unknown conversation triggers a refetch so brand-new threads appear.
  */
 export function ConversationRail({
-  conversations,
   basePath,
   userId,
 }: {
-  conversations: ConversationSummary[];
   basePath: string;
   userId: string;
 }) {
   const pathname = usePathname();
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState(conversations);
+  const [items, setItems] = useState<ConversationSummary[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Reconcile with the server snapshot whenever it changes (router.refresh from
-  // the user-events hook, or navigation). The server is authoritative; any local
-  // patch newer than the snapshot self-heals on the next message/refresh.
+  // Load the list once on mount (chrome is already on screen).
+  const refetch = useCallback(() => {
+    listConversationSummaries()
+      .then((list) => setItems(list))
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
-    setItems(conversations);
-  }, [conversations]);
+    let alive = true;
+    listConversationSummaries()
+      .then((list) => {
+        if (alive) setItems(list);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // Latest pathname for the subscription callback (avoids resubscribing).
   const pathnameRef = useRef(pathname);
@@ -46,11 +64,15 @@ export function ConversationRail({
 
   const handleMessage = useCallback(
     (p: UserEventPayload["message:new"] | undefined) => {
-      // System messages omit the preview; the user-events hook refreshes for them.
+      // System messages omit the preview; their refresh is handled elsewhere.
       if (!p?.conversationId || !p.preview) return;
+      let known = true;
       setItems((prev) => {
         const idx = prev.findIndex((c) => c.id === p.conversationId);
-        if (idx === -1) return prev; // unknown convo → router.refresh reconciles
+        if (idx === -1) {
+          known = false;
+          return prev;
+        }
         const viewing = pathnameRef.current === `${basePath}/${p.conversationId}`;
         const updated: ConversationSummary = {
           ...prev[idx],
@@ -60,8 +82,9 @@ export function ConversationRail({
         };
         return [updated, ...prev.filter((_, i) => i !== idx)];
       });
+      if (!known) refetch(); // a brand-new conversation — pull the full list
     },
-    [basePath],
+    [basePath, refetch],
   );
   const handleMessageRef = useRef(handleMessage);
   useEffect(() => {
@@ -82,17 +105,10 @@ export function ConversationRail({
     };
   }, [userId]);
 
-  // Opening a thread clears its unread dot immediately (markConversationRead
-  // persists it server-side).
+  // Publish summaries so the thread pane can paint its header instantly.
   useEffect(() => {
-    if (!pathname.startsWith(`${basePath}/`)) return;
-    const activeId = pathname.slice(basePath.length + 1);
-    setItems((prev) =>
-      prev.some((c) => c.id === activeId && c.hasUnread)
-        ? prev.map((c) => (c.id === activeId ? { ...c, hasUnread: false } : c))
-        : prev,
-    );
-  }, [pathname, basePath]);
+    publishSummaries(items);
+  }, [items]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -104,50 +120,67 @@ export function ConversationRail({
 
   return (
     <>
-      <div className="space-y-3 lg:space-y-[0.833vw] border-b border-border p-4 lg:p-[1.111vw]">
-        <h1 className="font-semibold lg:text-[1.111vw]">Messages</h1>
+      <div className="px-4 pb-2 pt-4 lg:px-[1.111vw] lg:pb-[0.556vw] lg:pt-[1.111vw]">
+        <h1 className="text-base lg:text-[1.25vw] font-semibold tracking-tight">Messages</h1>
+      </div>
+      <div className="px-3 pb-2 lg:px-[0.556vw] lg:pb-[0.556vw]">
         <div className="relative">
           <Search
             className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
             strokeWidth={2}
           />
           <input
-            type="search"
+            type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search…"
-            className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card pl-9 lg:pl-[2.5vw] pr-3 lg:pr-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
+            placeholder="Search messages"
+            className="h-9 lg:h-[2.5vw] w-full rounded lg:rounded-[0.4vw] border pl-9 lg:pl-[2.5vw] pr-9 lg:pr-[2.5vw] text-sm lg:text-[0.903vw] outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
+              className="absolute right-2 lg:right-[0.556vw] top-1/2 grid size-6 lg:size-[1.667vw] -translate-y-1/2 cursor-pointer place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <SVGIcon src="/icons/close.svg" className="size-3.5 lg:size-[0.972vw]" />
+            </button>
+          ) : null}
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {filtered.length === 0 ? (
-          <p className="p-6 lg:p-[1.667vw] text-center text-sm lg:text-[0.903vw] text-muted-foreground">
+      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 lg:px-[0.556vw]">
+        {loading && items.length === 0 ? (
+          <RailRowsSkeleton />
+        ) : filtered.length === 0 ? (
+          <p className="px-4 py-10 lg:px-[1.111vw] lg:py-[2.778vw] text-center text-sm lg:text-[0.903vw] text-muted-foreground">
             {query
               ? "No matches."
               : `No conversations yet. They’ll appear here once you connect with ${basePath.includes("homeowner") ? "a contractor" : "a homeowner"}.`}
           </p>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="space-y-0.5 lg:space-y-[0.139vw]">
             {filtered.map((c) => {
               const active = pathname === `${basePath}/${c.id}`;
+              // The open conversation reads as read, even before mark-read commits.
+              const unread = c.hasUnread && !active;
               return (
                 <li key={c.id}>
                   <Link
                     href={`${basePath}/${c.id}`}
+                    onPointerEnter={() => prefetchThread(c.id)}
                     className={cn(
-                      "flex items-center gap-3 lg:gap-[0.833vw] px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] transition-colors hover:bg-muted/40",
-                      active && "bg-muted/60",
+                      "flex items-center gap-3 lg:gap-[0.833vw] rounded lg:rounded-[0.4vw] px-2.5 py-2.5 lg:px-[0.694vw] lg:py-[0.694vw] transition-colors",
+                      active ? "bg-accent" : "hover:bg-muted/60",
                     )}
                   >
-                    <ParticipantAvatar name={c.otherName} />
+                    <ParticipantAvatar name={c.otherName} className="size-10 lg:size-[2.778vw] border" />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-2 lg:gap-[0.556vw]">
+                      <div className="flex items-center justify-between gap-2 lg:gap-[0.556vw]">
                         <p
                           className={cn(
                             "truncate text-sm lg:text-[0.972vw]",
-                            c.hasUnread ? "font-semibold text-foreground" : "font-medium text-foreground",
+                            unread ? "font-semibold text-foreground" : "font-medium text-foreground",
                           )}
                         >
                           {c.otherName}
@@ -155,24 +188,32 @@ export function ConversationRail({
                         {c.lastMessageAt ? (
                           <span
                             suppressHydrationWarning
-                            className="shrink-0 text-xs lg:text-[0.764vw] text-muted-foreground"
+                            className={cn(
+                              "shrink-0 text-[11px] lg:text-[0.764vw]",
+                              unread ? "font-medium text-primary" : "text-muted-foreground",
+                            )}
                           >
                             {formatDistanceToNow(new Date(c.lastMessageAt))}
                           </span>
                         ) : null}
                       </div>
-                      <p
-                        className={cn(
-                          "truncate text-xs lg:text-[0.833vw]",
-                          c.hasUnread ? "text-foreground/80" : "text-muted-foreground",
-                        )}
-                      >
-                        {c.lastMessageBody ?? "No messages yet"}
-                      </p>
+                      <div className="mt-0.5 lg:mt-[0.139vw] flex items-center justify-between gap-2 lg:gap-[0.556vw]">
+                        <p
+                          className={cn(
+                            "truncate text-xs lg:text-[0.833vw]",
+                            unread ? "text-foreground/90" : "text-muted-foreground",
+                          )}
+                        >
+                          {c.lastMessageBody ?? "No messages yet"}
+                        </p>
+                        {unread ? (
+                          <span
+                            aria-label="Unread"
+                            className="size-2 lg:size-[0.556vw] shrink-0 rounded-full bg-primary"
+                          />
+                        ) : null}
+                      </div>
                     </div>
-                    {c.hasUnread ? (
-                      <span aria-label="Unread" className="size-2 lg:size-[0.556vw] shrink-0 rounded-full bg-primary" />
-                    ) : null}
                   </Link>
                 </li>
               );
@@ -181,5 +222,25 @@ export function ConversationRail({
         )}
       </div>
     </>
+  );
+}
+
+/** Row placeholders shown only while the conversation list loads. */
+function RailRowsSkeleton() {
+  return (
+    <div className="space-y-0.5 lg:space-y-[0.139vw]">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-3 lg:gap-[0.833vw] px-2.5 py-2.5 lg:px-[0.694vw] lg:py-[0.694vw]"
+        >
+          <Skeleton className="size-10 lg:size-[2.778vw] shrink-0 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-2 lg:space-y-[0.556vw]">
+            <Skeleton className="h-3.5 lg:h-[0.972vw] w-32 lg:w-[8vw]" />
+            <Skeleton className="h-3 lg:h-[0.833vw] w-44 lg:w-[13vw]" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

@@ -11,7 +11,7 @@
     "email:test": "tsx scripts/test-email.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:seed:dev": "tsx scripts/seed.ts --dev",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx scripts/migrate.ts",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "test": "vitest --run",
