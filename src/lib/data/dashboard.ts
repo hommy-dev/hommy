@@ -1,11 +1,15 @@
 // Data layer for the contractor dashboard (v2).
 //
-// NOT cached ("use cache"): offers, counts, and pipeline state change constantly
-// and must be fresh (CODING_GUIDE.md §4). Runs on the privileged Drizzle
-// connection (RLS bypassed); authorization is enforced by scoping every query to
-// the caller's contractorId — resolved from their active membership.
+// Caching policy: live data (offers, counts, pipeline state, credit balance,
+// verification status) is NOT cached — it changes constantly and must be fresh
+// (CODING_GUIDE.md §4). Only static platform config (e.g. getRoofingSubtypes) is
+// `"use cache"`-d. In particular getContractorForUser is left uncached because
+// the row carries the live creditBalance shown in the header. Runs on the
+// privileged Drizzle connection (RLS bypassed); authorization is enforced by
+// scoping every query to the caller's contractorId — from their active membership.
 
 import { cache } from 'react'
+import { cacheLife, cacheTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { and, count, desc, eq, getTableColumns, inArray } from 'drizzle-orm'
 import {
@@ -158,8 +162,17 @@ export async function getContractorSubtypes(
   return row?.subtypes ?? []
 }
 
-/** All subtypes the roofing service offers (the pick-from list). */
+/**
+ * All subtypes the roofing service offers (the pick-from list).
+ *
+ * Cached cross-request: this is platform service config — it changes only when
+ * an admin edits the service catalog (no such action today), so it's safe to
+ * serve from cache. Any future editor must `updateTag("services")`.
+ */
 export async function getRoofingSubtypes(): Promise<string[]> {
+  'use cache'
+  cacheLife('static')
+  cacheTag('services')
   const [row] = await db
     .select({ subtypes: services.subtypes })
     .from(services)

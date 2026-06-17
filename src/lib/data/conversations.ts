@@ -9,7 +9,7 @@
 // participant check — every read is scoped to conversations the caller is in.
 
 import { cache } from 'react'
-import { and, desc, eq, inArray, lt, or, type SQL } from 'drizzle-orm'
+import { and, count, desc, eq, gt, inArray, isNull, lt, not, or, type SQL } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import {
   contractorMembers,
@@ -99,8 +99,14 @@ export async function resolveParticipant(
   return row ?? null
 }
 
-/** Every conversation the user is a party to, newest activity first. */
-export async function listConversationsForUser(userId: string): Promise<ConversationSummary[]> {
+/**
+ * Every conversation the user is a party to, newest activity first.
+ *
+ * React cache() dedupes per request: the messages layout (the rail) and the
+ * contractor layout's unread badge both resolve the same user's inbox, so
+ * without this it would build twice (~6 queries each).
+ */
+export const listConversationsForUser = cache(async (userId: string): Promise<ConversationSummary[]> => {
   const contractorIds = await getUserContractorIds(userId)
 
   const myParts = await db
@@ -206,28 +212,37 @@ export async function listConversationsForUser(userId: string): Promise<Conversa
   return summaries.sort(
     (a, b) => (b.lastMessageAt?.getTime() ?? 0) - (a.lastMessageAt?.getTime() ?? 0),
   )
-}
+})
 
-/** One conversation's header detail for the viewer (or null if not a party). */
-export async function getConversationForUser(
+/**
+ * One conversation's header detail for the viewer (or null if not a party).
+ *
+ * React cache() dedupes per request: the thread page resolves the detail, then
+ * getJobPanelForConversation resolves it again — without this the panel re-runs
+ * this whole waterfall.
+ */
+export const getConversationForUser = cache(async (
   conversationId: string,
   userId: string,
-): Promise<ConversationDetail | null> {
+): Promise<ConversationDetail | null> => {
   const contractorIds = await getUserContractorIds(userId)
   const me = await resolveParticipant(conversationId, userId, contractorIds)
   if (!me) return null
 
-  const [convo] = await db
-    .select({ id: conversations.id, contextType: conversations.contextType, contextId: conversations.contextId })
-    .from(conversations)
-    .where(eq(conversations.id, conversationId))
-    .limit(1)
+  // convo header and participant rows are independent — fetch in parallel.
+  const [[convo], parts] = await Promise.all([
+    db
+      .select({ id: conversations.id, contextType: conversations.contextType, contextId: conversations.contextId })
+      .from(conversations)
+      .where(eq(conversations.id, conversationId))
+      .limit(1),
+    db
+      .select({ type: conversationParticipants.participantType, id: conversationParticipants.participantId })
+      .from(conversationParticipants)
+      .where(eq(conversationParticipants.conversationId, conversationId)),
+  ])
   if (!convo) return null
 
-  const parts = await db
-    .select({ type: conversationParticipants.participantType, id: conversationParticipants.participantId })
-    .from(conversationParticipants)
-    .where(eq(conversationParticipants.conversationId, conversationId))
   const other = parts.find((p) => !(p.type === me.type && p.id === me.id))
 
   let otherName = 'Homeowner'
@@ -256,7 +271,7 @@ export async function getConversationForUser(
     otherAvatarUrl,
     otherKind,
   }
-}
+})
 
 /** A page of messages (newest `limit`, or older than `before`), oldest-first. */
 export async function listMessages(
@@ -302,11 +317,63 @@ export async function listMessages(
   }
 }
 
-/** Number of conversations with at least one unread message for this user. */
-export async function countUnreadConversations(userId: string): Promise<number> {
-  const summaries = await listConversationsForUser(userId)
-  return summaries.filter((s) => s.hasUnread).length
-}
+/**
+ * Number of conversations that are unread for this user — the sidebar badge.
+ *
+ * "Unread" matches listConversationsForUser exactly: the LATEST message in the
+ * conversation is from the other party (not the viewer) and newer than the
+ * viewer's lastReadAt. This is a single COUNT query (a DISTINCT ON latest-per-
+ * conversation joined to the viewer's participant rows), so every contractor
+ * page pays one round-trip instead of rebuilding the whole inbox.
+ *
+ * Edge: if the viewer is somehow both a `user` and a `contractor` participant in
+ * one conversation, DISTINCT ON keeps a single latest row — the same
+ * last-wins approximation as listConversationsForUser's meByConvo map.
+ */
+export const countUnreadConversations = cache(async (userId: string): Promise<number> => {
+  const contractorIds = await getUserContractorIds(userId)
+
+  // The viewer's participant identity per conversation (subquery).
+  const me = db
+    .select({
+      conversationId: conversationParticipants.conversationId,
+      type: conversationParticipants.participantType,
+      id: conversationParticipants.participantId,
+      lastReadAt: conversationParticipants.lastReadAt,
+    })
+    .from(conversationParticipants)
+    .where(meCondition(userId, contractorIds))
+    .as('me')
+
+  // Latest message per conversation the viewer is in, carrying the me columns.
+  const latest = db
+    .selectDistinctOn([messages.conversationId], {
+      conversationId: messages.conversationId,
+      senderType: messages.senderType,
+      senderId: messages.senderId,
+      createdAt: messages.createdAt,
+      meType: me.type,
+      meId: me.id,
+      lastReadAt: me.lastReadAt,
+    })
+    .from(messages)
+    .innerJoin(me, eq(me.conversationId, messages.conversationId))
+    .orderBy(messages.conversationId, desc(messages.createdAt))
+    .as('latest')
+
+  const [row] = await db
+    .select({ value: count() })
+    .from(latest)
+    .where(
+      and(
+        // NOT (latest message is mine) — both operands are always present, so the
+        // `and` is never undefined here.
+        not(and(eq(latest.senderType, latest.meType), eq(latest.senderId, latest.meId))!),
+        or(isNull(latest.lastReadAt), gt(latest.createdAt, latest.lastReadAt)),
+      ),
+    )
+  return row?.value ?? 0
+})
 
 /**
  * User ids to notify about activity in a conversation: each user participant,

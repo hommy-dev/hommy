@@ -3,6 +3,7 @@
 // the ledger is the append-only credit_transactions source of truth.
 
 import { and, desc, eq } from 'drizzle-orm'
+import { cacheLife, cacheTag } from 'next/cache'
 import { db } from '@/lib/db'
 import {
   contractors,
@@ -112,7 +113,15 @@ export async function getBilling(contractorId: string): Promise<BillingData> {
   }
 }
 
+/**
+ * The published pricing tiers. Cached cross-request: plan config is platform
+ * data that changes only when an admin edits the catalog. Any future editor must
+ * `updateTag("plans")`. (Per-contractor billing in getBilling stays live.)
+ */
 export async function getActivePlans(): Promise<PlanOption[]> {
+  'use cache'
+  cacheLife('static')
+  cacheTag('plans')
   return db
     .select({
       id: plans.id,

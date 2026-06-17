@@ -21,13 +21,17 @@ const ROLE_HOMES: Record<Role, string> = {
  */
 const getAuthUser = cache(async () => {
   const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
+  // getClaims() verifies the JWT locally — no network round-trip to Supabase
+  // Auth — when the project uses asymmetric JWT signing keys. On the legacy
+  // shared secret it falls back to a network call (same result, just slower).
+  const { data, error } = await supabase.auth.getClaims()
+  const userId = data?.claims?.sub
+  if (error || !userId) return null
   try {
     const [dbUser] = await db
       .select()
       .from(users)
-      .where(eq(users.id, user.id))
+      .where(eq(users.id, userId))
       .limit(1)
     return dbUser ?? null
   } catch {

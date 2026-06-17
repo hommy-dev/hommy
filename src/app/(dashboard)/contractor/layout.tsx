@@ -23,17 +23,19 @@ export default async function DashboardLayout({
   if (!contractor) {
     return <NoCompany />
   }
-  const companies = await getUserCompanies(user.id)
   const personName = user.fullName || user.email
+  // getUserCompanies doesn't depend on the active company, so fold it into the
+  // parallel batch instead of awaiting it in series.
+  const [companies, unreadCount, unreadMessages] = await Promise.all([
+    getUserCompanies(user.id),
+    getUnreadCountAction(),
+    countUnreadConversations(user.id),
+  ])
   const navCompanies = companies.map((c) => ({
     id: c.id,
     name: c.name ?? "Your company",
     logoUrl: c.logoUrl,
   }))
-  const [unreadCount, unreadMessages] = await Promise.all([
-    getUnreadCountAction(),
-    countUnreadConversations(user.id),
-  ])
 
   return (
     <>
