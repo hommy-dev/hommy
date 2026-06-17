@@ -56,6 +56,7 @@ export function MessageBubble({
       >
         <p className="whitespace-pre-wrap break-words">{message.body}</p>
         <span
+          suppressHydrationWarning
           className={cn(
             'mt-1 lg:mt-[0.278vw] block text-right text-[10px] lg:text-[0.694vw]',
             mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
@@ -72,7 +73,10 @@ export function MessageBubble({
 export function DayDivider({ iso }: { iso: string }) {
   return (
     <div className="flex justify-center py-2 lg:py-[0.556vw]">
-      <span className="rounded-full bg-muted px-3 lg:px-[0.833vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.764vw] font-medium text-muted-foreground">
+      <span
+        suppressHydrationWarning
+        className="rounded-full bg-muted px-3 lg:px-[0.833vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.764vw] font-medium text-muted-foreground"
+      >
         {dayLabel(iso)}
       </span>
     </div>

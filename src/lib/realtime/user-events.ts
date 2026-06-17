@@ -56,7 +56,15 @@ export type UserEventPayload = {
   'lead:updated': { leadId: string }
   'quote:new': { estimateId: string }
   'quote:accepted': { estimateId: string }
-  'message:new': { conversationId: string }
+  // `preview`/`createdAt`/`mine` are present for chat messages (let the inbox
+  // rail patch in place); system-message broadcasts omit them and fall back to a
+  // soft refresh. `mine` marks the sender's own copy (no refresh needed).
+  'message:new': {
+    conversationId: string
+    preview?: string
+    createdAt?: string
+    mine?: boolean
+  }
   'credits:changed': { balance: number }
 }
 

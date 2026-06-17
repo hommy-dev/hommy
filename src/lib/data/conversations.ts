@@ -100,6 +100,49 @@ export async function resolveParticipant(
 }
 
 /**
+ * SQL predicate for "this participant row is the viewer", resolving the viewer's
+ * contractor seats via a correlated subquery instead of a separate
+ * getUserContractorIds round-trip. Use in hot single-conversation paths (send,
+ * mark-read) where one query beats two.
+ */
+export function meConditionForUser(userId: string): SQL | undefined {
+  const myContractors = db
+    .select({ id: contractorMembers.contractorId })
+    .from(contractorMembers)
+    .where(and(eq(contractorMembers.userId, userId), eq(contractorMembers.status, 'active')))
+  return or(
+    and(
+      eq(conversationParticipants.participantType, 'user'),
+      eq(conversationParticipants.participantId, userId),
+    ),
+    and(
+      eq(conversationParticipants.participantType, 'contractor'),
+      inArray(conversationParticipants.participantId, myContractors),
+    ),
+  )
+}
+
+/**
+ * Like resolveParticipant, but folds the contractor-seats lookup into the same
+ * query — one DB round-trip total. For server actions that only have the user id.
+ */
+export async function resolveParticipantForUser(
+  conversationId: string,
+  userId: string,
+): Promise<(ParticipantIdentity & { lastReadAt: Date | null }) | null> {
+  const [row] = await db
+    .select({
+      type: conversationParticipants.participantType,
+      id: conversationParticipants.participantId,
+      lastReadAt: conversationParticipants.lastReadAt,
+    })
+    .from(conversationParticipants)
+    .where(and(eq(conversationParticipants.conversationId, conversationId), meConditionForUser(userId)))
+    .limit(1)
+  return row ?? null
+}
+
+/**
  * Every conversation the user is a party to, newest activity first.
  *
  * React cache() dedupes per request: the messages layout (the rail) and the

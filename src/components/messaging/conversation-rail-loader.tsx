@@ -15,5 +15,5 @@ export async function ConversationRailLoader({
   basePath: string;
 }) {
   const conversations = await listConversationsForUser(userId);
-  return <ConversationRail conversations={conversations} basePath={basePath} />;
+  return <ConversationRail conversations={conversations} basePath={basePath} userId={userId} />;
 }

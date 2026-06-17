@@ -52,7 +52,13 @@ export function useRealtimeUserEvents(userId: string, _role: Role) {
       .on('broadcast', { event: USER_EVENTS.LEAD_UPDATED }, refresh)
       .on('broadcast', { event: USER_EVENTS.QUOTE_NEW }, refresh)
       .on('broadcast', { event: USER_EVENTS.QUOTE_ACCEPTED }, refresh)
-      .on('broadcast', { event: USER_EVENTS.MESSAGE_NEW }, refresh)
+      // The inbox rail patches chat messages in place; only refresh the sidebar
+      // unread badge for messages from OTHERS (the sender's own send changes no
+      // count). `mine` is set on the sender's own copy.
+      .on('broadcast', { event: USER_EVENTS.MESSAGE_NEW }, (msg) => {
+        if ((msg.payload as { mine?: boolean } | undefined)?.mine) return
+        refresh()
+      })
       .on('broadcast', { event: USER_EVENTS.CREDITS_CHANGED }, refresh)
       .subscribe((status) => {
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {

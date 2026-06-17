@@ -49,6 +49,20 @@ export async function getRequiredUser(requiredRole?: Role) {
   return dbUser
 }
 
+/**
+ * Just the authenticated user's id, straight from the verified JWT claims — no
+ * `users` table read. For hot server actions (e.g. sending a message) that only
+ * need the id and enforce authorization downstream (the participant check), this
+ * skips a DB round-trip. Redirects to login when there's no valid session.
+ */
+export const getRequiredUserId = cache(async (): Promise<string> => {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.getClaims()
+  const userId = data?.claims?.sub
+  if (error || !userId) redirect('/auth/login')
+  return userId
+})
+
 export async function getOptionalUser() {
   try {
     return await getAuthUser()

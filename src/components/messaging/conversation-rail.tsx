@@ -1,37 +1,106 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import type { ConversationSummary } from "@/lib/data/conversations";
+import { createClient } from "@/lib/supabase/client";
+import { USER_EVENTS, type UserEventPayload } from "@/lib/realtime/user-events";
 import { formatDistanceToNow } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ParticipantAvatar } from "./participant-avatar";
 
 /**
  * The conversation rail: search box + the list of conversations. Holds the
- * client-side search filter. Rendered inside MessagesShell's <aside> and fed by
- * an async loader under a <Suspense> boundary, so the list streams in while the
- * shell (and the open thread) paint immediately.
+ * client-side search filter and a live subscription to the viewer's `user:{id}`
+ * channel, so a new message patches the matching row in place (preview, time,
+ * unread dot, reorder) without waiting for a server round-trip — for messages
+ * the viewer receives AND ones they send themselves.
  */
 export function ConversationRail({
   conversations,
   basePath,
+  userId,
 }: {
   conversations: ConversationSummary[];
   basePath: string;
+  userId: string;
 }) {
   const pathname = usePathname();
   const [query, setQuery] = useState("");
+  const [items, setItems] = useState(conversations);
+
+  // Reconcile with the server snapshot whenever it changes (router.refresh from
+  // the user-events hook, or navigation). The server is authoritative; any local
+  // patch newer than the snapshot self-heals on the next message/refresh.
+  useEffect(() => {
+    setItems(conversations);
+  }, [conversations]);
+
+  // Latest pathname for the subscription callback (avoids resubscribing).
+  const pathnameRef = useRef(pathname);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+
+  const handleMessage = useCallback(
+    (p: UserEventPayload["message:new"] | undefined) => {
+      // System messages omit the preview; the user-events hook refreshes for them.
+      if (!p?.conversationId || !p.preview) return;
+      setItems((prev) => {
+        const idx = prev.findIndex((c) => c.id === p.conversationId);
+        if (idx === -1) return prev; // unknown convo → router.refresh reconciles
+        const viewing = pathnameRef.current === `${basePath}/${p.conversationId}`;
+        const updated: ConversationSummary = {
+          ...prev[idx],
+          lastMessageBody: p.preview ?? prev[idx].lastMessageBody,
+          lastMessageAt: p.createdAt ? new Date(p.createdAt) : prev[idx].lastMessageAt,
+          hasUnread: p.mine ? false : !viewing,
+        };
+        return [updated, ...prev.filter((_, i) => i !== idx)];
+      });
+    },
+    [basePath],
+  );
+  const handleMessageRef = useRef(handleMessage);
+  useEffect(() => {
+    handleMessageRef.current = handleMessage;
+  }, [handleMessage]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const supabase = createClient();
+    const channel = supabase.channel(`user:${userId}`, { config: { private: true } });
+    channel
+      .on("broadcast", { event: USER_EVENTS.MESSAGE_NEW }, (msg) =>
+        handleMessageRef.current(msg.payload as UserEventPayload["message:new"] | undefined),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
+
+  // Opening a thread clears its unread dot immediately (markConversationRead
+  // persists it server-side).
+  useEffect(() => {
+    if (!pathname.startsWith(`${basePath}/`)) return;
+    const activeId = pathname.slice(basePath.length + 1);
+    setItems((prev) =>
+      prev.some((c) => c.id === activeId && c.hasUnread)
+        ? prev.map((c) => (c.id === activeId ? { ...c, hasUnread: false } : c))
+        : prev,
+    );
+  }, [pathname, basePath]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return conversations;
-    return conversations.filter((c) =>
+    if (!q) return items;
+    return items.filter((c) =>
       [c.otherName, c.lastMessageBody].filter(Boolean).join(" ").toLowerCase().includes(q),
     );
-  }, [conversations, query]);
+  }, [items, query]);
 
   return (
     <>
@@ -84,7 +153,10 @@ export function ConversationRail({
                           {c.otherName}
                         </p>
                         {c.lastMessageAt ? (
-                          <span className="shrink-0 text-xs lg:text-[0.764vw] text-muted-foreground">
+                          <span
+                            suppressHydrationWarning
+                            className="shrink-0 text-xs lg:text-[0.764vw] text-muted-foreground"
+                          >
                             {formatDistanceToNow(new Date(c.lastMessageAt))}
                           </span>
                         ) : null}
