@@ -9,7 +9,7 @@
 // participant check — every read is scoped to conversations the caller is in.
 
 import { cache } from 'react'
-import { and, count, desc, eq, gt, inArray, isNull, lt, not, or, type SQL } from 'drizzle-orm'
+import { and, count, desc, eq, gt, inArray, isNull, lt, not, or, sql, type SQL } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import {
   contractorMembers,
@@ -366,9 +366,16 @@ export const countUnreadConversations = cache(async (userId: string): Promise<nu
     .from(latest)
     .where(
       and(
-        // NOT (latest message is mine) — both operands are always present, so the
-        // `and` is never undefined here.
-        not(and(eq(latest.senderType, latest.meType), eq(latest.senderId, latest.meId))!),
+        // NOT (latest message is mine). sender_type and participant_type are
+        // distinct Postgres enum types and can't be compared directly, so compare
+        // them as text — exactly the string comparison listConversationsForUser
+        // does in JS. (senderId/participantId share a type, so eq is fine.)
+        not(
+          and(
+            sql`${latest.senderType}::text = ${latest.meType}::text`,
+            eq(latest.senderId, latest.meId),
+          )!,
+        ),
         or(isNull(latest.lastReadAt), gt(latest.createdAt, latest.lastReadAt)),
       ),
     )

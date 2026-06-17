@@ -39,3 +39,32 @@ export function ThreadPaneSkeleton() {
     </div>
   )
 }
+
+/**
+ * Loading placeholder for the conversation rail (search header + a few rows).
+ * Fills MessagesShell's <aside> while listConversationsForUser streams in.
+ */
+export function ConversationRailSkeleton() {
+  return (
+    <>
+      <div className="space-y-3 lg:space-y-[0.833vw] border-b border-border p-4 lg:p-[1.111vw]">
+        <Skeleton className="h-5 lg:h-[1.389vw] w-24 lg:w-[6vw]" />
+        <Skeleton className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw]" />
+      </div>
+      <div className="min-h-0 flex-1 divide-y divide-border overflow-hidden">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 lg:gap-[0.833vw] px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]"
+          >
+            <Skeleton className="size-9 lg:size-[2.5vw] shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-1.5 lg:space-y-[0.417vw]">
+              <Skeleton className="h-4 lg:h-[1.111vw] w-32 lg:w-[8vw]" />
+              <Skeleton className="h-3 lg:h-[0.833vw] w-40 lg:w-[12vw]" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
