@@ -17,7 +17,7 @@
 // accept can always charge the win.
 
 import { z } from 'zod'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import {
@@ -39,7 +39,7 @@ import {
   type Tx,
 } from '@/lib/credits/ledger'
 import { recordScoreEvent } from '@/lib/reputation/score'
-import { SCORE_DELTAS, LEAD_SLA } from '@/lib/config/tunables'
+import { SCORE_DELTAS, FAST_ENGAGE_FRACTION, responseWindowHours, quoteReminderHours } from '@/lib/config/tunables'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
 type EngageError =
@@ -91,6 +91,7 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
           status: leads.status,
           serviceId: leads.serviceId,
           homeownerId: leads.homeownerId,
+          urgency: leads.urgency,
           engagementCreditCost: leads.engagementCreditCost,
           awardCreditCost: leads.awardCreditCost,
         })
@@ -103,7 +104,7 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
 
       // This company's offer row.
       const [recipient] = await tx
-        .select({ status: leadRecipients.status })
+        .select({ status: leadRecipients.status, offeredAt: leadRecipients.offeredAt })
         .from(leadRecipients)
         .where(and(eq(leadRecipients.leadId, leadId), eq(leadRecipients.contractorId, contractor.id)))
         .for('update')
@@ -128,9 +129,12 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
       })
 
       const now = new Date()
+      // slaDeadline here is the gentle QUOTE-REMINDER time (not a deadline): if
+      // they haven't quoted by then, the cron sends one friendly nudge. No penalty.
+      const remindAt = new Date(now.getTime() + quoteReminderHours(lead.urgency) * 60 * 60 * 1000)
       await tx
         .update(leadRecipients)
-        .set({ status: 'engaged', engagedAt: now, respondedAt: now })
+        .set({ status: 'engaged', engagedAt: now, respondedAt: now, slaDeadline: remindAt })
         .where(and(eq(leadRecipients.leadId, leadId), eq(leadRecipients.contractorId, contractor.id)))
 
       const contactId = await upsertContact(tx, contractor.id, lead.homeownerId)
@@ -167,10 +171,14 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
         ].filter((v): v is NonNullable<typeof v> => v !== null),
       )
 
+      // Reward speed: a true fast engage (within FAST_ENGAGE_FRACTION of the
+      // urgency window) earns the bonus; a normal in-window engage earns less.
+      const elapsedMs = now.getTime() - recipient.offeredAt.getTime()
+      const fast = elapsedMs <= FAST_ENGAGE_FRACTION * responseWindowHours(lead.urgency) * 60 * 60 * 1000
       await recordScoreEvent(tx, {
         contractorId: contractor.id,
         kind: 'fast_engagement',
-        delta: SCORE_DELTAS.fast_engagement,
+        delta: fast ? SCORE_DELTAS.fast_engagement : SCORE_DELTAS.engagement,
         sourceType: 'lead',
         sourceId: leadId,
       })
@@ -218,9 +226,11 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
 }
 
 /**
- * Mark an offer as viewed (free) and tighten its SLA to the post-view window.
- * Best-effort and idempotent: only the first view (status `offered`) advances
- * the row; re-opening a viewed lead is a no-op.
+ * Mark an offer as viewed (free). Viewing is TELEMETRY only — it powers the
+ * homeowner's "X pros viewed your job" signal and softens the ignore penalty,
+ * but it does NOT change the deadline (one urgency-based clock; no perverse
+ * "opening it hurts me"). Best-effort and idempotent: only the first view
+ * (status `offered`) advances the row; re-opening a viewed lead is a no-op.
  */
 export async function markLeadViewed(leadId: string): Promise<void> {
   const user = await getRequiredUser('contractor')
@@ -234,7 +244,6 @@ export async function markLeadViewed(leadId: string): Promise<void> {
       .set({
         status: 'viewed',
         viewedAt: new Date(),
-        slaDeadline: sql`LEAST(${leadRecipients.slaDeadline}, now() + ${`${LEAD_SLA.POST_VIEW_HOURS} hours`}::interval)`,
       })
       .where(
         and(

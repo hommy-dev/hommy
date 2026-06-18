@@ -1,12 +1,11 @@
 // Lead cascade (docs §4.1 step 6). When an offer expires or is declined, offer
 // the lead to ONE more eligible contractor that hasn't been offered it yet —
-// keeping a rolling set of live offers until N engage or the lead closes.
+// topping up the live offers until the lead is awarded or closed.
 
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { leadRecipients, leads } from '@/lib/db/schema'
 import { findEligibleContractors } from '@/lib/leads/matching'
-import { LEAD_SLA } from '@/lib/config/tunables'
 import type { Tx } from '@/lib/credits/ledger'
 
 /**
@@ -43,7 +42,6 @@ export async function offerToNextContractor(
     leadId,
     contractorId: next.contractorId,
     status: 'offered',
-    slaDeadline: new Date(Date.now() + LEAD_SLA.NO_VIEW_HOURS * 60 * 60 * 1000),
   })
   return next.contractorId
 }

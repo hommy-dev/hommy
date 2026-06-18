@@ -12,11 +12,13 @@
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import {
+  contractors,
   estimates,
   homeowners,
   leadRecipients,
   leads,
   projects,
+  reviews,
   services,
   users,
 } from '@/lib/db/schema'
@@ -177,6 +179,16 @@ export type JobDetail = {
   boardStatus: BoardStatus
   recipientStatus: RecipientStatus
   homeowner: { name: string | null; phone: string | null; email: string }
+  /** The company on this row — decision info shown to the homeowner. */
+  contractor: {
+    id: string
+    companyName: string | null
+    logoUrl: string | null
+    avgRating: number | null
+    totalReviews: number
+    verified: boolean
+    yearsInBusiness: number | null
+  }
   lead: {
     address: string | null
     city: string | null
@@ -192,6 +204,9 @@ export type JobDetail = {
   milestones: JobMilestone[]
   latestQuote: { estimateId: string; total: string | null; status: EstimateStatus; sentAt: Date | null } | null
   estimates: EstimateSummary[]
+  /** Whether the homeowner has already submitted a review for this job. */
+  reviewSubmitted: boolean
+  reviewRating: number | null
 }
 
 /**
@@ -223,6 +238,12 @@ export async function getJobDetailForContractor(
       homeownerName: users.fullName,
       homeownerPhone: users.phone,
       homeownerEmail: users.email,
+      contractorCompanyName: contractors.companyName,
+      contractorLogoUrl: contractors.logoUrl,
+      contractorAvgRating: contractors.avgRating,
+      contractorTotalReviews: contractors.totalReviews,
+      contractorVerification: contractors.verificationStatus,
+      contractorYears: contractors.yearsInBusiness,
       projectId: projects.id,
       projectStage: projects.stage,
       projectStageUpdatedAt: projects.stageUpdatedAt,
@@ -232,12 +253,13 @@ export async function getJobDetailForContractor(
     .innerJoin(homeowners, eq(leads.homeownerId, homeowners.id))
     .innerJoin(users, eq(homeowners.userId, users.id))
     .innerJoin(services, eq(leads.serviceId, services.id))
+    .innerJoin(contractors, eq(contractors.id, leadRecipients.contractorId))
     .leftJoin(projects, and(eq(projects.leadId, leads.id), eq(projects.contractorId, contractorId)))
     .where(and(eq(leadRecipients.leadId, leadId), eq(leadRecipients.contractorId, contractorId)))
     .limit(1)
   if (!row) return null
 
-  const [estimateRows, conversationId] = await Promise.all([
+  const [estimateRows, conversationId, reviewRows] = await Promise.all([
     row.projectId
       ? db
           .select({
@@ -258,7 +280,16 @@ export async function getJobDetailForContractor(
           .orderBy(desc(estimates.createdAt))
       : Promise.resolve([]),
     row.projectId ? getProjectConversationId(row.projectId) : Promise.resolve(null),
+    row.projectId
+      ? db
+          .select({ rating: reviews.rating, submittedAt: reviews.submittedAt })
+          .from(reviews)
+          .where(eq(reviews.projectId, row.projectId))
+          .limit(1)
+      : Promise.resolve([]),
   ])
+  const review = reviewRows[0] ?? null
+  const reviewSubmitted = review?.submittedAt != null
 
   const latest = estimateRows[0] ?? null
   const lastSent = estimateRows.find((e) => e.sentAt != null) ?? null
@@ -292,6 +323,15 @@ export async function getJobDetailForContractor(
       phone: row.homeownerPhone,
       email: row.homeownerEmail,
     },
+    contractor: {
+      id: contractorId,
+      companyName: row.contractorCompanyName,
+      logoUrl: row.contractorLogoUrl,
+      avgRating: row.contractorAvgRating ? parseFloat(row.contractorAvgRating) : null,
+      totalReviews: row.contractorTotalReviews,
+      verified: row.contractorVerification === 'verified',
+      yearsInBusiness: row.contractorYears,
+    },
     lead: {
       address: row.address,
       city: row.city,
@@ -320,6 +360,8 @@ export async function getJobDetailForContractor(
       sentAt: e.sentAt,
       createdAt: e.createdAt,
     })),
+    reviewSubmitted,
+    reviewRating: reviewSubmitted ? (review?.rating ?? null) : null,
   }
 }
 
@@ -332,6 +374,8 @@ export type JobPanel = {
   canAccept: boolean
   /** Contractor can mark the won job completed. */
   canComplete: boolean
+  /** Homeowner can leave a review (job done, not yet reviewed). */
+  canReview: boolean
   detail: JobDetail
 }
 
@@ -365,6 +409,7 @@ export async function getJobPanelForConversation(
     canQuote: viewerRole === 'contractor' && (detail.boardStatus === 'talking' || detail.boardStatus === 'quoted'),
     canAccept: viewerRole === 'homeowner' && detail.latestQuote?.status === 'sent',
     canComplete: viewerRole === 'contractor' && detail.boardStatus === 'won',
+    canReview: viewerRole === 'homeowner' && detail.boardStatus === 'done' && !detail.reviewSubmitted,
     detail,
   }
 }

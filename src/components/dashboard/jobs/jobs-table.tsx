@@ -1,16 +1,14 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { MessageSquare, Search } from "lucide-react";
 import type { BoardStatus, JobCard as Job } from "@/lib/data/jobs";
-import { engageLead } from "@/lib/actions/engage";
-import { showToast } from "@/components/ui/toast";
 import { formatDistanceToNow, formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { SlaCountdown } from "../leads/sla-countdown";
 import { JobDetailSheet } from "./job-detail-sheet";
+import { EngageConfirm } from "./engage-confirm";
 import { BOARD_ACCENT, BOARD_META } from "./board-meta";
 
 type Tab = BoardStatus | "all";
@@ -136,30 +134,8 @@ function JobRow({
   canEngage: boolean;
   onView: (leadId: string) => void;
 }) {
-  const router = useRouter();
-  const [pending, start] = useTransition();
   const isNew = job.boardStatus === "new";
   const place = [job.city, job.state].filter(Boolean).join(", ") || job.zipCode || "—";
-
-  function startChat() {
-    if (pending) return;
-    start(async () => {
-      const res = await engageLead(job.leadId);
-      if (res.ok) {
-        router.push(`/contractor/messages/${res.conversationId}`);
-        return;
-      }
-      if (res.error === "INSUFFICIENT_CREDITS") {
-        showToast(res.message, {
-          type: "warning",
-          actionLabel: "Buy credits",
-          onAction: () => router.push("/contractor/settings/billing"),
-        });
-      } else {
-        showToast(res.message, { type: "error" });
-      }
-    });
-  }
 
   return (
     <tr
@@ -196,18 +172,20 @@ function JobRow({
       </td>
       <td className="px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] pr-4 lg:pr-[1.111vw] align-middle text-right whitespace-nowrap">
         {isNew ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canEngage) startChat();
-            }}
-            disabled={pending || !canEngage}
-            className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
-            {pending ? "Starting…" : `Chat · ${job.engagementCreditCost} cr`}
-          </button>
+          <EngageConfirm
+            leadId={job.leadId}
+            engagementCreditCost={job.engagementCreditCost}
+            homeownerName={job.homeownerName}
+            disabled={!canEngage}
+            stopPropagation
+            triggerClassName="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
+            triggerContent={
+              <>
+                <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                {`Chat · ${job.engagementCreditCost} cr`}
+              </>
+            }
+          />
         ) : job.conversationId ? (
           <Link
             href={`/contractor/messages/${job.conversationId}`}

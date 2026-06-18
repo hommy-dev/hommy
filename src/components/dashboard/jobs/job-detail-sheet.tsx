@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 import type { JobDetail } from "@/lib/data/jobs";
 import { getJobDetailAction } from "@/lib/actions/jobs";
-import { engageLead } from "@/lib/actions/engage";
-import { showToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -18,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { DeclineLeadDialog } from "../leads/decline-lead-dialog";
 import { JobDetailContent } from "./job-detail-content";
+import { EngageConfirm } from "./engage-confirm";
 import { BOARD_META } from "./board-meta";
 
 export function JobDetailSheet({
@@ -29,10 +27,8 @@ export function JobDetailSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const router = useRouter();
   const [detail, setDetail] = useState<JobDetail | null>(null);
   const [loading, startLoad] = useTransition();
-  const [engaging, startEngage] = useTransition();
 
   useEffect(() => {
     if (!open || !leadId) return;
@@ -44,26 +40,6 @@ export function JobDetailSheet({
   // Only show data that matches the currently-open lead (avoids a stale flash
   // when switching cards without clearing state inside the effect).
   const shown = detail && detail.leadId === leadId ? detail : null;
-
-  function startChat() {
-    if (!leadId || engaging) return;
-    startEngage(async () => {
-      const res = await engageLead(leadId);
-      if (res.ok) {
-        router.push(`/contractor/messages/${res.conversationId}`);
-        return;
-      }
-      if (res.error === "INSUFFICIENT_CREDITS") {
-        showToast(res.message, {
-          type: "warning",
-          actionLabel: "Buy credits",
-          onAction: () => router.push("/contractor/settings/billing"),
-        });
-      } else {
-        showToast(res.message, { type: "error" });
-      }
-    });
-  }
 
   const isNew = shown?.boardStatus === "new";
 
@@ -107,18 +83,21 @@ export function JobDetailSheet({
           <SheetFooter className="border-t border-border">
             {isNew ? (
               <div className="flex items-center gap-2 lg:gap-[0.556vw]">
-                <button
-                  type="button"
-                  onClick={startChat}
-                  disabled={engaging}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
-                  {engaging
-                    ? "Starting…"
-                    : `Chat with homeowner · ${shown.engagementCreditCost} credit${shown.engagementCreditCost === 1 ? "" : "s"}`}
-                </button>
-                <DeclineLeadDialog leadId={shown.leadId} />
+                <EngageConfirm
+                  leadId={shown.leadId}
+                  engagementCreditCost={shown.engagementCreditCost}
+                  triggerClassName="inline-flex flex-1 items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  triggerContent={
+                    <>
+                      <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                      {`Chat with homeowner · ${shown.engagementCreditCost} credit${shown.engagementCreditCost === 1 ? "" : "s"}`}
+                    </>
+                  }
+                />
+                <DeclineLeadDialog
+                  leadId={shown.leadId}
+                  triggerClassName="inline-flex shrink-0 items-center justify-center rounded-md lg:rounded-[0.556vw] border border-border bg-card px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                />
               </div>
             ) : shown.conversationId ? (
               <Link

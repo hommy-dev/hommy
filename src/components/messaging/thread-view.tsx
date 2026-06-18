@@ -196,9 +196,19 @@ export function ThreadView({ basePath, userId }: { basePath: string; userId: str
           {loadingMessages ? (
             <ThreadMessagesLoading />
           ) : messages.length === 0 ? (
-            <p className="py-10 lg:py-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-              No messages yet. Say hello.
-            </p>
+            thread?.panel?.viewerRole === "contractor" && thread.panel.canQuote ? (
+              <div className="py-10 lg:py-[2.778vw] text-center">
+                <p className="text-sm lg:text-[0.972vw] font-medium">You’re connected</p>
+                <p className="mx-auto mt-1 lg:mt-[0.278vw] max-w-sm lg:max-w-[24vw] text-sm lg:text-[0.903vw] text-muted-foreground">
+                  Introduce yourself and send a quote — homeowners hire fastest when a quote
+                  arrives within a day.
+                </p>
+              </div>
+            ) : (
+              <p className="py-10 lg:py-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
+                No messages yet. Say hello.
+              </p>
+            )
           ) : (
             messages.map((m, i) => {
               const prev = messages[i - 1];
@@ -206,7 +216,20 @@ export function ThreadView({ basePath, userId }: { basePath: string; userId: str
               return (
                 <Fragment key={m.id}>
                   {showDay ? <DayDivider iso={m.createdAt} /> : null}
-                  <MessageBubble message={m} viewerType={me?.type} otherName={name} />
+                  <MessageBubble
+                    message={m}
+                    viewerType={me?.type}
+                    otherName={name}
+                    reviewState={
+                      thread?.panel
+                        ? {
+                            submitted: thread.panel.detail.reviewSubmitted,
+                            rating: thread.panel.detail.reviewRating,
+                            canReview: thread.panel.canReview,
+                          }
+                        : undefined
+                    }
+                  />
                 </Fragment>
               );
             })

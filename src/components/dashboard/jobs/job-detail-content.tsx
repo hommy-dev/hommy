@@ -1,5 +1,8 @@
+import { BadgeCheck } from "lucide-react";
 import type { JobDetail } from "@/lib/data/jobs";
 import { formatCurrency } from "@/lib/format";
+import { RatingBadge } from "@/components/contractors/rating-badge";
+import { ContractorProfileDialog } from "@/components/contractors/contractor-profile-dialog";
 import { JobTimeline } from "./job-timeline";
 import { URGENCY_LABEL } from "./board-meta";
 
@@ -36,6 +39,33 @@ export function JobDetailContent({
           <p className="rounded-md lg:rounded-[0.556vw] border border-dashed border-border px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] text-muted-foreground">
             Contact details unlock when you start the chat.
           </p>
+        </Section>
+      ) : null}
+
+      {viewerRole === "homeowner" ? (
+        <Section title="Your contractor">
+          <div className="flex items-start justify-between gap-3 lg:gap-[0.833vw]">
+            <div className="min-w-0">
+              <p className="flex items-center gap-1.5 lg:gap-[0.417vw] font-medium lg:text-[0.972vw]">
+                <span className="truncate">{detail.contractor.companyName ?? "Contractor"}</span>
+                {detail.contractor.verified ? (
+                  <BadgeCheck className="size-4 lg:size-[1.111vw] shrink-0 text-success" strokeWidth={2} aria-label="Verified" />
+                ) : null}
+              </p>
+              <div className="mt-1 lg:mt-[0.278vw]">
+                <RatingBadge avgRating={detail.contractor.avgRating} totalReviews={detail.contractor.totalReviews} />
+              </div>
+              {detail.contractor.yearsInBusiness ? (
+                <p className="mt-0.5 lg:mt-[0.139vw] text-xs lg:text-[0.764vw] text-muted-foreground">
+                  {detail.contractor.yearsInBusiness} year{detail.contractor.yearsInBusiness === 1 ? "" : "s"} in business
+                </p>
+              ) : null}
+            </div>
+            <ContractorProfileDialog
+              contractorId={detail.contractor.id}
+              contractorName={detail.contractor.companyName}
+            />
+          </div>
         </Section>
       ) : null}
 

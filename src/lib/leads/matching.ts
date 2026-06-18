@@ -7,20 +7,20 @@
 // service_areas. Each area is stored as a PostGIS geography (`geom`) — a buffered
 // circle for radius areas, an arbitrary polygon for drawn areas — so one
 // `ST_Covers` predicate, backed by a GiST index, handles both shapes worldwide.
-// Ranked by profile_score, capped at OFFER_CAP.
+// Ranked by profile_score. Phase 1 fans out BROADLY (leads are free) — up to
+// LEAD_FANOUT.maxRecipients — rather than to a handful of slots, so a homeowner
+// isn't left waiting on a few pros who might all ghost.
 
 import { db } from '@/lib/db'
 import { and, desc, eq, isNotNull, notInArray, sql } from 'drizzle-orm'
 import { contractors, contractorServices, serviceAreas } from '@/lib/db/schema'
+import { LEAD_FANOUT } from '@/lib/config/tunables'
 
 // Accepts either the base client or an open transaction so matching can run
 // inside the same transaction that inserts the lead.
 type DbExecutor =
   | typeof db
   | Parameters<Parameters<typeof db.transaction>[0]>[0]
-
-/** Hard ceiling on how many companies a single lead is offered to up front. */
-export const OFFER_CAP = 10
 
 export type EligibleContractor = { contractorId: string }
 
@@ -61,7 +61,7 @@ export async function findEligibleContractors(
       ),
     )
     .orderBy(desc(contractors.profileScore))
-    .limit(opts.limit ?? OFFER_CAP)
+    .limit(opts.limit ?? LEAD_FANOUT.maxRecipients)
 
   return rows.map((r) => ({ contractorId: r.contractorId }))
 }

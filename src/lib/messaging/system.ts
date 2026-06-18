@@ -50,6 +50,33 @@ export async function postEventMessage(
   await postSystemMessageWithMeta(conversationId, fallbackBody, meta)
 }
 
+/** Post the inline "leave a review" card (after a job is completed). */
+export async function postReviewMessage(
+  conversationId: string,
+  meta: Extract<MessageMeta, { kind: 'review' }>,
+): Promise<void> {
+  await postSystemMessageWithMeta(conversationId, 'How was the job? Leave a review.', meta)
+}
+
+/** Flip the inline review card to submitted (records the rating for display). */
+export async function markReviewMessageSubmitted(projectId: string, rating: number): Promise<void> {
+  try {
+    await db
+      .update(messages)
+      .set({
+        meta: sql`jsonb_set(jsonb_set(${messages.meta}, '{status}', '"submitted"'::jsonb), '{rating}', ${String(rating)}::jsonb)`,
+      })
+      .where(
+        and(
+          sql`${messages.meta} ->> 'kind' = 'review'`,
+          sql`${messages.meta} ->> 'projectId' = ${projectId}`,
+        ),
+      )
+  } catch (e) {
+    console.error('[markReviewMessageSubmitted] failed', e)
+  }
+}
+
 /**
  * Flip an already-posted quote card to a new status (accepted / rejected) so it
  * stops (or starts) offering its Accept button. Scoped to quote-kind rows for the

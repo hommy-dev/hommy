@@ -6,7 +6,7 @@
 
 import { cache } from 'react'
 import { db } from '@/lib/db'
-import { and, count, desc, eq, inArray, min } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, isNotNull, min } from 'drizzle-orm'
 import {
   contractors,
   estimates,
@@ -14,6 +14,7 @@ import {
   leadRecipients,
   leads,
   projects,
+  reviews,
   services,
 } from '@/lib/db/schema'
 import { subtypeLabel, subtypeList } from '@/lib/leads/subtype'
@@ -42,6 +43,8 @@ export type HomeownerLead = {
   zipCode: string | null
   /** How many companies the lead was offered to. */
   matchedCount: number
+  /** How many pros have opened/viewed the job (powers "X pros viewed"). */
+  viewedCount: number
   /** How many engaged (started a conversation) — "interested" to the homeowner. */
   interestedCount: number
   /** How many quotes have been sent for this request. */
@@ -81,11 +84,17 @@ export async function getHomeownerLeads(
   //  • matched   = every offer row
   //  • interested = offers that engaged (started a conversation)
   //  • completed = leads whose hired contractor marked the project completed
-  const [matched, interested, quotes, completed] = await Promise.all([
+  const [matched, viewed, interested, quotes, completed] = await Promise.all([
     db
       .select({ leadId: leadRecipients.leadId, value: count() })
       .from(leadRecipients)
       .where(inArray(leadRecipients.leadId, leadIds))
+      .groupBy(leadRecipients.leadId),
+    // How many pros opened the job (viewedAt stamped).
+    db
+      .select({ leadId: leadRecipients.leadId, value: count() })
+      .from(leadRecipients)
+      .where(and(inArray(leadRecipients.leadId, leadIds), isNotNull(leadRecipients.viewedAt)))
       .groupBy(leadRecipients.leadId),
     db
       .select({ leadId: leadRecipients.leadId, value: count() })
@@ -119,6 +128,7 @@ export async function getHomeownerLeads(
   ])
 
   const matchedBy = new Map(matched.map((c) => [c.leadId, c.value]))
+  const viewedBy = new Map(viewed.map((c) => [c.leadId, c.value]))
   const interestedBy = new Map(interested.map((c) => [c.leadId, c.value]))
   const quotesBy = new Map(quotes.map((c) => [c.leadId as string, c]))
   const completedSet = new Set(completed.map((c) => c.leadId as string))
@@ -133,6 +143,7 @@ export async function getHomeownerLeads(
     state: r.state,
     zipCode: r.zipCode,
     matchedCount: matchedBy.get(r.id) ?? 0,
+    viewedCount: viewedBy.get(r.id) ?? 0,
     interestedCount: interestedBy.get(r.id) ?? 0,
     quoteCount: quotesBy.get(r.id)?.value ?? 0,
     bestQuoteTotal: quotesBy.get(r.id)?.best ?? null,
@@ -173,6 +184,11 @@ export type RequestContractor = {
   quoteTotal: string | null
   quoteStatus: EstimateStatus | null
   hasUnread: boolean
+  /** Decision signal for the homeowner. */
+  avgRating: number | null
+  totalReviews: number
+  verified: boolean
+  yearsInBusiness: number | null
 }
 
 export type HomeownerRequestDetail = {
@@ -188,10 +204,21 @@ export type HomeownerRequestDetail = {
   state: string | null
   zipCode: string | null
   notes: string | null
+  /** How many companies the job was offered to. */
+  matchedCount: number
+  /** How many pros opened/viewed the job. */
+  viewedCount: number
   interestedCount: number
   quoteCount: number
   /** One row per contractor who started a conversation — each is its own chat. */
   contractors: RequestContractor[]
+  /** Present once a contractor completed the job — drives the review prompt. */
+  review: {
+    projectId: string
+    contractorName: string | null
+    submitted: boolean
+    rating: number | null
+  } | null
   createdAt: Date
 }
 
@@ -231,6 +258,10 @@ export async function getHomeownerRequestDetail(
       projectId: projects.id,
       contractorId: projects.contractorId,
       contractorName: contractors.companyName,
+      avgRating: contractors.avgRating,
+      totalReviews: contractors.totalReviews,
+      verificationStatus: contractors.verificationStatus,
+      yearsInBusiness: contractors.yearsInBusiness,
       stage: projects.stage,
     })
     .from(projects)
@@ -238,6 +269,20 @@ export async function getHomeownerRequestDetail(
     .where(eq(projects.leadId, leadId))
 
   const projectCompleted = projRows.some((p) => p.stage === 'completed')
+
+  // Offer-level counts for the homeowner's "what's next" banner.
+  const [matchedRow, viewedRow] = await Promise.all([
+    db
+      .select({ value: count() })
+      .from(leadRecipients)
+      .where(eq(leadRecipients.leadId, leadId)),
+    db
+      .select({ value: count() })
+      .from(leadRecipients)
+      .where(and(eq(leadRecipients.leadId, leadId), isNotNull(leadRecipients.viewedAt))),
+  ])
+  const matchedCount = matchedRow[0]?.value ?? 0
+  const viewedCount = viewedRow[0]?.value ?? 0
 
   const projectIds = projRows.map((p) => p.projectId)
   const latest = projectIds.length
@@ -268,11 +313,32 @@ export async function getHomeownerRequestDetail(
       quoteTotal: est?.total ?? null,
       quoteStatus: est?.status ?? null,
       hasUnread: conv?.hasUnread ?? false,
+      avgRating: p.avgRating ? parseFloat(p.avgRating) : null,
+      totalReviews: p.totalReviews,
+      verified: p.verificationStatus === 'verified',
+      yearsInBusiness: p.yearsInBusiness,
     }
   })
 
   const interestedCount = contractorList.length
   const quoteCount = contractorList.filter((c) => c.quoteStatus != null).length
+
+  // Review prompt info for the completed job (if any).
+  const completedProj = projRows.find((p) => p.stage === 'completed')
+  let review: HomeownerRequestDetail['review'] = null
+  if (completedProj) {
+    const [rev] = await db
+      .select({ rating: reviews.rating, submittedAt: reviews.submittedAt })
+      .from(reviews)
+      .where(eq(reviews.projectId, completedProj.projectId))
+      .limit(1)
+    review = {
+      projectId: completedProj.projectId,
+      contractorName: completedProj.contractorName,
+      submitted: rev?.submittedAt != null,
+      rating: rev?.submittedAt ? (rev.rating ?? null) : null,
+    }
+  }
 
   return {
     leadId: lead.id,
@@ -287,9 +353,12 @@ export async function getHomeownerRequestDetail(
     state: lead.state,
     zipCode: lead.zipCode,
     notes: lead.notes,
+    matchedCount,
+    viewedCount,
     interestedCount,
     quoteCount,
     contractors: contractorList,
+    review,
     createdAt: lead.createdAt,
   }
 }

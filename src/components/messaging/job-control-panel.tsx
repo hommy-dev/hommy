@@ -100,7 +100,7 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
       </button>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="data-[side=right]:sm:max-w-md lg:data-[side=right]:sm:max-w-[34vw]">
+        <SheetContent side="right" className="data-[side=right]:sm:max-w-lg lg:data-[side=right]:sm:max-w-[40vw]">
           <SheetHeader className="border-b border-border">
             <SheetTitle className="pr-8 lg:pr-[2.5vw]">
               {panel.viewerRole === "contractor"

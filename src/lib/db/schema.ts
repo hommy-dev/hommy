@@ -507,6 +507,15 @@ export type MessageMeta =
       actorType: 'user' | 'contractor'
       actorId: string
     }
+  | {
+      // Inline "leave a review" prompt, posted when a job is completed. The
+      // homeowner submits right in the thread; the card flips to submitted.
+      kind: 'review'
+      projectId: string
+      contractorId: string
+      status: 'pending' | 'submitted'
+      rating?: number
+    }
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),

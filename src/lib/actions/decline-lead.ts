@@ -56,10 +56,12 @@ export async function declineLead(leadId: string, reason?: string): Promise<Decl
         .returning({ id: leadRecipients.id })
       if (updated.length === 0) throw new NotOffered()
 
+      // Declining WITH a reason is honest + cascades the lead fast → neutral.
+      // Declining with no reason → a mild ding.
       await recordScoreEvent(tx, {
         contractorId: contractor.id,
         kind: cleanReason ? 'lead_ignored_with_reason' : 'lead_ignored_no_reason',
-        delta: cleanReason ? SCORE_DELTAS.lead_ignored_with_reason : SCORE_DELTAS.lead_ignored_no_reason,
+        delta: cleanReason ? SCORE_DELTAS.decline_with_reason : SCORE_DELTAS.decline_no_reason,
         sourceType: 'lead',
         sourceId: leadId,
         note: cleanReason || undefined,

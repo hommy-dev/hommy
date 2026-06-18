@@ -15,7 +15,14 @@ import { showToast } from "@/components/ui/toast";
 import { declineLead } from "@/lib/actions/decline-lead";
 
 /** Decline a lead offer with an optional reason (a reason softens the score hit). */
-export function DeclineLeadDialog({ leadId }: { leadId: string }) {
+export function DeclineLeadDialog({
+  leadId,
+  triggerClassName,
+}: {
+  leadId: string;
+  /** Override the trigger styling. Defaults to the lead-card's hover-reveal button. */
+  triggerClassName?: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -41,7 +48,10 @@ export function DeclineLeadDialog({ leadId }: { leadId: string }) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="hidden rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground group-hover:inline-flex"
+          className={
+            triggerClassName ??
+            "hidden rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground group-hover:inline-flex"
+          }
         >
           Decline
         </button>

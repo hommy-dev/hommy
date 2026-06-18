@@ -12,7 +12,7 @@ import { db } from '@/lib/db'
 import { activityLog, contractors, homeowners, leads, projects, users } from '@/lib/db/schema'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
-import { getProjectConversationId, postEventMessage } from '@/lib/messaging/system'
+import { getProjectConversationId, postEventMessage, postReviewMessage } from '@/lib/messaging/system'
 import { sendNotification } from '@/lib/notifications'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import type { ProjectStage } from '@/lib/data/projects'
@@ -125,6 +125,13 @@ async function notifyJobCompleted(projectId: string, contractorId: string): Prom
       actorType: 'contractor',
       actorId: contractorId,
     }).catch((e) => console.error('[notifyJobCompleted] event message failed', e))
+    // Inline review prompt — the homeowner can rate right in the thread.
+    await postReviewMessage(conversationId, {
+      kind: 'review',
+      projectId,
+      contractorId,
+      status: 'pending',
+    }).catch((e) => console.error('[notifyJobCompleted] review message failed', e))
   }
 
   await sendNotification({

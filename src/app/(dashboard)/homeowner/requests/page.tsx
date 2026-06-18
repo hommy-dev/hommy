@@ -21,6 +21,8 @@ function summary(r: HomeownerLead): string {
     return `${r.quoteCount} quote${r.quoteCount === 1 ? "" : "s"} in — review and choose.`
   if (r.interestedCount > 0)
     return `${r.interestedCount} pro${r.interestedCount === 1 ? " is" : "s are"} interested — quotes coming.`
+  if (r.viewedCount > 0)
+    return `${r.viewedCount} pro${r.viewedCount === 1 ? "" : "s"} viewed your job — messages coming soon.`
   if (r.matchedCount > 0)
     return `${r.matchedCount} pro${r.matchedCount === 1 ? "" : "s"} matched — waiting for them to respond.`
   return "No pros cover your area yet — we'll alert you the moment one joins."

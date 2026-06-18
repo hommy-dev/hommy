@@ -31,8 +31,6 @@ type CreateLeadData = {
   redirectTo: string
 }
 
-const SLA_HOURS = 48
-
 const CreateLeadSchema = z.object({
   subtypes: z.array(z.string().trim().min(1)).min(1, 'Choose the type of work'),
   urgency: z.enum(['emergency', 'within_week', 'within_month', 'planning']),
@@ -156,7 +154,6 @@ export async function createLead(
   }
 
   const pricing = getLeadPricing('roofing')
-  const slaDeadline = new Date(Date.now() + SLA_HOURS * 60 * 60 * 1000)
   // Postal code is optional/display-only now (matching is geographic).
   const zipCode = d.zipCode ? normalizePostalCode(d.zipCode) : null
 
@@ -179,7 +176,6 @@ export async function createLead(
           lng,
           notes: d.notes || null,
           status: 'open',
-          engageSlots: pricing.engageSlots,
           engagementCreditCost: pricing.engagementCreditCost,
           awardCreditCost: pricing.awardCreditCost,
         })
@@ -198,7 +194,6 @@ export async function createLead(
             leadId: lead.id,
             contractorId: e.contractorId,
             status: 'offered' as const,
-            slaDeadline,
           })),
         )
       }

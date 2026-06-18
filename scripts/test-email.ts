@@ -6,7 +6,7 @@
  *   pnpm email:test -- --to=you@example.com --subject="Hi" --body="<h1>Hey</h1>"
  *
  * The script reports:
- *   • whether RESEND_API_KEY and FROM_EMAIL are set
+ *   • whether RESEND_API_KEY and NEXT_PUBLIC_FROM_EMAIL are set
  *   • whether Resend returns an id (success) or an error (failure)
  *   • the raw Resend response so domain/verification issues are obvious
  *
@@ -48,7 +48,7 @@ async function main() {
     </div>`
 
   const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.FROM_EMAIL ?? 'notifications@homei.com'
+  const from = process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@homei.com'
 
   console.log('[email:test] config', {
     hasApiKey: Boolean(apiKey),

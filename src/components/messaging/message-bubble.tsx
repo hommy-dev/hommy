@@ -2,7 +2,10 @@ import { cn } from '@/lib/utils'
 import type { ThreadMessage, ParticipantIdentity } from '@/lib/data/conversations'
 import type { MessageMeta } from '@/lib/db/schema'
 import { QuoteCard } from './quote-card'
+import { ReviewCard } from './review-card'
 import { ParticipantAvatar } from './participant-avatar'
+
+export type ReviewState = { submitted: boolean; rating: number | null; canReview: boolean }
 
 export type DisplayMessage = ThreadMessage & { pending?: boolean; failed?: boolean }
 
@@ -44,10 +47,12 @@ export function MessageBubble({
   message,
   viewerType,
   otherName,
+  reviewState,
 }: {
   message: DisplayMessage
   viewerType?: ParticipantIdentity['type']
   otherName?: string
+  reviewState?: ReviewState
 }) {
   // Rich quote payload → card the homeowner (a 'user' participant) can accept.
   // The quote is always contractor-sent, so it sits on the contractor's side.
@@ -60,6 +65,11 @@ export function MessageBubble({
         otherName={otherName}
       />
     )
+  }
+
+  // Inline review prompt (posted at completion) — homeowner rates in-thread.
+  if (message.meta?.kind === 'review') {
+    return <ReviewCard meta={message.meta} viewerType={viewerType} reviewState={reviewState} />
   }
 
   // Lifecycle auto-message → personalized bubble owned by the triggering party.
