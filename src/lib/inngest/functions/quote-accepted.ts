@@ -5,9 +5,10 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { db } from '@/lib/db'
-import { contractorMembers, leadRecipients } from '@/lib/db/schema'
+import { contractorMembers, contractors, homeowners, leadRecipients, leads, users } from '@/lib/db/schema'
 import { sendNotification } from '@/lib/notifications'
 import { broadcastUserEventToMany } from '@/lib/realtime/user-events'
+import { getProjectConversationId } from '@/lib/messaging/system'
 
 async function activeMemberIds(contractorIds: string[]): Promise<string[]> {
   if (contractorIds.length === 0) return []
@@ -28,7 +29,31 @@ export const quoteAccepted = inngest.createFunction(
     const estimateId = event.data.estimateId as string | undefined
     const leadId = event.data.leadId as string | undefined
     const winnerContractorId = event.data.winnerContractorId as string | undefined
+    const projectId = event.data.projectId as string | undefined
     if (!leadId || !winnerContractorId) return { ok: false, reason: 'missing event data' }
+
+    await step.run('notify-homeowner', async () => {
+      const [row] = await db
+        .select({ homeownerUserId: users.id, companyName: contractors.companyName })
+        .from(leads)
+        .innerJoin(homeowners, eq(homeowners.id, leads.homeownerId))
+        .innerJoin(users, eq(users.id, homeowners.userId))
+        .innerJoin(contractors, eq(contractors.id, winnerContractorId))
+        .where(eq(leads.id, leadId))
+        .limit(1)
+      if (!row) return
+      const conversationId = projectId ? await getProjectConversationId(projectId) : null
+      await sendNotification({
+        userId: row.homeownerUserId,
+        type: 'ESTIMATE',
+        title: 'You’re hired — quote accepted',
+        body: `You accepted ${row.companyName ?? 'your contractor'}’s quote. They’ll be in touch to schedule the work.`,
+        actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner/requests',
+        entityType: 'ESTIMATE',
+        entityId: estimateId,
+        dedupKey: `quote_accepted_homeowner:${estimateId ?? leadId}`,
+      }).catch((err) => console.error('[quote-accepted] homeowner notify', err))
+    })
 
     await step.run('notify-winner', async () => {
       const winners = await activeMemberIds([winnerContractorId])

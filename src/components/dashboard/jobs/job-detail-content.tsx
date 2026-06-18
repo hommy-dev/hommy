@@ -7,9 +7,12 @@ import { URGENCY_LABEL } from "./board-meta";
 export function JobDetailContent({
   detail,
   showHomeowner = true,
+  viewerRole = "contractor",
 }: {
   detail: JobDetail;
+  /** Show the homeowner's contact block. Gated behind engagement for contractors. */
   showHomeowner?: boolean;
+  viewerRole?: "contractor" | "homeowner";
 }) {
   const place = [detail.lead.city, detail.lead.state].filter(Boolean).join(", ");
 
@@ -28,6 +31,12 @@ export function JobDetailContent({
           <Field label="Phone" value={detail.homeowner.phone ?? "—"} />
           <Field label="Email" value={detail.homeowner.email} />
         </Section>
+      ) : viewerRole === "contractor" ? (
+        <Section title="Homeowner">
+          <p className="rounded-md lg:rounded-[0.556vw] border border-dashed border-border px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] text-muted-foreground">
+            Contact details unlock when you start the chat.
+          </p>
+        </Section>
       ) : null}
 
       {detail.latestQuote ? (
@@ -44,7 +53,7 @@ export function JobDetailContent({
       ) : null}
 
       <Section title="Progress">
-        <JobTimeline milestones={detail.milestones} />
+        <JobTimeline milestones={detail.milestones} viewerRole={viewerRole} />
       </Section>
     </div>
   );

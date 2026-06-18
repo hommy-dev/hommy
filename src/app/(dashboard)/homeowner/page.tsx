@@ -13,15 +13,15 @@ export default async function HomeownerDashboardPage() {
           Welcome, {firstName}
         </h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Post a project and we’ll match you with vetted local roofers.
+          Post a project and we’ll match you with vetted local pros.
         </p>
       </header>
 
       <section className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-6 lg:p-[1.667vw]">
-        <h2 className="text-sm lg:text-[0.972vw] font-semibold">Start a new request</h2>
+        <h2 className="text-sm lg:text-[0.972vw] font-semibold">Start a new job</h2>
         <p className="mt-1 lg:mt-[0.278vw] max-w-md lg:max-w-[31.108vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Tell us about your roofing project and start receiving quotes from
-          trusted contractors near you.
+          Tell us about your project and start receiving quotes from trusted
+          contractors near you.
         </p>
         <Button asChild size="lg" className="mt-4 lg:mt-[1.111vw]">
           <Link href="/get-a-quote">Get a quote</Link>

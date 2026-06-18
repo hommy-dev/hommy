@@ -99,7 +99,7 @@ export function JobDetailSheet({
               This job is no longer available.
             </p>
           ) : (
-            <JobDetailContent detail={shown} />
+            <JobDetailContent detail={shown} showHomeowner={!isNew} />
           )}
         </div>
 

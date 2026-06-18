@@ -105,6 +105,17 @@ export function ConversationRail({
     };
   }, [userId]);
 
+  // Opening a conversation reads it — clear its unread flag for good (not just
+  // while active), so the dot doesn't reappear after navigating away. Done in the
+  // click handler (below) rather than an effect to avoid a cascading re-render.
+  const markRowRead = useCallback((id: string) => {
+    setItems((prev) =>
+      prev.some((c) => c.id === id && c.hasUnread)
+        ? prev.map((c) => (c.id === id ? { ...c, hasUnread: false } : c))
+        : prev,
+    );
+  }, []);
+
   // Publish summaries so the thread pane can paint its header instantly.
   useEffect(() => {
     publishSummaries(items);
@@ -169,6 +180,7 @@ export function ConversationRail({
                   <Link
                     href={`${basePath}/${c.id}`}
                     onPointerEnter={() => prefetchThread(c.id)}
+                    onClick={() => markRowRead(c.id)}
                     className={cn(
                       "flex items-center gap-3 lg:gap-[0.833vw] rounded lg:rounded-[0.4vw] px-2.5 py-2.5 lg:px-[0.694vw] lg:py-[0.694vw] transition-colors",
                       active ? "bg-accent" : "hover:bg-muted/60",

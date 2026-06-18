@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import {
@@ -25,11 +25,16 @@ export function QuoteBuilderDialog({
   projectId,
   triggerLabel = "Build quote",
   triggerClassName,
+  initialItems,
+  initialScopeNotes,
 }: {
   projectId: string;
   triggerLabel?: string;
   /** Override the trigger button styling (e.g. to match a button cluster). */
   triggerClassName?: string;
+  /** Prefill line items (e.g. "Update quote" seeds from the current quote). */
+  initialItems?: Row[];
+  initialScopeNotes?: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -39,6 +44,19 @@ export function QuoteBuilderDialog({
   const [validDays, setValidDays] = useState("30");
   const [estimateId, setEstimateId] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
+
+  // Seed the form from the existing quote each time the dialog opens (an
+  // "update" prefills; a fresh "send" starts blank). We never carry the old
+  // estimateId — sending always supersedes the prior quote server-side, so a
+  // resend stays a single active quote rather than editing a sent (locked) row.
+  useEffect(() => {
+    if (!open) return;
+    if (initialItems && initialItems.length > 0) {
+      setRows(initialItems.map((r) => ({ ...r })));
+      setScopeNotes(initialScopeNotes ?? "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const items = rows
     .map((r) => ({ label: r.label.trim(), amount: parseFloat(r.amount) || 0 }))

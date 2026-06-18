@@ -3,7 +3,7 @@
 // actions. System events are plain `messages` rows with sender_type='system'
 // and a human-readable body (D5: no separate payload column).
 
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { conversations, messages, type MessageMeta } from '@/lib/db/schema'
 import { sendRealtimeBroadcast } from '@/lib/realtime/broadcast'
@@ -32,24 +32,53 @@ export async function postSystemMessage(conversationId: string, body: string): P
 export async function postQuoteMessage(
   conversationId: string,
   body: string,
-  meta: MessageMeta,
+  meta: Extract<MessageMeta, { kind: 'quote' }>,
 ): Promise<void> {
   await postSystemMessageWithMeta(conversationId, body, meta)
 }
 
 /**
- * Flip an already-posted quote card to "accepted" so it stops offering an Accept
- * button. Best-effort: a stale card would still be guarded server-side anyway.
+ * Post a lifecycle auto-message (quote accepted, job completed, …). The thread
+ * renders it as a LEFT/RIGHT bubble owned by `actor`, with text personalized per
+ * viewer; `fallbackBody` is the plain text used on non-thread surfaces.
  */
-export async function markQuoteMessageAccepted(estimateId: string): Promise<void> {
+export async function postEventMessage(
+  conversationId: string,
+  fallbackBody: string,
+  meta: Extract<MessageMeta, { kind: 'event' }>,
+): Promise<void> {
+  await postSystemMessageWithMeta(conversationId, fallbackBody, meta)
+}
+
+/**
+ * Flip an already-posted quote card to a new status (accepted / rejected) so it
+ * stops (or starts) offering its Accept button. Scoped to quote-kind rows for the
+ * given estimate(s). Best-effort: a stale card would still be guarded server-side.
+ */
+export async function markQuoteMessageStatus(
+  estimateIds: string | string[],
+  status: 'accepted' | 'rejected',
+): Promise<void> {
+  const ids = Array.isArray(estimateIds) ? estimateIds : [estimateIds]
+  if (ids.length === 0) return
   try {
     await db
       .update(messages)
-      .set({ meta: sql`jsonb_set(${messages.meta}, '{status}', '"accepted"'::jsonb)` })
-      .where(sql`${messages.meta} ->> 'estimateId' = ${estimateId}`)
+      .set({ meta: sql`jsonb_set(${messages.meta}, '{status}', ${JSON.stringify(status)}::jsonb)` })
+      .where(
+        and(
+          sql`${messages.meta} ->> 'kind' = 'quote'`,
+          inArray(sql`${messages.meta} ->> 'estimateId'`, ids),
+        ),
+      )
   } catch (e) {
-    console.error('[markQuoteMessageAccepted] failed', e)
+    console.error('[markQuoteMessageStatus] failed', e)
   }
+}
+
+/** Back-compat alias — flip a quote card to accepted. */
+export async function markQuoteMessageAccepted(estimateId: string): Promise<void> {
+  await markQuoteMessageStatus(estimateId, 'accepted')
 }
 
 async function postSystemMessageWithMeta(

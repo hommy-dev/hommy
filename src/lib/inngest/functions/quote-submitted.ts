@@ -9,6 +9,7 @@ import { db } from '@/lib/db'
 import { contacts, contractors, estimates, homeowners, projects } from '@/lib/db/schema'
 import { sendNotification } from '@/lib/notifications'
 import { broadcastUserEvent } from '@/lib/realtime/user-events'
+import { getProjectConversationId } from '@/lib/messaging/system'
 import { formatCurrency } from '@/lib/format'
 
 export const quoteSubmitted = inngest.createFunction(
@@ -25,6 +26,7 @@ export const quoteSubmitted = inngest.createFunction(
       const [row] = await db
         .select({
           total: estimates.total,
+          projectId: estimates.projectId,
           companyName: contractors.companyName,
           homeownerUserId: homeowners.userId,
         })
@@ -39,14 +41,17 @@ export const quoteSubmitted = inngest.createFunction(
 
       const companyName = row.companyName ?? 'A contractor'
       const amount = row.total ? formatCurrency(row.total) : 'a quote'
+      // Quotes live inside the job's chat now (no separate Quotes page) — deep
+      // link straight to the conversation where they can View & Accept.
+      const conversationId = await getProjectConversationId(row.projectId)
 
       await broadcastUserEvent(row.homeownerUserId, 'quote:new', { estimateId })
       await sendNotification({
         userId: row.homeownerUserId,
         type: 'ESTIMATE',
         title: `${companyName} sent you a quote`,
-        body: `${companyName} quoted ${amount} for your request. Review and compare it in your dashboard.`,
-        actionUrl: '/homeowner/quotes',
+        body: `${companyName} quoted ${amount} for your job. Open the chat to review and accept it.`,
+        actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner/requests',
         entityType: 'ESTIMATE',
         entityId: estimateId,
         dedupKey: `quote_submitted:${estimateId}`,

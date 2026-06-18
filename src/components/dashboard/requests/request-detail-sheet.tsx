@@ -13,8 +13,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { REQUEST_META } from "./request-meta";
+import { REQUEST_COLUMNS, REQUEST_META } from "./request-meta";
 import { URGENCY_LABEL } from "@/components/dashboard/jobs/board-meta";
+
+// Homeowner-framed labels for the request progress stepper.
+const PROGRESS_LABEL: Record<string, string> = {
+  posted: "Job posted",
+  interested: "Contractors interested",
+  quotes: "Quotes received",
+  hired: "You hired",
+  done: "Job completed",
+};
 
 export function RequestDetailSheet({
   leadId,
@@ -74,6 +83,36 @@ export function RequestDetailSheet({
                 <Field label="Urgency" value={URGENCY_LABEL[shown.urgency]} />
                 <Field label="Location" value={shown.address || place || shown.zipCode || "—"} />
                 {shown.notes ? <Field label="Notes" value={shown.notes} /> : null}
+              </section>
+
+              <section className="space-y-3 lg:space-y-[0.833vw]">
+                <h3 className="text-xs lg:text-[0.764vw] uppercase tracking-wide text-muted-foreground">
+                  Progress
+                </h3>
+                <ol className="space-y-2.5 lg:space-y-[0.694vw]">
+                  {REQUEST_COLUMNS.map((col, i) => {
+                    const idx = REQUEST_COLUMNS.indexOf(shown.requestStatus);
+                    const done = i <= idx;
+                    return (
+                      <li key={col} className="flex items-center gap-2.5 lg:gap-[0.694vw]">
+                        <span
+                          className={cn(
+                            "size-2 lg:size-[0.556vw] shrink-0 rounded-full",
+                            done ? "bg-primary" : "bg-muted-foreground/30",
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "text-sm lg:text-[0.903vw]",
+                            done ? "font-medium text-foreground" : "text-muted-foreground",
+                          )}
+                        >
+                          {PROGRESS_LABEL[col]}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
               </section>
 
               <section className="space-y-3 lg:space-y-[0.833vw]">

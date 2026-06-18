@@ -132,7 +132,12 @@ export function appendMessage(id: string, msg: DisplayMessage) {
   const s = threads.get(id);
   if (!s) return;
   if (s.messages.some((m) => m.id === msg.id)) return;
-  setThread(id, { ...s, messages: [...s.messages, msg] });
+  // Insert in time order (not blind append) so an out-of-order realtime/system
+  // message lands in the right place and day-dividers stay correct.
+  const next = [...s.messages, msg].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+  setThread(id, { ...s, messages: next });
 }
 
 export function patchMessages(id: string, fn: (prev: DisplayMessage[]) => DisplayMessage[]) {

@@ -2,11 +2,12 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { sendMessage, markConversationRead } from "@/lib/actions/messages";
 import { showToast } from "@/components/ui/toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { markReadOptimistic } from "@/components/dashboard/unread-store";
 import { MessageBubble, DayDivider, type DisplayMessage } from "./message-bubble";
 import { MessageComposer } from "./message-composer";
 import { ParticipantAvatar } from "./participant-avatar";
@@ -32,6 +33,7 @@ function sameDay(a: string, b: string): boolean {
  */
 export function ThreadView({ basePath, userId }: { basePath: string; userId: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const activeId = pathname.startsWith(`${basePath}/`)
     ? pathname.slice(basePath.length + 1)
     : null;
@@ -45,6 +47,7 @@ export function ThreadView({ basePath, userId }: { basePath: string; userId: str
   const endRef = useRef<HTMLDivElement>(null);
   const tempCounter = useRef(0);
   const markReadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const optimisticReadId = useRef<string | null>(null);
 
   // Load (and revalidate) whenever the active conversation changes.
   useEffect(() => {
@@ -56,17 +59,31 @@ export function ThreadView({ basePath, userId }: { basePath: string; userId: str
     const id = activeId;
     if (markReadTimer.current) clearTimeout(markReadTimer.current);
     markReadTimer.current = setTimeout(() => {
-      void markConversationRead(id).catch(() => {});
+      // Reconcile the authoritative sidebar count after the read commits (the
+      // optimistic decrement already cleared it instantly).
+      void markConversationRead(id)
+        .then((res) => {
+          if (res?.ok) router.refresh();
+        })
+        .catch(() => {});
     }, 800);
-  }, [activeId]);
+  }, [activeId, router]);
 
   // Mark read once messages are present; clean up on switch/unmount.
   useEffect(() => {
-    if (activeId && messages.length) scheduleMarkRead();
+    if (activeId && messages.length) {
+      scheduleMarkRead();
+      // Optimistically clear this conversation from the sidebar badge the moment
+      // it's opened (once per conversation), if it was unread.
+      if (optimisticReadId.current !== activeId && summary?.hasUnread) {
+        optimisticReadId.current = activeId;
+        markReadOptimistic(activeId, true);
+      }
+    }
     return () => {
       if (markReadTimer.current) clearTimeout(markReadTimer.current);
     };
-  }, [activeId, scheduleMarkRead, messages.length]);
+  }, [activeId, scheduleMarkRead, messages.length, summary?.hasUnread]);
 
   // Keep pinned to the newest message (and on conversation switch).
   useEffect(() => {
@@ -78,6 +95,15 @@ export function ThreadView({ basePath, userId }: { basePath: string; userId: str
     if (!activeId) return;
     const mine = me ? incoming.senderType === me.type && incoming.senderId === me.id : false;
     appendMessage(activeId, { ...incoming, isMine: mine });
+    // A lifecycle message (quote sent/accepted/superseded, job completed, …)
+    // changes the job state, so refetch the panel + message meta — this is what
+    // makes the header actions (Accept / Mark completed), the timeline, and the
+    // quote-card status update LIVE for both parties without a manual reload.
+    const lifecycle =
+      incoming.senderType === "system" ||
+      incoming.meta?.kind === "event" ||
+      incoming.meta?.kind === "quote";
+    if (lifecycle) void loadThread(activeId);
     if (!mine) scheduleMarkRead();
   });
 

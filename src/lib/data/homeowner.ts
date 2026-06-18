@@ -6,7 +6,7 @@
 
 import { cache } from 'react'
 import { db } from '@/lib/db'
-import { and, count, desc, eq, inArray } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, min } from 'drizzle-orm'
 import {
   contractors,
   estimates,
@@ -46,6 +46,10 @@ export type HomeownerLead = {
   interestedCount: number
   /** How many quotes have been sent for this request. */
   quoteCount: number
+  /** Best (lowest) quote total across contractors, for the table's Quote column. */
+  bestQuoteTotal: string | null
+  /** True once the hired contractor marked the job completed (projects.stage). */
+  projectCompleted: boolean
   createdAt: Date
 }
 
@@ -76,7 +80,8 @@ export async function getHomeownerLeads(
   // Grouped counts (one query each) instead of N per-lead queries:
   //  • matched   = every offer row
   //  • interested = offers that engaged (started a conversation)
-  const [matched, interested, quotes] = await Promise.all([
+  //  • completed = leads whose hired contractor marked the project completed
+  const [matched, interested, quotes, completed] = await Promise.all([
     db
       .select({ leadId: leadRecipients.leadId, value: count() })
       .from(leadRecipients)
@@ -92,9 +97,10 @@ export async function getHomeownerLeads(
         ),
       )
       .groupBy(leadRecipients.leadId),
-    // Quotes actually sent to the homeowner, via the engaged contractor's project.
+    // Quotes actually sent to the homeowner, via the engaged contractor's project
+    // — count + the best (lowest) total for the table's Quote column.
     db
-      .select({ leadId: projects.leadId, value: count() })
+      .select({ leadId: projects.leadId, value: count(), best: min(estimates.total) })
       .from(estimates)
       .innerJoin(projects, eq(projects.id, estimates.projectId))
       .where(
@@ -104,13 +110,18 @@ export async function getHomeownerLeads(
         ),
       )
       .groupBy(projects.leadId),
+    // Leads whose hired contractor marked the project completed.
+    db
+      .select({ leadId: projects.leadId, value: count() })
+      .from(projects)
+      .where(and(inArray(projects.leadId, leadIds), eq(projects.stage, 'completed')))
+      .groupBy(projects.leadId),
   ])
 
   const matchedBy = new Map(matched.map((c) => [c.leadId, c.value]))
   const interestedBy = new Map(interested.map((c) => [c.leadId, c.value]))
-  const quotesBy = new Map(
-    quotes.map((c) => [c.leadId as string, c.value]),
-  )
+  const quotesBy = new Map(quotes.map((c) => [c.leadId as string, c]))
+  const completedSet = new Set(completed.map((c) => c.leadId as string))
 
   return rows.map((r) => ({
     id: r.id,
@@ -123,7 +134,9 @@ export async function getHomeownerLeads(
     zipCode: r.zipCode,
     matchedCount: matchedBy.get(r.id) ?? 0,
     interestedCount: interestedBy.get(r.id) ?? 0,
-    quoteCount: quotesBy.get(r.id) ?? 0,
+    quoteCount: quotesBy.get(r.id)?.value ?? 0,
+    bestQuoteTotal: quotesBy.get(r.id)?.best ?? null,
+    projectCompleted: completedSet.has(r.id),
     createdAt: r.createdAt,
   }))
 }
@@ -139,7 +152,13 @@ export function deriveRequestStatus(args: {
   status: LeadStatus
   interestedCount: number
   quoteCount: number
+  /** True once the awarded contractor has marked their project completed. */
+  projectCompleted: boolean
 }): HomeownerRequestStatus {
+  // A completed job is "done" for the homeowner too — the contractor drives
+  // completion via projects.stage, which the homeowner has no lead-status mirror
+  // of, so we read it directly (the divergence bug: leads stays `awarded`).
+  if (args.projectCompleted) return 'done'
   if (args.status === 'awarded') return 'hired'
   if (args.status === 'closed' || args.status === 'expired') return 'done'
   if (args.quoteCount > 0) return 'quotes'
@@ -212,10 +231,13 @@ export async function getHomeownerRequestDetail(
       projectId: projects.id,
       contractorId: projects.contractorId,
       contractorName: contractors.companyName,
+      stage: projects.stage,
     })
     .from(projects)
     .innerJoin(contractors, eq(contractors.id, projects.contractorId))
     .where(eq(projects.leadId, leadId))
+
+  const projectCompleted = projRows.some((p) => p.stage === 'completed')
 
   const projectIds = projRows.map((p) => p.projectId)
   const latest = projectIds.length
@@ -258,7 +280,7 @@ export async function getHomeownerRequestDetail(
     subtype: subtypeLabel(lead.serviceDetails),
     subtypes: subtypeList(lead.serviceDetails),
     status: lead.status,
-    requestStatus: deriveRequestStatus({ status: lead.status, interestedCount, quoteCount }),
+    requestStatus: deriveRequestStatus({ status: lead.status, interestedCount, quoteCount, projectCompleted }),
     urgency: lead.urgency,
     address: lead.address,
     city: lead.city,
@@ -272,76 +294,6 @@ export async function getHomeownerRequestDetail(
   }
 }
 
-export type HomeownerQuote = {
-  estimateId: string
-  contractorName: string | null
-  status: EstimateStatus
-  total: string | null
-  lineItems: Array<{ label: string; amount: string }>
-  scopeNotes: string | null
-  validUntil: Date | null
-}
-
-export type HomeownerQuoteGroup = {
-  leadId: string
-  serviceName: string
-  subtype: string | null
-  leadStatus: LeadStatus
-  city: string | null
-  state: string | null
-  quotes: HomeownerQuote[]
-}
-
-/** A homeowner's received quotes, grouped by request. Only sent/accepted shown. */
-export async function getHomeownerQuotes(homeownerId: string): Promise<HomeownerQuoteGroup[]> {
-  const rows = await db
-    .select({
-      estimateId: estimates.id,
-      status: estimates.status,
-      total: estimates.total,
-      lineItems: estimates.lineItems,
-      scopeNotes: estimates.scopeNotes,
-      validUntil: estimates.validUntil,
-      contractorName: contractors.companyName,
-      leadId: leads.id,
-      leadStatus: leads.status,
-      serviceName: services.name,
-      serviceDetails: leads.serviceDetails,
-      city: leads.city,
-      state: leads.state,
-    })
-    .from(estimates)
-    .innerJoin(projects, eq(projects.id, estimates.projectId))
-    .innerJoin(contractors, eq(contractors.id, projects.contractorId))
-    .innerJoin(leads, eq(leads.id, projects.leadId))
-    .innerJoin(services, eq(services.id, leads.serviceId))
-    .where(and(eq(leads.homeownerId, homeownerId), inArray(estimates.status, ['sent', 'accepted'])))
-    .orderBy(desc(estimates.createdAt))
-
-  const groups = new Map<string, HomeownerQuoteGroup>()
-  for (const r of rows) {
-    let group = groups.get(r.leadId)
-    if (!group) {
-      group = {
-        leadId: r.leadId,
-        serviceName: r.serviceName,
-        subtype: subtypeLabel(r.serviceDetails),
-        leadStatus: r.leadStatus,
-        city: r.city,
-        state: r.state,
-        quotes: [],
-      }
-      groups.set(r.leadId, group)
-    }
-    group.quotes.push({
-      estimateId: r.estimateId,
-      contractorName: r.contractorName,
-      status: r.status,
-      total: r.total,
-      lineItems: r.lineItems,
-      scopeNotes: r.scopeNotes,
-      validUntil: r.validUntil,
-    })
-  }
-  return [...groups.values()]
-}
+// Homeowner quotes are no longer a standalone page — they're viewed and accepted
+// inside each job's chat (QuoteCard) and the request detail. getHomeownerQuotes /
+// the Quotes board were removed to declutter the homeowner nav.

@@ -9,9 +9,11 @@ import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
-import { activityLog, projects } from '@/lib/db/schema'
+import { activityLog, contractors, homeowners, leads, projects, users } from '@/lib/db/schema'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
+import { getProjectConversationId, postEventMessage } from '@/lib/messaging/system'
+import { sendNotification } from '@/lib/notifications'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import type { ProjectStage } from '@/lib/data/projects'
 
@@ -74,6 +76,13 @@ export async function advanceProjectStage(projectId: string, toStage: string): P
   }
 
   if (target === 'completed') {
+    // Post-commit side effects — best-effort. The homeowner must learn the job
+    // is done across every surface: an in-thread auto-message (which also
+    // refreshes both parties' panels/timelines live), an in-app + email
+    // notification, and a board refresh.
+    await notifyJobCompleted(projectId, contractor.id).catch((err) =>
+      console.error('[advanceProjectStage] completion notify failed (non-fatal)', err),
+    )
     try {
       await inngest.send({ name: INNGEST_EVENTS.REVIEW_REQUEST_SCHEDULED, data: { projectId } })
     } catch (err) {
@@ -83,5 +92,49 @@ export async function advanceProjectStage(projectId: string, toStage: string): P
 
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
+  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner/messages')
   return { ok: true }
+}
+
+/**
+ * Tell the homeowner their job is complete: a personalized auto-message in the
+ * thread (owned by the contractor company, so it sits on their side and the
+ * homeowner reads a "marked complete" note), plus an in-app + email notification.
+ */
+async function notifyJobCompleted(projectId: string, contractorId: string): Promise<void> {
+  const [row] = await db
+    .select({
+      companyName: contractors.companyName,
+      homeownerUserId: users.id,
+    })
+    .from(projects)
+    .innerJoin(leads, eq(leads.id, projects.leadId))
+    .innerJoin(homeowners, eq(homeowners.id, leads.homeownerId))
+    .innerJoin(users, eq(users.id, homeowners.userId))
+    .innerJoin(contractors, eq(contractors.id, projects.contractorId))
+    .where(eq(projects.id, projectId))
+    .limit(1)
+  if (!row) return
+
+  const conversationId = await getProjectConversationId(projectId)
+  if (conversationId) {
+    await postEventMessage(conversationId, 'Job marked completed.', {
+      kind: 'event',
+      event: 'job_completed',
+      actorType: 'contractor',
+      actorId: contractorId,
+    }).catch((e) => console.error('[notifyJobCompleted] event message failed', e))
+  }
+
+  await sendNotification({
+    userId: row.homeownerUserId,
+    type: 'SYSTEM',
+    title: 'Your job is complete',
+    body: `${row.companyName ?? 'Your contractor'} marked the job as completed. We’ll ask you for a quick review shortly.`,
+    actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner/requests',
+    entityType: 'SYSTEM',
+    entityId: projectId,
+    dedupKey: `job-completed:${projectId}`,
+  }).catch((e) => console.error('[notifyJobCompleted] notification failed', e))
 }

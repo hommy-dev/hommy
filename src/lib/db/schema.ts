@@ -481,12 +481,32 @@ export const conversationParticipants = pgTable('conversation_participants', {
 
 // Structured payload attached to a message so the thread can render a rich card
 // (e.g. a quote) instead of plain text. Nullable — most messages have no meta.
-export type MessageMeta = {
-  kind: 'quote'
-  estimateId: string
-  total: string | null
-  status: 'draft' | 'sent' | 'accepted' | 'rejected'
-}
+//
+// A `quote` payload renders the inline accept/view card. An `event` payload is a
+// lifecycle auto-message (quote accepted, job completed, …) that the thread
+// renders as a normal LEFT/RIGHT bubble owned by the user who triggered it
+// (`actorType`/`actorId`), with text PERSONALIZED per viewer at render time — so
+// the contractor sees "Awaiting the homeowner…" while the homeowner sees
+// "Awaiting you…". The stored `body` is only a fallback for non-thread surfaces.
+export type SystemEventKind =
+  | 'quote_accepted'
+  | 'quote_superseded'
+  | 'job_completed'
+
+export type MessageMeta =
+  | {
+      kind: 'quote'
+      estimateId: string
+      total: string | null
+      status: 'draft' | 'sent' | 'accepted' | 'rejected'
+    }
+  | {
+      kind: 'event'
+      event: SystemEventKind
+      /** The participant who triggered this event (owns the bubble's side). */
+      actorType: 'user' | 'contractor'
+      actorId: string
+    }
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),

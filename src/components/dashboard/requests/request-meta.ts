@@ -26,5 +26,9 @@ export type RequestCardItem = {
   state: string | null;
   zipCode: string | null;
   quoteCount: number;
+  /** Best (lowest) quote total received, for the table's Quote column. */
+  bestQuoteTotal: string | null;
   summary: string;
+  /** ISO timestamp the request was posted. */
+  createdAt: string;
 };

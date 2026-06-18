@@ -10,16 +10,18 @@
 
 import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray, ne } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { estimates, projects } from '@/lib/db/schema'
-import { getRequiredUser } from '@/lib/auth/session'
+import { getRequiredUser, getRequiredUserId } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
+import { getConversationForUser } from '@/lib/data/conversations'
 import { computeTotals, lineItemAmount } from '@/lib/estimates/compute'
-import { getProjectConversationId, postQuoteMessage } from '@/lib/messaging/system'
+import { getProjectConversationId, markQuoteMessageStatus, postQuoteMessage } from '@/lib/messaging/system'
 import { formatCurrency } from '@/lib/format'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
+import { contractors } from '@/lib/db/schema'
 import type { Tx } from '@/lib/credits/ledger'
 
 const lineItemSchema = z.object({
@@ -84,10 +86,24 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
 
   let estimateId = ''
   let total = '0.00'
+  let supersededIds: string[] = []
   try {
     const result = await db.transaction(async (tx) => {
       const draft = await upsertDraft(tx, ctx.contractorId, ctx.input)
       const token = randomBytes(24).toString('base64url')
+      // One active quote per project: supersede any prior sent/draft estimates so
+      // the homeowner never sees two acceptable quotes from the same company.
+      const superseded = await tx
+        .update(estimates)
+        .set({ status: 'rejected' })
+        .where(
+          and(
+            eq(estimates.projectId, ctx.input.projectId),
+            inArray(estimates.status, ['sent', 'draft']),
+            ne(estimates.id, draft.estimateId),
+          ),
+        )
+        .returning({ id: estimates.id })
       await tx
         .update(estimates)
         .set({ status: 'sent', sentAt: new Date(), acceptToken: token })
@@ -96,18 +112,25 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
         .update(projects)
         .set({ stage: 'estimate_sent', stageUpdatedAt: new Date() })
         .where(eq(projects.id, ctx.input.projectId))
-      return { estimateId: draft.estimateId, total: draft.totals.total }
+      return { estimateId: draft.estimateId, total: draft.totals.total, supersededIds: superseded.map((s) => s.id) }
     })
     estimateId = result.estimateId
     total = result.total
+    supersededIds = result.supersededIds
   } catch (err) {
     if (err instanceof EstimateError) return fail(err.code)
     console.error('[sendEstimate] failed', err)
     return fail('DB_ERROR')
   }
 
-  // Post-commit side effects — best-effort. Post a rich quote card so both
-  // parties see (and the homeowner can accept) the quote inside the thread.
+  // Post-commit side effects — best-effort. Flip any superseded quote cards so
+  // they stop offering Accept, then post a rich quote card so both parties see
+  // (and the homeowner can accept) the new quote inside the thread.
+  if (supersededIds.length > 0) {
+    await markQuoteMessageStatus(supersededIds, 'rejected').catch((e) =>
+      console.error('[sendEstimate] supersede cards failed', e),
+    )
+  }
   const conversationId = await getProjectConversationId(ctx.input.projectId)
   if (conversationId) {
     await postQuoteMessage(conversationId, `Quote sent — ${formatCurrency(total)}`, {
@@ -128,7 +151,8 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
 
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
-  revalidatePath('/homeowner/quotes')
+  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner/messages')
   return { ok: true, estimateId }
 }
 
@@ -190,4 +214,74 @@ async function upsertDraft(
     .values({ projectId: input.projectId, status: 'draft', ...values })
     .returning({ id: estimates.id })
   return { estimateId: created.id, totals }
+}
+
+// ── view (read) ──
+
+export type QuoteDetail = {
+  estimateId: string
+  contractorName: string | null
+  status: EstimateStatusValue
+  subtotal: string | null
+  taxAmount: string | null
+  total: string | null
+  lineItems: Array<{ label: string; amount: string }>
+  scopeNotes: string | null
+  validUntil: string | null
+}
+
+type EstimateStatusValue = (typeof estimates.status.enumValues)[number]
+
+export type ViewQuoteResult = { ok: true; quote: QuoteDetail } | { ok: false; message: string }
+
+/**
+ * Full quote detail for the in-thread "View quote" dialog. Authorized to EITHER
+ * party of the project's conversation (homeowner or a member of the owning
+ * company), so both can inspect line items, scope, and validity from the chat.
+ */
+export async function getEstimateForViewer(estimateId: string): Promise<ViewQuoteResult> {
+  if (!z.string().uuid().safeParse(estimateId).success) {
+    return { ok: false, message: 'That quote no longer exists.' }
+  }
+  const userId = await getRequiredUserId()
+
+  const [row] = await db
+    .select({
+      id: estimates.id,
+      projectId: estimates.projectId,
+      status: estimates.status,
+      subtotal: estimates.subtotal,
+      taxAmount: estimates.taxAmount,
+      total: estimates.total,
+      lineItems: estimates.lineItems,
+      scopeNotes: estimates.scopeNotes,
+      validUntil: estimates.validUntil,
+      contractorName: contractors.companyName,
+    })
+    .from(estimates)
+    .innerJoin(projects, eq(projects.id, estimates.projectId))
+    .innerJoin(contractors, eq(contractors.id, projects.contractorId))
+    .where(eq(estimates.id, estimateId))
+    .limit(1)
+  if (!row) return { ok: false, message: 'That quote no longer exists.' }
+
+  // Authorize: the caller must be a participant of the project's conversation.
+  const conversationId = await getProjectConversationId(row.projectId)
+  const convo = conversationId ? await getConversationForUser(conversationId, userId) : null
+  if (!convo) return { ok: false, message: 'You don’t have access to this quote.' }
+
+  return {
+    ok: true,
+    quote: {
+      estimateId: row.id,
+      contractorName: row.contractorName,
+      status: row.status,
+      subtotal: row.subtotal,
+      taxAmount: row.taxAmount,
+      total: row.total,
+      lineItems: row.lineItems,
+      scopeNotes: row.scopeNotes,
+      validUntil: row.validUntil ? row.validUntil.toISOString() : null,
+    },
+  }
 }

@@ -77,6 +77,12 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
           projectId={detail.projectId}
           triggerLabel={quote ? "Update quote" : "Send quote"}
           triggerClassName={btnPrimary}
+          initialItems={
+            quote
+              ? detail.estimates[0]?.lineItems.map((li) => ({ label: li.label, amount: String(li.amount) }))
+              : undefined
+          }
+          initialScopeNotes={quote ? detail.estimates[0]?.scopeNotes : undefined}
         />
       ) : null}
       {panel.canComplete ? (
@@ -116,7 +122,11 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
             </div>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto p-6 lg:p-[1.667vw]">
-            <JobDetailContent detail={detail} showHomeowner={panel.viewerRole === "contractor"} />
+            <JobDetailContent
+              detail={detail}
+              showHomeowner={panel.viewerRole === "contractor"}
+              viewerRole={panel.viewerRole}
+            />
           </div>
         </SheetContent>
       </Sheet>

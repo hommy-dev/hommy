@@ -12,13 +12,18 @@ import { headers } from 'next/headers'
 import { and, eq, ne } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
-import { estimates, leadRecipients, leads, projects } from '@/lib/db/schema'
+import { estimates, homeowners, leadRecipients, leads, projects, users } from '@/lib/db/schema'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getHomeownerForUser } from '@/lib/data/homeowner'
 import { spendCredits } from '@/lib/credits/ledger'
 import { recordScoreEvent } from '@/lib/reputation/score'
 import { SCORE_DELTAS } from '@/lib/config/tunables'
-import { getProjectConversationId, markQuoteMessageAccepted, postSystemMessage } from '@/lib/messaging/system'
+import {
+  getProjectConversationId,
+  markQuoteMessageAccepted,
+  postEventMessage,
+  postSystemMessage,
+} from '@/lib/messaging/system'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
 type AcceptError =
@@ -203,9 +208,28 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
 
   // Post-commit side effects — best-effort.
   await markQuoteMessageAccepted(estimateId)
+  // The accepting homeowner owns this auto-message, so it renders on THEIR side
+  // ("You accepted…") and on the contractor's left ("<Homeowner> accepted your
+  // quote — you won! 🎉"). Look up the homeowner's user id for the actor.
+  const [hoRow] = await db
+    .select({ userId: users.id })
+    .from(leads)
+    .innerJoin(homeowners, eq(homeowners.id, leads.homeownerId))
+    .innerJoin(users, eq(users.id, homeowners.userId))
+    .where(eq(leads.id, outcome.leadId))
+    .limit(1)
   const winnerConvo = await getProjectConversationId(outcome.winnerProjectId)
   if (winnerConvo) {
-    await postSystemMessage(winnerConvo, 'Quote accepted — you won the job! 🎉').catch(() => {})
+    if (hoRow) {
+      await postEventMessage(winnerConvo, 'Quote accepted.', {
+        kind: 'event',
+        event: 'quote_accepted',
+        actorType: 'user',
+        actorId: hoRow.userId,
+      }).catch(() => {})
+    } else {
+      await postSystemMessage(winnerConvo, 'Quote accepted — you won the job! 🎉').catch(() => {})
+    }
   }
   await Promise.all(
     outcome.loserProjectIds.map(async (pid) => {
@@ -228,8 +252,8 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
     console.error('[acceptEstimate] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath('/homeowner/quotes')
   revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner/messages')
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
 

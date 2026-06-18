@@ -9,6 +9,7 @@
     "lint": "eslint",
     "admin:create": "tsx scripts/create-admin.ts",
     "email:test": "tsx scripts/test-email.ts",
+    "notifications:test": "tsx scripts/test-notifications.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:seed:dev": "tsx scripts/seed.ts --dev",
     "db:migrate": "tsx scripts/migrate.ts",

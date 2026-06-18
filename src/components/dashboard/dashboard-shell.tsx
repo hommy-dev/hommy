@@ -24,6 +24,7 @@ import { SVGIcon } from "@/components/ui/svg-icon";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { formatUnreadBadge } from "@/utils/format/unread";
+import { seedUnread, useUnreadCount } from "@/components/dashboard/unread-store";
 import {
   type DashboardNavItem,
   isDashboardNavActive,
@@ -68,7 +69,17 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const pathname = usePathname() ?? "";
-  const getUnreadForHref = (href: string) => navUnreadCounts?.[href] ?? 0;
+  // The Messages badge is optimistic: seeded from the server count, decremented
+  // instantly when the open thread reads a conversation, then reconciled by the
+  // next server count. Other nav badges read the server prop directly.
+  const messagesHref = navItems.find((i) => i.href.endsWith("/messages"))?.href;
+  const messagesServerCount = messagesHref ? (navUnreadCounts?.[messagesHref] ?? 0) : 0;
+  React.useEffect(() => {
+    seedUnread(messagesServerCount);
+  }, [messagesServerCount]);
+  const liveMessagesCount = useUnreadCount();
+  const getUnreadForHref = (href: string) =>
+    href === messagesHref ? liveMessagesCount : (navUnreadCounts?.[href] ?? 0);
   // The messaging surface manages its own scroll and fills the inset edge-to-edge
   // (no page padding / panel frame). Other routes keep the comfortable padding.
   const isFullBleed = /\/messages(\/|$)/.test(pathname);

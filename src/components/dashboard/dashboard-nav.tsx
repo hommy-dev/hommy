@@ -23,8 +23,9 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
 
 export const HOMEOWNER_NAV: DashboardNavItem[] = [
   { href: "/homeowner", label: "Dashboard", icon: "category" },
-  { href: "/homeowner/requests", label: "My requests", icon: "paper" },
-  { href: "/homeowner/quotes", label: "Quotes", icon: "discount" },
+  // The homeowner's single board (mirrors the contractor "Jobs" table). Quotes
+  // live inside each job's chat + detail, so there's no separate Quotes page.
+  { href: "/homeowner/requests", label: "Jobs", icon: "work" },
   { href: "/homeowner/messages", label: "Messages", icon: "chat" },
   { href: "/homeowner/settings", label: "Settings", icon: "setting" },
 ]
