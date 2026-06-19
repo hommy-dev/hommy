@@ -213,6 +213,13 @@ function LedgerRow({ entry }: { entry: LedgerEntry }) {
       </td>
       <td className="px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
         {KIND_LABEL[entry.kind] ?? entry.kind}
+        {entry.expiresAt && entry.amount > 0 ? (
+          <span className="block text-xs lg:text-[0.764vw] text-muted-foreground">
+            {new Date(entry.expiresAt) < new Date()
+              ? "Expired"
+              : `Expires ${formatDate(entry.expiresAt)}`}
+          </span>
+        ) : null}
       </td>
       <td
         className={cn(

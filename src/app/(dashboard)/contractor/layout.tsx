@@ -111,6 +111,28 @@ function buildNotice(
     )
   }
 
+  if (contractor.creditBalance < 0) {
+    return (
+      <SidebarNotice
+        tone="warning"
+        title={`You owe ${Math.abs(contractor.creditBalance)} credits`}
+        body="From a won job. Top up to take new leads."
+        cta={{ label: "Top up", href: "/contractor/settings/billing" }}
+      />
+    )
+  }
+
+  if (contractor.creditBalance < 5) {
+    return (
+      <SidebarNotice
+        tone="announcement"
+        title={`${contractor.creditBalance} credits left`}
+        body="Low on credits — top up to start new chats."
+        cta={{ label: "Buy credits", href: "/contractor/settings/billing" }}
+      />
+    )
+  }
+
   return (
     <SidebarNotice
       tone="success"

@@ -55,17 +55,35 @@ export const quoteAccepted = inngest.createFunction(
       }).catch((err) => console.error('[quote-accepted] homeowner notify', err))
     })
 
+    const creditsCharged = event.data.creditsCharged as number | undefined
+    const winnerBalanceAfter = event.data.winnerBalanceAfter as number | undefined
+
     await step.run('notify-winner', async () => {
       const winners = await activeMemberIds([winnerContractorId])
       if (winners.length === 0) return
       await broadcastUserEventToMany(winners, 'quote:accepted', { estimateId: estimateId ?? '' })
+
+      // Surface the win-fee charge + new balance so the deduction is never a
+      // mystery. Falls back to plain copy for older events without the amounts.
+      let body = 'The homeowner accepted your quote. Open the job to get started.'
+      if (typeof creditsCharged === 'number') {
+        const fee = `Win fee: ${creditsCharged} credit${creditsCharged === 1 ? '' : 's'}`
+        const wallet =
+          typeof winnerBalanceAfter === 'number'
+            ? winnerBalanceAfter < 0
+              ? ` · you owe ${Math.abs(winnerBalanceAfter)} — top up to take new leads`
+              : ` · ${winnerBalanceAfter} left`
+            : ''
+        body = `The homeowner accepted your quote. ${fee}${wallet}. Open the job to get started.`
+      }
+
       await Promise.all(
         winners.map((userId) =>
           sendNotification({
             userId,
             type: 'ESTIMATE',
             title: 'You won the job! 🎉',
-            body: 'The homeowner accepted your quote. Open the job to get started.',
+            body,
             actionUrl: '/contractor/jobs',
             entityType: 'ESTIMATE',
             entityId: estimateId,

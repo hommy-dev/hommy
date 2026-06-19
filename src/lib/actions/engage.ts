@@ -40,6 +40,7 @@ import {
   type Tx,
 } from '@/lib/credits/ledger'
 import { recordScoreEvent } from '@/lib/reputation/score'
+import { broadcastCreditsChanged } from '@/lib/credits/notify'
 import { SCORE_DELTAS, FAST_ENGAGE_FRACTION, responseWindowHours, quoteReminderHours } from '@/lib/config/tunables'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
@@ -54,7 +55,7 @@ type EngageError =
   | 'DB_ERROR'
 
 export type EngageResult =
-  | { ok: true; projectId: string; conversationId: string }
+  | { ok: true; projectId: string; conversationId: string; creditsSpent: number; balanceAfter: number }
   | { ok: false; error: EngageError; message: string; needed?: number; balance?: number }
 
 const MESSAGES: Record<EngageError, string> = {
@@ -80,7 +81,7 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
   if (!z.string().uuid().safeParse(leadId).success) return fail('NOT_OFFERED')
 
   type Outcome =
-    | { code: 'OK'; projectId: string; conversationId: string; homeownerUserId: string }
+    | { code: 'OK'; projectId: string; conversationId: string; homeownerUserId: string; creditsSpent: number; balanceAfter: number }
     | { code: Exclude<EngageError, 'UNAUTHENTICATED' | 'NO_COMPANY' | 'NOT_VERIFIED' | 'DB_ERROR'>; needed?: number; balance?: number }
 
   let outcome: Outcome
@@ -120,7 +121,7 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
       if (balance < required) return { code: 'INSUFFICIENT_CREDITS', needed: required, balance }
 
       // Charge the small engagement fee now.
-      await spendCredits(tx, {
+      const balanceAfter = await spendCredits(tx, {
         contractorId: contractor.id,
         kind: 'lead_engagement',
         amount: lead.engagementCreditCost,
@@ -189,6 +190,8 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
         projectId: project.id,
         conversationId: conversation.id,
         homeownerUserId: homeownerUserId ?? '',
+        creditsSpent: lead.engagementCreditCost,
+        balanceAfter,
       }
     })
   } catch (err) {
@@ -219,11 +222,20 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
     console.error('[engageLead] inngest send failed (non-fatal)', err)
   }
 
+  // Refresh the header credit chip / sidebar balance live for the whole company.
+  void broadcastCreditsChanged(contractor.id, outcome.balanceAfter)
+
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
   revalidatePath('/homeowner/requests')
 
-  return { ok: true, projectId: outcome.projectId, conversationId: outcome.conversationId }
+  return {
+    ok: true,
+    projectId: outcome.projectId,
+    conversationId: outcome.conversationId,
+    creditsSpent: outcome.creditsSpent,
+    balanceAfter: outcome.balanceAfter,
+  }
 }
 
 /**

@@ -49,6 +49,10 @@ export function EngageConfirm({
     start(async () => {
       const res = await engageLead(leadId);
       if (res.ok) {
+        showToast(
+          `Chat unlocked · ${res.creditsSpent} credit${res.creditsSpent === 1 ? "" : "s"} spent · ${res.balanceAfter} left`,
+          { type: "success" },
+        );
         router.push(`/contractor/messages/${res.conversationId}`);
         return;
       }

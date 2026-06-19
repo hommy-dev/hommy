@@ -21,6 +21,7 @@ import {
   homeowners,
 } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
+import { sendNotification } from '@/lib/notifications'
 
 /** Free credits every new company gets, no strings, never expires. */
 export const SIGNUP_BONUS_CREDITS = 50
@@ -60,6 +61,10 @@ export async function provisionContractor({
     .where(eq(plans.slug, 'free'))
     .limit(1)
 
+  // Computed before the txn so the welcome message can quote the same date.
+  const promoExpiresAt = new Date()
+  promoExpiresAt.setMonth(promoExpiresAt.getMonth() + LAUNCH_PROMO_EXPIRES_MONTHS)
+
   await db.transaction(async (tx) => {
     const [company] = await tx
       .insert(contractors)
@@ -91,16 +96,55 @@ export async function provisionContractor({
 
     // Launch promo — expires LAUNCH_PROMO_EXPIRES_MONTHS out (FIFO spends it first).
     if (LAUNCH_PROMO_CREDITS > 0) {
-      const expiresAt = new Date()
-      expiresAt.setMonth(expiresAt.getMonth() + LAUNCH_PROMO_EXPIRES_MONTHS)
       await grantCredits(tx, {
         contractorId: company.id,
         kind: 'promo',
         amount: LAUNCH_PROMO_CREDITS,
-        expiresAt,
+        expiresAt: promoExpiresAt,
         sourceType: 'launch_promo',
       })
     }
+  })
+
+  // Welcome — what they got + how credits work. Best-effort (never block signup).
+  await sendContractorWelcome({ userId, expiresAt: promoExpiresAt }).catch((err) =>
+    console.error('[provisionContractor] welcome send failed (non-fatal)', err),
+  )
+}
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? ''
+
+/** First-run welcome: explains the starting credits + how the economy works. */
+async function sendContractorWelcome({ userId, expiresAt }: { userId: string; expiresAt: Date }): Promise<void> {
+  const total = SIGNUP_BONUS_CREDITS + LAUNCH_PROMO_CREDITS
+  const expiresStr = new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(expiresAt)
+  const html = `
+    <h2>Welcome to Homei 👋</h2>
+    <p>Your account is ready — and we've added <strong>${total} credits</strong> to your wallet to get you started:</p>
+    <ul>
+      <li><strong>${SIGNUP_BONUS_CREDITS} signup credits</strong> — yours to keep, never expire.</li>
+      <li><strong>${LAUNCH_PROMO_CREDITS} launch-bonus credits</strong> — use them before <strong>${expiresStr}</strong>.</li>
+    </ul>
+    <h3>How credits work</h3>
+    <ul>
+      <li><strong>Getting leads is free.</strong> Every matching job shows up at no cost.</li>
+      <li><strong>5 credits to start a chat</strong> — unlocks the homeowner's contact details.</li>
+      <li><strong>You only pay the win fee when you win</strong> — a small % of the job, charged when the homeowner accepts your quote. No win, no fee.</li>
+    </ul>
+    <p><a href="${APP_URL}/contractor">Open your dashboard →</a></p>
+  `
+  await sendNotification({
+    userId,
+    type: 'SYSTEM',
+    title: 'Welcome to Homei 👋',
+    body: `You've got ${total} credits to start. Receiving leads is free — you only pay 5 to start a chat, and the win fee when a homeowner accepts your quote.`,
+    actionUrl: '/contractor',
+    emailHtml: html,
+    dedupKey: `welcome:${userId}`,
   })
 }
 

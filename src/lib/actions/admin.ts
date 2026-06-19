@@ -7,6 +7,7 @@ import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { contractors, purchaseIntents } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
+import { broadcastCreditsChanged } from '@/lib/credits/notify'
 
 type Result = { success: true } | { success: false; error: string }
 
@@ -62,9 +63,10 @@ export async function grantCreditsToContractor(input: unknown): Promise<Result> 
   }
   const { contractorId, credits, kind, intentId, note } = parsed.data
 
+  let newBalance = 0
   try {
     await db.transaction(async (tx) => {
-      await grantCredits(tx, {
+      newBalance = await grantCredits(tx, {
         contractorId,
         kind,
         amount: credits,
@@ -83,6 +85,9 @@ export async function grantCreditsToContractor(input: unknown): Promise<Result> 
     console.error('[grantCreditsToContractor] failed', err)
     return { success: false, error: 'Could not grant credits. Please try again.' }
   }
+
+  // Refresh the company's credit chip live.
+  void broadcastCreditsChanged(contractorId, newBalance)
 
   revalidatePath('/admin/credits')
   revalidatePath('/admin')

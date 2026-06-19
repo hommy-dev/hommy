@@ -16,6 +16,7 @@ import { estimates, homeowners, leadRecipients, leads, projects, users } from '@
 import { getRequiredUser } from '@/lib/auth/session'
 import { getHomeownerForUser } from '@/lib/data/homeowner'
 import { spendCredits } from '@/lib/credits/ledger'
+import { broadcastCreditsChanged } from '@/lib/credits/notify'
 import { computeAwardCost } from '@/lib/leads/pricing'
 import { recordScoreEvent } from '@/lib/reputation/score'
 import { SCORE_DELTAS } from '@/lib/config/tunables'
@@ -73,6 +74,8 @@ type Outcome =
       winnerProjectId: string
       leadId: string
       loserProjectIds: string[]
+      creditsCharged: number
+      winnerBalanceAfter: number
     }
   | { code: Exclude<AcceptError, 'DB_ERROR'> }
 
@@ -129,7 +132,7 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
       // the winner already paid. Computed here, not snapshot, so it scales with
       // the real job value. Fires on the homeowner's action — may go negative.
       const awardCost = computeAwardCost(parseFloat(estimate.total ?? '0'), lead.engagementCreditCost)
-      await spendCredits(tx, {
+      const winnerBalanceAfter = await spendCredits(tx, {
         contractorId: winnerContractorId,
         kind: 'lead_won',
         amount: awardCost,
@@ -201,7 +204,15 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
         sourceId: leadId,
       })
 
-      return { code: 'OK', winnerContractorId, winnerProjectId: project.id, leadId, loserProjectIds }
+      return {
+        code: 'OK',
+        winnerContractorId,
+        winnerProjectId: project.id,
+        leadId,
+        loserProjectIds,
+        creditsCharged: awardCost,
+        winnerBalanceAfter,
+      }
     })
   } catch (err) {
     console.error('[acceptEstimate] failed', err)
@@ -242,6 +253,9 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
     }),
   )
 
+  // Refresh the winning company's credit chip live (the win fee just landed).
+  void broadcastCreditsChanged(outcome.winnerContractorId, outcome.winnerBalanceAfter)
+
   try {
     await inngest.send({
       name: INNGEST_EVENTS.QUOTE_ACCEPTED,
@@ -250,6 +264,8 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
         leadId: outcome.leadId,
         winnerContractorId: outcome.winnerContractorId,
         projectId: outcome.winnerProjectId,
+        creditsCharged: outcome.creditsCharged,
+        winnerBalanceAfter: outcome.winnerBalanceAfter,
       },
     })
   } catch (err) {
