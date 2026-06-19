@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Upload, X } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 import { showToast } from '@/components/ui/toast'
 import { uploadToCloudinary } from '@/lib/cloudinary/upload'
@@ -105,7 +105,7 @@ export function ImageUpload({
           {uploading ? (
             <Spinner />
           ) : (
-            <Upload className="size-4 lg:size-[1.111vw]" />
+            <Icon name="upload" className="size-4 lg:size-[1.111vw]" />
           )}
           {uploading ? 'Uploading…' : maxFiles > 1 ? 'Upload files' : 'Upload'}
         </Button>
@@ -152,7 +152,7 @@ export function UploadedImagePreview({
           className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] rounded-full bg-background/80 p-0.5 lg:p-[0.139vw] opacity-0 transition-opacity group-hover:opacity-100"
           aria-label="Remove image"
         >
-          <X className="size-3.5 lg:size-[0.972vw] text-destructive" />
+          <Icon name="close" className="size-3.5 lg:size-[0.972vw] text-destructive" />
         </button>
       )}
     </div>

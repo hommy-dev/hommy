@@ -7,7 +7,7 @@ import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Icon } from "@/components/ui/icon";
 
 const ICON_BTN =
-  "flex size-9 lg:size-[2.5vw] items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "flex size-9 lg:size-[2.5vw] items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
 export function DashboardHeaderActions({
   userId,

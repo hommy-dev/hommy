@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { ArrowUp } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
 /**
@@ -67,7 +67,7 @@ export function MessageComposer({
               : 'bg-muted text-muted-foreground',
           )}
         >
-          <ArrowUp className="size-4 lg:size-[1.111vw]" strokeWidth={2.5} />
+          <Icon name="arrow-up" className="size-4 lg:size-[1.111vw]" />
         </button>
       </div>
     </div>

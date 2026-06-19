@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { showToast } from "@/components/ui/toast";
 import { submitReview } from "@/lib/actions/reviews";
@@ -42,9 +42,9 @@ export function ReviewForm({ token, contractorName }: { token: string; contracto
             aria-label={`${n} star${n === 1 ? "" : "s"}`}
             className="p-0.5 transition-transform hover:scale-110"
           >
-            <Star
-              className={cn("size-9", n <= shown ? "fill-warning text-warning" : "fill-none text-muted-foreground/40")}
-              strokeWidth={1.5}
+            <Icon
+              name={n <= shown ? "star-filled" : "star"}
+              className={cn("size-9", n <= shown ? "text-warning" : "text-muted-foreground/40")}
             />
           </button>
         ))}

@@ -180,9 +180,7 @@ describe('lead matching (radius)', () => {
 
   it('prices roofing leads from config', () => {
     expect(getLeadPricing('roofing')).toEqual({
-      engagementCreditCost: 2,
-      awardCreditCost: 20,
-      engageSlots: 3,
+      engagementCreditCost: 5,
     })
   })
 })

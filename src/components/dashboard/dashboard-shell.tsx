@@ -20,7 +20,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import { SVGIcon } from "@/components/ui/svg-icon";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { formatUnreadBadge } from "@/utils/format/unread";
@@ -94,10 +93,10 @@ export function DashboardShell({
               href={brandHref}
               prefetch
               aria-label={brandLabel}
-              className="flex items-center gap-2.5 lg:gap-[0.694vw] outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md lg:rounded-[0.556vw]"
+              className="flex items-center gap-2.5 lg:gap-[0.694vw] outline-none focus-visible:ring-1 focus-visible:ring-sidebar-ring rounded-md lg:rounded-[0.556vw]"
             >
-              <SVGIcon
-                src="/icons/logo.svg"
+              <Icon
+                name="logo"
                 className="size-5 lg:size-[1.389vw] text-sidebar-primary"
               />
               <span className="truncate text-base lg:text-[1.111vw] font-semibold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden">

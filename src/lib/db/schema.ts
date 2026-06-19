@@ -70,6 +70,11 @@ export const creditTxnKind = pgEnum('credit_txn_kind', [
   'signup_bonus', 'purchase', 'plan_grant', 'lead_engagement', 'lead_won',
   'ai_agent', 'marketing', 'refund', 'promo', 'expiry', 'adjustment',
 ])
+// purchase_intents — a contractor's request to buy credits. v1 has no payment
+// integration: the intent is recorded and platform admins are notified so they
+// can fulfill it manually (offline payment → admin credit grant). `fulfilled`
+// when the matching `purchase`/`adjustment` grant is made; `declined` otherwise.
+export const purchaseIntentStatus = pgEnum('purchase_intent_status', ['requested', 'fulfilled', 'declined'])
 
 export const leadUrgency = pgEnum('lead_urgency', ['emergency', 'within_week', 'within_month', 'planning'])
 export const leadStatus = pgEnum('lead_status', ['open', 'awarded', 'closed', 'expired'])
@@ -252,6 +257,24 @@ export const creditTransactions = pgTable('credit_transactions', {
 }, (t) => [
   index('credit_transactions_contractor_idx').on(t.contractorId),
   index('credit_transactions_contractor_expiry_idx').on(t.contractorId, t.expiresAt),
+])
+
+// purchase_intents — v1 "buy credits" requests (no live payments yet). Each row
+// is one click on "Buy credits"; platform admins are notified and settle it by
+// hand (offline payment → admin grant), then mark it fulfilled.
+export const purchaseIntents = pgTable('purchase_intents', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }),
+  requestedBy: uuid('requested_by').references(() => users.id, { onDelete: 'set null' }),
+  credits: integer('credits').notNull(),
+  amountCents: integer('amount_cents').notNull(),
+  balanceAtRequest: integer('balance_at_request').notNull(),
+  status: purchaseIntentStatus('status').notNull().default('requested'),
+  note: text('note'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('purchase_intents_contractor_idx').on(t.contractorId),
+  index('purchase_intents_status_idx').on(t.status),
 ])
 
 // ============================================================

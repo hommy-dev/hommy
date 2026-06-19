@@ -16,6 +16,7 @@ import { estimates, homeowners, leadRecipients, leads, projects, users } from '@
 import { getRequiredUser } from '@/lib/auth/session'
 import { getHomeownerForUser } from '@/lib/data/homeowner'
 import { spendCredits } from '@/lib/credits/ledger'
+import { computeAwardCost } from '@/lib/leads/pricing'
 import { recordScoreEvent } from '@/lib/reputation/score'
 import { SCORE_DELTAS } from '@/lib/config/tunables'
 import {
@@ -112,7 +113,7 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
       if (!project?.leadId) return { code: 'NOT_FOUND' }
 
       const [lead] = await tx
-        .select({ status: leads.status, awardCreditCost: leads.awardCreditCost, homeownerId: leads.homeownerId })
+        .select({ status: leads.status, engagementCreditCost: leads.engagementCreditCost, homeownerId: leads.homeownerId })
         .from(leads)
         .where(eq(leads.id, project.leadId))
         .for('update')
@@ -124,11 +125,14 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
       const winnerContractorId = project.contractorId
       const leadId = project.leadId
 
-      // Full award charge — fires on the homeowner's action, may go negative.
+      // Win fee = % of the accepted quote (clamped), less the engagement credits
+      // the winner already paid. Computed here, not snapshot, so it scales with
+      // the real job value. Fires on the homeowner's action — may go negative.
+      const awardCost = computeAwardCost(parseFloat(estimate.total ?? '0'), lead.engagementCreditCost)
       await spendCredits(tx, {
         contractorId: winnerContractorId,
         kind: 'lead_won',
-        amount: lead.awardCreditCost,
+        amount: awardCost,
         allowNegative: true,
         sourceType: 'lead',
         sourceId: leadId,

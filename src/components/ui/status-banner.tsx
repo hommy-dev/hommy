@@ -1,4 +1,4 @@
-import { Info, AlertTriangle, CheckCircle2, XCircle, X } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -27,10 +27,10 @@ const VARIANT_STYLES: Record<
 }
 
 const VARIANT_ICONS = {
-  info: Info,
-  warning: AlertTriangle,
-  success: CheckCircle2,
-  error: XCircle,
+  info: 'info-square',
+  warning: 'danger-triangle',
+  success: 'tick-square',
+  error: 'danger-circle',
 } as const
 
 interface StatusBannerProps {
@@ -54,7 +54,7 @@ export function StatusBanner({
   className,
 }: StatusBannerProps) {
   const styles = VARIANT_STYLES[variant]
-  const Icon = VARIANT_ICONS[variant]
+  const iconName = VARIANT_ICONS[variant]
 
   return (
     <div
@@ -65,7 +65,7 @@ export function StatusBanner({
         className
       )}
     >
-      <Icon className={cn('mt-0.5 lg:mt-[0.139vw] size-5 lg:size-[1.389vw] shrink-0', styles.icon)} />
+      <Icon name={iconName} className={cn('mt-0.5 lg:mt-[0.139vw] size-5 lg:size-[1.389vw] shrink-0', styles.icon)} />
       <div className="flex-1 min-w-0">
         <p className="text-sm lg:text-[0.972vw] font-medium">{title}</p>
         {description && (
@@ -89,7 +89,7 @@ export function StatusBanner({
           className="shrink-0 rounded-md lg:rounded-[0.556vw] p-0.5 lg:p-[0.139vw] text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Dismiss"
         >
-          <X className="size-4 lg:size-[1.111vw]" />
+          <Icon name="close" className="size-4 lg:size-[1.111vw]" />
         </button>
       )}
     </div>

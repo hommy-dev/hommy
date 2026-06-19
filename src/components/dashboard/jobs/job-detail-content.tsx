@@ -1,4 +1,4 @@
-import { BadgeCheck } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import type { JobDetail } from "@/lib/data/jobs";
 import { formatCurrency } from "@/lib/format";
 import { RatingBadge } from "@/components/contractors/rating-badge";
@@ -49,7 +49,7 @@ export function JobDetailContent({
               <p className="flex items-center gap-1.5 lg:gap-[0.417vw] font-medium lg:text-[0.972vw]">
                 <span className="truncate">{detail.contractor.companyName ?? "Contractor"}</span>
                 {detail.contractor.verified ? (
-                  <BadgeCheck className="size-4 lg:size-[1.111vw] shrink-0 text-success" strokeWidth={2} aria-label="Verified" />
+                  <Icon name="badge-check" className="size-4 lg:size-[1.111vw] shrink-0 text-success" aria-label="Verified" />
                 ) : null}
               </p>
               <div className="mt-1 lg:mt-[0.278vw]">

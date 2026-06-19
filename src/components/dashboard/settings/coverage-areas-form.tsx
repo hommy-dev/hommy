@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/google-places-input"
 import { showToast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { coverageSummary } from "@/lib/coverage"
@@ -166,10 +167,16 @@ export function CoverageAreasForm({
       )}
 
       {areas.length === 0 ? (
-        <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-          No coverage areas yet
-          {canManage ? " — add the cities you serve above." : "."}
-        </p>
+        <EmptyState
+          size="sm"
+          icon="location"
+          title="No coverage areas yet"
+          description={
+            canManage
+              ? "Add the cities and regions you serve above so we can match you to nearby jobs."
+              : "This company hasn't set the areas they serve yet."
+          }
+        />
       ) : (
         <ul className="divide-y divide-border rounded-md lg:rounded-[0.556vw] border border-border">
           {areas.map((a) => (

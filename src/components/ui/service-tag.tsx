@@ -1,7 +1,6 @@
 "use client"
 
-import { HugeiconsIcon } from "@hugeicons/react"
-import { House01Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 import { SUBTYPE_META } from "@/components/public/get-a-quote/constants"
 import { cn } from "@/lib/utils"
 
@@ -15,7 +14,7 @@ export function ServiceTag({
   label: string
   className?: string
 }) {
-  const icon = SUBTYPE_META[label]?.icon ?? House01Icon
+  const icon = SUBTYPE_META[label]?.icon ?? "home"
   return (
     <span
       className={cn(
@@ -24,11 +23,7 @@ export function ServiceTag({
       )}
     >
       <span className="flex size-7 lg:size-[1.944vw] shrink-0 items-center justify-center rounded-md lg:rounded-[0.417vw] bg-muted text-foreground/60">
-        <HugeiconsIcon
-          icon={icon}
-          strokeWidth={2}
-          className="size-4 lg:size-[1.111vw]"
-        />
+        <Icon name={icon} className="size-4 lg:size-[1.111vw]" />
       </span>
       <span className="text-sm lg:text-[0.972vw] font-medium text-foreground">
         {label}

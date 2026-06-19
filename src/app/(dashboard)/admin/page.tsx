@@ -9,6 +9,7 @@ import {
 import { StatCard } from "@/components/dashboard/stat-card"
 import { Icon } from "@/components/ui/icon"
 import { Skeleton } from "@/components/ui/skeleton"
+import { EmptyState } from "@/components/ui/empty-state"
 import { cn } from "@/lib/utils"
 
 export default async function AdminDashboardPage() {
@@ -40,7 +41,7 @@ async function StatsRow() {
   const stats = await getAdminStats()
   return (
     <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-3">
-      <Link href="/admin/verification" className="rounded-2xl lg:rounded-[1.111vw] outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Link href="/admin/verification" className="rounded-2xl lg:rounded-[1.111vw] outline-none focus-visible:ring-1 focus-visible:ring-ring">
         <StatCard
           label="Pending verification"
           value={stats.pendingVerifications}
@@ -82,9 +83,13 @@ async function RecentContractors() {
         </Link>
       </div>
       {rows.length === 0 ? (
-        <div className="mt-4 lg:mt-[1.111vw] rounded-md lg:rounded-[0.4vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No companies yet.
-        </div>
+        <EmptyState
+          size="sm"
+          icon="work"
+          title="No companies yet"
+          description="New companies will show up here as they sign up to Homei."
+          className="mt-4 lg:mt-[1.111vw]"
+        />
       ) : (
         <ul className="mt-4 lg:mt-[1.111vw] divide-y divide-border">
           {rows.map((c) => (

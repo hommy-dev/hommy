@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
 import { SVGIcon } from "../ui/svg-icon";
+import { Icon } from "../ui/icon";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -95,8 +96,8 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
               key={p}
               className="flex items-center gap-2.5 lg:gap-[0.694vw] text-sm lg:text-[1.042vw] font-semibold"
             >
-              <SVGIcon
-                src="/icons/tick-square.svg"
+              <Icon
+                name="tick-square"
                 className="size-5 lg:size-[1.389vw] opacity-80"
               />
               {p}

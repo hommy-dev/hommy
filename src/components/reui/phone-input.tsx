@@ -23,8 +23,7 @@ import {
   ComboboxValue,
 } from "@/components/ui/combobox"
 import { Input } from "@/components/ui/input"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Globe02Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 
 type PhoneInputSize = "sm" | "default" | "lg"
 
@@ -187,9 +186,8 @@ function CountrySelect({
       >
         <div className="shrink-0 border-b border-border bg-popover p-2 lg:p-[0.556vw]">
           <div className="relative">
-            <HugeiconsIcon
-              icon={Search01Icon}
-              strokeWidth={2}
+            <Icon
+              name="search"
               className="pointer-events-none absolute top-1/2 left-2.5 lg:left-[0.694vw] size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
             />
             <ComboboxPrimitive.Input
@@ -240,9 +238,8 @@ function FlagComponent({ country, countryName }: BasePhoneInput.FlagProps) {
       {Flag ? (
         <Flag title={countryName} />
       ) : (
-        <HugeiconsIcon
-          icon={Globe02Icon}
-          strokeWidth={2}
+        <Icon
+          name="globe"
           className="size-4 lg:size-[1.111vw] opacity-60"
         />
       )}

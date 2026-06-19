@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import type { MessageMeta } from "@/lib/db/schema";
 import type { ParticipantIdentity } from "@/lib/data/conversations";
 import { Stars } from "@/components/reviews/stars";
@@ -33,7 +33,7 @@ export function ReviewCard({
       <div className="w-full max-w-[22rem] lg:max-w-[24vw] rounded-lg lg:rounded-[0.694vw] border border-border bg-card p-4 lg:p-[1.111vw]">
         <div className="flex items-center gap-2 lg:gap-[0.556vw]">
           <span className="grid size-8 lg:size-[2.222vw] place-items-center rounded-md lg:rounded-[0.556vw] bg-muted text-warning">
-            <Star className="size-4 lg:size-[1.111vw] fill-warning" strokeWidth={2} />
+            <Icon name="star-filled" className="size-4 lg:size-[1.111vw]" />
           </span>
           <p className="text-sm lg:text-[0.903vw] font-semibold">
             {submitted ? "Review submitted" : "How was the job?"}

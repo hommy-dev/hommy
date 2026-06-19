@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { HomeownerRequestStatus } from "@/lib/data/homeowner";
 import { formatCurrency, formatDistanceToNow } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,35 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "all", label: "All" },
   ...REQUEST_COLUMNS.map((c) => ({ key: c, label: REQUEST_META[c].label })),
 ];
+
+// Copy for the *filtered* empty view (the homeowner has jobs, just none under
+// this tab or matching the search). Warm and plain, like a person would say it.
+const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
+  all: {
+    title: "Nothing here yet",
+    description: "Your posted jobs will show up here as they come in.",
+  },
+  posted: {
+    title: "Nothing waiting on pros",
+    description: "Jobs you've just posted sit here until a pro reacts.",
+  },
+  interested: {
+    title: "No pros interested yet",
+    description: "When a pro says they're interested, the job moves here.",
+  },
+  quotes: {
+    title: "No quotes to review",
+    description: "Jobs with quotes waiting for your decision land here.",
+  },
+  hired: {
+    title: "You haven't hired anyone yet",
+    description: "Once you pick a pro for a job, it shows up here.",
+  },
+  done: {
+    title: "Nothing wrapped up yet",
+    description: "Finished jobs get collected here so you can look back on them.",
+  },
+};
 
 /**
  * The homeowner's jobs board — the same tabbed-table layout the contractor uses,
@@ -70,9 +100,9 @@ export function HomeownerJobsTable({ items }: { items: RequestCardItem[] }) {
 
       {/* Search */}
       <div className="relative min-w-0 sm:max-w-xs lg:sm:max-w-[20vw]">
-        <Search
+        <Icon
+          name="search"
           className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
-          strokeWidth={2}
         />
         <input
           type="search"
@@ -84,9 +114,16 @@ export function HomeownerJobsTable({ items }: { items: RequestCardItem[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-md lg:rounded-[0.556vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No jobs in this view.
-        </div>
+        query.trim() ? (
+          <EmptyState
+            size="sm"
+            icon="search"
+            title="No jobs match your search"
+            description={`Nothing here matches "${query.trim()}". Try a different word, or clear the search.`}
+          />
+        ) : (
+          <EmptyState size="sm" icon="paper" {...TAB_EMPTY[tab]} />
+        )
       ) : (
         <div className="overflow-x-auto rounded-md lg:rounded-[0.556vw] border border-border">
           <table className="w-full min-w-[48rem] border-collapse text-left">

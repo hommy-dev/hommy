@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { MessageSquare, Search } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { BoardStatus, JobCard as Job } from "@/lib/data/jobs";
 import { formatDistanceToNow, formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,39 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "done", label: "Done" },
   { key: "lost", label: "Closed" },
 ];
+
+// Copy for the *filtered* empty view (there are jobs, just none in this tab or
+// matching this search). Spoken plainly, like you'd tell a coworker what's up.
+const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
+  all: {
+    title: "No active jobs right now",
+    description: "Jobs you're working on show up here once you engage a lead.",
+  },
+  new: {
+    title: "No new leads right now",
+    description: "Fresh leads in your area land here. We'll ping you the moment one comes in.",
+  },
+  talking: {
+    title: "No chats going yet",
+    description: "Once you start chatting with a homeowner, the job moves here.",
+  },
+  quoted: {
+    title: "Nothing quoted yet",
+    description: "Jobs where you've sent a quote wait here until the homeowner decides.",
+  },
+  won: {
+    title: "No wins yet",
+    description: "When a homeowner picks you, the job shows up here.",
+  },
+  done: {
+    title: "Nothing wrapped up yet",
+    description: "Finished jobs get collected here so you can look back on them.",
+  },
+  lost: {
+    title: "Nothing closed",
+    description: "Jobs that didn't pan out end up here.",
+  },
+};
 
 export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean }) {
   const [tab, setTab] = useState<Tab>("all");
@@ -74,9 +108,9 @@ export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean
 
       {/* Search */}
       <div className="relative min-w-0 sm:max-w-xs lg:sm:max-w-[20vw]">
-        <Search
+        <Icon
+          name="search"
           className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
-          strokeWidth={2}
         />
         <input
           type="search"
@@ -88,9 +122,16 @@ export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-md lg:rounded-[0.556vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No jobs in this view.
-        </div>
+        query.trim() ? (
+          <EmptyState
+            size="sm"
+            icon="search"
+            title="No jobs match your search"
+            description={`Nothing here matches "${query.trim()}". Try a different word, or clear the search.`}
+          />
+        ) : (
+          <EmptyState size="sm" icon="paper" {...TAB_EMPTY[tab]} />
+        )
       ) : (
         <div className="overflow-x-auto rounded-md lg:rounded-[0.556vw] border border-border">
           <table className="w-full min-w-[52rem] border-collapse text-left">
@@ -181,7 +222,7 @@ function JobRow({
             triggerClassName="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
             triggerContent={
               <>
-                <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                <Icon name="message" className="size-4 lg:size-[1.111vw]" />
                 {`Chat · ${job.engagementCreditCost} cr`}
               </>
             }
@@ -192,7 +233,7 @@ function JobRow({
             onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold transition-colors hover:bg-muted"
           >
-            <MessageSquare className="size-4 lg:size-[1.111vw]" strokeWidth={2} /> Open chat
+            <Icon name="message" className="size-4 lg:size-[1.111vw]" /> Open chat
           </Link>
         ) : (
           <span className="text-muted-foreground">—</span>

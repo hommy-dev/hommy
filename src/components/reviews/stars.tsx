@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 /** Read-only star rating (rounded to nearest whole for fill). */
@@ -15,14 +15,14 @@ export function Stars({
   return (
     <span className={cn("inline-flex items-center gap-0.5", className)} aria-label={`${rating} out of 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <Star
+        <Icon
           key={n}
+          name={n <= filled ? "star-filled" : "star"}
           className={cn(
             "size-4",
-            n <= filled ? "fill-warning text-warning" : "fill-none text-muted-foreground/40",
+            n <= filled ? "text-warning" : "text-muted-foreground/40",
             starClassName,
           )}
-          strokeWidth={1.5}
           aria-hidden
         />
       ))}

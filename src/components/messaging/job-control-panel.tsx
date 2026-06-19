@@ -2,18 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { PanelRightOpen } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import type { JobPanel } from "@/lib/data/jobs";
 import { acceptEstimate } from "@/lib/actions/accept-estimate";
 import { advanceProjectStage } from "@/lib/actions/projects";
 import { showToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { DetailDialog } from "@/components/ui/detail-dialog";
 import { QuoteBuilderDialog } from "@/components/dashboard/estimates/quote-builder-dialog";
 import { JobDetailContent } from "@/components/dashboard/jobs/job-detail-content";
 import { BOARD_META } from "@/components/dashboard/jobs/board-meta";
@@ -96,40 +91,35 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
         onClick={() => setSheetOpen(true)}
         className={cn(btnOutline, "text-muted-foreground hover:text-foreground")}
       >
-        <PanelRightOpen className="size-4 lg:size-[1.111vw]" strokeWidth={2} /> Details
+        <Icon name="open-panel-right" className="size-4 lg:size-[1.111vw]" /> Details
       </button>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="data-[side=right]:sm:max-w-lg lg:data-[side=right]:sm:max-w-[40vw]">
-          <SheetHeader className="border-b border-border">
-            <SheetTitle className="pr-8 lg:pr-[2.5vw]">
-              {panel.viewerRole === "contractor"
-                ? (detail.homeowner.name ?? "Job details")
-                : "Job details"}
-            </SheetTitle>
-            <div className="flex items-center gap-2 lg:gap-[0.556vw]">
-              <span
-                className={cn(
-                  "rounded-full px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium",
-                  meta.pill,
-                )}
-              >
-                {meta.label}
-              </span>
-              <span className="text-sm lg:text-[0.903vw] text-muted-foreground">
-                {detail.serviceName}
-              </span>
-            </div>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-6 lg:p-[1.667vw]">
-            <JobDetailContent
-              detail={detail}
-              showHomeowner={panel.viewerRole === "contractor"}
-              viewerRole={panel.viewerRole}
-            />
+      <DetailDialog
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        title={panel.viewerRole === "contractor" ? (detail.homeowner.name ?? "Job details") : "Job details"}
+        headerExtra={
+          <div className="flex items-center gap-2 lg:gap-[0.556vw]">
+            <span
+              className={cn(
+                "rounded-full px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium",
+                meta.pill,
+              )}
+            >
+              {meta.label}
+            </span>
+            <span className="text-sm lg:text-[0.903vw] text-muted-foreground">
+              {detail.serviceName}
+            </span>
           </div>
-        </SheetContent>
-      </Sheet>
+        }
+      >
+        <JobDetailContent
+          detail={detail}
+          showHomeowner={panel.viewerRole === "contractor"}
+          viewerRole={panel.viewerRole}
+        />
+      </DetailDialog>
     </div>
   );
 }

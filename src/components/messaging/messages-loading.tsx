@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react"
+import { Icon } from "@/components/ui/icon"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function MessagesLoading() {
   return (
     <div className="flex h-full overflow-hidden bg-background">
-      <aside className="flex w-full shrink-0 flex-col border-r border-border lg:w-[20vw] xl:w-[19vw]">
+      <aside className="flex w-full shrink-0 flex-col border-r border-border lg:w-[24vw] xl:w-[22vw]">
         {/* Title */}
         <div className="px-4 pb-2 pt-4 lg:px-[1.111vw] lg:pb-[0.556vw] lg:pt-[1.111vw]">
           <h1 className="text-base lg:text-[1.25vw] font-semibold tracking-tight">Messages</h1>
@@ -41,9 +41,9 @@ export function MessagesLoading() {
       {/* Thread placeholder (desktop only, matching ThreadView's empty state) */}
       <div className="hidden min-w-0 flex-1 place-items-center p-10 lg:flex lg:p-[2.778vw] text-center">
         <div className="m-auto space-y-2 lg:space-y-[0.556vw]">
-          <MessageSquare
+          <Icon
+            name="chat"
             className="mx-auto size-8 lg:size-[2.222vw] text-muted-foreground/40"
-            strokeWidth={1.5}
           />
           <p className="font-medium text-muted-foreground lg:text-[1.042vw]">Loading messages…</p>
         </div>

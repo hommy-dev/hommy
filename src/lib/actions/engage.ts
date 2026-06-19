@@ -11,10 +11,11 @@
 // that reaches an open lead (a later offer, a cascade, or browsing leads) can
 // always engage. A lead only stops accepting engagement once it is `awarded`.
 //
-// Affordability rule (D2, docs §4.2): we BLOCK engage unless the company can
-// cover BOTH the small engagement fee AND the full award fee — the engagement
-// fee is spent now, the award fee is only reserved so the homeowner's later
-// accept can always charge the win.
+// Affordability rule (docs §4.2): engage gates ONLY on the small engagement fee.
+// The win fee is a percentage of the accepted quote, computed later when the
+// homeowner accepts (see accept-estimate.ts), so it can't be reserved here. That
+// charge is allowed to push the balance negative; a negative balance then blocks
+// taking NEW leads until the company settles up.
 
 import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
@@ -93,7 +94,6 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
           homeownerId: leads.homeownerId,
           urgency: leads.urgency,
           engagementCreditCost: leads.engagementCreditCost,
-          awardCreditCost: leads.awardCreditCost,
         })
         .from(leads)
         .where(eq(leads.id, leadId))
@@ -113,12 +113,13 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
       if (recipient.status === 'engaged' || recipient.status === 'won') return { code: 'ALREADY_ENGAGED' }
       if (recipient.status !== 'offered' && recipient.status !== 'viewed') return { code: 'NOT_OFFERED' }
 
-      // Affordability (D2): must cover engagement fee + reserved award fee.
-      const required = lead.engagementCreditCost + lead.awardCreditCost
+      // Affordability: must cover the small engagement fee. The win fee is
+      // computed + charged later (homeowner accept) and may go negative.
+      const required = lead.engagementCreditCost
       const balance = await lockBalance(tx, contractor.id)
       if (balance < required) return { code: 'INSUFFICIENT_CREDITS', needed: required, balance }
 
-      // Charge the small engagement fee now (the award is only reserved).
+      // Charge the small engagement fee now.
       await spendCredits(tx, {
         contractorId: contractor.id,
         kind: 'lead_engagement',

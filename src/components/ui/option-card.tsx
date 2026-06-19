@@ -1,11 +1,9 @@
 "use client"
 
-import type { ComponentProps } from "react"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { House01Icon } from "@hugeicons/core-free-icons"
+import { Icon, type IconName } from "@/components/ui/icon"
 import { cn } from "@/lib/utils"
 
-export type IconType = ComponentProps<typeof HugeiconsIcon>["icon"]
+export type IconType = IconName
 
 // Selectable option card: icon + label + optional helper line, with a check that
 // fills in when active. Works for single- or multi-select (the parent owns the
@@ -46,11 +44,7 @@ export function OptionCard({
             : "bg-muted text-foreground/55 group-hover:text-foreground/80",
         )}
       >
-        <HugeiconsIcon
-          icon={icon ?? House01Icon}
-          strokeWidth={2}
-          className="size-5 lg:size-[1.25vw]"
-        />
+        <Icon name={icon ?? "home"} className="size-5 lg:size-[1.25vw]" />
       </span>
 
       <span className="min-w-0 flex-1">

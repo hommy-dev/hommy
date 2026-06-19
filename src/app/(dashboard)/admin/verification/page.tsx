@@ -1,6 +1,7 @@
 import { getRequiredUser } from "@/lib/auth/session"
 import { getVerificationQueue } from "@/lib/data/admin"
 import { VerificationReviewCard } from "@/components/admin/verification-review"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default async function AdminVerificationPage() {
   await getRequiredUser("admin")
@@ -21,9 +22,11 @@ export default async function AdminVerificationPage() {
       </header>
 
       {queue.length === 0 ? (
-        <div className="rounded-2xl lg:rounded-[1.111vw] border border-dashed border-border p-12 lg:p-[3.333vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No companies are waiting for verification right now.
-        </div>
+        <EmptyState
+          icon="shield-done"
+          title="You're all caught up"
+          description="No companies are waiting for verification right now. New submissions will land here as they come in."
+        />
       ) : (
         <div className="space-y-4 lg:space-y-[1.111vw]">
           {queue.map((item) => (

@@ -59,6 +59,27 @@ function setThread(id: string, next: ThreadState) {
   emit();
 }
 
+// How many conversations the viewer has, published by the rail once its list
+// loads. The thread pane reads this to decide whether its "nothing selected"
+// state should say "pick a conversation" (they have some) or a personalized
+// "here's why your inbox is empty" (they have none).
+let inbox: { loaded: boolean; count: number } = { loaded: false, count: 0 };
+const INITIAL_INBOX = inbox;
+
+export function publishInboxCount(count: number) {
+  if (inbox.loaded && inbox.count === count) return;
+  inbox = { loaded: true, count };
+  emit();
+}
+
+export function useInboxCount(): { loaded: boolean; count: number } {
+  return useSyncExternalStore(
+    subscribe,
+    () => inbox,
+    () => INITIAL_INBOX,
+  );
+}
+
 /** Union by id (server rows win), keep pending optimistic temps, sort by time. */
 function mergeMessages(prev: DisplayMessage[], next: DisplayMessage[]): DisplayMessage[] {
   const map = new Map<string, DisplayMessage>();

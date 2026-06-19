@@ -1,14 +1,3 @@
-import {
-  Wrench01Icon,
-  ReloadIcon,
-  Search01Icon,
-  CloudAngledRainIcon,
-  HelpCircleIcon,
-  AlarmClockIcon,
-  Clock01Icon,
-  Calendar01Icon,
-  Idea01Icon,
-} from "@hugeicons/core-free-icons"
 import type { IconType } from "@/components/ui/option-card"
 import { NOT_SURE_SUBTYPE } from "@/lib/leads/subtype"
 
@@ -30,50 +19,55 @@ export const URGENCY = [
     value: "emergency",
     label: "Emergency",
     desc: "Need someone now",
-    icon: AlarmClockIcon,
+    icon: "alarm",
   },
   {
     value: "within_week",
     label: "Within a week",
     desc: "As soon as possible",
-    icon: Clock01Icon,
+    icon: "time-circle",
   },
   {
     value: "within_month",
     label: "Within a month",
     desc: "No big rush",
-    icon: Calendar01Icon,
+    icon: "calendar",
   },
   {
     value: "planning",
     label: "Just planning",
     desc: "Getting prices",
-    icon: Idea01Icon,
+    icon: "lightbulb",
   },
-] as const
+] as const satisfies ReadonlyArray<{
+  value: string
+  label: string
+  desc: string
+  icon: IconType
+}>
 
 // Icon + one-line helper per subtype, so the choices read as real options, not
 // filter tags. Keyed by the service's subtype labels; unknown labels fall back
 // to a neutral icon and no description.
 export const SUBTYPE_META: Record<string, { icon: IconType; desc: string }> = {
   Repair: {
-    icon: Wrench01Icon,
+    icon: "wrench",
     desc: "A leak, missing shingles, or a specific problem.",
   },
   Replacement: {
-    icon: ReloadIcon,
+    icon: "swap",
     desc: "Replace all or a large section of the roof.",
   },
   Inspection: {
-    icon: Search01Icon,
+    icon: "search",
     desc: "Have a pro assess the roof's condition.",
   },
   "Storm Damage": {
-    icon: CloudAngledRainIcon,
+    icon: "storm",
     desc: "Damage from wind, hail, or a recent storm.",
   },
   [NOT_SURE_SUBTYPE]: {
-    icon: HelpCircleIcon,
-    desc: "Not sure what's wrong — a roofer will take a look.",
+    icon: "info-square",
+    desc: "Not sure what's wrong, a roofer will take a look.",
   },
 }

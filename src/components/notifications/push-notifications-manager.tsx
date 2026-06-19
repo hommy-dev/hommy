@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, BellOff, Loader2, X } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
 import { usePushSubscription } from '@/hooks/use-push-subscription'
 import { showToast } from '@/components/ui/toast'
 import { Button } from '@/components/ui/button'
@@ -100,7 +100,7 @@ export function PushNotificationsManager() {
     >
       <div className="flex items-start gap-3 lg:gap-[0.833vw]">
         <span className="flex size-9 lg:size-[2.5vw] shrink-0 items-center justify-center rounded-lg lg:rounded-[0.694vw] bg-primary/10 text-primary">
-          <Bell className="size-4 lg:size-[1.111vw]" />
+          <Icon name="notification" className="size-4 lg:size-[1.111vw]" />
         </span>
         <div className="min-w-0 flex-1 space-y-1 lg:space-y-[0.278vw]">
           <p className="text-sm lg:text-[0.972vw] font-medium text-foreground">
@@ -117,7 +117,7 @@ export function PushNotificationsManager() {
           className="text-muted-foreground hover:text-foreground"
           aria-label="Dismiss"
         >
-          <X className="size-4 lg:size-[1.111vw]" />
+          <Icon name="close" className="size-4 lg:size-[1.111vw]" />
         </button>
       </div>
       <div className="mt-3 lg:mt-[0.833vw] flex items-center justify-end gap-2 lg:gap-[0.556vw]">
@@ -127,11 +127,11 @@ export function PushNotificationsManager() {
         <Button size="sm" onClick={handleEnable} disabled={loading} className="gap-1.5 lg:gap-[0.417vw]">
           {loading ? (
             <>
-              <Loader2 className="size-3.5 lg:size-[0.972vw] animate-spin" /> Enabling…
+              <span className="block size-3.5 lg:size-[0.972vw] animate-spin rounded-full border-2 border-current border-t-transparent" /> Enabling…
             </>
           ) : (
             <>
-              <BellOff className="size-3.5 lg:size-[0.972vw]" />
+              <Icon name="notification" className="size-3.5 lg:size-[0.972vw]" />
               Enable
             </>
           )}

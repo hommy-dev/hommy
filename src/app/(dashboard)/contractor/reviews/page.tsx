@@ -3,6 +3,7 @@ import { getContractorForUser } from "@/lib/data/dashboard"
 import { getContractorReviews } from "@/lib/data/reviews"
 import { ReviewsSummaryCard } from "@/components/dashboard/reviews/reviews-summary"
 import { ReviewList } from "@/components/dashboard/reviews/review-list"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default async function ReviewsPage() {
   const user = await getRequiredUser("contractor")
@@ -31,10 +32,11 @@ export default async function ReviewsPage() {
       </header>
 
       {summary.total === 0 ? (
-        <div className="rounded-md lg:rounded-[0.556vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No reviews yet. Finish a job and we’ll invite the homeowner to review
-          your work.
-        </div>
+        <EmptyState
+          icon="star"
+          title="No reviews yet"
+          description="Once you finish a job, we'll ask the homeowner to leave a review. Their feedback helps your profile score and brings in more leads."
+        />
       ) : (
         <>
           <ReviewsSummaryCard summary={summary} />

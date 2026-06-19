@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { SVGIcon } from "./svg-icon";
+import { Icon } from "./icon";
 
 // Compact "this is you" card: initials avatar + optional eyebrow + name +
 // optional secondary line, with a signed-in check. Reusable wherever the app
@@ -67,7 +67,7 @@ export function IdentityCard({
               : "border border-border text-foreground/60"
           )}
         >
-          <SVGIcon src="/icons/tick.svg" className="size-3 lg:size-[0.78vw]" />
+          <Icon name="tick" className="size-3 lg:size-[0.78vw]" />
         </span>
       )}
     </div>

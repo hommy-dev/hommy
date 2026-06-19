@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 import { setPassword } from "@/lib/actions/account"
 import { showToast } from "@/components/ui/toast"
 import { Input } from "@/components/ui/input"
@@ -66,9 +65,8 @@ export function ChangePasswordDialog({ hasPassword }: { hasPassword: boolean }) 
             className="absolute inset-y-0 right-0 flex w-11 lg:w-[3.056vw] items-center justify-center text-foreground/50 hover:text-foreground"
             tabIndex={-1}
           >
-            <HugeiconsIcon
-              icon={show ? ViewOffSlashIcon : ViewIcon}
-              strokeWidth={2}
+            <Icon
+              name={show ? "hide" : "show"}
               className="size-4 lg:size-[1.111vw]"
             />
           </button>

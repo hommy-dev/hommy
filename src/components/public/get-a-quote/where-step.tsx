@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/google-places-input";
 import { IdentityCard } from "@/components/ui/identity-card";
 import { WizardField, WizardStep } from "./wizard-parts";
-import { SVGIcon } from "@/components/ui/svg-icon";
+import { Icon } from "@/components/ui/icon";
 
 export function WhereStep({
   value,
@@ -41,8 +41,8 @@ export function WhereStep({
 
       {summary && (
         <div className="-mt-4 lg:-mt-[1.2vw] flex items-center gap-2.5 lg:gap-[0.694vw]">
-          <SVGIcon
-            src="/icons/location.svg"
+          <Icon
+            name="location"
             className="size-5 lg:size-[1.389vw] opacity-80 shrink-0"
           />
           <p className="text-left text-[13px] lg:text-[0.903vw] text-pretty text-muted-foreground font-medium">

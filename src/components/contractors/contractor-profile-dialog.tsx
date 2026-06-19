@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { BadgeCheck, Clock, Briefcase } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import type { ContractorPublicProfile } from "@/lib/data/contractor-profile";
 import { getContractorProfileAction } from "@/lib/actions/contractor-profile";
 import { showToast } from "@/components/ui/toast";
 import { formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/empty-state";
 import { Stars } from "@/components/reviews/stars";
 import { ParticipantAvatar } from "@/components/messaging/participant-avatar";
 import {
@@ -37,15 +38,17 @@ export function ContractorProfileDialog({
   const [profile, setProfile] = useState<ContractorPublicProfile | null>(null);
   const [loading, start] = useTransition();
 
+  function load() {
+    start(async () => {
+      const res = await getContractorProfileAction(contractorId);
+      if (res) setProfile(res);
+      else showToast("Couldn’t load this profile.", { type: "error" });
+    });
+  }
+
   function onOpenChange(next: boolean) {
     setOpen(next);
-    if (next && !profile) {
-      start(async () => {
-        const res = await getContractorProfileAction(contractorId);
-        if (res) setProfile(res);
-        else showToast("Couldn’t load this profile.", { type: "error" });
-      });
-    }
+    if (next && !profile) load();
   }
 
   const name = profile?.companyName ?? contractorName ?? "Contractor";
@@ -74,7 +77,7 @@ export function ContractorProfileDialog({
                 {name}
                 {profile?.verified ? (
                   <span className="inline-flex items-center gap-1 lg:gap-[0.278vw] rounded-full bg-success/15 px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.764vw] font-medium text-success">
-                    <BadgeCheck className="size-3.5 lg:size-[0.972vw]" strokeWidth={2} /> Verified
+                    <Icon name="badge-check" className="size-3.5 lg:size-[0.972vw]" /> Verified
                   </span>
                 ) : null}
               </span>
@@ -96,7 +99,7 @@ export function ContractorProfileDialog({
                 <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground">
                   {rated
                     ? `${(profile.avgRating as number).toFixed(1)} average · ${profile.totalReviews} review${profile.totalReviews === 1 ? "" : "s"} on Homei`
-                    : "No reviews yet — this company is new to Homei."}
+                    : "No reviews yet. This company is new to Homei."}
                 </p>
               </div>
 
@@ -104,13 +107,13 @@ export function ContractorProfileDialog({
               <div className="flex flex-wrap gap-x-5 gap-y-2 lg:gap-x-[1.389vw] lg:gap-y-[0.556vw] text-sm lg:text-[0.903vw]">
                 {profile.yearsInBusiness ? (
                   <span className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] text-muted-foreground">
-                    <Briefcase className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                    <Icon name="work" className="size-4 lg:size-[1.111vw]" />
                     {profile.yearsInBusiness} year{profile.yearsInBusiness === 1 ? "" : "s"} in business
                   </span>
                 ) : null}
                 {respond ? (
                   <span className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] text-muted-foreground">
-                    <Clock className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                    <Icon name="time-circle" className="size-4 lg:size-[1.111vw]" />
                     {respond}
                   </span>
                 ) : null}
@@ -151,9 +154,16 @@ export function ContractorProfileDialog({
               ) : null}
             </div>
           ) : (
-            <p className={cn("py-6 lg:py-[1.667vw] text-center text-sm lg:text-[0.903vw] text-muted-foreground")}>
-              Profile unavailable.
-            </p>
+            <ErrorState
+              icon="danger-triangle"
+              title="We couldn't load this profile"
+              description="Something went wrong on our end. Give it another try."
+              action={
+                <Button size="sm" variant="outline" onClick={load} disabled={loading}>
+                  {loading ? "Trying…" : "Try again"}
+                </Button>
+              }
+            />
           )}
         </DialogContent>
       </Dialog>

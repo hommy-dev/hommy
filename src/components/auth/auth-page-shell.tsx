@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { SVGIcon } from "../ui/svg-icon";
+import { Icon } from "../ui/icon";
 
 type BrandVariant = "default" | "contractor" | "homeowner";
 
@@ -89,7 +89,7 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
           href="/"
           className="relative z-10 flex w-fit shrink-0 items-center gap-2 lg:gap-[0.556vw]"
         >
-          <SVGIcon src="/icons/logo.svg" className="size-10 lg:size-[2.778vw]" />
+          <Icon name="logo" className="size-10 lg:size-[2.778vw]" />
         </Link>
 
         <div className="max-w-md lg:max-w-[31.108vw] space-y-5 lg:space-y-[1.389vw]">

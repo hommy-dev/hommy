@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SVGIcon } from "../ui/svg-icon";
+import { Icon } from "../ui/icon";
 
 const SERVICES = [
   {
@@ -71,8 +71,8 @@ export function Services() {
                 className="w-full mt-4 lg:mt-[1vw] inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 border-primary/10 group-hover:border-primary/50 px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.8vw] text-base lg:text-[1.111vw] text-primary transition-colors"
               >
                 Post a job
-                <SVGIcon
-                  src="/icons/arrow-right.svg"
+                <Icon
+                  name="arrow-right"
                   className="size-6 lg:size-[1.667vw] text-primary transition-transform group-hover:translate-x-0.5"
                 />
               </Link>
@@ -86,8 +86,8 @@ export function Services() {
           className="group mt-10 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3 text-base font-semibold text-background sm:w-auto lg:hidden"
         >
           Post a job
-          <SVGIcon
-            src="/icons/arrow-right.svg"
+          <Icon
+            name="arrow-right"
             className="size-6 text-background transition-transform group-hover:translate-x-0.5"
           />
         </Link>

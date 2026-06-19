@@ -1,6 +1,6 @@
 'use client'
 
-import { Check } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
 /**
@@ -68,7 +68,7 @@ export function PhotoGridSelect<T extends string>({
             className={cn(
               'group relative flex flex-col overflow-hidden rounded-md lg:rounded-[0.4vw] border bg-background text-left outline-none transition-all',
               'hover:border-primary/40 hover:shadow-sm',
-              'focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
+              'focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
               selected
                 ? 'border-primary ring-2 ring-primary/20'
                 : 'border-border',
@@ -97,7 +97,7 @@ export function PhotoGridSelect<T extends string>({
 
               {selected ? (
                 <span className="absolute right-2 lg:right-[0.556vw] top-2 lg:top-[0.556vw] z-10 flex size-6 lg:size-[1.667vw] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-                  <Check className="size-3.5 lg:size-[0.972vw]" />
+                  <Icon name="tick" className="size-3.5 lg:size-[0.972vw]" />
                 </span>
               ) : null}
 

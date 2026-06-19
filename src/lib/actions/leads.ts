@@ -177,7 +177,8 @@ export async function createLead(
           notes: d.notes || null,
           status: 'open',
           engagementCreditCost: pricing.engagementCreditCost,
-          awardCreditCost: pricing.awardCreditCost,
+          // award_credit_cost is deprecated (win fee is computed at acceptance);
+          // leave it at its 0 default.
         })
         .returning({ id: leads.id })
       leadId = lead.id

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { StarIcon } from 'lucide-react'
+import { Icon } from "@/components/ui/icon"
 
 const ratingVariants = cva("flex items-center", {
   variants: {
@@ -123,9 +123,10 @@ function Rating({
           onMouseLeave={handleStarMouseLeave}
         >
           {/* Background star (empty) */}
-          <StarIcon
+          <Icon
+            name="star"
             data-slot="rating-star-empty"
-            className={cn(starVariants({ size }), "text-muted-foreground")}
+            className={cn(starVariants({ size }), "text-muted-foreground/40")}
           />
 
           {/* Filled star */}
@@ -135,9 +136,10 @@ function Rating({
               width: filled ? "100%" : `${fillPercentage}%`,
             }}
           >
-            <StarIcon
+            <Icon
+              name="star-filled"
               data-slot="rating-star-filled"
-              className={cn(starVariants({ size }), starClassName)}
+              className={cn(starVariants({ size }), "text-warning", starClassName)}
             />
           </div>
         </div>

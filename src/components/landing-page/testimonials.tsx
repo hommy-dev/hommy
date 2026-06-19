@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { LandingImage } from "./shared";
-import { SVGIcon } from "../ui/svg-icon";
+import { Icon } from "../ui/icon";
 import { Button } from "../ui/button";
 
 const REVIEWS = [
@@ -66,8 +66,8 @@ export function Testimonials() {
                   variant="ghost"
                   className="border border-foreground/30 rounded-full size-6 lg:size-[2.5vw] "
                 >
-                  <SVGIcon
-                    src="/icons/arrow-left.svg"
+                  <Icon
+                    name="arrow-left"
                     className="size-4 lg:size-[1.5vw] text-muted-foreground"
                   />
                 </Button>
@@ -77,8 +77,8 @@ export function Testimonials() {
                   variant="ghost"
                   className="border border-foreground/30 rounded-full size-6 lg:size-[2.5vw] "
                 >
-                  <SVGIcon
-                    src="/icons/arrow-right.svg"
+                  <Icon
+                    name="arrow-right"
                     className="size-4 lg:size-[1.5vw] text-muted-foreground"
                   />
                 </Button>

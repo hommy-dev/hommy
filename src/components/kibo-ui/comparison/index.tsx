@@ -1,6 +1,6 @@
 "use client";
 
-import { GripVerticalIcon } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import {
   type MotionValue,
   motion,
@@ -199,7 +199,7 @@ export const ComparisonHandle = ({
           <div className="-translate-x-1/2 absolute left-1/2 h-full w-1 bg-background" />
           {mode === "drag" && (
             <div className="z-50 flex items-center justify-center rounded-sm bg-background px-0.5 py-1">
-              <GripVerticalIcon className="h-4 w-4 select-none text-muted-foreground" />
+              <Icon name="grip-vertical" className="size-4 select-none text-muted-foreground" />
             </div>
           )}
         </>

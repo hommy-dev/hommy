@@ -83,7 +83,7 @@ export function MessageBubble({
         ) : null}
         <div
           className={cn(
-            'max-w-[78%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] leading-relaxed',
+            'max-w-[68%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] leading-relaxed',
             mine
               ? 'bg-primary/90 text-primary-foreground'
               : 'border border-border bg-muted/60 text-foreground',

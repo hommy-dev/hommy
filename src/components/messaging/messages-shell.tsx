@@ -26,7 +26,7 @@ export function MessagesShell({
     <div className="flex h-full overflow-hidden bg-background">
       <aside
         className={cn(
-          "w-full shrink-0 flex-col border-r border-border lg:flex lg:w-[20vw] xl:w-[19vw]",
+          "w-full shrink-0 flex-col border-r border-border lg:flex lg:w-[24vw] xl:w-[22vw]",
           threadOpen ? "hidden lg:flex" : "flex",
         )}
       >

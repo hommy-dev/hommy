@@ -11,8 +11,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon, Cancel01Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 
 const Combobox = ComboboxPrimitive.Root
 
@@ -32,7 +31,7 @@ function ComboboxTrigger({
       {...props}
     >
       {children}
-      <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className="pointer-events-none size-4 lg:size-[1.111vw] text-muted-foreground" />
+      <Icon name="down" className="pointer-events-none size-4 lg:size-[1.111vw] text-muted-foreground" />
     </ComboboxPrimitive.Trigger>
   )
 }
@@ -45,7 +44,7 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
       className={cn(className)}
       {...props}
     >
-      <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="pointer-events-none" />
+      <Icon name="close" className="pointer-events-none size-4 lg:size-[1.111vw]" />
     </ComboboxPrimitive.Clear>
   )
 }
@@ -157,7 +156,7 @@ function ComboboxItem({
           <span className="pointer-events-none absolute right-2 lg:right-[0.556vw] flex size-4 lg:size-[1.111vw] items-center justify-center" />
         }
       >
-        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="pointer-events-none" />
+        <Icon name="tick" className="pointer-events-none size-4 lg:size-[1.111vw]" />
       </ComboboxPrimitive.ItemIndicator> */}
     </ComboboxPrimitive.Item>
   )
@@ -259,7 +258,7 @@ function ComboboxChip({
           className="-ml-1 lg:-ml-[0.278vw] opacity-50 hover:opacity-100"
           data-slot="combobox-chip-remove"
         >
-          <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="pointer-events-none" />
+          <Icon name="close" className="pointer-events-none size-4 lg:size-[1.111vw]" />
         </ComboboxPrimitive.ChipRemove>
       )}
     </ComboboxPrimitive.Chip>

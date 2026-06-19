@@ -4,7 +4,7 @@
 
 import { db } from '@/lib/db'
 import { and, count, desc, eq, isNotNull } from 'drizzle-orm'
-import { contractors, contractorMembers, users } from '@/lib/db/schema'
+import { contractors, contractorMembers, purchaseIntents, users } from '@/lib/db/schema'
 
 export type VerificationQueueItem = {
   contractorId: string
@@ -109,5 +109,45 @@ export async function getRecentContractors(
     })
     .from(contractors)
     .orderBy(desc(contractors.createdAt))
+    .limit(limit)
+}
+
+export type PurchaseIntentRow = {
+  id: string
+  contractorId: string
+  companyName: string | null
+  currentBalance: number
+  credits: number
+  amountCents: number
+  balanceAtRequest: number
+  status: (typeof purchaseIntents.status.enumValues)[number]
+  requestedByName: string | null
+  requestedByEmail: string | null
+  createdAt: Date
+}
+
+/**
+ * Credit-purchase requests (v1 manual settlement). Newest first; the page shows
+ * `requested` ones with a Grant action and keeps fulfilled/declined as history.
+ */
+export async function getPurchaseIntents(limit = 100): Promise<PurchaseIntentRow[]> {
+  return db
+    .select({
+      id: purchaseIntents.id,
+      contractorId: purchaseIntents.contractorId,
+      companyName: contractors.companyName,
+      currentBalance: contractors.creditBalance,
+      credits: purchaseIntents.credits,
+      amountCents: purchaseIntents.amountCents,
+      balanceAtRequest: purchaseIntents.balanceAtRequest,
+      status: purchaseIntents.status,
+      requestedByName: users.fullName,
+      requestedByEmail: users.email,
+      createdAt: purchaseIntents.createdAt,
+    })
+    .from(purchaseIntents)
+    .innerJoin(contractors, eq(contractors.id, purchaseIntents.contractorId))
+    .leftJoin(users, eq(users.id, purchaseIntents.requestedBy))
+    .orderBy(desc(purchaseIntents.createdAt))
     .limit(limit)
 }

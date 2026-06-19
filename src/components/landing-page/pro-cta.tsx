@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SVGIcon } from "../ui/svg-icon";
+import { Icon } from "../ui/icon";
 
 export function ProCta() {
   return (
@@ -20,8 +20,8 @@ export function ProCta() {
           className="group mt-8 lg:mt-[3vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
         >
           Register your company
-          <SVGIcon
-            src="/icons/arrow-right.svg"
+          <Icon
+            name="arrow-right"
             className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
           />
         </Link>

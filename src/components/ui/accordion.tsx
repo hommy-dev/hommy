@@ -4,8 +4,7 @@ import * as React from "react"
 import { Accordion as AccordionPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 
 function Accordion({
   className,
@@ -52,8 +51,8 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-slot="accordion-trigger-icon" className="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden" />
-        <HugeiconsIcon icon={ArrowUp01Icon} strokeWidth={2} data-slot="accordion-trigger-icon" className="pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline" />
+        <Icon name="down" data-slot="accordion-trigger-icon" className="pointer-events-none size-4 lg:size-[1.111vw] shrink-0 group-aria-expanded/accordion-trigger:hidden" />
+        <Icon name="up" data-slot="accordion-trigger-icon" className="pointer-events-none hidden size-4 lg:size-[1.111vw] shrink-0 group-aria-expanded/accordion-trigger:inline" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )

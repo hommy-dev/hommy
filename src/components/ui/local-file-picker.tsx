@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Upload, X, FileText } from 'lucide-react'
+import { Icon } from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 import { showToast } from '@/components/ui/toast'
 
@@ -138,7 +138,8 @@ export function LocalFilePicker({
               : 'border-border hover:border-primary/50 hover:bg-accent/50'
           )}
         >
-          <Upload
+          <Icon
+            name="upload"
             className={cn(
               'text-muted-foreground',
               compact ? 'size-5 lg:size-[1.389vw]' : 'size-6 lg:size-[1.667vw]'
@@ -192,7 +193,7 @@ export function LocalFilePicker({
                 />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-1 lg:gap-[0.278vw] p-2 lg:p-[0.556vw]">
-                  <FileText className="size-8 lg:size-[2.222vw] text-muted-foreground" />
+                  <Icon name="document" className="size-8 lg:size-[2.222vw] text-muted-foreground" />
                   <span className="text-[10px] lg:text-[0.694vw] text-muted-foreground truncate max-w-full">
                     {staged.file.name}
                   </span>
@@ -204,7 +205,7 @@ export function LocalFilePicker({
                 className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] rounded-full bg-background/80 p-0.5 lg:p-[0.139vw] opacity-0 transition-opacity group-hover:opacity-100"
                 aria-label={`Remove ${staged.file.name}`}
               >
-                <X className="size-3.5 lg:size-[0.972vw] text-destructive" />
+                <Icon name="close" className="size-3.5 lg:size-[0.972vw] text-destructive" />
               </button>
             </div>
           ))}

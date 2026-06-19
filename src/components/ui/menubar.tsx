@@ -4,8 +4,7 @@ import * as React from "react"
 import { Menubar as MenubarPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 
 function Menubar({
   className,
@@ -128,7 +127,7 @@ function MenubarCheckboxItem({
     >
       <span className="pointer-events-none absolute left-3 lg:left-[0.833vw] flex size-4 lg:size-[1.111vw] items-center justify-center [&_svg:not([class*='size-'])]:size-4">
         <MenubarPrimitive.ItemIndicator>
-          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
+          <Icon name="tick" className="size-4 lg:size-[1.111vw]" />
         </MenubarPrimitive.ItemIndicator>
       </span>
       {children}
@@ -156,7 +155,7 @@ function MenubarRadioItem({
     >
       <span className="pointer-events-none absolute left-3 lg:left-[0.833vw] flex size-4 lg:size-[1.111vw] items-center justify-center [&_svg:not([class*='size-'])]:size-4">
         <MenubarPrimitive.ItemIndicator>
-          <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
+          <Icon name="tick" className="size-4 lg:size-[1.111vw]" />
         </MenubarPrimitive.ItemIndicator>
       </span>
       {children}
@@ -238,7 +237,7 @@ function MenubarSubTrigger({
       {...props}
     >
       {children}
-      <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-auto size-4 lg:size-[1.111vw]" />
+      <Icon name="right" className="ml-auto size-4 lg:size-[1.111vw]" />
     </MenubarPrimitive.SubTrigger>
   )
 }

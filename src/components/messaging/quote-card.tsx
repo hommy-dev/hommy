@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FileText } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import type { MessageMeta } from "@/lib/db/schema";
 import type { ParticipantIdentity } from "@/lib/data/conversations";
 import { acceptEstimate } from "@/lib/actions/accept-estimate";
@@ -67,7 +67,7 @@ export function QuoteCard({
       <div className="w-full max-w-[20rem] lg:max-w-[22vw] rounded-lg lg:rounded-[0.694vw] border border-border bg-card p-4 lg:p-[1.111vw]">
         <div className="flex items-center gap-2 lg:gap-[0.556vw]">
           <span className="grid size-8 lg:size-[2.222vw] place-items-center rounded-md lg:rounded-[0.556vw] bg-muted text-muted-foreground">
-            <FileText className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+            <Icon name="document" className="size-4 lg:size-[1.111vw]" />
           </span>
           <div className="min-w-0">
             <p className="text-sm lg:text-[0.903vw] font-semibold">Quote</p>
@@ -131,7 +131,7 @@ function ViewQuoteButton({ estimateId, otherName }: { estimateId: string; otherN
       </button>
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md lg:max-w-[30vw]">
+        <DialogContent className="max-w-md lg:max-w-[40vw]">
           <DialogHeader>
             <DialogTitle>Quote{quote?.contractorName ? ` from ${quote.contractorName}` : ""}</DialogTitle>
             <DialogDescription>

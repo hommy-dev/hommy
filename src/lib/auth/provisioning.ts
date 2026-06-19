@@ -6,8 +6,9 @@
 //     pre-signup step and we only have the authenticated user.
 //
 // Creates: the public.users row, an empty company, the owner membership, a free
-// subscription, and a one-time signup-bonus credit grant. Company name, license,
-// services, and service areas are collected later in the onboarding wizard.
+// subscription, and the onboarding credit grants (signup bonus + launch promo).
+// Company name, license, services, and service areas are collected later in the
+// onboarding wizard.
 
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
@@ -16,12 +17,17 @@ import {
   contractors,
   contractorMembers,
   subscriptions,
-  creditTransactions,
   plans,
   homeowners,
 } from '@/lib/db/schema'
+import { grantCredits } from '@/lib/credits/ledger'
 
-export const SIGNUP_BONUS_CREDITS = 25
+/** Free credits every new company gets, no strings, never expires. */
+export const SIGNUP_BONUS_CREDITS = 50
+/** Launch-window bonus on top of the signup bonus — expires (see below). */
+export const LAUNCH_PROMO_CREDITS = 250
+/** The launch promo expires this many months after the company is created. */
+export const LAUNCH_PROMO_EXPIRES_MONTHS = 4
 
 export async function provisionContractor({
   userId,
@@ -57,7 +63,7 @@ export async function provisionContractor({
   await db.transaction(async (tx) => {
     const [company] = await tx
       .insert(contractors)
-      .values({ creditBalance: SIGNUP_BONUS_CREDITS })
+      .values({ creditBalance: 0 })
       .returning({ id: contractors.id })
 
     await tx.insert(contractorMembers).values({
@@ -75,13 +81,26 @@ export async function provisionContractor({
       })
     }
 
-    await tx.insert(creditTransactions).values({
+    // Signup bonus — never expires.
+    await grantCredits(tx, {
       contractorId: company.id,
       kind: 'signup_bonus',
       amount: SIGNUP_BONUS_CREDITS,
-      balanceAfter: SIGNUP_BONUS_CREDITS,
       sourceType: 'signup',
     })
+
+    // Launch promo — expires LAUNCH_PROMO_EXPIRES_MONTHS out (FIFO spends it first).
+    if (LAUNCH_PROMO_CREDITS > 0) {
+      const expiresAt = new Date()
+      expiresAt.setMonth(expiresAt.getMonth() + LAUNCH_PROMO_EXPIRES_MONTHS)
+      await grantCredits(tx, {
+        contractorId: company.id,
+        kind: 'promo',
+        amount: LAUNCH_PROMO_CREDITS,
+        expiresAt,
+        sourceType: 'launch_promo',
+      })
+    }
   })
 }
 

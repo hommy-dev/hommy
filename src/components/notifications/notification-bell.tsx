@@ -2,17 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Bell,
-  Briefcase,
-  FileText,
-  Clock,
-  CloudLightning,
-  Star,
-  MessageSquare,
-  Info,
-  Check,
-} from 'lucide-react'
+import { Icon, type IconName } from '@/components/ui/icon'
 import { createClient } from '@/lib/supabase/client'
 import {
   getNotificationsAction,
@@ -37,14 +27,14 @@ const TOAST_TYPE_BY_NOTIF: Record<string, ToastType> = {
   SYSTEM: 'info',
 }
 
-const TYPE_ICONS: Record<string, React.ElementType> = {
-  LEAD: Briefcase,
-  ESTIMATE: FileText,
-  FOLLOW_UP: Clock,
-  STORM_ALERT: CloudLightning,
-  REVIEW: Star,
-  MESSAGE: MessageSquare,
-  SYSTEM: Info,
+const TYPE_ICONS: Record<string, IconName> = {
+  LEAD: 'work',
+  ESTIMATE: 'document',
+  FOLLOW_UP: 'time-circle',
+  STORM_ALERT: 'danger-triangle',
+  REVIEW: 'star',
+  MESSAGE: 'message',
+  SYSTEM: 'info-square',
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -192,9 +182,9 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
         <button
           type="button"
           aria-label={`Notifications${unread > 0 ? ` (${unread} unread)` : ''}`}
-          className="relative flex size-9 lg:size-[2.5vw] items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="relative flex size-9 lg:size-[2.5vw] items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          <Bell className="size-[18px] lg:size-[1.25vw]" />
+          <Icon name="notification" className="size-[18px] lg:size-[1.25vw]" />
           {unread > 0 && (
             <span className="absolute right-1 lg:right-[0.278vw] top-1 lg:top-[0.278vw] flex items-center justify-center rounded-full bg-primary p-1 lg:p-[0.278vw] text-[10px] lg:text-[0.694vw] font-bold leading-1 text-primary-foreground">
               {unread > 99 ? '99+' : unread}
@@ -211,7 +201,7 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
               onClick={handleMarkAllRead}
               className="flex items-center gap-1 lg:gap-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Check className="size-3 lg:size-[0.833vw]" />
+              <Icon name="tick" className="size-3 lg:size-[0.833vw]" />
               Mark all read
             </button>
           )}
@@ -234,7 +224,7 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
 
           {loaded && items.length === 0 && (
             <div className="flex flex-col items-center justify-center px-4 lg:px-[1.111vw] py-12 lg:py-[3.333vw] text-center">
-              <Bell className="mb-3 lg:mb-[0.833vw] size-8 lg:size-[2.222vw] text-muted-foreground/40" />
+              <Icon name="notification" className="mb-3 lg:mb-[0.833vw] size-8 lg:size-[2.222vw] text-muted-foreground/40" />
               <p className="text-sm lg:text-[0.972vw] font-medium text-muted-foreground">No notifications yet</p>
               <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground/60">
                 New leads and updates will show up here.
@@ -245,7 +235,7 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
           {loaded && items.length > 0 && (
             <div className="p-1 lg:p-[0.278vw]">
               {items.map((item) => {
-                const Icon = TYPE_ICONS[item.type] ?? Info
+                const iconName = TYPE_ICONS[item.type] ?? 'info-square'
                 const colorClass = TYPE_COLORS[item.type] ?? TYPE_COLORS.SYSTEM
                 return (
                   <button
@@ -262,7 +252,7 @@ export function NotificationBell({ userId, initialUnreadCount = 0 }: Props) {
                         colorClass,
                       )}
                     >
-                      <Icon className="size-3.5 lg:size-[0.972vw]" />
+                      <Icon name={iconName} className="size-3.5 lg:size-[0.972vw]" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p

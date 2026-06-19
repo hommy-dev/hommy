@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import type { ConversationSummary } from "@/lib/data/conversations";
 import { listConversationSummaries } from "@/lib/actions/messages";
 import { createClient } from "@/lib/supabase/client";
@@ -11,9 +11,8 @@ import { USER_EVENTS, type UserEventPayload } from "@/lib/realtime/user-events";
 import { formatDistanceToNow } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SVGIcon } from "@/components/ui/svg-icon";
 import { ParticipantAvatar } from "./participant-avatar";
-import { publishSummaries, prefetchThread } from "./messaging-store";
+import { publishSummaries, publishInboxCount, prefetchThread } from "./messaging-store";
 
 /**
  * The conversation rail. The chrome (title + search) renders instantly; only the
@@ -25,14 +24,17 @@ import { publishSummaries, prefetchThread } from "./messaging-store";
 export function ConversationRail({
   basePath,
   userId,
+  initialItems,
 }: {
   basePath: string;
   userId: string;
+  /** Server-fetched rows so the list paints instantly (still revalidated on mount). */
+  initialItems?: ConversationSummary[];
 }) {
   const pathname = usePathname();
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState<ConversationSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<ConversationSummary[]>(initialItems ?? []);
+  const [loading, setLoading] = useState(initialItems === undefined);
 
   // Load the list once on mount (chrome is already on screen).
   const refetch = useCallback(() => {
@@ -121,6 +123,12 @@ export function ConversationRail({
     publishSummaries(items);
   }, [items]);
 
+  // Tell the thread pane how many conversations exist (once loaded), so its
+  // empty state can be "pick a conversation" vs a personalized "why empty".
+  useEffect(() => {
+    if (!loading) publishInboxCount(items.length);
+  }, [loading, items.length]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return items;
@@ -136,16 +144,16 @@ export function ConversationRail({
       </div>
       <div className="px-3 pb-2 lg:px-[0.556vw] lg:pb-[0.556vw]">
         <div className="relative">
-          <Search
+          <Icon
+            name="search"
             className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
-            strokeWidth={2}
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search messages"
-            className="h-9 lg:h-[2.5vw] w-full rounded lg:rounded-[0.4vw] border pl-9 lg:pl-[2.5vw] pr-9 lg:pr-[2.5vw] text-sm lg:text-[0.903vw] outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 lg:h-[2.5vw] w-full rounded lg:rounded-[0.4vw] border pl-9 lg:pl-[2.5vw] pr-9 lg:pr-[2.5vw] text-sm lg:text-[0.903vw] outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
           />
           {query ? (
             <button
@@ -154,7 +162,7 @@ export function ConversationRail({
               aria-label="Clear search"
               className="absolute right-2 lg:right-[0.556vw] top-1/2 grid size-6 lg:size-[1.667vw] -translate-y-1/2 cursor-pointer place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
             >
-              <SVGIcon src="/icons/close.svg" className="size-3.5 lg:size-[0.972vw]" />
+              <Icon name="close" className="size-3.5 lg:size-[0.972vw]" />
             </button>
           ) : null}
         </div>

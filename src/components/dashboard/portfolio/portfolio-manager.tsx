@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import type { PortfolioProject } from "@/lib/data/portfolio"
+import { EmptyState } from "@/components/ui/empty-state"
 import { AddCaseStudyDialog } from "./add-case-study-dialog"
 import { ManageCaseStudyDialog } from "./manage-case-study-dialog"
 
@@ -36,9 +37,13 @@ export function PortfolioManager({
       </div>
 
       {initial.length === 0 ? (
-        <p className="rounded-md lg:rounded-[0.556vw] border border-dashed border-border px-4 lg:px-[1.111vw] py-8 lg:py-[2.222vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No work added yet. Add a case study to show off completed jobs.
-        </p>
+        <EmptyState
+          size="sm"
+          icon="image-3"
+          title="No case studies yet"
+          description="Show off your best completed jobs with before and after photos. Add your first one to start winning more homeowners."
+          action={atCap ? undefined : <AddCaseStudyDialog subtypes={subtypes} />}
+        />
       ) : (
         <div className="grid grid-cols-2 gap-3 lg:gap-[0.833vw] sm:grid-cols-3">
           {initial.map((p) => (

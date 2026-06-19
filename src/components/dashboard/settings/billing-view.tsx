@@ -1,5 +1,7 @@
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
+import { BuyCreditsDialog } from "@/components/dashboard/settings/buy-credits-dialog"
 import { cn } from "@/lib/utils"
 import type {
   BillingData,
@@ -93,11 +95,7 @@ export function BillingView({
       <SettingsSection
         title="Credits"
         description="Spent to engage leads and win jobs. Plan credits renew each cycle; purchased credits roll over."
-        action={
-          <Button disabled title="Coming soon">
-            Buy credits
-          </Button>
-        }
+        action={<BuyCreditsDialog />}
       >
         <div className="flex items-baseline gap-2 lg:gap-[0.556vw]">
           <span className="font-sebenta text-4xl lg:text-[3vw] font-bold tracking-tight">
@@ -176,9 +174,12 @@ export function BillingView({
           Billing history
         </h2>
         {ledger.length === 0 ? (
-          <div className="rounded-md lg:rounded-[0.556vw] border border-border bg-card p-5 lg:p-[1.389vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-            No credit activity yet.
-          </div>
+          <EmptyState
+            size="sm"
+            icon="wallet"
+            title="No credit activity yet"
+            description="Your plan credits, purchases, and lead charges will show up here as they happen."
+          />
         ) : (
           <div className="overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border">
             <table className="w-full text-sm lg:text-[0.972vw]">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SVGIcon } from "../ui/svg-icon";
+import { Icon } from "../ui/icon";
 
 const FOOTER = [
   {
@@ -45,8 +45,8 @@ export function SiteFooter() {
               className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 px-6 lg:px-[1.5vw] py-2.5 lg:py-[0.5vw] text-base lg:text-[1vw] transition-colors hover:border-foreground"
             >
               Post a job
-              <SVGIcon
-                src="/icons/arrow-right.svg"
+              <Icon
+                name="arrow-right"
                 className="size-6 lg:size-[1.4vw] transition-transform group-hover:translate-x-0.5"
               />
             </Link>

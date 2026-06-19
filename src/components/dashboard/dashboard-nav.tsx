@@ -33,6 +33,7 @@ export const HOMEOWNER_NAV: DashboardNavItem[] = [
 export const ADMIN_NAV: DashboardNavItem[] = [
   { href: "/admin", label: "Dashboard", icon: "category" },
   { href: "/admin/verification", label: "Verification", icon: "shield-done" },
+  { href: "/admin/credits", label: "Credits", icon: "wallet" },
   { href: "/admin/leads", label: "Leads", icon: "discovery" },
   { href: "/admin/contractors", label: "Contractors", icon: "user-3" },
   { href: "/admin/storm-events", label: "Storm events", icon: "danger-triangle" },

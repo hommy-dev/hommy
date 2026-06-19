@@ -10,6 +10,8 @@
     "admin:create": "tsx scripts/create-admin.ts",
     "email:test": "tsx scripts/test-email.ts",
     "notifications:test": "tsx scripts/test-notifications.ts",
+    "test:reset": "tsx scripts/test-reset.ts",
+    "test:seed": "tsx scripts/test-seed.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:seed:dev": "tsx scripts/seed.ts --dev",
     "db:migrate": "tsx scripts/migrate.ts",

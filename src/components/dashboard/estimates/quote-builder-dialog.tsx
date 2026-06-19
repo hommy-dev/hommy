@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { Icon } from "@/components/ui/icon";
 import {
   Dialog,
   DialogContent,
@@ -162,7 +162,7 @@ export function QuoteBuilderDialog({
                   className="grid size-9 lg:size-[2.5vw] shrink-0 place-items-center rounded-md lg:rounded-[0.556vw] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
                   disabled={rows.length === 1}
                 >
-                  <Trash2 className="size-4 lg:size-[1.111vw]" strokeWidth={2} />
+                  <Icon name="delete" className="size-4 lg:size-[1.111vw]" />
                 </button>
               </div>
             ))}
@@ -171,7 +171,7 @@ export function QuoteBuilderDialog({
               onClick={() => setRows((p) => [...p, blankRow()])}
               className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] text-sm lg:text-[0.903vw] font-medium text-primary transition-opacity hover:opacity-80"
             >
-              <Plus className="size-4 lg:size-[1.111vw]" strokeWidth={2.2} /> Add line
+              <Icon name="plus" className="size-4 lg:size-[1.111vw]" /> Add line
             </button>
           </div>
 

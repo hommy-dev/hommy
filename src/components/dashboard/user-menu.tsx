@@ -123,7 +123,7 @@ export function UserMenu({
             type="button"
             disabled={pending}
             aria-label="Open account menu"
-            className="flex w-full items-center gap-2.5 lg:gap-[0.694vw] rounded-md lg:rounded-[0.556vw] p-1.5 lg:p-[0.417vw] text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring disabled:opacity-70 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+            className="flex w-full items-center gap-2.5 lg:gap-[0.694vw] rounded-md lg:rounded-[0.556vw] p-1.5 lg:p-[0.417vw] text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-1 focus-visible:ring-sidebar-ring disabled:opacity-70 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
           >
             {avatar}
             <span className="flex min-w-0 flex-1 flex-col group-data-[collapsible=icon]:hidden">

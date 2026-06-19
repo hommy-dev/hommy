@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GripHorizontal } from "lucide-react";
 import { useTheme } from "next-themes";
 import React, { useCallback, useEffect, useId, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/ui/icon";
 
 const Skiper26 = () => {
   const [variant, setVariant] = useState<AnimationVariant>("rectangle");
@@ -100,7 +100,7 @@ const Options = ({
     >
       <div className="flex items-center justify-between">
         <span className="size-4 lg:size-[1.111vw] cursor-grab active:cursor-grabbing">
-          <GripHorizontal className="size-4 lg:size-[1.111vw] opacity-50" />
+          <Icon name="grip-vertical" className="size-4 lg:size-[1.111vw] opacity-50" />
         </span>
 
         <p className="group flex cursor-pointer items-center justify-center gap-1 lg:gap-[0.278vw] rounded-lg lg:rounded-[0.694vw] px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] text-sm lg:text-[0.972vw] opacity-50">

@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons"
+import { Icon } from "@/components/ui/icon"
 import { loginHomeownerInline } from "@/lib/actions/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -127,9 +126,8 @@ export function LoginDialog({
                 className="absolute inset-y-0 right-0 flex w-11 lg:w-[3.056vw] items-center justify-center text-foreground/50 hover:text-foreground"
                 tabIndex={-1}
               >
-                <HugeiconsIcon
-                  icon={showPw ? ViewOffSlashIcon : ViewIcon}
-                  strokeWidth={2}
+                <Icon
+                  name={showPw ? "hide" : "show"}
                   className="size-4 lg:size-[1.111vw]"
                 />
               </button>

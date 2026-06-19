@@ -1,26 +1,46 @@
+import { Suspense } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
+import { listConversationSummaries } from "@/lib/actions/messages"
 import { MessagesShell } from "@/components/messaging/messages-shell"
+import { MessagesLoading } from "@/components/messaging/messages-loading"
 import { ConversationRail } from "@/components/messaging/conversation-rail"
-import { ThreadView } from "@/components/messaging/thread-view"
+import { ThreadView, type InboxEmptyKind } from "@/components/messaging/thread-view"
 
 const BASE_PATH = "/contractor/messages"
 
-export default async function ContractorMessagesLayout({
+// Synchronous layout so it never suspends at the parent (card) loading boundary;
+// the async inbox load shows the real messaging skeleton via the local Suspense.
+export default function ContractorMessagesLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const user = await getRequiredUser("contractor")
-
   return (
     <>
-      <MessagesShell
-        basePath={BASE_PATH}
-        rail={<ConversationRail basePath={BASE_PATH} userId={user.id} />}
-        thread={<ThreadView basePath={BASE_PATH} userId={user.id} />}
-      />
+      <Suspense fallback={<MessagesLoading />}>
+        <MessagesInbox />
+      </Suspense>
       {/* Route pages are inert; the persistent ThreadView renders the active thread. */}
       <span className="hidden">{children}</span>
     </>
+  )
+}
+
+async function MessagesInbox() {
+  const [user, conversations] = await Promise.all([
+    getRequiredUser("contractor"),
+    listConversationSummaries(),
+  ])
+
+  // No conversations yet → the right pane explains how chats start for a pro.
+  const emptyInbox: InboxEmptyKind | null =
+    conversations.length === 0 ? "contractor-no-chats" : null
+
+  return (
+    <MessagesShell
+      basePath={BASE_PATH}
+      rail={<ConversationRail basePath={BASE_PATH} userId={user.id} initialItems={conversations} />}
+      thread={<ThreadView basePath={BASE_PATH} userId={user.id} emptyInbox={emptyInbox} />}
+    />
   )
 }

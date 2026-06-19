@@ -12,6 +12,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { SetupGate } from "@/components/dashboard/setup-gate";
 import { LeadCard } from "@/components/dashboard/leads/lead-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function DashboardPage() {
   const user = await getRequiredUser("contractor");
@@ -128,10 +129,13 @@ async function RecentLeads({ contractorId }: { contractorId: string }) {
         </Link>
       </div>
       {recent.length === 0 ? (
-        <div className="mt-4 lg:mt-[1.111vw] rounded-md lg:rounded-[0.4vw] border border-dashed border-border p-10 lg:p-[2.778vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
-          No leads yet. New offers will appear here the moment they’re sent your
-          way.
-        </div>
+        <EmptyState
+          size="sm"
+          icon="discovery"
+          title="No leads yet"
+          description="New jobs matched to your area show up here. We'll alert you the moment one lands."
+          className="mt-4 lg:mt-[1.111vw]"
+        />
       ) : (
         <div className="mt-4 lg:mt-[1.111vw] grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
           {recent.map((lead) => (

@@ -1,7 +1,8 @@
 # Homei — Product & Technical Brief
 
 > This document is the single source of truth for building the Homei platform. Read every section before writing any code.
-> **v2 (2026-06): the lead/money/identity/messaging model changed substantially from v1.** Where older notes survive, this document wins.
+> **v2 (2026-06): the lead/money/identity/messaging model changed substantially from v1, and most of v2 is now BUILT** (identity split, credits, lead economy, universal messaging, homeowner dashboard, reviews). Where older notes survive, this document wins.
+> **Phase-1 lead-economy stance (2026-06, supersedes earlier "capped competition" notes):** leads are free, so we **fan out broadly** (ranked by score, up to a configurable max — no fixed engage cap) and **never expire a lead on a contractor**. A lead ends only when the homeowner **hires** or **closes** it (or a 30-day abandoned-post auto-close). Timing is a single **urgency**-based signal used for the fast-responder bonus + a gentle post-engage quote reminder — **not** a deadline or penalty. Reputation is **carrots over sticks**: speed/quotes/wins raise the score and ranking; we don't punish honest declines or slow-but-real deals.
 
 ---
 
@@ -52,12 +53,12 @@ Sourced pain points this platform addresses (these are the defensible, fact-chec
 
 **How Homei is different (the honest pitch):**
 
-- **Free to receive leads.** You never pay to _see_ a lead.
+- **Free to receive leads.** You never pay to _see_ a lead, and a lead never expires on you — it's yours to act on until the homeowner hires or closes it.
 - **Pay only when you act, mostly when you win.** A small credit fee to _engage_ (start the conversation), and the **full credit charge only when the homeowner accepts your quote** — i.e. you won the job.
-- **Capped competition, not a free-for-all.** A lead is offered to several contractors but only a **fixed maximum** can engage; once full, it locks. The homeowner compares a short list, not a flood.
-- **Reputation is enforced.** Ignoring or abandoning leads drops your profile score; consistently winning and responding fast raises it.
+- **Open competition, decided by quality.** A lead is offered broadly to eligible pros (ranked by score); whoever shows up and quotes well wins. The homeowner sees who's interested, each with ratings + profile, and picks.
+- **Reputation is rewarded.** Responding fast, quoting, and winning raise your score and bump you up the ranking (more/better lead flow). We don't punish honest declines or slow-but-legitimate deals.
 
-> Marketing copy must drop the old "exclusive leads" claim — the v2 model is _capped competition with win-based pricing_, which is a stronger and more honest story than "exclusive."
+> Marketing copy must drop the old "exclusive leads" claim — the model is _free leads with win-based pricing and quality-ranked competition_, a stronger and more honest story than "exclusive."
 
 ---
 
@@ -74,7 +75,8 @@ Credits are the **universal currency** of Homei. Today they pay for lead engagem
 ### 3.2 Credits
 
 - **Buying credits is independent of any subscription** — a one-time Stripe payment. Free-plan companies can buy as many as they want.
-- **Sources** (positive ledger entries): `signup_bonus` (every new company gets a few; a launch-window promo may grant more), `purchase` (Stripe one-time), `plan_grant` (each billing cycle), `promo`, `refund`, `adjustment` (admin).
+- **Sources** (positive ledger entries): `signup_bonus` (**50**, never expires — every new company), `promo` (**250** launch bonus, **expires 4 months** after signup), `purchase` (one-time top-up), `plan_grant` (each billing cycle; free plan = **10**/mo), `refund`, `adjustment` (admin). Signup + launch promo = **300 starting credits**.
+- **v1 has NO live payments.** Buying credits is fully built in the UI, but "Continue to payment" records a `purchase_intent` and notifies platform admins instead of charging — no Stripe/PSP account yet (Pakistan founder; US customers → a Merchant-of-Record like Paddle/Lemon Squeezy, or Stripe Atlas, is the likely later route). Admins settle a request by hand: take payment offline, then **grant the credits from `/admin/credits`** (kind `purchase`, which marks the intent fulfilled).
 - **Sinks** (negative entries): `lead_engagement` (small), `lead_won` (full job cost), later `ai_agent`, `marketing`.
 - **Expiry policy:** plan-granted credits **expire at cycle end**; purchased credits **never expire**. Spending consumes **oldest-expiring-first (FIFO)**, like airline miles. An Inngest job writes negative `expiry` entries for unspent expired grants.
 - **`contractors.credit_balance`** is a **cached projection** of the ledger, updated transactionally on every spend/grant. The ledger is the source of truth.
@@ -82,36 +84,56 @@ Credits are the **universal currency** of Homei. Today they pay for lead engagem
 
 ### 3.3 What credits cost (configurable, never hardcoded)
 
-Per-service credit pricing lives in config/data, so it's tunable without a migration: an `engagement_credit_cost` (small) and an `award_credit_cost` (full job cost) per lead, derived from the service + optionally lead value.
+**1 credit = $1.** Pricing lives in config (`src/lib/leads/pricing.ts`), tunable without a migration:
+
+- **Engagement (unlock chat) — flat.** A small `engagementCreditCost` (roofing: **5**), SNAPSHOT onto the lead at creation. Engaging gates ONLY on this — see §4.1.
+- **Win fee — a percentage of the accepted quote, computed AT ACCEPTANCE** (not a snapshot, so it scales with the real job value). `computeAwardCost()` = `clamp(round(pct × acceptedQuoteTotal), minCredits, maxCredits) − engagementCreditCost`. Current policy (`AWARD_PRICING`): **pct 2.5%**, **floor 40**, **cap 250**. The engagement credits the winner already paid are credited toward the fee, so the winner's TOTAL cost to win equals the clamped fee (e.g. a $9,000 roof → fee 225 cr, 5 already paid → 220 cr charged on accept). A losing engager only ever paid the 5.
+- `leads.award_credit_cost` is **deprecated** (kept at its 0 default); the win charge no longer reads it.
 
 ---
 
 ## 4. Leads — lifecycle, distribution & pricing
 
-This is the heart of v2. Leads are **not** exclusively assigned at creation.
+This is the heart of the model. Leads are **not** exclusively assigned, **not** capped, and **do not expire** on contractors.
 
 ### 4.1 Lifecycle
 
 1. **Homeowner posts a job** → their account is auto-created (§5.2) → a `lead` is created with the property location and `service_details`.
-2. **Free fan-out.** The matching engine offers the lead to **≥3** eligible contractors (matched by `service_id`, `service_areas`, score). Rows are written to `lead_recipients`. **Receiving and viewing are free.**
-3. **Engage (small credit charge).** A contractor engages by **starting the conversation / first outreach** → `lead_recipients.status = engaged`, a small `lead_engagement` credit charge, a `project` is created in their CRM, and a `conversation` opens with the homeowner. Engagement takes **one of N capped slots**.
-4. **Capped competition.** Only **N** contractors (e.g. 3) may engage. When N slots fill, the lead **locks** (`status = filled`) — no new contractors can engage.
-5. **Quote → Win (full credit charge).** Engaged contractors send **quotes** (the `estimates` flow). The homeowner reviews quotes in their dashboard and **accepts one**. **Acceptance is the unambiguous "job won" signal** → that contractor is charged the **full** `award_credit_cost` (`lead_won`), the lead is `awarded`, the other contractors' projects are marked lost.
-6. **Cascade on no-response (SLA).** If an offered contractor doesn't respond within **24h after viewing** (or **48h without viewing**), their offer expires and the engine **offers the lead to one more contractor**, and so on — until N engage or the lead closes.
+2. **Free, broad fan-out.** The matching engine offers the lead to every eligible contractor (matched by `service_id` + `service_areas` geography + verified), **ranked by score, up to `LEAD_FANOUT.maxRecipients`** (config, default 25 — set high to reach all). Rows are written to `lead_recipients`. **Receiving and viewing are free.** A homeowner is never left waiting on a tiny handful who might all ghost.
+3. **Engage (small credit charge).** A contractor engages by clicking **Chat** (a confirm discloses the cost + that it unlocks the homeowner's contact) → `lead_recipients.status = engaged`, a small `lead_engagement` charge, a `project` is created in their CRM, a `contact` is recorded, and a `conversation` opens with the homeowner. **No cap, no lock** — any offered contractor may engage until the lead is awarded or closed. Engaging gates **only** on the engagement credits; the win fee is settled later (§3.3) and may push the balance negative — a **negative balance blocks taking new leads** until the company settles up.
+4. **Viewing is telemetry only.** Opening an offered lead's detail stamps `viewed_at` (powers the homeowner's "X pros viewed your job" signal and a small softening of reputation), but it does **not** start or shorten any deadline.
+5. **Quote → Win (full credit charge).** Engaged contractors send **quotes** (the `estimates` flow). The quote appears as an inline **quote card** in the conversation; the homeowner **accepts it right there** (or from the job detail). **Acceptance is the unambiguous "job won" signal** → that contractor is charged the **win fee** (a % of the accepted quote total, computed at acceptance — §3.3) via `lead_won`, the lead is `awarded`, the other engaged contractors' recipients/projects are marked `lost`. Sending a new quote **supersedes** the company's prior active quote (one acceptable quote per company per job).
+6. **No expiry; the homeowner is in control.** A lead stays live (engageable) until the homeowner **hires** (accepts a quote) or **closes** it ("I hired someone / no longer needed"). The only system close is an **abandoned-post auto-close** after `ABANDONED_LEAD_DAYS` (30) with zero engagement — hygiene, not a contractor deadline. After engaging, if a pro hasn't quoted within an urgency-based window they get one gentle **quote reminder** (no penalty).
+7. **Complete → review.** The contractor marks the won job `completed`; this posts an in-thread completion note + an inline **review card**, and notifies the homeowner (in-app + email). The homeowner reviews inline in the chat or from the job detail; a tokenized email link 72h later is the fallback. One review per project (inline + email converge on the same row).
+
+**Timing knobs (config in `tunables.ts`, urgency-tiered — bonus/reminder only, never a deadline):**
+- **Fast-responder bonus window** (engage within this → score bonus): emergency 4h · this-week 24h · this-month 48h · planning 72h.
+- **Post-engage quote-reminder window**: emergency 24h · this-week 72h · this-month 5d · planning 7d.
 
 ### 4.2 Anti-leakage (the "they did it off-platform" problem)
 
 We charge a _small_ fee to engage and a _full_ fee to win — so the risk is a contractor engaging cheaply, then taking the homeowner off-platform to dodge the full charge. Mitigations, in order of strength:
 
-1. **Quote acceptance is the win signal, and the homeowner triggers it.** Because homeowners have accounts, _they_ accept a quote in their dashboard. The full charge fires on the **homeowner's** action, not the contractor's honesty. This is a natural workflow step, not an artificial button.
-2. **Score decay (reputation).** Ignoring a lead without a reason drops the profile score **fast**; repeated ignores (even _with_ reasons) drop it faster. A _pattern_ of "engages many, never produces an accepted quote" looks like leakage and decays score too.
-3. _(Optional, later)_ a homeowner outcome prompt at lead close ("did you hire someone?") to catch fully off-platform jobs.
+1. **Quote acceptance is the win signal, and the homeowner triggers it.** Because homeowners have accounts, _they_ accept a quote (inline in the chat / job detail). The full charge fires on the **homeowner's** action, not the contractor's honesty. This is a natural workflow step, not an artificial button.
+2. **In-product nudges.** The homeowner's "what's next" guidance explicitly says to keep the quote + acceptance on Homei ("never pay or agree off-platform").
+3. **Reputation (carrots).** Winning + good reviews raise the score; an off-platform flag (homeowner-reported) drops it hard.
+4. **Homeowner close action.** A "Close job / I hired someone" control gives an outcome signal (and the future hook to catch fully off-platform jobs).
 
-> **We do NOT mask phone numbers.** For home services the contractor visits the property, so they get the number in person regardless — masking adds cost and friction for ~zero benefit. Contact details are shown on engagement.
+> **We do NOT mask phone numbers.** For home services the contractor visits the property, so they get the number in person regardless — masking adds cost and friction for ~zero benefit. Contact details unlock on engagement (hidden on not-yet-engaged leads).
 
 ### 4.3 Reputation / profile score
 
-`contractors.profile_score` is a **cached** value backed by an append-only `score_events` ledger. Events (with configurable deltas): `lead_ignored_no_reason` (−−), `lead_ignored_with_reason` (−), `slow_response`, `fast_engagement` (+), `quote_accepted` (+), `review_received` (± by stars), `off_platform_flag` (−−, homeowner-reported), `pattern_no_quotes` (−). Score gates matching priority and is shown on the public profile.
+`contractors.profile_score` is a **cached** value backed by an append-only `score_events` ledger. **Carrots over sticks** — speed and outcomes raise it; we don't punish honest behavior or slow-but-real deals (no expiry penalties). Configurable deltas (`SCORE_DELTAS`):
+
+- `fast_engagement` **+5** (engaged within the urgency fast-window) / a normal in-window engage **+3**
+- `quote_accepted` **+15** (the outcome we want)
+- `review_received` **± by stars** ((rating−3)×4)
+- `lead_ignored_with_reason` **0** — declining _with_ a reason is honest + cascades the lead fast, so it's neutral
+- `lead_ignored_no_reason` **−3** (declined with no reason)
+- `off_platform_flag` **−25** (homeowner-reported)
+- `pattern_no_quotes` (reserved, soft) — for a _pattern_ of engaging and never quoting
+
+Score gates **matching/ranking priority** (fast, reliable pros surface first → more lead flow) and is shown on the public profile. The `score_events` enum still includes legacy `slow_response`; it's no longer emitted (no expiry).
 
 ---
 
@@ -132,9 +154,9 @@ users (a person / login)
 - A **contractor company has many member users**; a user's power inside a company comes from their membership role. The wallet, subscription, leads, contacts, and reviews all belong to the **company**.
 - **Admins** are Homei staff. They can see/join anything (admin → anyone messaging, full panel).
 
-### 5.2 Homeowners are authenticated (changed in v2)
+### 5.2 Homeowners are authenticated (changed in v2 — BUILT)
 
-Homeowners now have accounts and a **full dashboard** (their job posts + stats, quotes received, messaging, hiring). To keep signup frictionless (homeowners don't want to "make an account"):
+Homeowners now have accounts and a **full dashboard**: a **Jobs** board (a tabbed table mirroring the contractor's, posted → done) with per-job detail, **messaging**, and hiring. Quotes are **not** a separate page — they're viewed and accepted **inline in each job's chat** (quote card) and the job detail. The job detail shows each interested contractor with a **rating + verified badge + View profile**, a personalized "what's next" guidance banner, a progress timeline, and a **Close job** action. To keep signup frictionless (homeowners don't want to "make an account"):
 
 - During the post-a-job flow we collect name / email / phone / job details.
 - At submit we **auto-create a pre-confirmed auth user** (email auto-verified) and redirect straight to the homeowner dashboard.
@@ -155,11 +177,18 @@ Homeowners now have accounts and a **full dashboard** (their job posts + stats, 
 
 Anyone can message anyone: homeowner ↔ company, company ↔ company, admin ↔ anyone. One **polymorphic conversation graph** replaces the old narrow contractor↔homeowner `messages` table.
 
-- **`conversations`** — `type` (`direct` | `lead` | `engagement` | `support`) + optional polymorphic `context` (lead/project/engagement it's about).
+- **`conversations`** — `type` (`direct` | `lead` | `engagement` | `support`) + optional polymorphic `context`. The job/lead workspace conversation uses **`context_type = 'project'`, `context_id = projects.id`** (created at engage). The job control panel + all rich cards key off this — use `'project'`, not `'lead'`.
 - **`conversation_participants`** — a participant is a **`user`** (homeowner, admin, or a specific person) **or a `contractor`** (the whole company — any active member reads/sends). `last_read_at` per participant drives unread counts.
-- **`messages`** — `sender_type` (`user` | `contractor` | `system`), `sender_id`, `body`, `channel` (`platform` | `sms` | `email`), `external_id`. In-app realtime + SMS/email bridges (Plivo/Resend) for notifications and homeowner reach.
+- **`messages`** — `sender_type` (`user` | `contractor` | `system`), `sender_id`, `body`, `channel` (`platform` | `sms` | `email`), `external_id`, and a structured **`meta` jsonb** for rich cards (see below). In-app realtime + SMS/email bridges (Plivo/Resend).
 
-The inherited (currently broken) `chat.ts` / `actions/chat.ts` were written for exactly this `conversations` / `conversation_participants` shape — **adapt them, don't discard them.**
+**Rich message `meta` (the `MessageMeta` union, rendered as cards in the thread):**
+- `kind: 'quote'` — the inline quote card (`estimateId`, `total`, `status`). Homeowner **accepts / views** it here; aligned to the contractor's side; status copy personalized per viewer ("Awaiting your decision" vs "Awaiting the homeowner's decision").
+- `kind: 'event'` — a lifecycle auto-message (`quote_accepted`, `job_completed`, `quote_superseded`) owned by the triggering party (`actorType`/`actorId`), so it renders as a **left/right bubble on their side** with text **personalized per viewer** (e.g. "You accepted…" vs "<Homeowner> accepted your quote — you won!"). Replaces the old centered "system note".
+- `kind: 'review'` — the inline review card posted at completion; the homeowner rates in-thread; flips to a read-only thank-you once submitted (and never re-prompts if already reviewed via any path).
+
+**Optimistic + realtime:** sends are optimistic (no "sending…" status). A lifecycle message refetches the thread's job panel + message meta so the header actions (Accept / Mark completed), timeline, and card states update live for both parties.
+
+> History: the inherited `chat.ts` / `actions/chat.ts` were adapted into this `conversations` / `conversation_participants` graph — messaging is built, not a stub.
 
 ---
 
@@ -299,14 +328,18 @@ credit_transactions {
 
 // ───────────── SUPPLY-SIDE (company-scoped) ─────────────
 
-service_areas {
+service_areas {                    // GEOGRAPHIC coverage — circle or drawn polygon
   id: uuid
   contractor_id: uuid (FK contractors)
-  zip_code: text
-  lat: double (nullable)           // zip centroid for NWS alerts
-  lng: double (nullable)
+  label: text (nullable)
+  zip_code: text (nullable)        // display-only now (matching is geographic)
+  area_type: text                  // 'circle' | 'polygon'  (default 'circle')
+  lat: double (nullable)  lng: double (nullable)  radius_km: double (nullable)   // circle
+  polygon: jsonb (nullable)        // [{lat,lng}, ...] for drawn areas
+  geom: geography (nullable)       // canonical matchable shape (PostGIS), GiST-indexed;
+                                   //   maintained by trigger from the fields above.
+                                   //   Matching = ST_Covers(geom, lead_point).
   created_at: timestamp
-  // unique(contractor_id, zip_code)
 }
 
 contractor_services {              // which verticals (+ subtypes) a company handles
@@ -338,8 +371,8 @@ leads {
   photo_url: text
   notes: text
   storm_event_id: uuid (nullable FK storm_events)   // ROOFING-ONLY, fenced
-  status: enum('open','filled','awarded','closed','expired')
-  engage_slots: integer            // N (capped competition, default 3)
+  status: enum('open','awarded','closed','expired')  // no 'filled' (no engage cap)
+  engage_slots: integer            // VESTIGIAL (Phase 1 has no cap/lock); column kept, unused
   engagement_credit_cost: integer  // small, snapshot at creation
   award_credit_cost: integer       // full job cost, snapshot at creation
   awarded_to: uuid (nullable FK contractors)
@@ -355,11 +388,12 @@ lead_recipients {
   contractor_id: uuid (FK contractors)
   status: enum('offered','viewed','engaged','declined','expired','lost','won')
   offered_at: timestamp
-  viewed_at: timestamp (nullable)
+  viewed_at: timestamp (nullable)  // telemetry only — does NOT start a deadline
   engaged_at: timestamp (nullable)
   responded_at: timestamp (nullable)
   decline_reason: text (nullable)
-  sla_deadline: timestamp          // 24h after view / 48h after offer
+  sla_deadline: timestamp (nullable) // Phase 1: null while offered (no expiry);
+                                     //   set on engage to the quote-REMINDER time, cleared after the nudge
   created_at: timestamp
   // unique(lead_id, contractor_id)
 }
@@ -427,9 +461,13 @@ messages {
   conversation_id: uuid (FK conversations)
   sender_type: enum('user','contractor','system')
   sender_id: uuid (nullable)
-  body: text
+  body: text                       // fallback / non-thread surfaces
   channel: enum('platform','sms','email')
   external_id: text (nullable)     // Plivo/Resend id
+  meta: jsonb (nullable)           // MessageMeta union → rich card:
+                                   //   { kind:'quote', estimateId, total, status }
+                                   //   { kind:'event', event, actorType, actorId }   (personalized, sided)
+                                   //   { kind:'review', projectId, contractorId, status, rating? }
   created_at: timestamp
 }
 
@@ -512,25 +550,26 @@ engagements {                      // do NOT build yet — shape for forward-com
 
 | Plan    | Price | Monthly credits | Seats  | Notable features                 |
 | ------- | ----- | --------------- | ------ | -------------------------------- |
-| Free    | $0    | few / 0         | 1      | CRM, buy credits, basic alerts   |
+| Free    | $0    | 10              | 3      | CRM, buy credits, basic alerts   |
 | Starter | TBD   | small grant     | small  | + storm alerts, estimate builder |
 | Growth  | TBD   | medium grant    | medium | + analytics, priority matching   |
 | Pro     | TBD   | large grant     | large  | + AI agent, marketing tools      |
 
-Rules: plan credits **expire** at cycle end; purchased credits **roll over**; every signup gets a `signup_bonus`; a launch-window promo grants extra. Credits — not "included leads" — are the unit of value.
+Rules: plan credits **expire** at cycle end; purchased credits **roll over**; every signup gets a **50**-credit `signup_bonus` (never expires) + a **250**-credit launch `promo` (**expires 4 months** out) = **300 to start**; spends are FIFO (oldest-expiring first). Credits — not "included leads" — are the unit of value. **v1 has no live payments** (see §3.2): the Buy UI records a request and admins grant manually from `/admin/credits`.
 
 ---
 
 ## 10. Key Automations (Inngest jobs)
 
-- **`lead.created`** — fan out free offers to ≥3 eligible contractors (match by service + area + score); write `lead_recipients`; push/SMS/email each member; set SLA deadlines.
-- **`lead.recipient.sla`** — when an offer passes 24h-post-view / 48h-no-view, expire it and offer the lead to one more eligible contractor (cascade) until `engage_slots` fill or no eligibles remain.
-- **`lead.engaged`** — on engagement: charge `engagement_credit_cost`, create project + contact + conversation, decrement open slots; lock the lead when slots fill.
-- **`quote.accepted`** — on homeowner acceptance: charge winner `award_credit_cost` (`lead_won`), set `leads.awarded_to`, mark other recipients `lost`, project → `in_progress`.
+- **`lead.created`** — fan out free offers broadly to eligible contractors (match by service + area geography + verified, ranked by score, up to `LEAD_FANOUT.maxRecipients`); the `lead_recipients` rows are written inline in `createLead`, so this job handles the async notify (push/SMS/email + a live `lead:new` badge) per member. (Emergencies also SMS.)
+- **`lead.recipient.sla`** — housekeeping cron (no expiry, no cascade): (1) **quote reminder** — one gentle nudge to an engaged pro who hasn't quoted by the urgency window (no penalty); (2) **abandoned-post cleanup** — auto-close an `open` lead older than `ABANDONED_LEAD_DAYS` (30) with **zero** engagement.
+- **`lead.engaged`** (inline in `engageLead`) — charge `engagement_credit_cost`, create project + contact + conversation; notify the homeowner. No slots/lock.
+- **`quote.submitted`** — notify the homeowner of a new quote (deep-links into the chat, where they View/Accept).
+- **`quote.accepted`** — on homeowner acceptance: charge winner `award_credit_cost` (`lead_won`), set `leads.awarded_to`, mark other recipients `lost`, project → `in_progress`; notify the **winner** ("you won"), the **losers** ("not selected"), AND the **homeowner** ("you're hired — quote accepted").
+- **completion** (inline in `advanceProjectStage` → `completed`) — post an in-thread completion event + review card; notify the homeowner (in-app + email); schedule the review request.
+- **`review.request` / submission** — 72h after `completed`, create a pending review row + tokenized email link; inline or token submission recomputes the contractor's cached `avg_rating`/`total_reviews` and records `review_received`.
 - **`credits.expire`** — cron: write `expiry` entries for unspent expired `plan_grant` lots; refresh `credit_balance`.
 - **`subscription.cycle`** — on Stripe invoice paid: write `plan_grant`; on cancel/past_due: update `subscriptions`.
-- **`score.recompute`** — apply `score_events` deltas; decay for ignored/abandoned leads.
-- **`project.stage_changed`** — log activity; schedule follow-ups; trigger review request 72h after `completed`.
 - **`storm.poll`** _(roofing-only)_ — nightly NWS poll by service-area centroid; create `storm_events`; tag + alert.
 
 ---
@@ -552,8 +591,8 @@ Every notification goes through one `sendNotification()` core: writes a per-user
 `src/app` is organized with route groups by audience (the group name is NOT in the URL): `(public)/` for marketing, `auth/` for auth flows, and `(dashboard)/{contractor,homeowner,admin}/` for the three authenticated areas. So the contractor area lives at `src/app/(dashboard)/contractor/` and serves `/contractor`.
 
 - **Public / marketing:** `/`, `/get-a-quote`, `/contractors`, `/contractors/signup`, `/roofing-contractors/[city]-[state]`. (`src/app/(public)/`)
-- **Homeowner (auth, role `homeowner`):** `/homeowner` dashboard — their job posts + stats, quotes received + accept, messages, profile/password setup. (Frictionless auto-signup from the post flow.) (`src/app/(dashboard)/homeowner/`)
-- **Contractor (auth, role `contractor`):** `/contractor` — command center, `/contractor/leads` (offers + engage), contacts, projects (+ quote builder), messages, storm-alerts, reviews, **team** (members + invites), **billing** (plan + credits + purchase), profile, settings. (`src/app/(dashboard)/contractor/`)
+- **Homeowner (auth, role `homeowner`):** `/homeowner` dashboard, `/homeowner/requests` — the **Jobs** board (tabbed table; quotes are accepted inline in chat/detail, so there is **no** `/homeowner/quotes` page), `/homeowner/messages`, settings (profile/password). (Frictionless auto-signup from the post flow.) (`src/app/(dashboard)/homeowner/`)
+- **Contractor (auth, role `contractor`):** `/contractor` — command center, **`/contractor/jobs`** — the unified board (offers → engage → quote → won → done; **Leads + Projects were merged into it**, so `/contractor/leads` redirects here), contacts, messages, storm-alerts, reviews, **team** (members + invites), **billing** (plan + credits + purchase), profile, settings. (`src/app/(dashboard)/contractor/`)
 - **Admin (auth, role `admin`):** `/admin` — leads, contractors (verify), members, storm-events, plans/credits, analytics, settings. (`src/app/(dashboard)/admin/`)
 - **Tokenized (no session needed):** quote acceptance link, review submission link, invitation accept link.
 - **API route handlers:** `/api/inngest`, `/api/push/*`, `/api/webhooks/stripe`, `/api/webhooks/plivo` (inbound SMS), `/api/webhooks/resend` (inbound email).
@@ -606,6 +645,8 @@ All spend **credits** (same ledger) and attribute to **companies/members** (same
 
 ## 16. Build Sequence (where we are)
 
-Done: schema v1 + migration `0000`; RLS/realtime/seed (`0001`); contractor dashboard shell + leads inbox (placeholder pages for the rest); fonts (Inter + Sebenta).
+**Done (v2 foundation + core loop — BUILT):** the v2 schema (identity split, credits/plans/subscriptions, lead economy, universal messaging, scoring, reviews) + RLS/realtime; homeowner post-a-job + auto-signup; geographic matching + broad fan-out; the **lead loop** — offer → engage (credit charge, project + conversation) → quote (inline quote card) → accept (full charge, win) → complete → review; the unified contractor **Jobs** board (Leads + Projects merged); homeowner **Jobs** board + per-job detail (interested contractors with ratings/profile, "what's next" guidance, close-job); universal **messaging** with optimistic sends, personalized lifecycle event cards, inline quote + review cards, and live panel/timeline updates; **notifications** (in-app + email) across the lifecycle for both sides; contractor **public-profile dialog** (rating, reviews, verified, experience). Phase-1 lead-economy stance applied (broad fan-out, no engage cap, no expiry, urgency-based bonus/reminder, carrot scoring — see the header note + §4).
 
-**Next (v2 foundation, pre-launch — cheap to do now):** migrate the schema to this document — identity split (`contractor_members`, homeowners-as-users), credits (`plans`/`subscriptions`/`credit_transactions`), lead economy (`lead_recipients`, lead status machine), universal messaging (`conversations`/`participants`), scoring (`score_events`) — plus updated RLS (membership-based, set-returning helper) and a fresh seed. Then build: homeowner post-a-job + auto-signup, the lead offer/engage/quote/accept loop, credits/billing, and team/members. See `CODING_GUIDE.md` for Next.js 16 patterns.
+**Test fixtures:** `pnpm test:reset` (wipe activity) + `pnpm test:seed` (one job per scenario across both dashboards) — see `scripts/test-*.ts`. Email pipeline check: `pnpm notifications:test`.
+
+**Next:** credits/billing UI (Stripe checkout + portal + webhooks), team/members management, storm alerts, then the §15 growth features. See `CODING_GUIDE.md` for Next.js 16 patterns.

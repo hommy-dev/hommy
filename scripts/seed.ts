@@ -457,7 +457,7 @@ async function seedDemo(
         id: leadId, homeownerId: mariaHo, serviceId,
         serviceDetails: { subtype: m.subtype }, urgency: m.urgency,
         address: HOMEOWNERS[0].address, zipCode: HOMEOWNERS[0].zip, city: HOMEOWNERS[0].city, state: HOMEOWNERS[0].state, lat: HOMEOWNERS[0].lat, lng: HOMEOWNERS[0].lng,
-        notes: m.notes, status: m.status, engageSlots: 3, engagementCreditCost: 2, awardCreditCost: 20,
+        notes: m.notes, status: m.status, engageSlots: 3, engagementCreditCost: 5,
       })
       .onConflictDoUpdate({ target: leads.id, set: { status: m.status, notes: m.notes } })
     for (const cId of m.recipients) {
@@ -555,7 +555,7 @@ async function seedDevFixtures(serviceId: string, growthPlanId: string): Promise
         serviceDetails: { subtype: h.subtype, roofSizeSqft: h.sqft },
         urgency: h.urgency, address: h.address, zipCode: h.zip, city: h.city, state: h.state, lat: h.lat, lng: h.lng,
         notes: h.notes, status: 'open',
-        engageSlots: 3, engagementCreditCost: 2, awardCreditCost: 20,
+        engageSlots: 3, engagementCreditCost: 5,
       })
       .onConflictDoUpdate({ target: leads.id, set: { status: 'open', notes: h.notes } })
 

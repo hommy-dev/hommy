@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import type { PortfolioProject } from "@/lib/data/portfolio"
+import { EmptyState } from "@/components/ui/empty-state"
 import {
   Dialog,
   DialogContent,
@@ -19,9 +20,12 @@ export function PortfolioGallery({ items }: { items: PortfolioProject[] }) {
 
   if (items.length === 0) {
     return (
-      <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-        No work showcased yet.
-      </p>
+      <EmptyState
+        size="sm"
+        icon="image-3"
+        title="No work to show yet"
+        description="This pro hasn't shared photos of past jobs yet."
+      />
     )
   }
 

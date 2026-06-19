@@ -1,28 +1,52 @@
 "use client";
 
 import { Toast } from "@base-ui/react/toast";
-import {
-  CircleAlertIcon,
-  CircleCheckIcon,
-  InfoIcon,
-  LoaderCircleIcon,
-  TriangleAlertIcon,
-  X,
-} from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "@/components/ui/icon";
 import { buttonVariants } from "@/components/ui/button";
 
 const toastManager = Toast.createToastManager();
 const anchoredToastManager = Toast.createToastManager();
 
+// Per-type icon + tint. `loading` has no static icon — it renders a CSS spinner.
 const TOAST_ICONS = {
-  error: CircleAlertIcon,
-  info: InfoIcon,
-  loading: LoaderCircleIcon,
-  success: CircleCheckIcon,
-  warning: TriangleAlertIcon,
+  error: "danger-circle",
+  info: "info-square",
+  loading: "loading",
+  success: "tick-square",
+  warning: "danger-triangle",
 } as const;
+
+const TOAST_ICON_COLOR: Record<string, string> = {
+  error: "text-destructive",
+  info: "text-info",
+  success: "text-success",
+  warning: "text-warning",
+};
+
+/** Status glyph for a toast: a spinning ring while loading, else a custom icon. */
+function ToastIcon({ type }: { type?: string }) {
+  if (!type) return null;
+  if (type === "loading") {
+    return (
+      <span
+        data-slot="toast-icon"
+        aria-hidden
+        className="block size-4 lg:size-[1.111vw] shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent opacity-80"
+      />
+    );
+  }
+  const name = TOAST_ICONS[type as ToastType];
+  if (!name || name === "loading") return null;
+  return (
+    <Icon
+      name={name as IconName}
+      data-slot="toast-icon"
+      className={cn("size-4 lg:size-[1.111vw] shrink-0", TOAST_ICON_COLOR[type])}
+    />
+  );
+}
 
 type ToastPosition =
   | "top-left"
@@ -70,9 +94,6 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
         data-slot="toast-viewport"
       >
         {toasts.map((toast) => {
-          const Icon = toast.type
-            ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS]
-            : null;
 
           return (
             <Toast.Root
@@ -131,14 +152,7 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
               <Toast.Content className="pointer-events-auto flex flex-col gap-2 lg:gap-[0.556vw] overflow-hidden px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] transition-opacity duration-250 data-behind:not-data-expanded:pointer-events-none data-behind:opacity-0 data-expanded:opacity-100">
                 <div className="flex items-start gap-2 lg:gap-[0.556vw]">
                   <div className="flex gap-2 lg:gap-[0.556vw] flex-1">
-                    {Icon && (
-                      <div
-                        className="[&>svg]:h-lh [&>svg]:w-4 [&_svg]:pointer-events-none [&_svg]:shrink-0"
-                        data-slot="toast-icon"
-                      >
-                        <Icon className="in-data-[type=loading]:animate-spin in-data-[type=error]:text-destructive in-data-[type=info]:text-info in-data-[type=success]:text-success in-data-[type=warning]:text-warning in-data-[type=loading]:opacity-80" />
-                      </div>
-                    )}
+                    <ToastIcon type={toast.type} />
 
                     <div className="flex flex-col gap-0.5 lg:gap-[0.139vw]">
                       <Toast.Title
@@ -152,10 +166,10 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
                     </div>
                   </div>
                   <Toast.Close
-                    className="cursor-pointer shrink-0 rounded-md lg:rounded-[0.556vw] text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="cursor-pointer shrink-0 rounded-md lg:rounded-[0.556vw] text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label="Close"
                   >
-                    <X className="h-4 lg:h-[1.111vw] w-4 lg:w-[1.111vw]" />
+                    <Icon name="close" className="size-4 lg:size-[1.111vw]" />
                   </Toast.Close>
                 </div>
                 {toast.actionProps && (
@@ -196,9 +210,6 @@ function AnchoredToasts() {
         data-slot="toast-viewport-anchored"
       >
         {toasts.map((toast) => {
-          const Icon = toast.type
-            ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS]
-            : null;
           const tooltipStyle =
             (toast.data as { tooltipStyle?: boolean })?.tooltipStyle ?? false;
           const positionerProps = toast.positionerProps;
@@ -233,14 +244,7 @@ function AnchoredToasts() {
                   <Toast.Content className="pointer-events-auto flex flex-col gap-2 lg:gap-[0.556vw] overflow-hidden px-3.5 lg:px-[0.972vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw]">
                     <div className="flex items-start gap-2 lg:gap-[0.556vw]">
                       <div className="flex gap-2 lg:gap-[0.556vw] flex-1">
-                        {Icon && (
-                          <div
-                            className="[&>svg]:h-lh [&>svg]:w-4 [&_svg]:pointer-events-none [&_svg]:shrink-0"
-                            data-slot="toast-icon"
-                          >
-                            <Icon className="in-data-[type=loading]:animate-spin in-data-[type=error]:text-destructive in-data-[type=info]:text-info in-data-[type=success]:text-success in-data-[type=warning]:text-warning in-data-[type=loading]:opacity-80" />
-                          </div>
-                        )}
+                        <ToastIcon type={toast.type} />
 
                         <div className="flex flex-col gap-0.5 lg:gap-[0.139vw]">
                           <Toast.Title
@@ -254,10 +258,10 @@ function AnchoredToasts() {
                         </div>
                       </div>
                       <Toast.Close
-                        className="cursor-pointer shrink-0 rounded-md lg:rounded-[0.556vw] text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="cursor-pointer shrink-0 rounded-md lg:rounded-[0.556vw] text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
                         aria-label="Close"
                       >
-                        <X className="h-4 lg:h-[1.111vw] w-4 lg:w-[1.111vw]" />
+                        <Icon name="close" className="size-4 lg:size-[1.111vw]" />
                       </Toast.Close>
                     </div>
                     {toast.actionProps && (

@@ -133,7 +133,9 @@ export default async function ContractorProfilePage() {
               </p>
             ) : (
               <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-                No description yet.
+                {canManage
+                  ? "No description yet. Add a short bio so homeowners get a feel for your work."
+                  : "No description yet."}
               </p>
             )}
           </Section>
@@ -147,7 +149,9 @@ export default async function ContractorProfilePage() {
               </div>
             ) : (
               <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-                No services listed yet.
+                {canManage
+                  ? "No services yet. Add the services you offer so the right jobs reach you."
+                  : "No services listed yet."}
               </p>
             )}
           </Section>
@@ -201,7 +205,9 @@ export default async function ContractorProfilePage() {
               </ul>
             ) : (
               <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-                No coverage areas yet.
+                {canManage
+                  ? "No coverage areas yet. Add the places you serve so we can match you to nearby jobs."
+                  : "No coverage areas yet."}
               </p>
             )}
           </Section>
