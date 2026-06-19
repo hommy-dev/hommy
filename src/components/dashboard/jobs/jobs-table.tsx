@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
+import { buttonVariants } from "@/components/ui/button";
 import type { BoardStatus, JobCard as Job } from "@/lib/data/jobs";
 import { formatDistanceToNow, formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -219,7 +220,7 @@ function JobRow({
             homeownerName={job.homeownerName}
             disabled={!canEngage}
             stopPropagation
-            triggerClassName="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
+            triggerClassName={buttonVariants({ variant: "inverse", size: "sm" })}
             triggerContent={
               <>
                 <Icon name="message" className="size-4 lg:size-[1.111vw]" />
@@ -231,7 +232,7 @@ function JobRow({
           <Link
             href={`/contractor/messages/${job.conversationId}`}
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold transition-colors hover:bg-muted"
+            className={cn(buttonVariants({ variant: "surface", size: "sm" }))}
           >
             <Icon name="message" className="size-4 lg:size-[1.111vw]" /> Open chat
           </Link>

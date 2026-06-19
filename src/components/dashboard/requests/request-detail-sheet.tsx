@@ -9,6 +9,7 @@ import type { HomeownerRequestDetail } from "@/lib/data/homeowner";
 import { closeRequest, getRequestDetailAction } from "@/lib/actions/requests";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { showToast } from "@/components/ui/toast";
 import { RatingBadge } from "@/components/contractors/rating-badge";
 import { ContractorProfileDialog } from "@/components/contractors/contractor-profile-dialog";
@@ -241,7 +242,7 @@ export function RequestDetailSheet({
                               </p>
                             ) : null}
                           </div>
-                          <span className="shrink-0 text-right text-sm lg:text-[0.903vw] font-semibold tabular-nums">
+                          <span className="shrink-0 text-right text-sm lg:text-[0.903vw] tabular-nums">
                             {c.quoteStatus
                               ? (c.quoteTotal ? formatCurrency(c.quoteTotal) : "—")
                               : null}
@@ -254,12 +255,12 @@ export function RequestDetailSheet({
                           <ContractorProfileDialog
                             contractorId={c.contractorId}
                             contractorName={c.contractorName}
-                            triggerClassName="inline-flex flex-1 items-center justify-center rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold transition-colors hover:bg-muted"
+                            triggerClassName={cn(buttonVariants({ variant: "surface", size: "sm", className: "flex-1" }))}
                           />
                           {c.conversationId ? (
                             <Link
                               href={`/homeowner/messages/${c.conversationId}`}
-                              className="inline-flex flex-1 items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90"
+                              className={cn(buttonVariants({ variant: "inverse", size: "sm" }), "flex-1")}
                             >
                               <Icon name="message" className="size-4 lg:size-[1.111vw]" /> Chat
                             </Link>

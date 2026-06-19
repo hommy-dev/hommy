@@ -12,6 +12,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { showToast } from "@/components/ui/toast";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { declineLead } from "@/lib/actions/decline-lead";
 
 /** Decline a lead offer with an optional reason (a reason softens the score hit). */
@@ -75,7 +77,7 @@ export function DeclineLeadDialog({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-md lg:rounded-[0.556vw] border border-border bg-card px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-medium transition-colors hover:bg-muted"
+            className={cn(buttonVariants({ variant: "surface", size: "default" }))}
           >
             Cancel
           </button>
@@ -83,7 +85,7 @@ export function DeclineLeadDialog({
             type="button"
             onClick={confirm}
             disabled={pending}
-            className="rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={buttonVariants({ variant: "inverse", size: "default" })}
           >
             {pending ? "Declining…" : "Decline lead"}
           </button>

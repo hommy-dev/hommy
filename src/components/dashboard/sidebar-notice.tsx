@@ -4,45 +4,35 @@ import { cn } from "@/lib/utils"
 export type NoticeTone = "info" | "warning" | "success" | "announcement"
 
 type ToneStyle = {
-  /** Card surface — soft gradient so the notice reads as a distinct, inviting block. */
+  /** Card surface — soft tinted bg + matching border so it reads as a distinct block. */
   card: string
-  /** Foreground text on the soft surface. */
-  text: string
-  /** Faded body copy. */
-  body: string
   /** Filled CTA pill — the single thing we want clicked. */
   cta: string
 }
 
 /**
- * Soft, type-coded palettes. The notice is the only splash of saturated color
- * in an otherwise neutral sidebar, so whenever one is shown the eye is pulled
- * straight to it — and to its action button.
+ * Soft, type-coded palettes. The tone shows in the BORDER + soft BG + the CTA;
+ * the title/body always use the theme's foreground/muted tokens so the copy is
+ * high-contrast and readable in BOTH light and dark mode (the `*-foreground`
+ * tokens are for text on a SOLID fill, not on these soft `*-bg` surfaces — using
+ * them here washed the text out in dark mode).
  */
 const TONES: Record<NoticeTone, ToneStyle> = {
   info: {
     card: "border-info/30 bg-info-bg",
-    text: "text-info-foreground",
-    body: "text-info-foreground/70",
     cta: "bg-info text-white hover:bg-info/85",
   },
   warning: {
     card: "border-warning/30 bg-warning-bg",
-    text: "text-warning-foreground",
-    body: "text-warning-foreground/70",
     cta: "bg-warning text-warning-foreground hover:bg-warning/85",
   },
   success: {
     card: "border-success/30 bg-success-bg",
-    text: "text-success-foreground",
-    body: "text-success-foreground/70",
     cta: "bg-success text-success-foreground hover:bg-success/85",
   },
   announcement: {
     card: "border-primary/30 bg-accent",
-    text: "text-primary",
-    body: "text-primary/70",
-    cta: "bg-secondary text-secondary-foreground hover:bg-secondary/85",
+    cta: "bg-primary text-primary-foreground hover:bg-primary/90",
   },
 }
 /**
@@ -68,12 +58,11 @@ export function SidebarNotice({
       className={cn(
         "rounded-md lg:rounded-[0.556vw] border p-3 lg:p-[0.833vw] group-data-[collapsible=icon]:hidden",
         t.card,
-        t.text,
       )}
     >
-      <p className="text-[13px] lg:text-[0.903vw] font-semibold leading-tight">{title}</p>
+      <p className="text-[13px] lg:text-[0.903vw] font-semibold leading-tight text-foreground">{title}</p>
       {body ? (
-        <p className={cn("mt-1.5 lg:mt-[0.417vw] text-[11px] lg:text-[0.764vw] leading-snug", t.body)}>{body}</p>
+        <p className="mt-1.5 lg:mt-[0.417vw] text-[11px] lg:text-[0.764vw] leading-snug text-muted-foreground">{body}</p>
       ) : null}
       {cta ? (
         <Link

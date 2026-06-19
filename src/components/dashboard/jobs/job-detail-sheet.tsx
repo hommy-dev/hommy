@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import type { JobDetail } from "@/lib/data/jobs";
 import { getJobDetailAction } from "@/lib/actions/jobs";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { DetailDialog } from "@/components/ui/detail-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DeclineLeadDialog } from "../leads/decline-lead-dialog";
@@ -67,7 +68,7 @@ export function JobDetailSheet({
               <EngageConfirm
                 leadId={shown.leadId}
                 engagementCreditCost={shown.engagementCreditCost}
-                triggerClassName="inline-flex flex-1 items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
+                triggerClassName={buttonVariants({ variant: "inverse", size: "lg", className: "flex-1 font-semibold" })}
                 triggerContent={
                   <>
                     <Icon name="chat" className="size-4 lg:size-[1.111vw]" />
@@ -77,13 +78,13 @@ export function JobDetailSheet({
               />
               <DeclineLeadDialog
                 leadId={shown.leadId}
-                triggerClassName="inline-flex shrink-0 items-center justify-center rounded-md lg:rounded-[0.556vw] border border-border bg-card px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                triggerClassName={cn(buttonVariants({ variant: "surface", size: "lg", className: "shrink-0 font-semibold text-muted-foreground" }))}
               />
             </div>
           ) : shown.conversationId ? (
             <Link
               href={`/contractor/messages/${shown.conversationId}`}
-              className="inline-flex w-full items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] bg-foreground px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] text-sm lg:text-[0.903vw] font-semibold text-background transition-colors hover:bg-foreground/90"
+              className={cn(buttonVariants({ variant: "inverse", size: "lg" }), "w-full font-semibold")}
             >
               <Icon name="chat" className="size-4 lg:size-[1.111vw]" /> Open chat
             </Link>

@@ -3,6 +3,8 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/icon";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -219,7 +221,7 @@ export function QuoteBuilderDialog({
             type="button"
             onClick={onSaveDraft}
             disabled={!canSubmit || pending}
-            className="rounded-md lg:rounded-[0.556vw] border border-border bg-card px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-medium transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+            className={cn(buttonVariants({ variant: "surface", size: "default" }))}
           >
             Save draft
           </button>
@@ -227,7 +229,7 @@ export function QuoteBuilderDialog({
             type="button"
             onClick={onSend}
             disabled={!canSubmit || pending}
-            className="rounded-md lg:rounded-[0.556vw] bg-primary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={buttonVariants({ variant: "default", size: "default" })}
           >
             {pending ? "Sending…" : "Send quote"}
           </button>

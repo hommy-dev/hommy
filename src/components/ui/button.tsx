@@ -10,8 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        // Dark/solid CTA (near-black in light, light in dark) — the app's other
+        // primary action style, distinct from the brand-colored `default`.
+        inverse: "bg-foreground text-background hover:bg-foreground/90",
         outline:
           "border-border bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
+        // Bordered button sitting on a card surface (card bg, muted hover) — the
+        // app's common secondary action in tables, sheets, and headers.
+        surface:
+          "border-border bg-card hover:bg-muted hover:text-foreground aria-expanded:bg-muted",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:

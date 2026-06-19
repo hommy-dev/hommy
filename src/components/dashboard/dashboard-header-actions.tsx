@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Icon } from "@/components/ui/icon";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const ICON_BTN =
   "flex size-9 lg:size-[2.5vw] items-center justify-center rounded-full text-foreground/65 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
@@ -23,11 +25,11 @@ export function DashboardHeaderActions({
       <Link
         href="/contractor/settings"
         title="Buy credits"
-        className="flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] border px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.972vw] font-semibold transition-colors hover:bg-accent"
+        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
       >
         <Icon name="wallet" className="size-[15px] lg:size-[1.042vw]" />
         <span className="tabular-nums">{credits}</span>
-        <span className="hidden text-secondary-foreground/65 sm:inline">credits</span>
+        <span className="hidden text-foreground sm:inline">credits</span>
       </Link>
       <HeaderThemeToggle />
       <NotificationBell userId={userId} initialUnreadCount={unreadCount} />

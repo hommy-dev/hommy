@@ -10,6 +10,7 @@ import { getEstimateForViewer, type QuoteDetail } from "@/lib/actions/estimates"
 import { showToast } from "@/components/ui/toast";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -85,14 +86,14 @@ export function QuoteCard({
           </span>
         </div>
 
-        <div className="mt-3 lg:mt-[0.833vw] flex items-center gap-2 lg:gap-[0.556vw]">
+        <div className="mt-3 lg:mt-[1.2vw] flex items-center gap-2 lg:gap-[0.556vw]">
           <ViewQuoteButton estimateId={meta.estimateId} otherName={otherName} />
           {canAccept && !accepted && !superseded ? (
             <button
               type="button"
               onClick={accept}
               disabled={pending}
-              className="flex-1 rounded-md lg:rounded-[0.417vw] bg-foreground px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-xs lg:text-[0.833vw] font-semibold text-background transition-colors hover:bg-foreground/90 disabled:opacity-60"
+              className={buttonVariants({ variant: "inverse", className: "flex-1" })}
             >
               {pending ? "Accepting…" : "Accept quote"}
             </button>
@@ -125,7 +126,7 @@ function ViewQuoteButton({ estimateId, otherName }: { estimateId: string; otherN
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="flex-1 rounded-md lg:rounded-[0.417vw] border border-border bg-card px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-xs lg:text-[0.833vw] font-semibold text-foreground transition-colors hover:bg-muted"
+        className={cn(buttonVariants({ variant: "surface", size: "sm", className: "flex-1" }))}
       >
         View quote
       </button>
