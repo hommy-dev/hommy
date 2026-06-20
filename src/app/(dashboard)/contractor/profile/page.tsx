@@ -11,6 +11,7 @@ import { getContractorReviews } from "@/lib/data/reviews"
 import { coverageBadge } from "@/lib/coverage"
 import { ServiceTag } from "@/components/ui/service-tag"
 import { getVerificationState } from "@/lib/contractor/verification"
+import { scoreStanding } from "@/lib/reputation/labels"
 import { PortfolioGallery } from "@/components/dashboard/portfolio/portfolio-gallery"
 import { ReviewsSummaryCard } from "@/components/dashboard/reviews/reviews-summary"
 import { ReviewList } from "@/components/dashboard/reviews/review-list"
@@ -51,6 +52,7 @@ export default async function ContractorProfilePage() {
     year: "numeric",
   }).format(c.createdAt)
   const rating = c.avgRating ? Number(c.avgRating) : null
+  const standing = scoreStanding(c.profileScore)
 
   return (
     <div className="mx-auto w-full space-y-8 lg:space-y-[2.222vw]">
@@ -186,6 +188,19 @@ export default async function ContractorProfilePage() {
               <li className="flex items-center gap-2.5 lg:gap-[0.694vw] text-muted-foreground">
                 <Icon name="time-circle" className="size-4 lg:size-[1.111vw]" />
                 On Homei since {memberSince}
+              </li>
+              <li>
+                <Link
+                  href="/contractor/reputation"
+                  prefetch
+                  className="-mx-2 lg:-mx-[0.556vw] flex items-center gap-2.5 lg:gap-[0.694vw] rounded-md lg:rounded-[0.417vw] px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] transition-colors hover:bg-muted/50"
+                >
+                  <Icon name="chart" className="size-4 lg:size-[1.111vw] text-primary" />
+                  <span className="text-foreground">{standing.label}</span>
+                  <span className="ml-auto shrink-0 text-[13px] lg:text-[0.903vw] font-semibold tabular-nums text-muted-foreground">
+                    {c.profileScore}
+                  </span>
+                </Link>
               </li>
             </ul>
           </Section>

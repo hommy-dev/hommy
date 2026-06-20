@@ -100,8 +100,8 @@
   /* ── Muted & Accent ── */
   --muted: #f0ede6;
   --muted-foreground: #5c5c52;
-  --accent: #ececec;
-  --accent-foreground: #1f00ce;
+  --accent: #f3f3ff;
+  --accent-foreground: #121213;
 
   /* ── Semantic: Destructive ── */
   --destructive: #ef4444;
@@ -199,8 +199,8 @@
   /* ── Muted & Accent ── */
   --muted: #2a2923;
   --muted-foreground: #9e9d95;
-  --accent: #252d14;
-  --accent-foreground: #a8e832;
+  --accent: #121213;
+  --accent-foreground: #f3f3ff;
 
   /* ── Semantic: Destructive ── */
   --destructive: #f87171;

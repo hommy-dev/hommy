@@ -99,13 +99,19 @@ async function StatsRow({ contractor }: { contractor: Contractor }) {
         tint="bg-tertiary/15 text-[#b23a5e]"
         icon={<StarIcon />}
       />
-      <StatCard
-        label="Profile score"
-        value={contractor.profileScore}
-        hint="Higher score, more leads"
-        tint="bg-secondary/70 text-secondary-foreground"
-        icon={<TrendIcon />}
-      />
+      <Link
+        href="/contractor/reputation"
+        prefetch
+        className="rounded-md lg:rounded-[0.556vw] transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <StatCard
+          label="Profile score"
+          value={contractor.profileScore}
+          hint="See what moves it"
+          tint="bg-secondary/70 text-secondary-foreground"
+          icon={<TrendIcon />}
+        />
+      </Link>
     </div>
   );
 }

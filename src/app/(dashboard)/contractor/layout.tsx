@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
-import { getContractorForUser, getUserCompanies } from "@/lib/data/dashboard"
+import { getContractorForUser, getUserCompanies, countNewLeadOffers } from "@/lib/data/dashboard"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { getUnreadCountAction } from "@/lib/notifications/actions"
 import { countUnreadConversations } from "@/lib/data/conversations"
@@ -24,12 +24,14 @@ export default async function DashboardLayout({
     return <NoCompany />
   }
   const personName = user.fullName || user.email
+  const firstName = personName.split(" ")[0]
   // getUserCompanies doesn't depend on the active company, so fold it into the
   // parallel batch instead of awaiting it in series.
-  const [companies, unreadCount, unreadMessages] = await Promise.all([
+  const [companies, unreadCount, unreadMessages, newLeads] = await Promise.all([
     getUserCompanies(user.id),
     getUnreadCountAction(),
     countUnreadConversations(user.id),
+    countNewLeadOffers(contractor.id),
   ])
   const navCompanies = companies.map((c) => ({
     id: c.id,
@@ -41,7 +43,7 @@ export default async function DashboardLayout({
     <>
       <DashboardShell
         navItems={CONTRACTOR_NAV}
-        notice={buildNotice(contractor)}
+        notice={buildNotice(contractor, newLeads, firstName)}
         navUnreadCounts={{ "/contractor/messages": unreadMessages }}
         footerUser={
           <UserMenu
@@ -72,19 +74,44 @@ export default async function DashboardLayout({
   )
 }
 
+/**
+ * The single most relevant, personalized notice for this contractor right now —
+ * a priority ladder (problems first, then opportunity, then a healthy default).
+ * Copy is woven with their first name + real numbers. No em dashes (copy rule).
+ */
 function buildNotice(
   contractor: Awaited<ReturnType<typeof getContractorForUser>>,
+  newLeads: number,
+  firstName: string,
 ) {
   if (!contractor) return null
   const state = getVerificationState(contractor)
+  const balance = contractor.creditBalance
 
   if (state === "rejected") {
     return (
       <SidebarNotice
         tone="warning"
-        title="Verification needs attention"
-        body="Update your license or insurance to keep going."
+        icon="danger-triangle"
+        eyebrow="Action needed"
+        urgent
+        title={`Quick fix needed, ${firstName}`}
+        body="Update your license or insurance to keep winning jobs."
         cta={{ label: "Review", href: "/contractor/settings/verification" }}
+      />
+    )
+  }
+
+  if (balance < 0) {
+    return (
+      <SidebarNotice
+        tone="warning"
+        icon="danger-triangle"
+        eyebrow="Balance due"
+        urgent
+        title={`You owe ${Math.abs(balance)} credits`}
+        body="From a won job 🎉 Settle up to take new leads."
+        cta={{ label: "Top up", href: "/contractor/settings/billing" }}
       />
     )
   }
@@ -93,9 +120,11 @@ function buildNotice(
     return (
       <SidebarNotice
         tone="info"
-        title="We’re reviewing your verification"
-        body="We’ll let you know the moment you’re approved."
-        cta={{ label: "View", href: "/contractor/settings/verification" }}
+        icon="time-circle"
+        eyebrow="In review"
+        title="We’re reviewing you"
+        body="We’ll ping you the moment you’re approved, usually within a day."
+        cta={{ label: "View status", href: "/contractor/settings/verification" }}
       />
     )
   }
@@ -104,31 +133,39 @@ function buildNotice(
     return (
       <SidebarNotice
         tone="announcement"
-        title="Finish verifying"
-        body="Add your license to start winning jobs."
+        icon="shield-done"
+        eyebrow="Get verified"
+        title={`One step left, ${firstName}`}
+        body="Add your license to start winning jobs near you."
         cta={{ label: "Get verified", href: "/contractor/settings/verification" }}
       />
     )
   }
 
-  if (contractor.creditBalance < 0) {
+  if (balance < 5) {
     return (
       <SidebarNotice
-        tone="warning"
-        title={`You owe ${Math.abs(contractor.creditBalance)} credits`}
-        body="From a won job. Top up to take new leads."
+        tone="announcement"
+        icon="wallet"
+        eyebrow="Running low"
+        urgent
+        title={`${balance} credit${balance === 1 ? "" : "s"} left`}
+        body="Top up so you don’t miss your next win."
         cta={{ label: "Top up", href: "/contractor/settings/billing" }}
       />
     )
   }
 
-  if (contractor.creditBalance < 5) {
+  if (newLeads > 0) {
     return (
       <SidebarNotice
-        tone="announcement"
-        title={`${contractor.creditBalance} credits left`}
-        body="Low on credits — top up to start new chats."
-        cta={{ label: "Buy credits", href: "/contractor/settings/billing" }}
+        tone="info"
+        icon="discovery"
+        eyebrow="New leads"
+        urgent
+        title={`${newLeads} new lead${newLeads === 1 ? "" : "s"} near you 🔥`}
+        body="Pros who reply first win most. Jump in."
+        cta={{ label: "View leads", href: "/contractor/jobs" }}
       />
     )
   }
@@ -136,8 +173,10 @@ function buildNotice(
   return (
     <SidebarNotice
       tone="success"
-      title={`${contractor.creditBalance} credits`}
-      body="Spent only when you win a job."
+      icon="wallet"
+      eyebrow="Wallet"
+      title={`${balance} credits ready, ${firstName}`}
+      body="Only spent when you win a job."
       cta={{ label: "Buy credits", href: "/contractor/settings/billing" }}
     />
   )

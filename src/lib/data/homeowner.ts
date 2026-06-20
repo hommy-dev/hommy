@@ -56,10 +56,11 @@ export type HomeownerLead = {
   createdAt: Date
 }
 
-/** A homeowner's posted jobs, newest first, with how many contractors each was offered to. */
-export async function getHomeownerLeads(
+/** A homeowner's posted jobs, newest first, with how many contractors each was
+ *  offered to. Deduped per request so the layout (notice) + page share one read. */
+export const getHomeownerLeads = cache(async (
   homeownerId: string,
-): Promise<HomeownerLead[]> {
+): Promise<HomeownerLead[]> => {
   const rows = await db
     .select({
       id: leads.id,
@@ -150,7 +151,7 @@ export async function getHomeownerLeads(
     projectCompleted: completedSet.has(r.id),
     createdAt: r.createdAt,
   }))
-}
+})
 
 export type LeadStatus = (typeof leads.status.enumValues)[number]
 export type EstimateStatus = (typeof estimates.status.enumValues)[number]
@@ -175,6 +176,88 @@ export function deriveRequestStatus(args: {
   if (args.quoteCount > 0) return 'quotes'
   if (args.interestedCount > 0) return 'interested'
   return 'posted'
+}
+
+export type HomeownerNoticeData = {
+  jobsCount: number
+  /** Jobs that have quotes waiting for a decision (not yet hired). */
+  quotes: number
+  /** Jobs where pros engaged but no quote yet. */
+  interested: number
+  /** Posted jobs being looked at (matched/viewed), nobody engaged yet. */
+  waiting: number
+  /** Hired + in progress (awarded, not completed). */
+  hired: { count: number; contractorName: string | null }
+  /** Completed jobs the homeowner hasn't reviewed yet. */
+  reviewPending: { count: number; contractorName: string | null }
+}
+
+/**
+ * Aggregated state for the homeowner sidebar notice — what's the single most
+ * relevant thing across all their jobs. Reuses getHomeownerLeads (deduped per
+ * request) plus two light lookups for the hired-contractor name + which jobs
+ * already have a review.
+ */
+export async function getHomeownerNoticeData(homeownerId: string): Promise<HomeownerNoticeData> {
+  const myLeads = await getHomeownerLeads(homeownerId)
+
+  const [awardedRows, reviewedRows] = await Promise.all([
+    db
+      .select({ leadId: leads.id, name: contractors.companyName })
+      .from(leads)
+      .innerJoin(contractors, eq(contractors.id, leads.awardedTo))
+      .where(and(eq(leads.homeownerId, homeownerId), isNotNull(leads.awardedTo))),
+    db
+      .selectDistinct({ leadId: projects.leadId })
+      .from(reviews)
+      .innerJoin(projects, eq(projects.id, reviews.projectId))
+      .innerJoin(leads, eq(leads.id, projects.leadId))
+      .where(and(eq(leads.homeownerId, homeownerId), isNotNull(reviews.submittedAt))),
+  ])
+  const nameByLead = new Map(awardedRows.map((r) => [r.leadId, r.name]))
+  const reviewed = new Set(reviewedRows.map((r) => r.leadId))
+
+  let quotes = 0
+  let interested = 0
+  let waiting = 0
+  let hiredCount = 0
+  let hiredName: string | null = null
+  let reviewCount = 0
+  let reviewName: string | null = null
+
+  for (const l of myLeads) {
+    const status = deriveRequestStatus({
+      status: l.status,
+      interestedCount: l.interestedCount,
+      quoteCount: l.quoteCount,
+      projectCompleted: l.projectCompleted,
+    })
+    if (status === 'done') {
+      // Only completed-and-unreviewed jobs prompt a review (not closed/expired).
+      if (l.projectCompleted && !reviewed.has(l.id)) {
+        reviewCount++
+        if (!reviewName) reviewName = nameByLead.get(l.id) ?? null
+      }
+    } else if (status === 'quotes') {
+      quotes++
+    } else if (status === 'interested') {
+      interested++
+    } else if (status === 'hired') {
+      hiredCount++
+      if (!hiredName) hiredName = nameByLead.get(l.id) ?? null
+    } else if (status === 'posted' && (l.matchedCount > 0 || l.viewedCount > 0)) {
+      waiting++
+    }
+  }
+
+  return {
+    jobsCount: myLeads.length,
+    quotes,
+    interested,
+    waiting,
+    hired: { count: hiredCount, contractorName: hiredName },
+    reviewPending: { count: reviewCount, contractorName: reviewName },
+  }
 }
 
 export type RequestContractor = {

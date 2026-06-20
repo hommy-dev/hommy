@@ -17,6 +17,7 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor/messages", label: "Messages", icon: "chat" },
   { href: "/contractor/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
   { href: "/contractor/reviews", label: "Reviews", icon: "star" },
+  { href: "/contractor/reputation", label: "Reputation", icon: "chart" },
   { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },
 ]
@@ -40,7 +41,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { href: "/admin/disputes", label: "Disputes", icon: "scale" },
   { href: "/admin/quotes", label: "Quotes", icon: "paper" },
   { href: "/admin/jobs", label: "Jobs", icon: "calendar" },
-  { href: "/admin/audits", label: "Audits", icon: "tick-square" },
+  { href: "/admin/audits", label: "Audit log", icon: "tick-square" },
   { href: "/admin/settings", label: "Settings", icon: "setting" },
 ]
 

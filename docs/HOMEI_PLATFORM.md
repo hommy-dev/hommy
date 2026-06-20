@@ -568,7 +568,7 @@ Rules: plan credits **expire** at cycle end; purchased credits **roll over**; ev
 - **`quote.accepted`** — on homeowner acceptance: charge winner `award_credit_cost` (`lead_won`), set `leads.awarded_to`, mark other recipients `lost`, project → `in_progress`; notify the **winner** ("you won"), the **losers** ("not selected"), AND the **homeowner** ("you're hired — quote accepted").
 - **completion** (inline in `advanceProjectStage` → `completed`) — post an in-thread completion event + review card; notify the homeowner (in-app + email); schedule the review request.
 - **`review.request` / submission** — 72h after `completed`, create a pending review row + tokenized email link; inline or token submission recomputes the contractor's cached `avg_rating`/`total_reviews` and records `review_received`.
-- **`credits.expire`** — cron: write `expiry` entries for unspent expired `plan_grant` lots; refresh `credit_balance`.
+- **`credits.expire`** — daily cron (BUILT): FIFO reconciliation — write negative `expiry` entries for credits left unspent in lapsed lots (`plan_grant` + the launch `promo`), refresh `credit_balance`, broadcast `credits:changed`. Idempotent; skips companies with a non-positive balance.
 - **`subscription.cycle`** — on Stripe invoice paid: write `plan_grant`; on cancel/past_due: update `subscriptions`.
 - **`storm.poll`** _(roofing-only)_ — nightly NWS poll by service-area centroid; create `storm_events`; tag + alert.
 

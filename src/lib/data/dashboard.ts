@@ -325,3 +325,22 @@ export async function getDashboardStats(
     activeProjects: projectRows[0]?.value ?? 0,
   }
 }
+
+/**
+ * Fresh leads the company can still jump on — offered/viewed (not yet engaged)
+ * on a lead that's still open. Powers the sidebar "new leads near you" nudge.
+ */
+export async function countNewLeadOffers(contractorId: string): Promise<number> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(leadRecipients)
+    .innerJoin(leads, eq(leads.id, leadRecipients.leadId))
+    .where(
+      and(
+        eq(leadRecipients.contractorId, contractorId),
+        inArray(leadRecipients.status, ['offered', 'viewed']),
+        eq(leads.status, 'open'),
+      ),
+    )
+  return row?.value ?? 0
+}

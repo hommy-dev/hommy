@@ -8,6 +8,7 @@ import { getRequiredUser } from '@/lib/auth/session'
 import { contractors, purchaseIntents } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
 import { broadcastCreditsChanged } from '@/lib/credits/notify'
+import { getAdminContractorDetail, type AdminContractorDetail } from '@/lib/data/admin'
 
 type Result = { success: true } | { success: false; error: string }
 
@@ -92,6 +93,15 @@ export async function grantCreditsToContractor(input: unknown): Promise<Result> 
   revalidatePath('/admin/credits')
   revalidatePath('/admin')
   return { success: true }
+}
+
+/** Lazy-load a company's full record (info + members) for the admin detail dialog. */
+export async function getAdminContractorDetailAction(
+  contractorId: string,
+): Promise<AdminContractorDetail | null> {
+  await getRequiredUser('admin')
+  if (!z.string().uuid().safeParse(contractorId).success) return null
+  return getAdminContractorDetail(contractorId)
 }
 
 /** Mark a purchase request declined (dismiss without granting). Admin-only. */
