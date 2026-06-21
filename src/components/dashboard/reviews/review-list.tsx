@@ -39,34 +39,62 @@ export function ReviewList({
   return (
     <ul className={cn("space-y-3 lg:space-y-[0.833vw]", className)}>
       {reviews.map((r) => {
-        const who = r.reviewerName ?? "Homeowner";
+        const isGoogle = r.source === "google";
+        const who = r.reviewerName ?? (isGoogle ? "Google reviewer" : "Homeowner");
         return (
           <li
             key={r.id}
             className="flex gap-4 lg:gap-[1.111vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw]"
           >
-            <span
-              className={cn(
-                "flex size-11 lg:size-[3vw] shrink-0 items-center justify-center rounded-full text-sm lg:text-[0.972vw] font-semibold",
-                tintFor(r.reviewerName)
-              )}
-            >
-              {initials(r.reviewerName)}
-            </span>
+            {isGoogle && r.authorPhotoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- remote Google avatar, not re-hosted
+              <img
+                src={r.authorPhotoUrl}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="size-11 lg:size-[3vw] shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span
+                className={cn(
+                  "flex size-11 lg:size-[3vw] shrink-0 items-center justify-center rounded-full text-sm lg:text-[0.972vw] font-semibold",
+                  tintFor(r.reviewerName)
+                )}
+              >
+                {initials(r.reviewerName)}
+              </span>
+            )}
 
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3 lg:gap-[0.833vw]">
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 lg:gap-[0.417vw] text-sm lg:text-[0.972vw] font-semibold text-foreground">
                     <span className="truncate">{who}</span>
-                    <Icon
-                      name="badge-check"
-                      className="size-3.5 lg:size-[0.972vw] shrink-0 text-primary"
-                    />
+                    {!isGoogle ? (
+                      <Icon
+                        name="badge-check"
+                        className="size-3.5 lg:size-[0.972vw] shrink-0 text-primary"
+                      />
+                    ) : null}
                   </p>
                   <div className="mt-1 lg:mt-[0.278vw] flex items-center gap-2 lg:gap-[0.556vw]">
                     <Stars rating={r.rating} starClassName="lg:size-[1.042vw]" />
-                    <span className="text-xs lg:text-[0.833vw] text-muted-foreground">Verified customer</span>
+                    {isGoogle ? (
+                      r.sourceUrl ? (
+                        <a
+                          href={r.sourceUrl}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="text-xs lg:text-[0.833vw] text-muted-foreground hover:text-foreground hover:underline"
+                        >
+                          via Google
+                        </a>
+                      ) : (
+                        <span className="text-xs lg:text-[0.833vw] text-muted-foreground">via Google</span>
+                      )
+                    ) : (
+                      <span className="text-xs lg:text-[0.833vw] text-muted-foreground">Verified customer</span>
+                    )}
                   </div>
                 </div>
                 <span className="shrink-0 whitespace-nowrap text-xs lg:text-[0.833vw] text-muted-foreground">

@@ -3,15 +3,24 @@ import { cn } from "@/lib/utils";
 import { Stars } from "@/components/reviews/stars";
 
 /** Average + total + per-star distribution bars. Pass `flat` to drop the card
- *  chrome when it already sits inside a bordered section. */
+ *  chrome when it already sits inside a bordered section. When `homeiCount`/
+ *  `googleCount` are given (combined view), an honest source breakdown is shown. */
 export function ReviewsSummaryCard({
   summary,
   flat,
+  homeiCount,
+  googleCount,
 }: {
   summary: ReviewsSummary;
   flat?: boolean;
+  homeiCount?: number;
+  googleCount?: number;
 }) {
   const { avgRating, total, distribution } = summary;
+  const showBreakdown =
+    typeof homeiCount === "number" &&
+    typeof googleCount === "number" &&
+    googleCount > 0;
 
   return (
     <div
@@ -30,6 +39,11 @@ export function ReviewsSummaryCard({
         <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.764vw] text-muted-foreground">
           {total} review{total === 1 ? "" : "s"}
         </p>
+        {showBreakdown ? (
+          <p className="mt-0.5 lg:mt-[0.139vw] text-[11px] lg:text-[0.694vw] text-muted-foreground">
+            {homeiCount} on Hommy · {googleCount} from Google
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5 lg:space-y-[0.417vw]">

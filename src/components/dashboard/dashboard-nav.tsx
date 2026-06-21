@@ -20,6 +20,7 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   // /contractor/storm-alerts). See docs/HOMEI_PLATFORM.md §573.
   // Reviews live on the contractor's Profile page (no standalone Reviews page).
   { href: "/contractor/analytics", label: "Analytics", icon: "graph" },
+  { href: "/contractor/integrations", label: "Integrations", icon: "globe" },
   { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },
 ]

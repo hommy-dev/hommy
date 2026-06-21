@@ -56,6 +56,13 @@ export type ContractorReview = {
   comment: string | null
   reviewerName: string | null
   submittedAt: Date
+  /** Where the review came from. Native Homei reviews vs imported Google ones.
+   *  Optional for back-compat — existing builders default to 'homei'. */
+  source?: 'homei' | 'google'
+  /** Reviewer photo (Google reviews carry one; Homei reviews don't). */
+  authorPhotoUrl?: string | null
+  /** Link back to the source review/listing — attribution for imported reviews. */
+  sourceUrl?: string | null
 }
 
 export type ReviewsSummary = {
@@ -94,6 +101,7 @@ export async function getContractorReviews(contractorId: string): Promise<Review
       comment: r.comment,
       reviewerName: r.reviewerName,
       submittedAt: r.submittedAt as Date,
+      source: 'homei',
     })
   }
 

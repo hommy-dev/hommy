@@ -102,6 +102,10 @@ export const stormEventType = pgEnum('storm_event_type', ['hail', 'high_wind', '
 // Portfolio media: a plain single image ("signal") or a before/after pair.
 export const portfolioImageKind = pgEnum('portfolio_image_kind', ['single', 'before_after'])
 
+// Integration connection lifecycle. `needs_reauth` is reserved for the v2 OAuth
+// providers (Business Profile API, social) — Places uses only active/error.
+export const integrationStatus = pgEnum('integration_status', ['active', 'needs_reauth', 'error', 'disconnected'])
+
 // ============================================================
 // IDENTITY
 // ============================================================
@@ -665,6 +669,83 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
 ])
 
 // ============================================================
+// INTEGRATIONS — connected external accounts (provider-agnostic)
+// ============================================================
+// A company connects external accounts (Google now; OAuth providers such as the
+// Business Profile API + social later). One row per connected external account
+// (per Google place_id ⇒ multi-location = multiple rows). Imported data lands in
+// external_reviews / external_media — the native `reviews` table stays untouched
+// so win-based reputation (avg_rating/total_reviews) is never polluted. Token
+// columns are nullable: unused by Places (API-key only), reserved for v2 OAuth.
+
+export const integrationConnections = pgTable('integration_connections', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }),
+  // text, not an enum, so adding a provider needs no migration (like plans = data).
+  provider: text('provider').notNull(), // 'google_places' | (later) 'google_business','instagram',…
+  status: integrationStatus('status').notNull().default('active'),
+  externalAccountId: text('external_account_id').notNull(), // Google place_id
+  externalAccountLabel: text('external_account_label'), // business name shown in UI
+  externalAccountMeta: jsonb('external_account_meta').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  // Reserved for v2 OAuth providers — unused by Places.
+  scopes: text('scopes').array().notNull().default(sql`'{}'::text[]`),
+  accessTokenEnc: text('access_token_enc'),
+  refreshTokenEnc: text('refresh_token_enc'),
+  tokenExpiresAt: timestamp('token_expires_at', { withTimezone: true }),
+  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
+  lastError: text('last_error'),
+  connectedBy: uuid('connected_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('integration_connections_company_provider_account_uq').on(t.contractorId, t.provider, t.externalAccountId),
+  index('integration_connections_contractor_idx').on(t.contractorId),
+])
+
+// external_reviews — imported reviews (landing zone). Shown alongside native
+// reviews on the profile, but kept separate from the `reviews` table.
+export const externalReviews = pgTable('external_reviews', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  connectionId: uuid('connection_id').notNull().references(() => integrationConnections.id, { onDelete: 'cascade' }),
+  contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }), // denormalized for fast profile reads
+  provider: text('provider').notNull(),
+  externalId: text('external_id').notNull(), // Google review resource name (or content hash fallback)
+  authorName: text('author_name'),
+  authorPhotoUrl: text('author_photo_url'),
+  rating: integer('rating'),
+  comment: text('comment'),
+  sourceUrl: text('source_url'), // link to the review/place on Google (attribution)
+  postedAt: timestamp('posted_at', { withTimezone: true }),
+  raw: jsonb('raw').$type<Record<string, unknown>>(),
+  isVisible: boolean('is_visible').notNull().default(true),
+  importedAt: timestamp('imported_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('external_reviews_connection_external_uq').on(t.connectionId, t.externalId),
+  index('external_reviews_contractor_idx').on(t.contractorId),
+])
+
+// external_media — imported photos (work images). v1 stores Google-hosted URLs
+// directly; v2 may re-host to Cloudinary for durability.
+export const externalMedia = pgTable('external_media', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  connectionId: uuid('connection_id').notNull().references(() => integrationConnections.id, { onDelete: 'cascade' }),
+  contractorId: uuid('contractor_id').notNull().references(() => contractors.id, { onDelete: 'cascade' }),
+  provider: text('provider').notNull(),
+  externalId: text('external_id').notNull(), // Google photo resource name
+  sourceUrl: text('source_url').notNull(), // Google-hosted image URL (photo.getURI)
+  caption: text('caption'),
+  widthPx: integer('width_px'),
+  heightPx: integer('height_px'),
+  attributionHtml: text('attribution_html'), // Places authorAttributions (must be displayed)
+  raw: jsonb('raw').$type<Record<string, unknown>>(),
+  isVisible: boolean('is_visible').notNull().default(true),
+  importedAt: timestamp('imported_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('external_media_connection_external_uq').on(t.connectionId, t.externalId),
+  index('external_media_contractor_idx').on(t.contractorId),
+])
+
+// ============================================================
 // ROOFING-ONLY MODULE — storm/weather (fenced; not core)
 // ============================================================
 
@@ -837,4 +918,20 @@ export const activityLogRelations = relations(activityLog, ({ one }) => ({
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}))
+
+export const integrationConnectionsRelations = relations(integrationConnections, ({ one, many }) => ({
+  contractor: one(contractors, { fields: [integrationConnections.contractorId], references: [contractors.id] }),
+  reviews: many(externalReviews),
+  media: many(externalMedia),
+}))
+
+export const externalReviewsRelations = relations(externalReviews, ({ one }) => ({
+  connection: one(integrationConnections, { fields: [externalReviews.connectionId], references: [integrationConnections.id] }),
+  contractor: one(contractors, { fields: [externalReviews.contractorId], references: [contractors.id] }),
+}))
+
+export const externalMediaRelations = relations(externalMedia, ({ one }) => ({
+  connection: one(integrationConnections, { fields: [externalMedia.connectionId], references: [integrationConnections.id] }),
+  contractor: one(contractors, { fields: [externalMedia.contractorId], references: [contractors.id] }),
 }))

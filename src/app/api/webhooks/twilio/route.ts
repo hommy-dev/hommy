@@ -30,9 +30,12 @@ export async function POST(req: NextRequest): Promise<Response> {
   const authToken = process.env.TWILIO_AUTH_TOKEN
   if (authToken) {
     const signature = req.headers.get('x-twilio-signature') ?? ''
+    // Twilio signs the EXACT public URL configured in the console. Behind a
+    // tunnel/proxy the reconstructed host can differ, so allow an explicit
+    // override (set TWILIO_WEBHOOK_URL to the same URL you put in Twilio).
     const proto = req.headers.get('x-forwarded-proto') ?? 'https'
     const host = req.headers.get('host') ?? ''
-    const url = `${proto}://${host}${new URL(req.url).pathname}`
+    const url = process.env.TWILIO_WEBHOOK_URL || `${proto}://${host}${new URL(req.url).pathname}`
     try {
       const twilioMod = await import('twilio')
       const validateRequest = (twilioMod.validateRequest ??

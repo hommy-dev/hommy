@@ -9,6 +9,8 @@
     "lint": "eslint",
     "admin:create": "tsx scripts/create-admin.ts",
     "email:test": "tsx scripts/test-email.ts",
+    "sms:test": "tsx scripts/test-sms.ts",
+    "opt-out:test": "tsx scripts/test-opt-out.ts",
     "notifications:test": "tsx scripts/test-notifications.ts",
     "test:reset": "tsx scripts/test-reset.ts",
     "test:seed": "tsx scripts/test-seed.ts",

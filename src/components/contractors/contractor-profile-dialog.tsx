@@ -98,8 +98,8 @@ export function ContractorProfileDialog({
                 </div>
                 <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground">
                   {rated
-                    ? `${(profile.avgRating as number).toFixed(1)} average · ${profile.totalReviews} review${profile.totalReviews === 1 ? "" : "s"} on Homei`
-                    : "No reviews yet. This company is new to Homei."}
+                    ? `${(profile.avgRating as number).toFixed(1)} average · ${profile.totalReviews} review${profile.totalReviews === 1 ? "" : "s"}${profile.googleCount > 0 ? ` (incl. ${profile.googleCount} from Google)` : ""}`
+                    : "No reviews yet. This company is new to Hommy."}
                 </p>
               </div>
 
@@ -145,7 +145,8 @@ export function ContractorProfileDialog({
                           </p>
                         ) : null}
                         <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.764vw] text-muted-foreground">
-                          — {r.reviewerName ?? "Verified homeowner"}
+                          — {r.reviewerName ?? (r.source === "google" ? "Google reviewer" : "Verified homeowner")}
+                          {r.source === "google" ? " · via Google" : ""}
                         </p>
                       </li>
                     ))}

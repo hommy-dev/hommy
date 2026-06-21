@@ -5,7 +5,8 @@
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { contractors } from '@/lib/db/schema'
-import { getContractorReviews, type ContractorReview } from '@/lib/data/reviews'
+import type { ContractorReview } from '@/lib/data/reviews'
+import { getCombinedReviews } from '@/lib/data/integrations'
 
 export type ContractorPublicProfile = {
   id: string
@@ -16,6 +17,8 @@ export type ContractorPublicProfile = {
   verified: boolean
   avgRating: number | null
   totalReviews: number
+  /** Imported (Google) reviews included in the totals above. */
+  googleCount: number
   avgResponseTimeMinutes: number | null
   reviews: ContractorReview[]
 }
@@ -38,8 +41,9 @@ export async function getContractorPublicProfile(
     .limit(1)
   if (!c) return null
 
-  // Live review summary (accurate vs the cached avg) — keep the 6 most recent.
-  const summary = await getContractorReviews(contractorId)
+  // Live combined summary (Hommy + imported Google reviews) — keep the 6 most
+  // recent. Display-only; the cached reputation columns stay Hommy-only.
+  const summary = await getCombinedReviews(contractorId)
 
   return {
     id: c.id,
@@ -50,6 +54,7 @@ export async function getContractorPublicProfile(
     verified: c.verificationStatus === 'verified',
     avgRating: summary.avgRating,
     totalReviews: summary.total,
+    googleCount: summary.googleCount,
     avgResponseTimeMinutes: c.avgResponseTimeMinutes,
     reviews: summary.reviews.slice(0, 6),
   }

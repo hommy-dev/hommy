@@ -92,6 +92,13 @@
       "when": 1782031316907,
       "tag": "0012_powerful_night_nurse",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1782047398008,
+      "tag": "0013_chief_spot",
+      "breakpoints": true
     }
   ]
 }

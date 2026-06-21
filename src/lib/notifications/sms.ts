@@ -24,7 +24,9 @@ export async function sendSms(to: string, body: string): Promise<SmsResult> {
   if (
     process.env.TWILIO_ACCOUNT_SID &&
     process.env.TWILIO_AUTH_TOKEN &&
-    process.env.TWILIO_PHONE_NUMBER
+    // A single from-number works for one country; a Messaging Service SID is the
+    // multi-country path (Twilio picks the best sender per recipient). Either one enables Twilio.
+    (process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_MESSAGING_SERVICE_SID)
   ) {
     return sendViaTwilio(to, text)
   }
@@ -89,7 +91,14 @@ async function sendViaTwilio(to: string, text: string): Promise<SmsResult> {
   try {
     const twilio = (await import('twilio')).default
     const client = twilio(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!)
-    await client.messages.create({ to, from: process.env.TWILIO_PHONE_NUMBER!, body: text })
+    // Prefer a Messaging Service (multi-country, sender pool) when configured;
+    // otherwise fall back to the single from-number.
+    const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID
+    await client.messages.create(
+      messagingServiceSid
+        ? { to, body: text, messagingServiceSid }
+        : { to, body: text, from: process.env.TWILIO_PHONE_NUMBER! },
+    )
     return { success: true }
   } catch (err) {
     console.error('[sendSms] Twilio error', err)

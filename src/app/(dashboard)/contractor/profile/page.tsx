@@ -7,11 +7,11 @@ import {
   getContractorWonCount,
 } from "@/lib/data/dashboard"
 import { getPortfolio } from "@/lib/data/portfolio"
-import { getContractorReviews } from "@/lib/data/reviews"
+import { getCombinedReviews, getExternalMedia } from "@/lib/data/integrations"
 import { ServiceTag } from "@/components/ui/service-tag"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { scoreStanding } from "@/lib/reputation/labels"
-import { PortfolioGallery } from "@/components/dashboard/portfolio/portfolio-gallery"
+import { WorkGallery } from "@/components/dashboard/profile/work-gallery"
 import { ReviewsBlock } from "@/components/dashboard/reviews/reviews-block"
 import { ProfileHeader, type ProfileStat } from "@/components/dashboard/profile/profile-header"
 import { ProfileCompleteness, type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
@@ -32,12 +32,13 @@ export default async function ContractorProfilePage() {
     )
   }
 
-  const [role, subtypes, areas, portfolio, reviews, wonCount] = await Promise.all([
+  const [role, subtypes, areas, portfolio, reviews, googleMedia, wonCount] = await Promise.all([
     getMembershipRole(user.id, c.id),
     getContractorSubtypes(c.id),
     getServiceAreas(c.id),
     getPortfolio(c.id, { publishedOnly: true }),
-    getContractorReviews(c.id),
+    getCombinedReviews(c.id),
+    getExternalMedia(c.id),
     getContractorWonCount(c.id),
   ])
   const canManage = role === "owner" || role === "admin"
@@ -47,7 +48,9 @@ export default async function ContractorProfilePage() {
     month: "long",
     year: "numeric",
   }).format(c.createdAt)
-  const rating = c.avgRating ? Number(c.avgRating) : null
+  // Combined (Hommy + Google) rating for DISPLAY only — the cached
+  // contractors.avg_rating/total_reviews that drive ranking stay Hommy-only.
+  const rating = reviews.avgRating
   const standing = scoreStanding(c.profileScore)
 
   const metaLine = [
@@ -62,7 +65,7 @@ export default async function ContractorProfilePage() {
 
   const stats: ProfileStat[] = [
     { label: "Rating", value: rating ? rating.toFixed(1) : "—", star: true },
-    { label: c.totalReviews === 1 ? "Review" : "Reviews", value: String(c.totalReviews) },
+    { label: reviews.total === 1 ? "Review" : "Reviews", value: String(reviews.total) },
     ...(c.yearsInBusiness != null
       ? [{ label: "Years", value: String(c.yearsInBusiness) } satisfies ProfileStat]
       : []),
@@ -109,15 +112,20 @@ export default async function ContractorProfilePage() {
             )}
           </SectionCard>
 
-          {portfolio.length > 0 ? (
+          {portfolio.length > 0 || googleMedia.length > 0 ? (
             <SectionCard title="Recent work">
-              <PortfolioGallery items={portfolio} />
+              <WorkGallery portfolio={portfolio} google={googleMedia} />
             </SectionCard>
           ) : null}
 
           {reviews.total > 0 ? (
             <SectionCard title="Reviews">
-              <ReviewsBlock summary={reviews} reviews={reviews.reviews} />
+              <ReviewsBlock
+                summary={reviews}
+                reviews={reviews.reviews}
+                homeiCount={reviews.homeiCount}
+                googleCount={reviews.googleCount}
+              />
             </SectionCard>
           ) : null}
         </div>

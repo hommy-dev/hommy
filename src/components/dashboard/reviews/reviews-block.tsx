@@ -12,18 +12,28 @@ export function ReviewsBlock({
   summary,
   reviews,
   flat,
+  homeiCount,
+  googleCount,
 }: {
   summary: ReviewsSummary;
   reviews: ContractorReview[];
   /** Drop the summary's own card chrome (when wrapped in a section card). */
   flat?: boolean;
+  /** Per-source counts for the combined-view breakdown line. */
+  homeiCount?: number;
+  googleCount?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const shown = expanded ? reviews : reviews.slice(0, INITIAL);
 
   return (
     <div className="space-y-5 lg:space-y-[1.389vw]">
-      <ReviewsSummaryCard summary={summary} flat={flat} />
+      <ReviewsSummaryCard
+        summary={summary}
+        flat={flat}
+        homeiCount={homeiCount}
+        googleCount={googleCount}
+      />
       <ReviewList reviews={shown} className="space-y-4 lg:space-y-[1.111vw]" />
       {reviews.length > INITIAL ? (
         <button
