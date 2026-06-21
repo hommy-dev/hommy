@@ -1,7 +1,17 @@
+import { Suspense } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
 import { AccountSettings } from "@/components/dashboard/settings/account-settings"
+import { SettingsSectionSkeleton } from "@/components/dashboard/skeletons"
 
-export default async function HomeownerSettingsPage() {
+export default function HomeownerSettingsPage() {
+  return (
+    <Suspense fallback={<SettingsSectionSkeleton rows={2} />}>
+      <AccountData />
+    </Suspense>
+  )
+}
+
+async function AccountData() {
   const user = await getRequiredUser("homeowner")
   return (
     <AccountSettings

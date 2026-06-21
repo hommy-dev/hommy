@@ -1,24 +1,10 @@
-import { getRequiredUser } from "@/lib/auth/session"
-import { getContractorForUser, getMembershipRole } from "@/lib/data/dashboard"
-import { getContractorConnections } from "@/lib/data/integrations"
+import { getIntegrationsData } from "@/lib/data/integrations"
 import { IntegrationsGrid } from "@/components/integrations/integrations-grid"
 
-export default async function ContractorIntegrationsPage() {
-  const user = await getRequiredUser("contractor")
-  const c = await getContractorForUser(user.id)
-  if (!c) {
-    return (
-      <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-        Your company isn’t set up yet.
-      </p>
-    )
-  }
-
-  const [role, connections] = await Promise.all([
-    getMembershipRole(user.id, c.id),
-    getContractorConnections(c.id),
-  ])
-  const canManage = role === "owner" || role === "admin"
+export default function ContractorIntegrationsPage() {
+  // Not awaited: the static header + provider cards render instantly; only the
+  // connected-state (Switch + manage dialog) streams in via the grid's Suspense.
+  const dataPromise = getIntegrationsData()
 
   return (
     <div className="mx-auto w-full space-y-6 lg:space-y-[1.667vw]">
@@ -31,7 +17,7 @@ export default async function ContractorIntegrationsPage() {
         </p>
       </header>
 
-      <IntegrationsGrid connections={connections} canManage={canManage} />
+      <IntegrationsGrid dataPromise={dataPromise} />
     </div>
   )
 }

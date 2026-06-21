@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { getRequiredUser } from "@/lib/auth/session"
 import { SettingsShell } from "@/components/dashboard/settings/settings-shell"
 import type { SettingsNavGroup } from "@/components/dashboard/settings/settings-nav"
 
@@ -22,12 +21,14 @@ const CONTRACTOR_SETTINGS_GROUPS: SettingsNavGroup[] = [
   },
 ]
 
-export default async function ContractorSettingsLayout({
+// Synchronous: the static nav (from CONTRACTOR_SETTINGS_GROUPS) paints instantly.
+// Auth is already enforced by the parent contractor layout; each section page
+// fetches its own data inside a Suspense island.
+export default function ContractorSettingsLayout({
   children,
 }: {
   children: ReactNode
 }) {
-  await getRequiredUser("contractor")
   return (
     <SettingsShell groups={CONTRACTOR_SETTINGS_GROUPS}>
       {children}

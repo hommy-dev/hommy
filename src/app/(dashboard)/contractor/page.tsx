@@ -15,7 +15,60 @@ import { Skeleton } from "@/components/ui/skeleton"
 // Below this, a company can't even engage a lead (engage costs 5), so nudge them.
 const LOW_CREDIT_BALANCE = 5
 
-export default async function OverviewPage() {
+export default function OverviewPage() {
+  return (
+    <div className="space-y-6 lg:space-y-[1.667vw]">
+      <header className="flex flex-wrap items-end justify-between gap-3 lg:gap-[0.833vw]">
+        <Suspense fallback={<WelcomeFallback />}>
+          <WelcomeHeader />
+        </Suspense>
+        <Button asChild variant="outline" className="shrink-0 gap-1.5 lg:gap-[0.417vw]">
+          <Link href="/contractor/jobs">
+            <Icon name="work" className="size-4 lg:size-[1.111vw]" />
+            View jobs
+          </Link>
+        </Button>
+      </header>
+
+      <Suspense fallback={<OverviewSkeleton />}>
+        <OverviewSection />
+      </Suspense>
+    </div>
+  )
+}
+
+function WelcomeFallback() {
+  return (
+    <div>
+      <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight sm:text-3xl">
+        Welcome back
+      </h1>
+      <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+        Here’s your company at a glance.
+      </p>
+    </div>
+  )
+}
+
+async function WelcomeHeader() {
+  const user = await getRequiredUser("contractor")
+  const contractor = await getContractorForUser(user.id)
+  const firstName = user.fullName?.trim().split(/\s+/)[0] ?? "there"
+  return (
+    <div>
+      <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight sm:text-3xl">
+        Welcome back, {firstName}
+      </h1>
+      {contractor ? (
+        <Suspense fallback={<p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">Here’s your company at a glance.</p>}>
+          <GreetingLine contractorId={contractor.id} userId={user.id} />
+        </Suspense>
+      ) : null}
+    </div>
+  )
+}
+
+async function OverviewSection() {
   const user = await getRequiredUser("contractor")
   const contractor = await getContractorForUser(user.id)
 
@@ -33,23 +86,6 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
-      <header className="flex flex-wrap items-end justify-between gap-3 lg:gap-[0.833vw]">
-        <div>
-          <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight sm:text-3xl">
-            Welcome back, {firstName}
-          </h1>
-          <Suspense fallback={<p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">Here’s your company at a glance.</p>}>
-            <GreetingLine contractorId={contractor.id} userId={user.id} />
-          </Suspense>
-        </div>
-        <Button asChild variant="outline" className="shrink-0 gap-1.5 lg:gap-[0.417vw]">
-          <Link href="/contractor/jobs">
-            <Icon name="work" className="size-4 lg:size-[1.111vw]" />
-            View jobs
-          </Link>
-        </Button>
-      </header>
-
       {needsSetup && (
         <SetupGate
           initial={{
@@ -62,10 +98,7 @@ export default async function OverviewPage() {
           }}
         />
       )}
-
-      <Suspense fallback={<OverviewSkeleton />}>
-        <OverviewContent contractor={contractor} userId={user.id} firstName={firstName} />
-      </Suspense>
+      <OverviewContent contractor={contractor} userId={user.id} firstName={firstName} />
     </div>
   )
 }

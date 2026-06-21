@@ -13,6 +13,8 @@ import { Empty } from "@/components/dashboard/settings/edit-dialog"
 import { EditCompanyDialog } from "@/components/dashboard/settings/edit-company-dialog"
 import { PortfolioManager } from "@/components/dashboard/portfolio/portfolio-manager"
 import { PortfolioGallery } from "@/components/dashboard/portfolio/portfolio-gallery"
+import { Suspense } from "react"
+import { SettingsSectionSkeleton } from "@/components/dashboard/skeletons"
 
 function initials(name: string) {
   const p = name.trim().split(/\s+/).filter(Boolean)
@@ -21,7 +23,24 @@ function initials(name: string) {
   return (p[0][0] + p[p.length - 1][0]).toUpperCase()
 }
 
-export default async function ContractorCompanyPage() {
+export default function ContractorCompanyPage() {
+  return (
+    <div className="space-y-8 lg:space-y-[2.222vw]">
+      <Suspense
+        fallback={
+          <>
+            <SettingsSectionSkeleton rows={2} />
+            <SettingsSectionSkeleton rows={3} />
+          </>
+        }
+      >
+        <CompanyBody />
+      </Suspense>
+    </div>
+  )
+}
+
+async function CompanyBody() {
   const user = await getRequiredUser("contractor")
   const c = await getContractorForUser(user.id)
   if (!c) {

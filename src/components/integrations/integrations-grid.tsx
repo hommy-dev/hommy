@@ -1,17 +1,19 @@
 "use client";
 
 // The main /contractor/integrations surface: a searchable, tabbed grid of
-// provider cards (inspired by the Untitled UI "Integrations and connected apps"
-// layout). Google is connectable today; the rest are roadmap placeholders.
-// Managing a Google connection (search a business, add locations, refresh,
-// disconnect) happens in a dialog launched from the Google card.
+// provider cards built from the static INTEGRATION_PROVIDERS constant — so the
+// whole grid paints instantly. Only the data-dependent bits (the Google card's
+// connected Switch and the manage dialog) stream in: the page passes an
+// unawaited promise that those inner pieces `use()` inside their own Suspense.
 
-import { useMemo, useState } from "react";
+import { Suspense, use, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { showToast } from "@/components/ui/toast";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/format";
@@ -35,8 +37,10 @@ import {
   type IntegrationCategory,
 } from "@/lib/integrations/providers";
 import type { GooglePlaceSelection } from "@/lib/integrations/types";
-import type { IntegrationConnectionRow } from "@/lib/data/integrations";
-import Link from "next/link";
+import type {
+  IntegrationConnectionRow,
+  IntegrationsData,
+} from "@/lib/data/integrations";
 
 const CATEGORY_LABEL: Record<IntegrationCategory, string> = {
   reviews_media: "Reviews & media",
@@ -46,123 +50,35 @@ const CATEGORY_LABEL: Record<IntegrationCategory, string> = {
 
 function importSummary(reviews: number, photos: number): string {
   if (reviews + photos === 0) return "";
-  return `Imported ${reviews} review${
-    reviews === 1 ? "" : "s"
-  } and ${photos} photo${photos === 1 ? "" : "s"}.`;
+  return `Imported ${reviews} review${reviews === 1 ? "" : "s"} and ${photos} photo${photos === 1 ? "" : "s"}.`;
 }
 
 export function IntegrationsGrid({
-  connections,
-  canManage,
+  dataPromise,
 }: {
-  connections: IntegrationConnectionRow[];
-  canManage: boolean;
+  dataPromise: Promise<IntegrationsData>;
 }) {
-  const router = useRouter();
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<"all" | IntegrationCategory>("all");
   const [manageOpen, setManageOpen] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [busyId, setBusyId] = useState<string | null>(null);
 
-  const googleConnections = connections.filter(
-    (c) => c.provider === GOOGLE_PLACES_PROVIDER
-  );
-
-  const tabs = useMemo(() => {
-    const cats = Array.from(
-      new Set(INTEGRATION_PROVIDERS.map((p) => p.category))
-    );
-    return ["all" as const, ...cats];
-  }, []);
+  const tabs: ("all" | IntegrationCategory)[] = [
+    "all",
+    ...Array.from(new Set(INTEGRATION_PROVIDERS.map((p) => p.category))),
+  ];
 
   const visible = INTEGRATION_PROVIDERS.filter((p) => {
     if (tab !== "all" && p.category !== tab) return false;
     const q = query.trim().toLowerCase();
-    if (
-      q &&
-      !p.displayName.toLowerCase().includes(q) &&
-      !p.tagline.toLowerCase().includes(q)
-    ) {
+    if (q && !p.displayName.toLowerCase().includes(q) && !p.tagline.toLowerCase().includes(q)) {
       return false;
     }
     return true;
   });
 
-  async function handleConnect(sel: GooglePlaceSelection) {
-    setConnecting(true);
-    try {
-      const content = await fetchPlaceContent(sel.placeId);
-      const res = await connectGooglePlace({ selection: sel, content });
-      if (!res.success) {
-        showToast(res.error, { type: "error" });
-        return;
-      }
-      const { reviewCount, mediaCount } = res.data!;
-      const summary = importSummary(reviewCount, mediaCount);
-      showToast(
-        summary ||
-          `Connected ${sel.name}. Google returned no reviews or photos for this listing yet.`,
-        { type: summary ? "success" : "info" }
-      );
-      router.refresh();
-    } catch (err) {
-      console.error("[integrations] connect failed", err);
-      showToast("Could not connect that listing. Try again.", {
-        type: "error",
-      });
-    } finally {
-      setConnecting(false);
-    }
-  }
-
-  async function handleRefresh(conn: IntegrationConnectionRow) {
-    setBusyId(conn.id);
-    try {
-      const content = await fetchPlaceContent(conn.externalAccountId);
-      const res = await refreshGooglePlace(conn.id, content);
-      if (!res.success) {
-        showToast(res.error, { type: "error" });
-        return;
-      }
-      const { reviewCount, mediaCount } = res.data!;
-      showToast(
-        importSummary(reviewCount, mediaCount) ||
-          "Refreshed. No reviews or photos available yet.",
-        {
-          type: reviewCount + mediaCount > 0 ? "success" : "info",
-        }
-      );
-      router.refresh();
-    } catch (err) {
-      console.error("[integrations] refresh failed", err);
-      showToast("Could not refresh right now. Try again.", { type: "error" });
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function handleDisconnect(conn: IntegrationConnectionRow) {
-    const ok = window.confirm(
-      `Disconnect ${
-        conn.label ?? "this listing"
-      }? Its imported reviews and photos will be removed from your profile.`
-    );
-    if (!ok) return;
-    setBusyId(conn.id);
-    const res = await disconnectGooglePlace(conn.id);
-    if (!res.success) {
-      showToast(res.error, { type: "error" });
-      setBusyId(null);
-      return;
-    }
-    showToast("Disconnected.", { type: "success" });
-    router.refresh();
-  }
-
   return (
     <div className="space-y-5 lg:space-y-[1.389vw]">
-      {/* Search (left) + tabs (right) */}
+      {/* Search (left) + tabs (right) — all static */}
       <div className="flex flex-col gap-3 lg:gap-[0.833vw] sm:flex-row sm:items-center sm:justify-between">
         <div className="relative sm:w-64 lg:w-[18vw]">
           <Icon
@@ -198,18 +114,13 @@ export function IntegrationsGrid({
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Grid — built from the static constant, paints instantly */}
       {visible.length === 0 ? (
-        <EmptyState
-          size="sm"
-          icon="search"
-          title="No integrations match your search"
-        />
+        <EmptyState size="sm" icon="search" title="No integrations match your search" />
       ) : (
-        <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((provider) => {
             const isGoogle = provider.slug === GOOGLE_PLACES_PROVIDER;
-            const connected = isGoogle && googleConnections.length > 0;
             const comingSoon = provider.status === "coming_soon";
 
             return (
@@ -221,16 +132,9 @@ export function IntegrationsGrid({
                   <span className="flex shrink-0 items-center justify-center">
                     {provider.logo ? (
                       // eslint-disable-next-line @next/next/no-img-element -- brand logo
-                      <img
-                        src={provider.logo}
-                        alt=""
-                        className=" size-11 lg:size-[3vw] object-contain"
-                      />
+                      <img src={provider.logo} alt="" className="size-11 lg:size-[3vw] object-contain" />
                     ) : (
-                      <Icon
-                        name={provider.icon}
-                        className=" size-11 lg:size-[3vw]  text-muted-foreground"
-                      />
+                      <Icon name={provider.icon} className="size-11 lg:size-[3vw] text-muted-foreground" />
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -261,14 +165,13 @@ export function IntegrationsGrid({
                   >
                     View integration
                   </Button>
-                  <Switch
-                    checked={connected}
-                    disabled={comingSoon}
-                    aria-label={`${provider.displayName} integration`}
-                    onCheckedChange={() => {
-                      if (isGoogle) setManageOpen(true);
-                    }}
-                  />
+                  {isGoogle ? (
+                    <Suspense fallback={<Skeleton className="h-[18px] w-[32px] lg:h-[1.25vw] lg:w-[2.222vw] rounded-full" />}>
+                      <GoogleSwitch dataPromise={dataPromise} onToggle={() => setManageOpen(true)} />
+                    </Suspense>
+                  ) : (
+                    <Switch checked={false} disabled={comingSoon} aria-label={`${provider.displayName} integration`} />
+                  )}
                 </div>
               </div>
             );
@@ -276,112 +179,186 @@ export function IntegrationsGrid({
         </div>
       )}
 
-      {/* Google management dialog */}
+      {/* Google management dialog — content streams via use() */}
       <Dialog open={manageOpen} onOpenChange={setManageOpen}>
         <DialogContent className="sm:max-w-lg lg:max-w-[40vw] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Google</DialogTitle>
             <DialogDescription>
-              Search your business and pick it to import up to 5 recent reviews
-              and your photos. Add as many locations as you like.
+              Search your business and pick it to import up to 5 recent reviews and your photos.
+              Add as many locations as you like.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 lg:space-y-[1.111vw]">
-            {canManage ? (
-              <div className="space-y-1.5 lg:space-y-[0.417vw]">
-                <GoogleBusinessPicker
-                  onSelect={handleConnect}
-                  disabled={connecting}
-                />
-                {connecting ? (
-                  <p className="text-xs lg:text-[0.764vw] text-muted-foreground">
-                    Connecting your listing…
-                  </p>
-                ) : null}
-              </div>
-            ) : (
-              <p className="text-sm lg:text-[0.903vw] text-muted-foreground">
-                Only owners and admins can connect accounts.
-              </p>
-            )}
-
-            {googleConnections.length > 0 ? (
-              <ul className="divide-y divide-border rounded-xl lg:rounded-[0.833vw] border border-border">
-                {googleConnections.map((conn) => {
-                  const address =
-                    typeof conn.meta.formattedAddress === "string"
-                      ? conn.meta.formattedAddress
-                      : null;
-                  const rowBusy = busyId === conn.id;
-                  return (
-                    <li
-                      key={conn.id}
-                      className="flex flex-wrap items-center justify-between gap-3 lg:gap-[0.833vw] p-4 lg:p-[1.111vw]"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm lg:text-[0.972vw] font-semibold text-foreground">
-                          {conn.label ?? "Google listing"}
-                        </p>
-                        {address ? (
-                          <p className="truncate text-xs lg:text-[0.833vw] text-muted-foreground">
-                            {address}
-                          </p>
-                        ) : null}
-                        <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.764vw] text-muted-foreground">
-                          {conn.reviewCount} review
-                          {conn.reviewCount === 1 ? "" : "s"} ·{" "}
-                          {conn.mediaCount} photo
-                          {conn.mediaCount === 1 ? "" : "s"}
-                          {conn.lastSyncedAt
-                            ? ` · synced ${formatDate(conn.lastSyncedAt)}`
-                            : ""}
-                        </p>
-                        {conn.lastError ? (
-                          <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.764vw] text-destructive">
-                            {conn.lastError}
-                          </p>
-                        ) : null}
-                      </div>
-                      {canManage ? (
-                        <div className="flex items-center gap-2 lg:gap-[0.556vw]">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRefresh(conn)}
-                            disabled={rowBusy || connecting}
-                          >
-                            <Icon
-                              name="swap"
-                              className="size-4 lg:size-[1.111vw]"
-                            />
-                            {rowBusy ? "Working…" : "Refresh"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDisconnect(conn)}
-                            disabled={rowBusy || connecting}
-                          >
-                            Disconnect
-                          </Button>
-                        </div>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : canManage ? (
-              <EmptyState
-                size="sm"
-                icon="star"
-                title="No Google listing connected yet"
-                description="Connect your Google business to show your reviews and work photos on your Hommy profile."
-              />
-            ) : null}
-          </div>
+          {manageOpen ? (
+            <Suspense fallback={<DialogLoading />}>
+              <GoogleManage dataPromise={dataPromise} />
+            </Suspense>
+          ) : null}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function GoogleSwitch({
+  dataPromise,
+  onToggle,
+}: {
+  dataPromise: Promise<IntegrationsData>;
+  onToggle: () => void;
+}) {
+  const { connections } = use(dataPromise);
+  const connected = connections.some((c) => c.provider === GOOGLE_PLACES_PROVIDER);
+  return (
+    <Switch checked={connected} aria-label="Google integration" onCheckedChange={onToggle} />
+  );
+}
+
+function DialogLoading() {
+  return (
+    <div className="space-y-3 lg:space-y-[0.833vw]">
+      <Skeleton className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw]" />
+      <Skeleton className="h-20 lg:h-[5.5vw] w-full rounded-xl lg:rounded-[0.833vw]" />
+    </div>
+  );
+}
+
+function GoogleManage({ dataPromise }: { dataPromise: Promise<IntegrationsData> }) {
+  const { connections, canManage } = use(dataPromise);
+  const router = useRouter();
+  const [connecting, setConnecting] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const googleConnections = connections.filter((c) => c.provider === GOOGLE_PLACES_PROVIDER);
+
+  async function handleConnect(sel: GooglePlaceSelection) {
+    setConnecting(true);
+    try {
+      const content = await fetchPlaceContent(sel.placeId);
+      const res = await connectGooglePlace({ selection: sel, content });
+      if (!res.success) {
+        showToast(res.error, { type: "error" });
+        return;
+      }
+      const { reviewCount, mediaCount } = res.data!;
+      const summary = importSummary(reviewCount, mediaCount);
+      showToast(
+        summary || `Connected ${sel.name}. Google returned no reviews or photos for this listing yet.`,
+        { type: summary ? "success" : "info" },
+      );
+      router.refresh();
+    } catch (err) {
+      console.error("[integrations] connect failed", err);
+      showToast("Could not connect that listing. Try again.", { type: "error" });
+    } finally {
+      setConnecting(false);
+    }
+  }
+
+  async function handleRefresh(conn: IntegrationConnectionRow) {
+    setBusyId(conn.id);
+    try {
+      const content = await fetchPlaceContent(conn.externalAccountId);
+      const res = await refreshGooglePlace(conn.id, content);
+      if (!res.success) {
+        showToast(res.error, { type: "error" });
+        return;
+      }
+      const { reviewCount, mediaCount } = res.data!;
+      showToast(importSummary(reviewCount, mediaCount) || "Refreshed. No reviews or photos available yet.", {
+        type: reviewCount + mediaCount > 0 ? "success" : "info",
+      });
+      router.refresh();
+    } catch (err) {
+      console.error("[integrations] refresh failed", err);
+      showToast("Could not refresh right now. Try again.", { type: "error" });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleDisconnect(conn: IntegrationConnectionRow) {
+    const ok = window.confirm(
+      `Disconnect ${conn.label ?? "this listing"}? Its imported reviews and photos will be removed from your profile.`,
+    );
+    if (!ok) return;
+    setBusyId(conn.id);
+    const res = await disconnectGooglePlace(conn.id);
+    if (!res.success) {
+      showToast(res.error, { type: "error" });
+      setBusyId(null);
+      return;
+    }
+    showToast("Disconnected.", { type: "success" });
+    router.refresh();
+  }
+
+  return (
+    <div className="space-y-4 lg:space-y-[1.111vw]">
+      {canManage ? (
+        <div className="space-y-1.5 lg:space-y-[0.417vw]">
+          <GoogleBusinessPicker onSelect={handleConnect} disabled={connecting} />
+          {connecting ? (
+            <p className="text-xs lg:text-[0.764vw] text-muted-foreground">Connecting your listing…</p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="text-sm lg:text-[0.903vw] text-muted-foreground">
+          Only owners and admins can connect accounts.
+        </p>
+      )}
+
+      {googleConnections.length > 0 ? (
+        <ul className="divide-y divide-border rounded-xl lg:rounded-[0.833vw] border border-border">
+          {googleConnections.map((conn) => {
+            const address =
+              typeof conn.meta.formattedAddress === "string" ? conn.meta.formattedAddress : null;
+            const rowBusy = busyId === conn.id;
+            return (
+              <li
+                key={conn.id}
+                className="flex flex-wrap items-center justify-between gap-3 lg:gap-[0.833vw] p-4 lg:p-[1.111vw]"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm lg:text-[0.972vw] font-semibold text-foreground">
+                    {conn.label ?? "Google listing"}
+                  </p>
+                  {address ? (
+                    <p className="truncate text-xs lg:text-[0.833vw] text-muted-foreground">{address}</p>
+                  ) : null}
+                  <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.764vw] text-muted-foreground">
+                    {conn.reviewCount} review{conn.reviewCount === 1 ? "" : "s"} · {conn.mediaCount} photo
+                    {conn.mediaCount === 1 ? "" : "s"}
+                    {conn.lastSyncedAt ? ` · synced ${formatDate(conn.lastSyncedAt)}` : ""}
+                  </p>
+                  {conn.lastError ? (
+                    <p className="mt-1 lg:mt-[0.278vw] text-xs lg:text-[0.764vw] text-destructive">{conn.lastError}</p>
+                  ) : null}
+                </div>
+                {canManage ? (
+                  <div className="flex items-center gap-2 lg:gap-[0.556vw]">
+                    <Button size="sm" variant="outline" onClick={() => handleRefresh(conn)} disabled={rowBusy || connecting}>
+                      <Icon name="swap" className="size-4 lg:size-[1.111vw]" />
+                      {rowBusy ? "Working…" : "Refresh"}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleDisconnect(conn)} disabled={rowBusy || connecting}>
+                      Disconnect
+                    </Button>
+                  </div>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : canManage ? (
+        <EmptyState
+          size="sm"
+          icon="star"
+          title="No Google listing connected yet"
+          description="Connect your Google business to show your reviews and work photos on your Hommy profile."
+        />
+      ) : null}
     </div>
   );
 }

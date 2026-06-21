@@ -1,10 +1,20 @@
+import { Suspense } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser, getMembershipRole } from "@/lib/data/dashboard"
 import { getTeam } from "@/lib/data/team"
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
 import { TeamManager } from "@/components/dashboard/settings/team-manager"
+import { SettingsSectionSkeleton } from "@/components/dashboard/skeletons"
 
-export default async function ContractorTeamPage() {
+export default function ContractorTeamPage() {
+  return (
+    <Suspense fallback={<SettingsSectionSkeleton rows={3} />}>
+      <TeamBody />
+    </Suspense>
+  )
+}
+
+async function TeamBody() {
   const user = await getRequiredUser("contractor")
   const c = await getContractorForUser(user.id)
   if (!c) {

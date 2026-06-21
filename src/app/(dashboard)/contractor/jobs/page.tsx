@@ -1,25 +1,13 @@
+import { Suspense } from "react"
 import Link from "next/link"
 import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser } from "@/lib/data/dashboard"
 import { getContractorJobs } from "@/lib/data/jobs"
 import { canEngageLeads } from "@/lib/contractor/verification"
 import { JobsTable } from "@/components/dashboard/jobs/jobs-table"
+import { JobsBoardSkeleton } from "@/components/dashboard/skeletons"
 
-export default async function JobsPage() {
-  const user = await getRequiredUser("contractor")
-  const contractor = await getContractorForUser(user.id)
-
-  if (!contractor) {
-    return (
-      <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-        Your contractor profile isn’t set up yet.
-      </p>
-    )
-  }
-
-  const jobs = await getContractorJobs(contractor.id, user.id)
-  const canEngage = canEngageLeads(contractor)
-
+export default function JobsPage() {
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
       <header className="w-full">
@@ -32,6 +20,23 @@ export default async function JobsPage() {
         </p>
       </header>
 
+      <Suspense fallback={<JobsBoardSkeleton />}>
+        <JobsData />
+      </Suspense>
+    </div>
+  )
+}
+
+async function JobsData() {
+  const user = await getRequiredUser("contractor")
+  const contractor = await getContractorForUser(user.id)
+  if (!contractor) return null
+
+  const jobs = await getContractorJobs(contractor.id, user.id)
+  const canEngage = canEngageLeads(contractor)
+
+  return (
+    <div className="space-y-6 lg:space-y-[1.667vw]">
       {!canEngage && (
         <div className="flex flex-wrap items-center justify-between gap-4 lg:gap-[1.111vw] rounded-2xl lg:rounded-[1.111vw] border border-primary/20 bg-accent/60 p-4 lg:p-[1.111vw]">
           <div className="flex items-start gap-3 lg:gap-[0.833vw]">

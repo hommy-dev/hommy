@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
 import {
   getContractorForUser,
@@ -12,8 +13,26 @@ import { SettingsSection } from "@/components/dashboard/settings/settings-sectio
 import { Empty } from "@/components/dashboard/settings/edit-dialog"
 import { EditServicesDialog } from "@/components/dashboard/settings/edit-services-dialog"
 import { ManageAreasDialog } from "@/components/dashboard/settings/manage-areas-dialog"
+import { SettingsSectionSkeleton } from "@/components/dashboard/skeletons"
 
-export default async function ContractorServiceAreaPage() {
+export default function ContractorServiceAreaPage() {
+  return (
+    <div className="space-y-8 lg:space-y-[2.222vw]">
+      <Suspense
+        fallback={
+          <>
+            <SettingsSectionSkeleton rows={1} />
+            <SettingsSectionSkeleton rows={2} />
+          </>
+        }
+      >
+        <ServiceAreaBody />
+      </Suspense>
+    </div>
+  )
+}
+
+async function ServiceAreaBody() {
   const user = await getRequiredUser("contractor")
   const c = await getContractorForUser(user.id)
   if (!c) {

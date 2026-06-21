@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser, getMembershipRole } from "@/lib/data/dashboard"
 import {
@@ -7,6 +8,7 @@ import {
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
 import { DataRow, Empty } from "@/components/dashboard/settings/edit-dialog"
 import { EditVerificationDialog } from "@/components/dashboard/settings/edit-verification-dialog"
+import { SettingsSectionSkeleton } from "@/components/dashboard/skeletons"
 import { cn } from "@/lib/utils"
 
 const STATUS: Record<VerificationState, { label: string; cls: string }> = {
@@ -33,7 +35,15 @@ function DocValue({ url }: { url: string | null }) {
   )
 }
 
-export default async function ContractorVerificationPage() {
+export default function ContractorVerificationPage() {
+  return (
+    <Suspense fallback={<SettingsSectionSkeleton rows={2} />}>
+      <VerificationBody />
+    </Suspense>
+  )
+}
+
+async function VerificationBody() {
   const user = await getRequiredUser("contractor")
   const c = await getContractorForUser(user.id)
   if (!c) {

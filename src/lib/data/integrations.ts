@@ -14,6 +14,27 @@ import {
   type ContractorReview,
   type ReviewsSummary,
 } from '@/lib/data/reviews'
+import { getRequiredUser } from '@/lib/auth/session'
+import { getContractorForUser, getMembershipRole } from '@/lib/data/dashboard'
+
+export type IntegrationsData = {
+  connections: IntegrationConnectionRow[]
+  canManage: boolean
+}
+
+/** Everything the integrations page's dynamic island needs (auth + company +
+ *  connections + role) in one call, so the page can pass an unawaited promise to
+ *  the client grid (static cards render instantly; only this state streams). */
+export async function getIntegrationsData(): Promise<IntegrationsData> {
+  const user = await getRequiredUser('contractor')
+  const contractor = await getContractorForUser(user.id)
+  if (!contractor) return { connections: [], canManage: false }
+  const [connections, role] = await Promise.all([
+    getContractorConnections(contractor.id),
+    getMembershipRole(user.id, contractor.id),
+  ])
+  return { connections, canManage: role === 'owner' || role === 'admin' }
+}
 
 export type IntegrationConnectionRow = {
   id: string

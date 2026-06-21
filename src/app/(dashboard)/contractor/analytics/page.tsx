@@ -13,7 +13,19 @@ function parseRange(v: string | string[] | undefined): number {
   return ALLOWED_RANGES.includes(n) ? n : 30
 }
 
-export default async function AnalyticsPage({
+export default function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>
+}) {
+  return (
+    <Suspense fallback={<AnalyticsSkeleton />}>
+      <AnalyticsView searchParams={searchParams} />
+    </Suspense>
+  )
+}
+
+async function AnalyticsView({
   searchParams,
 }: {
   searchParams: Promise<{ range?: string }>
@@ -66,6 +78,22 @@ export default async function AnalyticsPage({
           <ReputationSection contractorId={contractor.id} rangeDays={range} currentScore={contractor.profileScore} />
         </Suspense>
       </section>
+    </div>
+  )
+}
+
+function AnalyticsSkeleton() {
+  return (
+    <div className="space-y-8 lg:space-y-[2.222vw]">
+      <div className="flex flex-wrap items-end justify-between gap-3 lg:gap-[0.833vw]">
+        <div className="space-y-2 lg:space-y-[0.556vw]">
+          <Skeleton className="h-8 lg:h-[2.222vw] w-32 lg:w-[10vw]" />
+          <Skeleton className="h-4 lg:h-[1.111vw] w-64 lg:w-[20vw]" />
+        </div>
+        <Skeleton className="h-9 lg:h-[2.5vw] w-32 lg:w-[9vw] rounded-md lg:rounded-[0.556vw]" />
+      </div>
+      <KpiRowSkeleton />
+      <SectionSkeleton />
     </div>
   )
 }

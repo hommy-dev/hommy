@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
 import {
   getContractorForUser,
@@ -17,11 +18,20 @@ import { ProfileHeader, type ProfileStat } from "@/components/dashboard/profile/
 import { ProfileCompleteness, type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
 import { CoverageCard } from "@/components/dashboard/profile/coverage-card"
 import { Icon } from "@/components/ui/icon"
+import { ProfileSkeleton } from "@/components/dashboard/skeletons"
 
 const COMPANY_SETTINGS = "/contractor/settings/company"
 const COVERAGE_SETTINGS = "/contractor/settings/service-area"
 
-export default async function ContractorProfilePage() {
+export default function ContractorProfilePage() {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <ProfileBody />
+    </Suspense>
+  )
+}
+
+async function ProfileBody() {
   const user = await getRequiredUser("contractor")
   const c = await getContractorForUser(user.id)
   if (!c) {

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import { Suspense, type ReactNode } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
 import { getUnreadCountAction } from "@/lib/notifications/actions"
 import { countUnreadConversations } from "@/lib/data/conversations"
@@ -8,22 +8,21 @@ import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
 import { UserMenu } from "@/components/dashboard/user-menu"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { HOMEOWNER_NAV } from "@/components/dashboard/dashboard-nav"
+import { HeaderActionsSkeleton } from "@/components/dashboard/skeletons"
 import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount"
 import { PushNotificationsManager } from "@/components/notifications/push-notifications-manager"
 
+// Shell paints after auth + the message-badge count (both fast); the notice and
+// the notification bell count stream into Suspense slots. The user menu needs no
+// extra data, so it renders immediately.
 export default async function HomeownerLayout({
   children,
 }: {
   children: ReactNode
 }) {
   const user = await getRequiredUser("homeowner")
-  const ho = await getHomeownerForUser(user.id)
+  const unreadMessages = await countUnreadConversations(user.id)
   const firstName = (user.fullName || user.email).split(" ")[0]
-  const [unreadCount, unreadMessages, noticeData] = await Promise.all([
-    getUnreadCountAction(),
-    countUnreadConversations(user.id),
-    ho ? getHomeownerNoticeData(ho.id) : Promise.resolve(null),
-  ])
 
   return (
     <>
@@ -31,10 +30,16 @@ export default async function HomeownerLayout({
         navItems={HOMEOWNER_NAV}
         brandHref="/homeowner"
         brandLabel="Homei"
-        notice={noticeData ? buildHomeownerNotice(noticeData, firstName) : null}
+        notice={
+          <Suspense fallback={null}>
+            <HomeownerNotice userId={user.id} firstName={firstName} />
+          </Suspense>
+        }
         navUnreadCounts={{ "/homeowner/messages": unreadMessages }}
         topRight={
-          <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />
+          <Suspense fallback={<HeaderActionsSkeleton />}>
+            <HomeownerBell userId={user.id} />
+          </Suspense>
         }
         footerUser={
           <UserMenu
@@ -53,6 +58,19 @@ export default async function HomeownerLayout({
       <PushNotificationsManager />
     </>
   )
+}
+
+async function HomeownerNotice({ userId, firstName }: { userId: string; firstName: string }) {
+  const ho = await getHomeownerForUser(userId)
+  if (!ho) return null
+  const noticeData = await getHomeownerNoticeData(ho.id)
+  if (!noticeData) return null
+  return buildHomeownerNotice(noticeData, firstName)
+}
+
+async function HomeownerBell({ userId }: { userId: string }) {
+  const unreadCount = await getUnreadCountAction()
+  return <NotificationBell userId={userId} initialUnreadCount={unreadCount} />
 }
 
 /**

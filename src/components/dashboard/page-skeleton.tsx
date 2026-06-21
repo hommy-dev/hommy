@@ -1,7 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
 // Generic dashboard content-area skeleton, shown while a page's data streams
-// in (the sidebar/shell stays put). Used by the section-level loading.tsx files.
+// in (the sidebar/shell stays put). Used by the admin section's loading.tsx.
+// The contractor/homeowner areas render static shells + targeted skeletons
+// instead (see src/components/dashboard/skeletons.tsx).
 export function PageSkeleton() {
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">

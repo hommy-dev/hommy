@@ -1,6 +1,11 @@
-import type { ReactNode } from "react"
+import { Suspense, type ReactNode } from "react"
 import { getRequiredUser } from "@/lib/auth/session"
-import { getContractorForUser, getUserCompanies, countNewLeadOffers } from "@/lib/data/dashboard"
+import {
+  getContractorForUser,
+  getUserCompanies,
+  countNewLeadOffers,
+  type Contractor,
+} from "@/lib/data/dashboard"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { getUnreadCountAction } from "@/lib/notifications/actions"
 import { countUnreadConversations } from "@/lib/data/conversations"
@@ -10,60 +15,55 @@ import { UserMenu } from "@/components/dashboard/user-menu"
 import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
 import { NoCompany } from "@/components/dashboard/no-company"
 import { CONTRACTOR_NAV } from "@/components/dashboard/dashboard-nav"
+import { HeaderActionsSkeleton, UserMenuSkeleton } from "@/components/dashboard/skeletons"
 import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount"
 import { PushNotificationsManager } from "@/components/notifications/push-notifications-manager"
 
+// The shell paints as soon as auth + the active company + the message-badge count
+// resolve (all fast). The slower chrome — sidebar notice (new-lead count), the
+// company switcher (company list), and the header credits/notifications — stream
+// into Suspense slots so the sidebar/nav never wait on them.
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode
 }) {
   const user = await getRequiredUser("contractor")
-  const contractor = await getContractorForUser(user.id)
+  const [contractor, unreadMessages] = await Promise.all([
+    getContractorForUser(user.id),
+    countUnreadConversations(user.id),
+  ])
   if (!contractor) {
     return <NoCompany />
   }
   const personName = user.fullName || user.email
   const firstName = personName.split(" ")[0]
-  // getUserCompanies doesn't depend on the active company, so fold it into the
-  // parallel batch instead of awaiting it in series.
-  const [companies, unreadCount, unreadMessages, newLeads] = await Promise.all([
-    getUserCompanies(user.id),
-    getUnreadCountAction(),
-    countUnreadConversations(user.id),
-    countNewLeadOffers(contractor.id),
-  ])
-  const navCompanies = companies.map((c) => ({
-    id: c.id,
-    name: c.name ?? "Your company",
-    logoUrl: c.logoUrl,
-  }))
 
   return (
     <>
       <DashboardShell
         navItems={CONTRACTOR_NAV}
-        notice={buildNotice(contractor, newLeads, firstName)}
+        notice={
+          <Suspense fallback={null}>
+            <ContractorNotice contractor={contractor} firstName={firstName} />
+          </Suspense>
+        }
         navUnreadCounts={{ "/contractor/messages": unreadMessages }}
         footerUser={
-          <UserMenu
-            user={{
-              email: user.email,
-              fullName: personName,
-              avatarUrl: contractor?.logoUrl ?? null,
-            }}
-            settingsHref="/contractor/settings"
-            workspaces={navCompanies}
-            activeWorkspaceId={contractor.id}
-            manageHref="/contractor/settings/company"
-          />
+          <Suspense fallback={<UserMenuSkeleton />}>
+            <ContractorUserMenu
+              userId={user.id}
+              email={user.email}
+              personName={personName}
+              avatarUrl={contractor.logoUrl}
+              activeId={contractor.id}
+            />
+          </Suspense>
         }
         topRight={
-          <DashboardHeaderActions
-            userId={user.id}
-            unreadCount={unreadCount}
-            credits={contractor?.creditBalance ?? 0}
-          />
+          <Suspense fallback={<HeaderActionsSkeleton />}>
+            <ContractorHeaderActions userId={user.id} credits={contractor.creditBalance} />
+          </Suspense>
         }
       >
         {children}
@@ -72,6 +72,58 @@ export default async function DashboardLayout({
       <PushNotificationsManager />
     </>
   )
+}
+
+async function ContractorNotice({
+  contractor,
+  firstName,
+}: {
+  contractor: Contractor
+  firstName: string
+}) {
+  const newLeads = await countNewLeadOffers(contractor.id)
+  return buildNotice(contractor, newLeads, firstName)
+}
+
+async function ContractorUserMenu({
+  userId,
+  email,
+  personName,
+  avatarUrl,
+  activeId,
+}: {
+  userId: string
+  email: string
+  personName: string
+  avatarUrl: string | null
+  activeId: string
+}) {
+  const companies = await getUserCompanies(userId)
+  const navCompanies = companies.map((c) => ({
+    id: c.id,
+    name: c.name ?? "Your company",
+    logoUrl: c.logoUrl,
+  }))
+  return (
+    <UserMenu
+      user={{ email, fullName: personName, avatarUrl }}
+      settingsHref="/contractor/settings"
+      workspaces={navCompanies}
+      activeWorkspaceId={activeId}
+      manageHref="/contractor/settings/company"
+    />
+  )
+}
+
+async function ContractorHeaderActions({
+  userId,
+  credits,
+}: {
+  userId: string
+  credits: number
+}) {
+  const unreadCount = await getUnreadCountAction()
+  return <DashboardHeaderActions userId={userId} unreadCount={unreadCount} credits={credits} />
 }
 
 /**

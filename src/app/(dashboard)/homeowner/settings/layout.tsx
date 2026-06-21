@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { getRequiredUser } from "@/lib/auth/session"
 import { SettingsShell } from "@/components/dashboard/settings/settings-shell"
 import type { SettingsNavGroup } from "@/components/dashboard/settings/settings-nav"
 
@@ -12,12 +11,13 @@ const HOMEOWNER_SETTINGS_GROUPS: SettingsNavGroup[] = [
   },
 ]
 
-export default async function HomeownerSettingsLayout({
+// Synchronous: the static nav paints instantly; auth is enforced by the parent
+// homeowner layout, and the page fetches its data inside a Suspense island.
+export default function HomeownerSettingsLayout({
   children,
 }: {
   children: ReactNode
 }) {
-  await getRequiredUser("homeowner")
   return (
     <SettingsShell groups={HOMEOWNER_SETTINGS_GROUPS}>
       {children}
