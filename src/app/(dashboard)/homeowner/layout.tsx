@@ -83,7 +83,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         urgent
         title={d.quotes === 1 ? "Quotes are in" : `Quotes in on ${d.quotes} jobs`}
         body="Compare them and pick the pro you want."
-        cta={{ label: "Review quotes", href: "/homeowner/requests" }}
+        cta={{ label: "Review quotes", href: "/homeowner" }}
       />
     )
   }
@@ -96,7 +96,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         eyebrow="Review"
         title={`How was ${d.reviewPending.contractorName ?? "your pro"}?`}
         body="A quick review helps other homeowners choose."
-        cta={{ label: "Leave a review", href: "/homeowner/requests" }}
+        cta={{ label: "Leave a review", href: "/homeowner" }}
       />
     )
   }
@@ -123,7 +123,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         eyebrow="Posted"
         title="Your job is out there"
         body="Local pros are looking. First messages usually land within a day."
-        cta={{ label: "View jobs", href: "/homeowner/requests" }}
+        cta={{ label: "View jobs", href: "/homeowner" }}
       />
     )
   }

@@ -151,7 +151,7 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
 
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
   revalidatePath('/homeowner/messages')
   return { ok: true, estimateId }
 }

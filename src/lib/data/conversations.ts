@@ -183,6 +183,7 @@ export const listConversationsForUser = cache(async (userId: string): Promise<Co
       .selectDistinctOn([messages.conversationId], {
         conversationId: messages.conversationId,
         body: messages.body,
+        meta: messages.meta,
         senderType: messages.senderType,
         senderId: messages.senderId,
         createdAt: messages.createdAt,
@@ -246,7 +247,8 @@ export const listConversationsForUser = cache(async (userId: string): Promise<Co
       otherName: display.name,
       otherAvatarUrl: display.avatar,
       otherKind: display.kind,
-      lastMessageBody: lm?.body ?? null,
+      // File-only messages have no body — show an attachment label instead.
+      lastMessageBody: lm ? lm.body || (lm.meta?.kind === 'attachment' ? '📎 Attachment' : null) : null,
       lastMessageAt: lm?.createdAt ?? null,
       hasUnread,
     }

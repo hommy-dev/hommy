@@ -516,6 +516,22 @@ export type SystemEventKind =
   | 'quote_superseded'
   | 'job_completed'
 
+// One uploaded file shared in a chat message. We store the Cloudinary
+// `secure_url` directly (not just the public_id) because non-image files are
+// delivered from a different path (`/raw/upload/`) than images, and secure_url
+// is already correct for either. `resourceType` drives the render (image thumb
+// vs download chip).
+export type ChatAttachment = {
+  url: string
+  publicId: string
+  resourceType: 'image' | 'video' | 'raw'
+  name: string
+  bytes: number
+  format: string | null
+  width?: number
+  height?: number
+}
+
 export type MessageMeta =
   | {
       kind: 'quote'
@@ -538,6 +554,13 @@ export type MessageMeta =
       contractorId: string
       status: 'pending' | 'submitted'
       rating?: number
+    }
+  | {
+      // One or more files shared in the thread (images render as thumbnails,
+      // everything else as a download chip). The message `body` holds the
+      // optional caption (may be empty for a file-only message).
+      kind: 'attachment'
+      files: ChatAttachment[]
     }
 
 export const messages = pgTable('messages', {
@@ -655,6 +678,26 @@ export const stormEvents = pgTable('storm_events', {
   leadsGenerated: integer('leads_generated').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ============================================================
+// WAITLIST — out-of-area homeowner signups (service-neutral)
+// Captured on /coming-soon when we don't yet serve their region; region/country
+// are stamped from edge geo headers so we know where demand is.
+// ============================================================
+
+export const waitlist = pgTable('waitlist', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  email: text('email').notNull(),
+  fullName: text('full_name'),
+  zipCode: text('zip_code'),
+  region: text('region'), // detected ISO 3166-2 subdivision, e.g. 'CA'
+  country: text('country'), // detected ISO 3166-1 alpha-2, e.g. 'US'
+  serviceId: uuid('service_id').references(() => services.id, { onDelete: 'set null' }),
+  source: text('source'), // where the signup came from, e.g. 'coming_soon'
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('waitlist_email_uq').on(t.email),
+])
 
 // ============================================================
 // RELATIONS (query-builder only — no DB constraints here)

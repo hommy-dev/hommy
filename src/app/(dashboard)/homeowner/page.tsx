@@ -1,32 +1,105 @@
-import Link from "next/link"
-import { getRequiredUser } from "@/lib/auth/session"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { getRequiredUser } from "@/lib/auth/session";
+import {
+  deriveRequestStatus,
+  getHomeownerForUser,
+  getHomeownerLeads,
+  type HomeownerLead,
+} from "@/lib/data/homeowner";
+import { Button } from "@/components/ui/button";
+import { HomeownerRequestsBoard } from "@/components/dashboard/requests/homeowner-requests";
+import type { RequestCardItem } from "@/components/dashboard/requests/request-meta";
+import { Icon } from "@/components/ui/icon";
+import { EmptyState } from "@/components/ui/empty-state";
 
-export default async function HomeownerDashboardPage() {
-  const user = await getRequiredUser("homeowner")
-  const firstName = (user.fullName || "there").split(" ")[0]
+// Plain-language "what's happening now" line — the single most useful thing for
+// a homeowner watching their job.
+function summary(r: HomeownerLead): string {
+  if (r.projectCompleted) return "The job is complete.";
+  if (r.status === "awarded") return "You hired a contractor for this job.";
+  if (r.status === "closed") return "This job was closed.";
+  if (r.status === "expired") return "This job expired with no hire.";
+  if (r.quoteCount > 0)
+    return `${r.quoteCount} quote${
+      r.quoteCount === 1 ? "" : "s"
+    } in — review and choose.`;
+  if (r.interestedCount > 0)
+    return `${r.interestedCount} pro${
+      r.interestedCount === 1 ? " is" : "s are"
+    } interested — quotes coming.`;
+  if (r.viewedCount > 0)
+    return `${r.viewedCount} pro${
+      r.viewedCount === 1 ? "" : "s"
+    } viewed your job — messages coming soon.`;
+  if (r.matchedCount > 0)
+    return `${r.matchedCount} pro${
+      r.matchedCount === 1 ? "" : "s"
+    } matched — waiting for them to respond.`;
+  return "No pros cover your area yet — we'll alert you the moment one joins.";
+}
+
+export default async function HomeownerJobsPage() {
+  const user = await getRequiredUser("homeowner");
+  const ho = await getHomeownerForUser(user.id);
+  const requests = ho ? await getHomeownerLeads(ho.id) : [];
+
+  const items: RequestCardItem[] = requests.map((r) => ({
+    id: r.id,
+    serviceName: r.serviceName,
+    subtype: r.subtype,
+    images: r.images,
+    requestStatus: deriveRequestStatus({
+      status: r.status,
+      interestedCount: r.interestedCount,
+      quoteCount: r.quoteCount,
+      projectCompleted: r.projectCompleted,
+    }),
+    city: r.city,
+    state: r.state,
+    zipCode: r.zipCode,
+    quoteCount: r.quoteCount,
+    bestQuoteTotal: r.bestQuoteTotal,
+    canReview: r.projectCompleted && !r.hasReview,
+    summary: summary(r),
+    createdAt: r.createdAt.toISOString(),
+  }));
 
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
-      <header>
-        <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
-          Welcome, {firstName}
-        </h1>
-        <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Post a project and we’ll match you with vetted local pros.
-        </p>
+      <header className="flex items-end justify-between gap-4 lg:gap-[1.111vw]">
+        <div>
+          <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
+            Your jobs
+          </h1>
+          <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+            Your posted jobs and how they’re progressing.
+          </p>
+        </div>
+        <Button asChild className="shrink-0">
+          <Link href="/get-a-quote">
+            <Icon name="plus" />
+            Post a job
+          </Link>
+        </Button>
       </header>
 
-      <section className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-6 lg:p-[1.667vw]">
-        <h2 className="text-sm lg:text-[0.972vw] font-semibold">Start a new job</h2>
-        <p className="mt-1 lg:mt-[0.278vw] max-w-md lg:max-w-[31.108vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Tell us about your project and start receiving quotes from trusted
-          contractors near you.
-        </p>
-        <Button asChild size="lg" className="mt-4 lg:mt-[1.111vw]">
-          <Link href="/get-a-quote">Get a quote</Link>
-        </Button>
-      </section>
+      {items.length === 0 ? (
+        <EmptyState
+          icon="paper"
+          title="No jobs yet"
+          description="Post your first project and start receiving quotes from vetted local pros."
+          action={
+            <Button asChild size="lg">
+              <Link href="/get-a-quote">
+                <Icon name="plus" />
+                Post first job
+              </Link>
+            </Button>
+          }
+        />
+      ) : (
+        <HomeownerRequestsBoard items={items} />
+      )}
     </div>
-  )
+  );
 }

@@ -76,7 +76,7 @@ export async function closeRequest(leadId: string): Promise<CloseRequestResult> 
     return { ok: false, message: 'Could not close the job. Please try again.' }
   }
 
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
   revalidatePath('/homeowner/messages')
   revalidatePath('/contractor/jobs')
   return { ok: true }

@@ -7,7 +7,18 @@
 import { z } from 'zod'
 import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contractorMembers, conversationParticipants, messages, users } from '@/lib/db/schema'
+import {
+  contractorMembers,
+  conversationParticipants,
+  messages,
+  users,
+  type ChatAttachment,
+} from '@/lib/db/schema'
+import {
+  MAX_ATTACHMENT_BYTES,
+  MAX_ATTACHMENTS_PER_MESSAGE,
+  isBlockedFile,
+} from '@/lib/chat/attachments'
 import { getRequiredUserId } from '@/lib/auth/session'
 import {
   getConversationForUser,
@@ -28,31 +39,74 @@ import { sendRealtimeBroadcast } from '@/lib/realtime/broadcast'
 
 type Fail<E extends string> = { ok: false; error: E; message: string }
 
-const bodySchema = z.string().trim().min(1, 'Message is required').max(2000)
+// Body is optional WHEN attachments are present (a file-only message), so the
+// length check is "body OR attachments", enforced below — not in the schema.
+const bodySchema = z.string().trim().max(2000)
+
+// Server-side re-validation of each attachment. The client already validated,
+// but never trust it: pin the host to Cloudinary (block link injection), cap
+// the size, and refuse blocked file types.
+const attachmentSchema = z.object({
+  url: z
+    .string()
+    .url()
+    .refine((u) => {
+      try {
+        return new URL(u).hostname === 'res.cloudinary.com'
+      } catch {
+        return false
+      }
+    }, 'Attachment must be a Cloudinary URL'),
+  publicId: z.string().min(1),
+  resourceType: z.enum(['image', 'video', 'raw']),
+  name: z.string().trim().min(1).max(255).refine((n) => !isBlockedFile(n), 'File type not allowed'),
+  bytes: z.number().int().nonnegative().max(MAX_ATTACHMENT_BYTES, 'File is too large'),
+  format: z.string().nullable(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+})
+const attachmentsSchema = z.array(attachmentSchema).max(MAX_ATTACHMENTS_PER_MESSAGE)
 
 export type SendMessageResult =
   | { ok: true; message: ThreadMessage }
   | Fail<'UNAUTHENTICATED' | 'INVALID_INPUT' | 'NOT_MEMBER' | 'DB_ERROR'>
 
-export async function sendMessage(conversationId: string, rawBody: string): Promise<SendMessageResult> {
+export async function sendMessage(
+  conversationId: string,
+  rawBody: string,
+  rawAttachments?: unknown,
+): Promise<SendMessageResult> {
   const userId = await getRequiredUserId()
 
-  const parsed = bodySchema.safeParse(rawBody)
-  if (!parsed.success) {
-    return { ok: false, error: 'INVALID_INPUT', message: parsed.error.issues[0]?.message ?? 'Invalid message.' }
+  const parsedBody = bodySchema.safeParse(rawBody)
+  if (!parsedBody.success) {
+    return { ok: false, error: 'INVALID_INPUT', message: parsedBody.error.issues[0]?.message ?? 'Invalid message.' }
   }
-  const body = parsed.data
+  const body = parsedBody.data
+
+  const parsedAttachments = attachmentsSchema.safeParse(rawAttachments ?? [])
+  if (!parsedAttachments.success) {
+    return { ok: false, error: 'INVALID_INPUT', message: parsedAttachments.error.issues[0]?.message ?? 'Invalid attachment.' }
+  }
+  const files: ChatAttachment[] = parsedAttachments.data
+
+  // A message needs either text or at least one file.
+  if (body.length === 0 && files.length === 0) {
+    return { ok: false, error: 'INVALID_INPUT', message: 'Message is required' }
+  }
 
   // One round-trip: resolve the viewer's participant identity (folds the
   // contractor-seats lookup into the query) — also the authorization gate.
   const me = await resolveParticipantForUser(conversationId, userId)
   if (!me) return { ok: false, error: 'NOT_MEMBER', message: 'You are not part of this conversation.' }
 
+  const meta = files.length > 0 ? { kind: 'attachment' as const, files } : null
+
   let row: { id: string; createdAt: Date }
   try {
     const [inserted] = await db
       .insert(messages)
-      .values({ conversationId, senderType: me.type, senderId: me.id, body, channel: 'platform' })
+      .values({ conversationId, senderType: me.type, senderId: me.id, body, channel: 'platform', meta })
       .returning({ id: messages.id, createdAt: messages.createdAt })
     row = inserted
   } catch (err) {
@@ -66,7 +120,7 @@ export async function sendMessage(conversationId: string, rawBody: string): Prom
     senderType: me.type,
     senderId: me.id,
     body,
-    meta: null,
+    meta,
     createdAt,
     isMine: true,
   }
@@ -81,11 +135,21 @@ export async function sendMessage(conversationId: string, rawBody: string): Prom
     payload: message,
   }).catch((e) => console.error('[sendMessage] chat broadcast threw', e))
 
-  void fanOutInbox(conversationId, me, userId, body, createdAt).catch((e) =>
+  // What the rail/notification shows. A file-only message has no body, so fall
+  // back to a short attachment label.
+  const preview = body || attachmentPreview(files)
+  void fanOutInbox(conversationId, me, userId, preview, createdAt).catch((e) =>
     console.error('[sendMessage] inbox fan-out threw', e),
   )
 
   return { ok: true, message }
+}
+
+/** Short human label for a file-only message, used in the rail + notifications. */
+function attachmentPreview(files: ChatAttachment[]): string {
+  if (files.length === 0) return ''
+  if (files.length === 1) return `📎 ${files[0].name}`
+  return `📎 ${files.length} files`
 }
 
 export type MarkReadResult = { ok: true } | Fail<'UNAUTHENTICATED' | 'NOT_MEMBER' | 'DB_ERROR'>

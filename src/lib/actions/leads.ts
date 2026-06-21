@@ -224,10 +224,10 @@ export async function createLead(
   }
 
   revalidatePath('/contractor/jobs')
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
 
   return {
     success: true,
-    data: { leadId, matchedCount, redirectTo: '/homeowner/requests' },
+    data: { leadId, matchedCount, redirectTo: '/homeowner' },
   }
 }

@@ -51,7 +51,7 @@ export const quoteSubmitted = inngest.createFunction(
         type: 'ESTIMATE',
         title: `${companyName} sent you a quote`,
         body: `${companyName} quoted ${amount} for your job. Open the chat to review and accept it.`,
-        actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner/requests',
+        actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner',
         entityType: 'ESTIMATE',
         entityId: estimateId,
         dedupKey: `quote_submitted:${estimateId}`,

@@ -310,7 +310,7 @@ function InboxEmptyPanel({ emptyInbox }: { emptyInbox: InboxEmptyKind | null }) 
           description="Pros are looking at your job now. The moment one reaches out, your chat opens right here."
           action={
             <Button asChild variant="outline" size="lg">
-              <Link href="/homeowner/requests">View your jobs</Link>
+              <Link href="/homeowner">View your jobs</Link>
             </Button>
           }
         />

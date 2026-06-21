@@ -223,7 +223,7 @@ export async function submitProjectReview(input: unknown): Promise<SubmitReviewR
   }
 
   revalidatePath('/contractor/reviews')
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
   revalidatePath('/homeowner/messages')
   return { ok: true }
 }

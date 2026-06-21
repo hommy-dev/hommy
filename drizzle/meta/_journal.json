@@ -78,6 +78,13 @@
       "when": 1781840486673,
       "tag": "0010_great_omega_flight",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782022998871,
+      "tag": "0011_perfect_meteorite",
+      "breakpoints": true
     }
   ]
 }

@@ -227,7 +227,7 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
 
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
 
   return {
     ok: true,

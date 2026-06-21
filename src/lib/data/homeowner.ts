@@ -17,7 +17,7 @@ import {
   reviews,
   services,
 } from '@/lib/db/schema'
-import { subtypeLabel, subtypeList } from '@/lib/leads/subtype'
+import { leadPhotos, subtypeLabel, subtypeList } from '@/lib/leads/subtype'
 import { listConversationsForUser } from '@/lib/data/conversations'
 
 /** Map an authenticated user → their 1:1 homeowner profile. Deduped per request. */
@@ -36,6 +36,8 @@ export type HomeownerLead = {
   id: string
   serviceName: string
   subtype: string | null
+  /** Photos the homeowner attached when posting (may be empty). */
+  images: string[]
   urgency: (typeof leads.urgency.enumValues)[number]
   status: (typeof leads.status.enumValues)[number]
   city: string | null
@@ -53,6 +55,8 @@ export type HomeownerLead = {
   bestQuoteTotal: string | null
   /** True once the hired contractor marked the job completed (projects.stage). */
   projectCompleted: boolean
+  /** True once the homeowner has submitted a review for the completed job. */
+  hasReview: boolean
   createdAt: Date
 }
 
@@ -85,7 +89,7 @@ export const getHomeownerLeads = cache(async (
   //  • matched   = every offer row
   //  • interested = offers that engaged (started a conversation)
   //  • completed = leads whose hired contractor marked the project completed
-  const [matched, viewed, interested, quotes, completed] = await Promise.all([
+  const [matched, viewed, interested, quotes, completed, reviewed] = await Promise.all([
     db
       .select({ leadId: leadRecipients.leadId, value: count() })
       .from(leadRecipients)
@@ -126,6 +130,13 @@ export const getHomeownerLeads = cache(async (
       .from(projects)
       .where(and(inArray(projects.leadId, leadIds), eq(projects.stage, 'completed')))
       .groupBy(projects.leadId),
+    // Leads where the homeowner has already submitted a review.
+    db
+      .select({ leadId: projects.leadId, value: count() })
+      .from(reviews)
+      .innerJoin(projects, eq(projects.id, reviews.projectId))
+      .where(and(inArray(projects.leadId, leadIds), isNotNull(reviews.submittedAt)))
+      .groupBy(projects.leadId),
   ])
 
   const matchedBy = new Map(matched.map((c) => [c.leadId, c.value]))
@@ -133,11 +144,13 @@ export const getHomeownerLeads = cache(async (
   const interestedBy = new Map(interested.map((c) => [c.leadId, c.value]))
   const quotesBy = new Map(quotes.map((c) => [c.leadId as string, c]))
   const completedSet = new Set(completed.map((c) => c.leadId as string))
+  const reviewedSet = new Set(reviewed.map((c) => c.leadId as string))
 
   return rows.map((r) => ({
     id: r.id,
     serviceName: r.serviceName,
     subtype: subtypeLabel(r.serviceDetails),
+    images: leadPhotos(r.serviceDetails),
     urgency: r.urgency,
     status: r.status,
     city: r.city,
@@ -149,6 +162,7 @@ export const getHomeownerLeads = cache(async (
     quoteCount: quotesBy.get(r.id)?.value ?? 0,
     bestQuoteTotal: quotesBy.get(r.id)?.best ?? null,
     projectCompleted: completedSet.has(r.id),
+    hasReview: reviewedSet.has(r.id),
     createdAt: r.createdAt,
   }))
 })

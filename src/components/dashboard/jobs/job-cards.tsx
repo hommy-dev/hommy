@@ -275,8 +275,16 @@ export function JobCardItem({
       {/* Spacer — absorbs extra height so the button sits at the bottom and rows line up. */}
       <div aria-hidden className="grow" />
 
-      {/* Action — anchored to the bottom so cards in a row line up. */}
-      <span className="mt-4 lg:mt-[1.111vw] flex w-full items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-lg lg:rounded-[0.556vw] border border-border bg-card px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-medium text-foreground transition-colors group-hover:border-foreground/20 group-hover:bg-muted/60">
+      {/* Action — anchored to the bottom so cards in a row line up. New leads get a
+          louder, filled button to nudge a fast response. */}
+      <span
+        className={cn(
+          "mt-4 lg:mt-[1.111vw] flex w-full items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-lg lg:rounded-[0.556vw] border px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-medium transition-colors",
+          isNew
+            ? "border-primary bg-primary text-primary-foreground shadow-sm group-hover:bg-primary/90"
+            : "border-border bg-card text-foreground group-hover:border-foreground/20 group-hover:bg-muted/60"
+        )}
+      >
         View details
         <Icon name="arrow-right" className="size-4 lg:size-[1.111vw]" />
       </span>

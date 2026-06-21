@@ -92,7 +92,7 @@ export async function advanceProjectStage(projectId: string, toStage: string): P
 
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
   revalidatePath('/homeowner/messages')
   return { ok: true }
 }
@@ -139,7 +139,7 @@ async function notifyJobCompleted(projectId: string, contractorId: string): Prom
     type: 'SYSTEM',
     title: 'Your job is complete',
     body: `${row.companyName ?? 'Your contractor'} marked the job as completed. We’ll ask you for a quick review shortly.`,
-    actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner/requests',
+    actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner',
     entityType: 'SYSTEM',
     entityId: projectId,
     dedupKey: `job-completed:${projectId}`,

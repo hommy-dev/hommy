@@ -75,7 +75,7 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
-  const [view, setView] = useState<ViewMode>("table");
+  const [view, setView] = useState<ViewMode>("cards");
 
   // Remember the chosen layout across visits.
   useEffect(() => {
@@ -151,39 +151,39 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
 
   return (
     <div className="space-y-4 lg:space-y-[1.111vw]">
-      {/* Search + status filter + layout toggle */}
+      {/* Search + status filter on the left, layout toggle on the right */}
       <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
-        <div className="relative min-w-0 flex-1 sm:max-w-xs lg:max-w-[20vw]">
-          <Icon
-            name="search"
-            className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search jobs…"
-            className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card pl-9 lg:pl-[2.5vw] pr-3 lg:pr-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
-          />
-        </div>
+        <div className="flex min-w-0 flex-1 items-center gap-2 lg:gap-[0.556vw]">
+          <div className="relative min-w-0 flex-1 sm:max-w-xs lg:max-w-[20vw]">
+            <Icon
+              name="search"
+              className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search jobs…"
+              className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card pl-9 lg:pl-[2.5vw] pr-3 lg:pr-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
+            />
+          </div>
 
-        <div className="flex shrink-0 items-center gap-2 lg:gap-[0.556vw]">
           {/* A board already shows every column, so the filter is redundant there on desktop. */}
-          <div className={cn(view === "kanban" && "lg:hidden")}>
+          <div className={cn("shrink-0", view === "kanban" && "lg:hidden")}>
             <StatusFilter tab={tab} counts={counts} onChange={setTab} />
           </div>
+        </div>
 
-          <div className="inline-flex rounded-lg lg:rounded-[0.556vw] border border-border bg-card p-0.5 lg:p-[0.139vw]">
-            <ViewToggle active={view === "table"} label="Table view" onClick={() => changeView("table")}>
-              <RowsIcon />
-            </ViewToggle>
-            <ViewToggle active={view === "cards"} label="Card view" onClick={() => changeView("cards")}>
-              <GridIcon />
-            </ViewToggle>
-            <ViewToggle active={view === "kanban"} label="Board view" onClick={() => changeView("kanban")}>
-              <ColumnsIcon />
-            </ViewToggle>
-          </div>
+        <div className="inline-flex shrink-0 rounded-lg lg:rounded-[0.556vw] border border-border bg-card p-0.5 lg:p-[0.139vw]">
+          <ViewToggle active={view === "cards"} label="Card view" onClick={() => changeView("cards")}>
+            <GridIcon />
+          </ViewToggle>
+          <ViewToggle active={view === "table"} label="Table view" onClick={() => changeView("table")}>
+            <RowsIcon />
+          </ViewToggle>
+          <ViewToggle active={view === "kanban"} label="Board view" onClick={() => changeView("kanban")}>
+            <ColumnsIcon />
+          </ViewToggle>
         </div>
       </div>
 
@@ -266,10 +266,14 @@ function StatusFilter({
           <Icon name="down" className="size-3.5 lg:size-[0.972vw] text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-44 lg:min-w-[12vw]">
+      <DropdownMenuContent align="end" className="min-w-44 lg:min-w-[12vw] overflow-hidden p-0">
         <DropdownMenuRadioGroup value={tab} onValueChange={(v) => onChange(v as Tab)}>
           {TABS.map((t) => (
-            <DropdownMenuRadioItem key={t.key} value={t.key}>
+            <DropdownMenuRadioItem
+              key={t.key}
+              value={t.key}
+              className="rounded-none border-b border-border/60 last:border-b-0"
+            >
               <span
                 className={cn(
                   "size-2 lg:size-[0.556vw] rounded-full",

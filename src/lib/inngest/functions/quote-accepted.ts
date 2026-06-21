@@ -48,7 +48,7 @@ export const quoteAccepted = inngest.createFunction(
         type: 'ESTIMATE',
         title: 'You’re hired — quote accepted',
         body: `You accepted ${row.companyName ?? 'your contractor'}’s quote. They’ll be in touch to schedule the work.`,
-        actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner/requests',
+        actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner',
         entityType: 'ESTIMATE',
         entityId: estimateId,
         dedupKey: `quote_accepted_homeowner:${estimateId ?? leadId}`,

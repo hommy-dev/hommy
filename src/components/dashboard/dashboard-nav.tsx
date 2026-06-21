@@ -15,7 +15,9 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor/jobs", label: "Jobs", icon: "work" },
   { href: "/contractor/contacts", label: "Contacts", icon: "user-3" },
   { href: "/contractor/messages", label: "Messages", icon: "chat" },
-  { href: "/contractor/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
+  // Storm alerts is roofing-only and not part of launch — hidden from nav until
+  // the weather poll + alerts pipeline is built (route stub kept at
+  // /contractor/storm-alerts). See docs/HOMEI_PLATFORM.md §573.
   { href: "/contractor/reviews", label: "Reviews", icon: "star" },
   { href: "/contractor/analytics", label: "Analytics", icon: "graph" },
   { href: "/contractor/profile", label: "Profile", icon: "profile" },
@@ -23,10 +25,10 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
 ]
 
 export const HOMEOWNER_NAV: DashboardNavItem[] = [
-  { href: "/homeowner", label: "Dashboard", icon: "category" },
-  // The homeowner's single board (mirrors the contractor "Jobs" table). Quotes
-  // live inside each job's chat + detail, so there's no separate Quotes page.
-  { href: "/homeowner/requests", label: "Jobs", icon: "work" },
+  // The homeowner's home is their single jobs board (mirrors the contractor
+  // "Jobs" table). Quotes live inside each job's chat + detail, so there's no
+  // separate Quotes page, and no separate dashboard landing page.
+  { href: "/homeowner", label: "Jobs", icon: "work" },
   { href: "/homeowner/messages", label: "Messages", icon: "chat" },
   { href: "/homeowner/settings", label: "Settings", icon: "setting" },
 ]

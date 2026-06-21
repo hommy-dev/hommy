@@ -272,7 +272,7 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
     console.error('[acceptEstimate] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath('/homeowner/requests')
+  revalidatePath('/homeowner')
   revalidatePath('/homeowner/messages')
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
