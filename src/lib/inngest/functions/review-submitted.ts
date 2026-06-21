@@ -40,7 +40,7 @@ export const reviewSubmitted = inngest.createFunction(
             type: 'REVIEW',
             title: `New ${stars}★ review`,
             body: 'A homeowner just reviewed your work. See it on your reviews page.',
-            actionUrl: '/contractor/reviews',
+            actionUrl: '/contractor/profile',
             entityType: 'REVIEW',
             entityId: reviewId,
             dedupKey: `review_submitted:${reviewId}:${userId}`,

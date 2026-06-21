@@ -3,6 +3,7 @@ import type { ThreadMessage, ParticipantIdentity } from '@/lib/data/conversation
 import type { MessageMeta } from '@/lib/db/schema'
 import { QuoteCard } from './quote-card'
 import { ReviewCard } from './review-card'
+import { AttachmentList } from './attachment-list'
 import { ParticipantAvatar } from './participant-avatar'
 
 export type ReviewState = { submitted: boolean; rating: number | null; canReview: boolean }
@@ -98,6 +99,43 @@ export function MessageBubble({
             )}
           >
             {timeLabel(message.createdAt)}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  // File attachments → standard left/right bubble with thumbnails / download
+  // chips, plus the optional caption (the message body).
+  if (message.meta?.kind === 'attachment') {
+    const mine = message.isMine
+    const caption = message.body.trim()
+    return (
+      <div className={cn('flex items-end gap-2 lg:gap-[0.556vw]', mine ? 'justify-end' : 'justify-start')}>
+        {!mine ? (
+          <ParticipantAvatar name={otherName ?? '?'} className="size-7 lg:size-[2vw] self-end" />
+        ) : null}
+        <div
+          className={cn(
+            'max-w-[80%] lg:max-w-[60%] rounded-lg lg:rounded-[0.694vw] p-1.5 lg:p-[0.417vw]',
+            mine ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground',
+            message.failed && 'opacity-60 ring-1 ring-destructive',
+          )}
+        >
+          <AttachmentList files={message.meta.files} mine={mine} />
+          {caption ? (
+            <p className="px-1.5 lg:px-[0.417vw] pt-1.5 lg:pt-[0.417vw] text-sm lg:text-[0.903vw] leading-relaxed whitespace-pre-wrap break-words">
+              {caption}
+            </p>
+          ) : null}
+          <span
+            suppressHydrationWarning
+            className={cn(
+              'mt-1 lg:mt-[0.278vw] block px-1.5 lg:px-[0.417vw] text-right text-[10px] lg:text-[0.694vw]',
+              mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
+            )}
+          >
+            {message.failed ? 'Failed to send · tap to retry' : timeLabel(message.createdAt)}
           </span>
         </div>
       </div>

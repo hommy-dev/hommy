@@ -9,6 +9,8 @@ import {
   startHomeownerGoogleSignup,
 } from "@/lib/actions/auth"
 import { type PlaceResult } from "@/components/ui/google-places-input"
+import { type StagedFile } from "@/components/ui/local-file-picker"
+import { uploadToCloudinary } from "@/lib/cloudinary/upload"
 import { showToast } from "@/components/ui/toast"
 import { NOT_SURE_SUBTYPE } from "@/lib/leads/subtype"
 import { cn } from "@/lib/utils"
@@ -59,7 +61,9 @@ export function GetAQuoteWizard({
   )
   const [urgency, setUrgency] = useState<string>("within_month")
   const [notes, setNotes] = useState("")
-  const [photos, setPhotos] = useState<string[]>([])
+  // Photos are staged LOCALLY and only uploaded to Cloudinary on submit — keeps
+  // the picker instant and avoids burning storage on photos the user removes.
+  const [photos, setPhotos] = useState<StagedFile[]>([])
   const [place, setPlace] = useState<PlaceResult | null>(null)
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -92,13 +96,13 @@ export function GetAQuoteWizard({
         selectedSubtypes?: string[]
         urgency?: string
         notes?: string
-        photos?: string[]
         place?: PlaceResult | null
       }
       if (Array.isArray(d.selectedSubtypes)) setSelectedSubtypes(d.selectedSubtypes)
       if (typeof d.urgency === "string") setUrgency(d.urgency)
       if (typeof d.notes === "string") setNotes(d.notes)
-      if (Array.isArray(d.photos)) setPhotos(d.photos)
+      // Photos are local File objects, which can't survive the Google redirect's
+      // sessionStorage round-trip — the homeowner re-adds them if they used Google.
       if (d.place) setPlace(d.place)
       setStepIndex(stepKeys.length - 1)
     } catch {
@@ -184,11 +188,25 @@ export function GetAQuoteWizard({
 
   function submit() {
     startSubmit(async () => {
+      // Upload the staged photos now (on post), not when they were picked.
+      let photoUrls: string[] = []
+      if (photos.length > 0) {
+        try {
+          photoUrls = await Promise.all(
+            photos.map((p) => uploadToCloudinary(p.file, "jobs").then((r) => r.secureUrl)),
+          )
+        } catch (err) {
+          console.error("[get-a-quote] photo upload failed", err)
+          showToast("We couldn't upload your photos. Please try again.", { type: "error" })
+          return
+        }
+      }
+
       const res = await createLead({
         subtypes: selectedSubtypes,
         urgency,
         notes: notes.trim(),
-        photos,
+        photos: photoUrls,
         address: place?.formattedAddress ?? "",
         city: place?.city ?? "",
         state: place?.state ?? "",
@@ -268,7 +286,7 @@ export function GetAQuoteWizard({
     try {
       sessionStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ selectedSubtypes, urgency, notes, photos, place }),
+        JSON.stringify({ selectedSubtypes, urgency, notes, place }),
       )
     } catch {}
     startGoogle(async () => {

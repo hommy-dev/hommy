@@ -18,7 +18,7 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   // Storm alerts is roofing-only and not part of launch — hidden from nav until
   // the weather poll + alerts pipeline is built (route stub kept at
   // /contractor/storm-alerts). See docs/HOMEI_PLATFORM.md §573.
-  { href: "/contractor/reviews", label: "Reviews", icon: "star" },
+  // Reviews live on the contractor's Profile page (no standalone Reviews page).
   { href: "/contractor/analytics", label: "Analytics", icon: "graph" },
   { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },

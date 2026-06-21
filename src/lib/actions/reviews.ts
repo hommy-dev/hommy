@@ -101,7 +101,7 @@ export async function submitReview(input: unknown): Promise<SubmitReviewResult> 
     console.error('[submitReview] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath('/contractor/reviews')
+  revalidatePath('/contractor/profile')
   return { ok: true }
 }
 
@@ -222,7 +222,7 @@ export async function submitProjectReview(input: unknown): Promise<SubmitReviewR
     console.error('[submitProjectReview] inngest send failed (non-fatal)', err)
   }
 
-  revalidatePath('/contractor/reviews')
+  revalidatePath('/contractor/profile')
   revalidatePath('/homeowner')
   revalidatePath('/homeowner/messages')
   return { ok: true }

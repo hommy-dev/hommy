@@ -7,6 +7,8 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { sendMessage, markConversationRead } from "@/lib/actions/messages";
+import { uploadChatAttachment } from "@/lib/cloudinary/chat-upload";
+import type { ChatAttachment } from "@/lib/db/schema";
 import { showToast } from "@/components/ui/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -133,37 +135,75 @@ export function ThreadView({
   });
 
   const handleSend = useCallback(
-    (body: string) => {
+    (body: string, files: File[] = []) => {
       if (!activeId) return;
       const id = activeId;
       const tempId = `temp-${tempCounter.current++}`;
+
+      // Build local previews so the bubble appears instantly with thumbnails,
+      // then upload in the background and swap in the real Cloudinary URLs.
+      const localUrls: string[] = [];
+      const localFiles: ChatAttachment[] = files.map((file, i) => {
+        const url = URL.createObjectURL(file);
+        localUrls.push(url);
+        const resourceType: ChatAttachment["resourceType"] = file.type.startsWith("image/")
+          ? "image"
+          : file.type.startsWith("video/")
+            ? "video"
+            : "raw";
+        return {
+          url,
+          publicId: `local-${tempId}-${i}`,
+          resourceType,
+          name: file.name,
+          bytes: file.size,
+          format: null,
+        };
+      });
+
       const optimistic: DisplayMessage = {
         id: tempId,
         senderType: me?.type ?? "user",
         senderId: me?.id ?? userId,
         body,
-        meta: null,
+        meta: localFiles.length ? { kind: "attachment", files: localFiles } : null,
         createdAt: new Date().toISOString(),
         isMine: true,
         pending: true,
       };
       patchMessages(id, (prev) => [...prev, optimistic]);
 
+      const fail = () => {
+        patchMessages(id, (prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)),
+        );
+      };
+
       void (async () => {
-        const res = await sendMessage(id, body);
-        if (res.ok) {
-          const real = res.message;
-          patchMessages(id, (prev) => {
-            const without = prev.filter((m) => m.id !== tempId);
-            return without.some((m) => m.id === real.id)
-              ? without
-              : [...without, { ...real, isMine: true }];
-          });
-        } else {
-          patchMessages(id, (prev) =>
-            prev.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)),
+        try {
+          // Upload happens now (on send), not when files were picked — saves
+          // storage on files the user picked then removed.
+          const uploaded = await Promise.all(
+            files.map((file) => uploadChatAttachment({ file, conversationId: id })),
           );
-          showToast(res.message, { type: "error" });
+          const res = await sendMessage(id, body, uploaded);
+          if (res.ok) {
+            const real = res.message;
+            patchMessages(id, (prev) => {
+              const without = prev.filter((m) => m.id !== tempId);
+              return without.some((m) => m.id === real.id)
+                ? without
+                : [...without, { ...real, isMine: true }];
+            });
+            localUrls.forEach((u) => URL.revokeObjectURL(u)); // real URLs now in use
+          } else {
+            fail();
+            showToast(res.message, { type: "error" });
+          }
+        } catch (err) {
+          console.error("[thread] attachment send failed", err);
+          fail();
+          showToast("Couldn't upload your attachment. Please try again.", { type: "error" });
         }
       })();
     },

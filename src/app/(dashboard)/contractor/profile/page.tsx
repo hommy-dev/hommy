@@ -239,15 +239,7 @@ export default async function ContractorProfilePage() {
         <Section title="Reviews">
           <div className="space-y-5 lg:space-y-[1.389vw]">
             <ReviewsSummaryCard summary={reviews} />
-            <ReviewList reviews={reviews.reviews.slice(0, 4)} />
-            {reviews.total > 4 ? (
-              <Link
-                href="/contractor/reviews"
-                className="inline-block text-sm lg:text-[0.903vw] font-medium text-primary hover:underline"
-              >
-                View all {reviews.total} reviews
-              </Link>
-            ) : null}
+            <ReviewList reviews={reviews.reviews} />
           </div>
         </Section>
       ) : null}

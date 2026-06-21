@@ -1,4 +1,5 @@
 import { Icon } from "@/components/ui/icon";
+import { ImageZoom } from "@/components/kibo-ui/image-zoom";
 import type { JobDetail } from "@/lib/data/jobs";
 import { formatCurrency } from "@/lib/format";
 import { RatingBadge } from "@/components/contractors/rating-badge";
@@ -111,21 +112,31 @@ function PhotoGallery({ photos }: { photos: string[] }) {
       </p>
       <div className="mt-1.5 lg:mt-[0.417vw] grid grid-cols-3 gap-2 lg:gap-[0.556vw] sm:grid-cols-4">
         {photos.map((url, i) => (
-          <a
+          <div
             key={url}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative aspect-square overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="group relative aspect-square overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={url}
-              alt={`Job photo ${i + 1}`}
-              loading="lazy"
-              className="size-full object-cover transition-transform group-hover:scale-105"
-            />
-          </a>
+            <ImageZoom className="size-full [&_[data-rmiz-content]]:block [&_[data-rmiz-content]]:size-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`Job photo ${i + 1}`}
+                loading="lazy"
+                className="size-full object-cover"
+              />
+            </ImageZoom>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Download photo ${i + 1}`}
+              className="absolute right-1.5 top-1.5 lg:right-[0.417vw] lg:top-[0.417vw] z-10 grid size-7 lg:size-[1.944vw] place-items-center rounded-full bg-foreground/60 text-background opacity-0 backdrop-blur-sm transition-opacity hover:bg-foreground/80 focus-visible:opacity-100 group-hover:opacity-100"
+            >
+              <Icon name="download" className="size-3.5 lg:size-[0.972vw]" />
+            </a>
+          </div>
         ))}
       </div>
     </div>
