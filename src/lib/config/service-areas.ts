@@ -12,6 +12,15 @@ export const OPERATING_STATES = ['TX', 'FL'] as const
 
 export type OperatingState = (typeof OPERATING_STATES)[number]
 
+/**
+ * Specific served cities OUTSIDE the operating states, matched by country +
+ * city name. Region (province) codes are too coarse to open a single city, so
+ * we match the edge city header directly. Add a row to open a new city.
+ */
+export const OPERATING_CITIES: { country: string; city: string }[] = [
+  { country: 'PK', city: 'Bahawalnagar' },
+]
+
 /** Full names for friendly copy on the coming-soon page. */
 export const OPERATING_STATE_NAMES: Record<OperatingState, string> = {
   TX: 'Texas',
@@ -28,6 +37,8 @@ export const OPERATING_AREAS_LABEL = 'Texas and Florida'
 export const GEO_REGION_HEADER = 'x-vercel-ip-country-region'
 /** ISO 3166-1 alpha-2 country code, e.g. "US". */
 export const GEO_COUNTRY_HEADER = 'x-vercel-ip-country'
+/** City name, e.g. "Austin", "Bahawalnagar" (percent-encoded by Vercel). */
+export const GEO_CITY_HEADER = 'x-vercel-ip-city'
 
 /** Cookie that lets a mis-geolocated real customer bypass the gate (safety valve). */
 export const AREA_BYPASS_COOKIE = 'hommy-area'
@@ -46,6 +57,28 @@ export function isServedRegion(
   if (!region) return false
   if (country && country.toUpperCase() !== 'US') return false
   return (OPERATING_STATES as readonly string[]).includes(region.toUpperCase())
+}
+
+/** Is this visitor in a specifically-served city (e.g. Bahawalnagar, PK)? */
+export function isServedCity(
+  city: string | null | undefined,
+  country?: string | null,
+): boolean {
+  if (!city) return false
+  const c = (country ?? '').toUpperCase()
+  const name = city.trim().toLowerCase()
+  return OPERATING_CITIES.some(
+    (o) => o.country.toUpperCase() === c && o.city.toLowerCase() === name,
+  )
+}
+
+/** Served if the visitor's state OR their city is in our coverage. */
+export function isServedLocation(
+  region: string | null | undefined,
+  country: string | null | undefined,
+  city: string | null | undefined,
+): boolean {
+  return isServedRegion(region, country) || isServedCity(city, country)
 }
 
 /** Full state name for a region code, or null when unknown (for personalized copy). */

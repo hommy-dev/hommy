@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   AREA_BYPASS_COOKIE,
   AREA_BYPASS_VALUE,
+  GEO_CITY_HEADER,
   GEO_COUNTRY_HEADER,
   GEO_REGION_HEADER,
-  isServedRegion,
+  isServedLocation,
 } from "@/lib/config/service-areas";
 
 const PUBLIC_PATHS = [
@@ -75,21 +76,14 @@ export function handleProxyAuth(request: NextRequest): NextResponse {
     const bypassed =
       request.cookies.get(AREA_BYPASS_COOKIE)?.value === AREA_BYPASS_VALUE;
     if (!bypassed) {
-      let region = request.headers.get(GEO_REGION_HEADER);
-      let country = request.headers.get(GEO_COUNTRY_HEADER);
+      const region = request.headers.get(GEO_REGION_HEADER);
+      const country = request.headers.get(GEO_COUNTRY_HEADER);
+      const cityRaw = request.headers.get(GEO_CITY_HEADER);
+      const city = cityRaw ? decodeURIComponent(cityRaw) : null;
 
-      // Local dev has no Vercel geo headers, so the gate would always fail open.
-      // Allow forcing a region/country from env (e.g. DEV_GEO_REGION=PK) to test
-      // the redirect, and log the decision. Never runs in production.
-      if (process.env.NODE_ENV !== "production") {
-        region = region ?? process.env.DEV_GEO_REGION ?? null;
-        country = country ?? process.env.DEV_GEO_COUNTRY ?? null;
-        console.log(
-          `[geo-gate] ${pathname} region=${region ?? "(none)"} country=${country ?? "(none)"} served=${isServedRegion(region, country)} bypassCookie=${bypassed}`
-        );
-      }
-
-      if (region && !isServedRegion(region, country)) {
+      // Block only when the visitor's location is KNOWN and not served. When no
+      // geo headers are present (local dev) we fail open and let them through.
+      if ((region || city) && !isServedLocation(region, country, city)) {
         return NextResponse.redirect(new URL("/coming-soon", request.url));
       }
     }
