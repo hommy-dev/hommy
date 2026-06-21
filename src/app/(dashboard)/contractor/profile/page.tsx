@@ -191,7 +191,7 @@ export default async function ContractorProfilePage() {
               </li>
               <li>
                 <Link
-                  href="/contractor/reputation"
+                  href="/contractor/analytics"
                   prefetch
                   className="-mx-2 lg:-mx-[0.556vw] flex items-center gap-2.5 lg:gap-[0.694vw] rounded-md lg:rounded-[0.417vw] px-2 lg:px-[0.556vw] py-1 lg:py-[0.278vw] transition-colors hover:bg-muted/50"
                 >

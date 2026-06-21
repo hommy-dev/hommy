@@ -5,6 +5,13 @@ import confetti from "canvas-confetti"
 import { SetupModal } from "@/components/dashboard/setup-modal"
 import { AnimatedCheck } from "@/components/ui/animated-check"
 import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
+import {
+  ClimbVariantImpact,
+  HowToClimbCards,
+  ClimbVariantJourney,
+} from "@/components/dashboard/analytics/climb-variants"
+import { CoverageMap } from "@/components/dashboard/analytics/coverage-map"
+import { HUB, ORIGINS } from "@/components/dashboard/analytics/map-sample"
 
 export default function SandboxPage() {
   const [setupOpen, setSetupOpen] = useState(false)
@@ -121,7 +128,63 @@ export default function SandboxPage() {
           </div>
         </Section>
 
+        {/* "How to climb your score" — redesign variants */}
+        <div className="space-y-2 lg:space-y-[0.556vw]">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
+            “How to climb your score” — redesign variants
+          </h2>
+          <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
+            Three takes on the reputation guide. Goal: clearer UI plus better explanation of how scoring (and the platform) works.
+          </p>
+        </div>
+
+        <div className="max-w-5xl lg:max-w-[68vw] space-y-10 lg:space-y-[2.778vw]">
+          <Variant label="Variant 1 — Impact bars" note="Two columns (earn / lose) with bars sized by point weight, so the relative importance reads instantly.">
+            <ClimbVariantImpact />
+          </Variant>
+          <Variant label="Variant 2 — Do / Avoid cards (chosen)" note="A clear good-vs-bad split: a green “grow” card and a red “protect” card, each with checks/crosses and points.">
+            <HowToClimbCards />
+          </Variant>
+          <Variant label="Variant 3 — Journey" note="Teaches the platform flow (lead → engage → quote → win → review) with score gains along the path, and a penalties footer.">
+            <ClimbVariantJourney />
+          </Variant>
+        </div>
+
+        {/* Coverage map — chosen: static SVG, auto-fit to the data */}
+        <div className="space-y-2 lg:space-y-[0.556vw]">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
+            Coverage / leads map (static SVG)
+          </h2>
+          <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
+            Sample data. Auto-zooms to the points (real single-metro data zooms tighter). Hover a dot for the city + lead count.
+          </p>
+        </div>
+
+        <div className="max-w-xl lg:max-w-[40vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-4 lg:p-[1.111vw]">
+          <CoverageMap hub={HUB} origins={ORIGINS} />
+        </div>
+
       </div>
+    </div>
+  )
+}
+
+function Variant({
+  label,
+  note,
+  children,
+}: {
+  label: string
+  note: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <div className="mb-3 lg:mb-[0.833vw]">
+        <p className="text-sm lg:text-[0.972vw] font-semibold text-foreground">{label}</p>
+        <p className="text-xs lg:text-[0.833vw] text-muted-foreground">{note}</p>
+      </div>
+      {children}
     </div>
   )
 }

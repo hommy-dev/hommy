@@ -1,47 +1,53 @@
-import { Suspense } from "react";
-import Link from "next/link";
-import { getRequiredUser } from "@/lib/auth/session";
-import {
-  getContractorForUser,
-  getContractorLeads,
-  getDashboardStats,
-  type Contractor,
-} from "@/lib/data/dashboard";
-import { getVerificationState } from "@/lib/contractor/verification";
-import { StatCard } from "@/components/dashboard/stat-card";
-import { SetupGate } from "@/components/dashboard/setup-gate";
-import { LeadCard } from "@/components/dashboard/leads/lead-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/ui/empty-state";
+import { Suspense } from "react"
+import Link from "next/link"
+import { getRequiredUser } from "@/lib/auth/session"
+import { getContractorForUser, type Contractor } from "@/lib/data/dashboard"
+import { getContractorOverview } from "@/lib/data/overview"
+import { getVerificationState } from "@/lib/contractor/verification"
+import { scoreStanding } from "@/lib/reputation/labels"
+import { SetupGate } from "@/components/dashboard/setup-gate"
+import { OverviewStat } from "@/components/dashboard/overview/overview-stat"
+import { OverviewFeed, type ActionRow } from "@/components/dashboard/overview/overview-feed"
+import { Button } from "@/components/ui/button"
+import { Icon } from "@/components/ui/icon"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export default async function DashboardPage() {
-  const user = await getRequiredUser("contractor");
-  const contractor = await getContractorForUser(user.id);
+// Below this, a company can't even engage a lead (engage costs 5), so nudge them.
+const LOW_CREDIT_BALANCE = 5
+
+export default async function OverviewPage() {
+  const user = await getRequiredUser("contractor")
+  const contractor = await getContractorForUser(user.id)
 
   if (!contractor) {
     return (
       <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-        Your contractor profile isn’t set up yet. Finish onboarding to start
-        receiving leads.
+        Your contractor profile isn’t set up yet. Finish onboarding to start receiving leads.
       </p>
-    );
+    )
   }
 
-  const verification = getVerificationState(contractor);
-  const needsSetup =
-    verification === "not_started" || verification === "rejected";
+  const firstName = user.fullName?.trim().split(/\s+/)[0] ?? "there"
+  const verification = getVerificationState(contractor)
+  const needsSetup = verification === "not_started" || verification === "rejected"
 
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
-      <header className="relative overflow-hidden rounded-lg lg:rounded-[0.694vw]">
-        <div className="relative flex flex-col justify-end">
+      <header className="flex flex-wrap items-end justify-between gap-3 lg:gap-[0.833vw]">
+        <div>
           <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight sm:text-3xl">
-            {contractor.companyName ?? "Your dashboard"}
+            Welcome back, {firstName}
           </h1>
-          <p className="mt-1.5 lg:mt-[0.417vw] max-w-md lg:max-w-[31.108vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-            Here’s what’s happening with your leads and jobs.
-          </p>
+          <Suspense fallback={<p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">Here’s your company at a glance.</p>}>
+            <GreetingLine contractorId={contractor.id} userId={user.id} />
+          </Suspense>
         </div>
+        <Button asChild variant="outline" className="shrink-0 gap-1.5 lg:gap-[0.417vw]">
+          <Link href="/contractor/jobs">
+            <Icon name="work" className="size-4 lg:size-[1.111vw]" />
+            View jobs
+          </Link>
+        </Button>
       </header>
 
       {needsSetup && (
@@ -57,212 +63,162 @@ export default async function DashboardPage() {
         />
       )}
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsRow contractor={contractor} />
-      </Suspense>
-
-      <Suspense fallback={<LeadsSkeleton />}>
-        <RecentLeads contractorId={contractor.id} />
+      <Suspense fallback={<OverviewSkeleton />}>
+        <OverviewContent contractor={contractor} userId={user.id} firstName={firstName} />
       </Suspense>
     </div>
-  );
+  )
 }
 
-async function StatsRow({ contractor }: { contractor: Contractor }) {
-  const stats = await getDashboardStats(contractor.id);
-  const rating = contractor.avgRating
-    ? parseFloat(contractor.avgRating).toFixed(1)
-    : "—";
-
-  return (
-    <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard
-        label="Open offers"
-        value={stats.openOffers}
-        hint="Leads waiting on you"
-        tint="bg-primary/10 text-primary"
-        icon={<TargetIcon />}
-      />
-      <StatCard
-        label="Active jobs"
-        value={stats.activeProjects}
-        hint="In your pipeline now"
-        tint="bg-foreground/5 text-foreground"
-        icon={<BriefcaseIcon />}
-      />
-      <StatCard
-        label="Avg rating"
-        value={rating}
-        hint={`${contractor.totalReviews} review${
-          contractor.totalReviews === 1 ? "" : "s"
-        }`}
-        tint="bg-tertiary/15 text-[#b23a5e]"
-        icon={<StarIcon />}
-      />
-      <Link
-        href="/contractor/reputation"
-        prefetch
-        className="rounded-md lg:rounded-[0.556vw] transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <StatCard
-          label="Profile score"
-          value={contractor.profileScore}
-          hint="See what moves it"
-          tint="bg-secondary/70 text-secondary-foreground"
-          icon={<TrendIcon />}
-        />
-      </Link>
-    </div>
-  );
+async function GreetingLine({ contractorId, userId }: { contractorId: string; userId: string }) {
+  const { newLeadsWaiting, quotesAwaiting } = await getContractorOverview(contractorId, userId)
+  const bits: string[] = []
+  if (newLeadsWaiting > 0) bits.push(`${newLeadsWaiting} lead${newLeadsWaiting === 1 ? "" : "s"} waiting`)
+  if (quotesAwaiting > 0) bits.push(`${quotesAwaiting} quote${quotesAwaiting === 1 ? "" : "s"} out`)
+  const line =
+    bits.length > 0 ? `You’ve got ${bits.join(" and ")}.` : "You’re all set for today. Nothing’s waiting on you."
+  return <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">{line}</p>
 }
 
-async function RecentLeads({ contractorId }: { contractorId: string }) {
-  const leads = await getContractorLeads(contractorId);
-  const recent = leads.slice(0, 6);
+async function OverviewContent({
+  contractor,
+  userId,
+  firstName,
+}: {
+  contractor: Contractor
+  userId: string
+  firstName: string
+}) {
+  const o = await getContractorOverview(contractor.id, userId)
+  const balance = contractor.creditBalance
+  const standing = scoreStanding(contractor.profileScore)
+
+  const creditTone = balance < 0 ? "destructive" : balance < LOW_CREDIT_BALANCE ? "warning" : "success"
+  const creditHint =
+    balance < 0 ? "You owe credits" : balance < LOW_CREDIT_BALANCE ? "Running low" : "Healthy balance"
+
+  // Build the prioritized action list (most urgent first).
+  const actions: ActionRow[] = []
+  if (balance < 0) {
+    actions.push({
+      key: "arrears",
+      icon: "wallet",
+      tone: "destructive",
+      title: "Your balance is negative",
+      subtitle: `You owe ${Math.abs(balance)} credits. Top up to keep engaging new leads.`,
+      href: "/contractor/settings/billing",
+      cta: "Add credits",
+    })
+  } else if (balance < LOW_CREDIT_BALANCE) {
+    actions.push({
+      key: "low-credits",
+      icon: "wallet",
+      tone: "warning",
+      title: "Low credit balance",
+      subtitle: `Just ${balance} credit${balance === 1 ? "" : "s"} left, not enough to engage a new lead.`,
+      href: "/contractor/settings/billing",
+      cta: "Add credits",
+    })
+  }
+  if (o.newLeadsWaiting > 0) {
+    actions.push({
+      key: "new-leads",
+      icon: "discovery",
+      tone: "primary",
+      title: `${o.newLeadsWaiting} new lead${o.newLeadsWaiting === 1 ? "" : "s"} near you`,
+      subtitle: "Engage early to land the job before anyone else does.",
+      href: "/contractor/jobs",
+      cta: "View",
+    })
+  }
+  if (o.quotesAwaiting > 0) {
+    actions.push({
+      key: "quotes",
+      icon: "paper",
+      tone: "neutral",
+      title: `${o.quotesAwaiting} quote${o.quotesAwaiting === 1 ? "" : "s"} awaiting a reply`,
+      subtitle: "Homeowners are deciding right now, so a quick nudge can help.",
+      href: "/contractor/jobs",
+      cta: "View",
+    })
+  }
+  if (o.unreadConversations > 0) {
+    actions.push({
+      key: "unread",
+      icon: "chat",
+      tone: "primary",
+      title: `${o.unreadConversations} unread conversation${o.unreadConversations === 1 ? "" : "s"}`,
+      subtitle: "Quick replies keep deals moving and lift your score.",
+      href: "/contractor/messages",
+      cta: "Open",
+    })
+  }
+
+  const upDown = (n: number, label: string) =>
+    n > 0
+      ? { label: `${n} ${label}`, dir: "up" as const }
+      : n < 0
+        ? { label: `${Math.abs(n)} ${label}`, dir: "down" as const }
+        : undefined
 
   return (
-    <section className="rounded-md lg:rounded-[0.556vw] border border-border bg-card p-5 lg:p-[1.389vw]">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm lg:text-[0.972vw] font-semibold">
-          Recent leads
-        </h2>
-        <Link
+    <div className="space-y-8 lg:space-y-[2.222vw]">
+      {/* Headline KPIs */}
+      <div className="grid gap-4 lg:gap-[1.111vw] grid-cols-2 lg:grid-cols-4">
+        <OverviewStat
+          label="Open offers"
+          value={o.openOffers}
+          hint="Waiting on you"
           href="/contractor/jobs"
-          prefetch
-          className="text-sm lg:text-[0.972vw] font-medium text-primary hover:underline"
-        >
-          View all
-        </Link>
+          delta={o.offersTrend7d > 0 ? { label: `${o.offersTrend7d} this week`, dir: "up" } : undefined}
+          series={o.offersSeries}
+          delayMs={0}
+        />
+        <OverviewStat
+          label="Active jobs"
+          value={o.activeJobs}
+          hint="In your pipeline"
+          href="/contractor/jobs"
+          delta={o.jobsTrend7d > 0 ? { label: `${o.jobsTrend7d} this week`, dir: "up" } : undefined}
+          series={o.jobsSeries}
+          delayMs={60}
+        />
+        <OverviewStat
+          label="Credits"
+          value={balance}
+          hint={creditHint}
+          tone={creditTone}
+          href="/contractor/settings/billing"
+          delta={upDown(o.creditsTrend7d, "this week")}
+          series={o.creditsSeries}
+          delayMs={120}
+        />
+        <OverviewStat
+          label="Standing"
+          value={contractor.profileScore}
+          hint={standing.label}
+          href="/contractor/analytics"
+          delta={upDown(o.standingTrend7d, "this week")}
+          series={o.standingSeries}
+          delayMs={180}
+        />
       </div>
-      {recent.length === 0 ? (
-        <EmptyState
-          size="sm"
-          icon="discovery"
-          title="No leads yet"
-          description="New jobs matched to your area show up here. We'll alert you the moment one lands."
-          className="mt-4 lg:mt-[1.111vw]"
-        />
-      ) : (
-        <div className="mt-4 lg:mt-[1.111vw] grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
-          {recent.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} />
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
 
-function StatsSkeleton() {
-  return (
-    <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton
-          key={i}
-          className="h-[108px] lg:h-[7.5vw] rounded-2xl lg:rounded-[1.111vw]"
-        />
-      ))}
+      {/* Unified feed: what needs you + what just happened */}
+      <OverviewFeed actions={actions} activity={o.recentActivity} firstName={firstName} />
     </div>
-  );
+  )
 }
 
-function LeadsSkeleton() {
+function OverviewSkeleton() {
   return (
-    <div className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw]">
-      <Skeleton className="h-5 lg:h-[1.389vw] w-32 lg:w-[8.889vw]" />
-      <div className="mt-4 lg:mt-[1.111vw] grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
+    <div className="space-y-6 lg:space-y-[1.667vw]">
+      <div className="grid gap-4 lg:gap-[1.111vw] grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton
-            key={i}
-            className="h-28 lg:h-[7.778vw] rounded-lg lg:rounded-[0.694vw]"
-          />
+          <Skeleton key={i} className="h-[180px] lg:h-[12.5vw] rounded-xl lg:rounded-[0.833vw]" />
         ))}
       </div>
+      <Skeleton className="h-80 lg:h-[24vw] rounded-xl lg:rounded-[0.833vw]" />
     </div>
-  );
-}
-
-function TargetIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="10" cy="10" r="0.9" fill="currentColor" />
-    </svg>
-  );
-}
-
-function BriefcaseIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="3"
-        y="6.5"
-        width="14"
-        height="9.5"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <path
-        d="M7 6.5v-1A1.5 1.5 0 0 1 8.5 4h3A1.5 1.5 0 0 1 13 5.5v1"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <path d="M3 10.5h14" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
-  );
-}
-
-function StarIcon() {
-  return (
-    <svg
-      width="17"
-      height="17"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M8 1l1.9 4 4.1.5-3 2.9.8 4.1L8 10.6 4.2 12.5l.8-4.1-3-2.9 4.1-.5L8 1z" />
-    </svg>
-  );
-}
-
-function TrendIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M3 13l4-4 3 3 6-6"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 6h4v4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  )
 }
