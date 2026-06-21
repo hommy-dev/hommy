@@ -22,7 +22,7 @@ import {
   services,
   users,
 } from '@/lib/db/schema'
-import { subtypeLabel, subtypeList } from '@/lib/leads/subtype'
+import { leadPhotos, subtypeLabel, subtypeList } from '@/lib/leads/subtype'
 import { getConversationForUser, listConversationsForUser } from '@/lib/data/conversations'
 import { getProjectConversationId } from '@/lib/messaging/system'
 import type { EstimateStatus, EstimateSummary, ProjectStage } from '@/lib/data/projects'
@@ -65,9 +65,14 @@ export type JobCard = {
   projectId: string | null
   conversationId: string | null
   homeownerName: string | null
+  /** Contact details — only populated once the job is won (quote accepted). */
+  homeownerEmail: string | null
+  homeownerPhone: string | null
   serviceName: string
   subtype: string | null
   subtypes: string[]
+  /** Photos the homeowner attached at post time (may be empty). */
+  images: string[]
   city: string | null
   state: string | null
   zipCode: string | null
@@ -93,6 +98,8 @@ export async function getContractorJobs(contractorId: string, userId: string): P
       serviceDetails: leads.serviceDetails,
       serviceName: services.name,
       homeownerName: users.fullName,
+      homeownerEmail: users.email,
+      homeownerPhone: users.phone,
       city: leads.city,
       state: leads.state,
       zipCode: leads.zipCode,
@@ -140,20 +147,26 @@ export async function getContractorJobs(contractorId: string, userId: string): P
   return rows.map((r) => {
     const est = r.projectId ? latestByProject.get(r.projectId) : undefined
     const conv = r.projectId ? convByProject.get(r.projectId) : undefined
+    const boardStatus = deriveBoardStatus({
+      recipientStatus: r.recipientStatus,
+      projectStage: r.projectStage,
+      latestEstimateStatus: est?.status ?? null,
+    })
+    // Reveal contact only after the homeowner accepts a quote (won/done).
+    const contactUnlocked = boardStatus === 'won' || boardStatus === 'done'
     return {
       leadId: r.leadId,
       recipientStatus: r.recipientStatus,
-      boardStatus: deriveBoardStatus({
-        recipientStatus: r.recipientStatus,
-        projectStage: r.projectStage,
-        latestEstimateStatus: est?.status ?? null,
-      }),
+      boardStatus,
       projectId: r.projectId,
       conversationId: conv?.id ?? null,
       homeownerName: r.homeownerName,
+      homeownerEmail: contactUnlocked ? r.homeownerEmail : null,
+      homeownerPhone: contactUnlocked ? r.homeownerPhone : null,
       serviceName: r.serviceName,
       subtype: subtypeLabel(r.serviceDetails),
       subtypes: subtypeList(r.serviceDetails),
+      images: leadPhotos(r.serviceDetails),
       city: r.city,
       state: r.state,
       zipCode: r.zipCode,
@@ -198,6 +211,8 @@ export type JobDetail = {
     subtypes: string[]
     notes: string | null
     photoUrl: string | null
+    /** Optional photos the homeowner attached when posting the job. */
+    photos: string[]
   }
   serviceName: string
   engagementCreditCost: number
@@ -341,6 +356,7 @@ export async function getJobDetailForContractor(
       subtypes: subtypeList(row.serviceDetails),
       notes: row.notes,
       photoUrl: row.photoUrl,
+      photos: leadPhotos(row.serviceDetails),
     },
     serviceName: row.serviceName,
     engagementCreditCost: row.engagementCreditCost,

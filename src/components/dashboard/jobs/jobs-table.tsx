@@ -1,17 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { BoardStatus, JobCard as Job } from "@/lib/data/jobs";
 import { formatDistanceToNow, formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { SlaCountdown } from "../leads/sla-countdown";
 import { JobDetailSheet } from "./job-detail-sheet";
-import { EngageConfirm } from "./engage-confirm";
+import { JobsCardGrid } from "./job-cards";
+import { JobKanban } from "./job-kanban";
 import { BOARD_ACCENT, BOARD_META } from "./board-meta";
+
+type ViewMode = "table" | "cards" | "kanban";
 
 type Tab = BoardStatus | "all";
 
@@ -20,7 +29,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "new", label: "New" },
   { key: "talking", label: "Talking" },
   { key: "quoted", label: "Quoted" },
-  { key: "won", label: "Won" },
+  { key: "won", label: "In progress" },
   { key: "done", label: "Done" },
   { key: "lost", label: "Closed" },
 ];
@@ -48,8 +57,8 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
       "Jobs where you've sent a quote wait here until the homeowner decides.",
   },
   won: {
-    title: "No wins yet",
-    description: "When a homeowner picks you, the job shows up here.",
+    title: "Nothing in progress",
+    description: "When a homeowner hires you, the job shows up here while you work it.",
   },
   done: {
     title: "Nothing wrapped up yet",
@@ -62,16 +71,25 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
   },
 };
 
-export function JobsTable({
-  jobs,
-  canEngage,
-}: {
-  jobs: Job[];
-  canEngage: boolean;
-}) {
+export function JobsTable({ jobs }: { jobs: Job[] }) {
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [view, setView] = useState<ViewMode>("table");
+
+  // Remember the chosen layout across visits.
+  useEffect(() => {
+    const v = localStorage.getItem("jobs-view");
+    if (v === "table" || v === "cards" || v === "kanban") setView(v);
+  }, []);
+  function changeView(next: ViewMode) {
+    setView(next);
+    try {
+      localStorage.setItem("jobs-view", next);
+    } catch {
+      /* private mode / storage off — keep the in-memory choice */
+    }
+  }
 
   const counts = useMemo(() => {
     const c: Record<Tab, number> = {
@@ -90,77 +108,104 @@ export function JobsTable({
     return c;
   }, [jobs]);
 
-  const filtered = useMemo(() => {
+  // Search applies to every view; the tab filter only to table/cards (kanban
+  // shows all columns at once).
+  const searched = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return jobs.filter((j) => {
-      if (tab === "all" ? j.boardStatus === "lost" : j.boardStatus !== tab)
-        return false;
-      if (!q) return true;
-      return [j.homeownerName, j.serviceName, j.subtype, j.city, j.state]
+    if (!q) return jobs;
+    return jobs.filter((j) =>
+      [j.homeownerName, j.serviceName, j.subtype, j.city, j.state]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
-        .includes(q);
-    });
-  }, [jobs, tab, query]);
+        .includes(q),
+    );
+  }, [jobs, query]);
+
+  const filtered = useMemo(
+    () => searched.filter((j) => (tab === "all" ? j.boardStatus !== "lost" : j.boardStatus === tab)),
+    [searched, tab],
+  );
+
+  function renderEmpty(tabAware: boolean) {
+    if (query.trim()) {
+      return (
+        <EmptyState
+          size="sm"
+          icon="search"
+          title="No jobs match your search"
+          description={`Nothing here matches "${query.trim()}". Try a different word, or clear the search.`}
+        />
+      );
+    }
+    return (
+      <EmptyState
+        size="sm"
+        icon="paper"
+        {...(tabAware
+          ? TAB_EMPTY[tab]
+          : { title: "No jobs yet", description: "Leads you're offered show up here as they come in." })}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4 lg:space-y-[1.111vw]">
-      {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 lg:gap-[0.417vw]">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => setTab(t.key)}
-            className={cn(
-              "inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.903vw] font-medium transition-colors",
-              tab === t.key
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:bg-muted"
-            )}
-          >
-            {t.label}
-            <span
-              className={cn(
-                "text-xs lg:text-[0.764vw] tabular-nums",
-                tab === t.key
-                  ? "text-background/70"
-                  : "text-muted-foreground/70"
-              )}
-            >
-              {counts[t.key]}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Search */}
-      <div className="relative min-w-0 sm:max-w-xs lg:sm:max-w-[20vw]">
-        <Icon
-          name="search"
-          className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
-        />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search jobs…"
-          className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card pl-9 lg:pl-[2.5vw] pr-3 lg:pr-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
-        />
-      </div>
-
-      {filtered.length === 0 ? (
-        query.trim() ? (
-          <EmptyState
-            size="sm"
-            icon="search"
-            title="No jobs match your search"
-            description={`Nothing here matches "${query.trim()}". Try a different word, or clear the search.`}
+      {/* Search + status filter + layout toggle */}
+      <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
+        <div className="relative min-w-0 flex-1 sm:max-w-xs lg:max-w-[20vw]">
+          <Icon
+            name="search"
+            className="pointer-events-none absolute left-3 lg:left-[0.833vw] top-1/2 size-4 lg:size-[1.111vw] -translate-y-1/2 text-muted-foreground"
           />
-        ) : (
-          <EmptyState size="sm" icon="paper" {...TAB_EMPTY[tab]} />
-        )
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search jobs…"
+            className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card pl-9 lg:pl-[2.5vw] pr-3 lg:pr-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
+          />
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 lg:gap-[0.556vw]">
+          {/* A board already shows every column, so the filter is redundant there on desktop. */}
+          <div className={cn(view === "kanban" && "lg:hidden")}>
+            <StatusFilter tab={tab} counts={counts} onChange={setTab} />
+          </div>
+
+          <div className="inline-flex rounded-lg lg:rounded-[0.556vw] border border-border bg-card p-0.5 lg:p-[0.139vw]">
+            <ViewToggle active={view === "table"} label="Table view" onClick={() => changeView("table")}>
+              <RowsIcon />
+            </ViewToggle>
+            <ViewToggle active={view === "cards"} label="Card view" onClick={() => changeView("cards")}>
+              <GridIcon />
+            </ViewToggle>
+            <ViewToggle active={view === "kanban"} label="Board view" onClick={() => changeView("kanban")}>
+              <ColumnsIcon />
+            </ViewToggle>
+          </div>
+        </div>
+      </div>
+
+      {view === "kanban" ? (
+        <>
+          {/* Desktop board */}
+          <div className="hidden lg:block">
+            {searched.length === 0 ? (
+              renderEmpty(false)
+            ) : (
+              <JobKanban jobs={searched} onView={setOpenLeadId} />
+            )}
+          </div>
+          {/* Mobile: a board doesn't fit, so fall back to the tab-filtered cards */}
+          <div className="lg:hidden">
+            {filtered.length === 0 ? renderEmpty(true) : <JobsCardGrid jobs={filtered} onView={setOpenLeadId} />}
+          </div>
+        </>
+      ) : filtered.length === 0 ? (
+        renderEmpty(true)
+      ) : view === "cards" ? (
+        <JobsCardGrid jobs={filtered} onView={setOpenLeadId} />
       ) : (
         <div className="overflow-x-auto rounded-md lg:rounded-[0.556vw] border border-border">
           <table className="w-full min-w-[52rem] border-collapse text-left">
@@ -179,12 +224,7 @@ export function JobsTable({
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.map((j) => (
-                <JobRow
-                  key={j.leadId}
-                  job={j}
-                  canEngage={canEngage}
-                  onView={setOpenLeadId}
-                />
+                <JobRow key={j.leadId} job={j} onView={setOpenLeadId} />
               ))}
             </tbody>
           </table>
@@ -200,13 +240,59 @@ export function JobsTable({
   );
 }
 
+function StatusFilter({
+  tab,
+  counts,
+  onChange,
+}: {
+  tab: Tab;
+  counts: Record<Tab, number>;
+  onChange: (t: Tab) => void;
+}) {
+  const active = TABS.find((t) => t.key === tab) ?? TABS[0];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Filter by status"
+          className="inline-flex h-9 lg:h-[2.5vw] items-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] text-sm lg:text-[0.903vw] font-medium outline-none transition-colors hover:bg-muted/60 focus-visible:border-ring data-[state=open]:bg-muted/60"
+        >
+          <Icon name="filter" className="size-4 lg:size-[1.111vw] text-muted-foreground" />
+          <span className="whitespace-nowrap">{active.label}</span>
+          <span className="hidden tabular-nums text-xs lg:text-[0.764vw] text-muted-foreground sm:inline">
+            {counts[active.key]}
+          </span>
+          <Icon name="down" className="size-3.5 lg:size-[0.972vw] text-muted-foreground" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-44 lg:min-w-[12vw]">
+        <DropdownMenuRadioGroup value={tab} onValueChange={(v) => onChange(v as Tab)}>
+          {TABS.map((t) => (
+            <DropdownMenuRadioItem key={t.key} value={t.key}>
+              <span
+                className={cn(
+                  "size-2 lg:size-[0.556vw] rounded-full",
+                  t.key === "all" ? "bg-foreground/30" : BOARD_ACCENT[t.key as BoardStatus]
+                )}
+              />
+              <span>{t.label}</span>
+              <span className="ml-1 lg:ml-[0.278vw] tabular-nums text-xs lg:text-[0.764vw] text-muted-foreground">
+                {counts[t.key]}
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function JobRow({
   job,
-  canEngage,
   onView,
 }: {
   job: Job;
-  canEngage: boolean;
   onView: (leadId: string) => void;
 }) {
   const isNew = job.boardStatus === "new";
@@ -274,32 +360,6 @@ function JobRow({
         <Button variant="link">
           <Icon name="eye" className="size-4 lg:size-[1.111vw]" /> View details
         </Button>
-        {/* {isNew ? (
-          <EngageConfirm
-            leadId={job.leadId}
-            engagementCreditCost={job.engagementCreditCost}
-            homeownerName={job.homeownerName}
-            disabled={!canEngage}
-            stopPropagation
-            triggerClassName={buttonVariants({ variant: "inverse", size: "sm" })}
-            triggerContent={
-              <>
-                <Icon name="message" className="size-4 lg:size-[1.111vw]" />
-                {`Chat · ${job.engagementCreditCost} cr`}
-              </>
-            }
-          />
-        ) : job.conversationId ? (
-          <Link
-            href={`/contractor/messages/${job.conversationId}`}
-            onClick={(e) => e.stopPropagation()}
-            className={cn(buttonVariants({ variant: "surface", size: "sm" }))}
-          >
-            <Icon name="message" className="size-4 lg:size-[1.111vw]" /> Open chat
-          </Link>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        )} */}
       </td>
     </tr>
   );
@@ -321,6 +381,65 @@ function Th({
     >
       {children}
     </th>
+  );
+}
+
+function ViewToggle({
+  active,
+  label,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-pressed={active}
+      title={label}
+      className={cn(
+        "flex items-center justify-center rounded-md lg:rounded-[0.417vw] p-1.5 lg:p-[0.417vw] transition-colors",
+        active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function RowsIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden className="size-4 lg:size-[1.111vw]">
+      <rect x="2" y="3" width="12" height="2" rx="1" />
+      <rect x="2" y="7" width="12" height="2" rx="1" />
+      <rect x="2" y="11" width="12" height="2" rx="1" />
+    </svg>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden className="size-4 lg:size-[1.111vw]">
+      <rect x="2" y="2" width="5" height="5" rx="1.2" />
+      <rect x="9" y="2" width="5" height="5" rx="1.2" />
+      <rect x="2" y="9" width="5" height="5" rx="1.2" />
+      <rect x="9" y="9" width="5" height="5" rx="1.2" />
+    </svg>
+  );
+}
+
+function ColumnsIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden className="size-4 lg:size-[1.111vw]">
+      <rect x="2" y="2" width="3" height="12" rx="1" />
+      <rect x="6.5" y="2" width="3" height="12" rx="1" />
+      <rect x="11" y="2" width="3" height="12" rx="1" />
+    </svg>
   );
 }
 

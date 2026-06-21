@@ -26,6 +26,9 @@ export function JobDetailContent({
         <Field label="Urgency" value={URGENCY_LABEL[detail.lead.urgency]} />
         <Field label="Location" value={detail.lead.address || place || detail.lead.zipCode || "—"} />
         {detail.lead.notes ? <Field label="Notes" value={detail.lead.notes} /> : null}
+        {detail.lead.photos.length > 0 ? (
+          <PhotoGallery photos={detail.lead.photos} />
+        ) : null}
       </Section>
 
       {showHomeowner ? (
@@ -98,6 +101,35 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       {children}
     </section>
   );
+}
+
+function PhotoGallery({ photos }: { photos: string[] }) {
+  return (
+    <div>
+      <p className="text-xs lg:text-[0.764vw] text-muted-foreground">
+        Photos
+      </p>
+      <div className="mt-1.5 lg:mt-[0.417vw] grid grid-cols-3 gap-2 lg:gap-[0.556vw] sm:grid-cols-4">
+        {photos.map((url, i) => (
+          <a
+            key={url}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative aspect-square overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={url}
+              alt={`Job photo ${i + 1}`}
+              loading="lazy"
+              className="size-full object-cover transition-transform group-hover:scale-105"
+            />
+          </a>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function Field({ label, value }: { label: string; value: string }) {

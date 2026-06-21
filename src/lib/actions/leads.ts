@@ -16,7 +16,7 @@ import { createGuestHomeowner } from '@/lib/auth/guest-homeowner'
 import { findEligibleContractors } from '@/lib/leads/matching'
 import { getLeadPricing } from '@/lib/leads/pricing'
 import { normalizePostalCode } from '@/lib/geo/postal'
-import { NOT_SURE_SUBTYPE } from '@/lib/leads/subtype'
+import { MAX_LEAD_PHOTOS, NOT_SURE_SUBTYPE } from '@/lib/leads/subtype'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { homeowners, leadRecipients, leads, services } from '@/lib/db/schema'
 
@@ -44,6 +44,13 @@ const CreateLeadSchema = z.object({
   lat: z.number().nullable().optional(),
   lng: z.number().nullable().optional(),
   notes: z.string().trim().max(1000).optional().default(''),
+  // Optional job photos — Cloudinary secure URLs uploaded client-side before
+  // submit. Capped so a stray client can't store an unbounded list.
+  photos: z
+    .array(z.string().trim().url())
+    .max(MAX_LEAD_PHOTOS)
+    .optional()
+    .default([]),
   // Guest contact — required only when no homeowner is logged in.
   fullName: z.string().trim().optional().default(''),
   email: z.string().trim().toLowerCase().optional().default(''),
@@ -156,6 +163,9 @@ export async function createLead(
   const pricing = getLeadPricing('roofing')
   // Postal code is optional/display-only now (matching is geographic).
   const zipCode = d.zipCode ? normalizePostalCode(d.zipCode) : null
+  // Photos live in service_details (flexible, multi-vertical), and the first
+  // mirrors onto photo_url for legacy single-photo surfaces (lead-card thumb).
+  const photos = d.photos.slice(0, MAX_LEAD_PHOTOS)
 
   let leadId = ''
   let matchedCount = 0
@@ -166,7 +176,7 @@ export async function createLead(
         .values({
           homeownerId: ho.id,
           serviceId: roofing.id,
-          serviceDetails: { subtypes },
+          serviceDetails: { subtypes, ...(photos.length ? { photos } : {}) },
           urgency: d.urgency,
           address: d.address,
           city: d.city || null,
@@ -174,6 +184,7 @@ export async function createLead(
           zipCode,
           lat,
           lng,
+          photoUrl: photos[0] ?? null,
           notes: d.notes || null,
           status: 'open',
           engagementCreditCost: pricing.engagementCreditCost,

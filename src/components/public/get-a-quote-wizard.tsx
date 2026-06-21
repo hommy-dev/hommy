@@ -59,6 +59,7 @@ export function GetAQuoteWizard({
   )
   const [urgency, setUrgency] = useState<string>("within_month")
   const [notes, setNotes] = useState("")
+  const [photos, setPhotos] = useState<string[]>([])
   const [place, setPlace] = useState<PlaceResult | null>(null)
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -91,11 +92,13 @@ export function GetAQuoteWizard({
         selectedSubtypes?: string[]
         urgency?: string
         notes?: string
+        photos?: string[]
         place?: PlaceResult | null
       }
       if (Array.isArray(d.selectedSubtypes)) setSelectedSubtypes(d.selectedSubtypes)
       if (typeof d.urgency === "string") setUrgency(d.urgency)
       if (typeof d.notes === "string") setNotes(d.notes)
+      if (Array.isArray(d.photos)) setPhotos(d.photos)
       if (d.place) setPlace(d.place)
       setStepIndex(stepKeys.length - 1)
     } catch {
@@ -185,6 +188,7 @@ export function GetAQuoteWizard({
         subtypes: selectedSubtypes,
         urgency,
         notes: notes.trim(),
+        photos,
         address: place?.formattedAddress ?? "",
         city: place?.city ?? "",
         state: place?.state ?? "",
@@ -264,7 +268,7 @@ export function GetAQuoteWizard({
     try {
       sessionStorage.setItem(
         DRAFT_KEY,
-        JSON.stringify({ selectedSubtypes, urgency, notes, place }),
+        JSON.stringify({ selectedSubtypes, urgency, notes, photos, place }),
       )
     } catch {}
     startGoogle(async () => {
@@ -302,6 +306,8 @@ export function GetAQuoteWizard({
             onUrgencyChange={setUrgency}
             notes={notes}
             onNotesChange={setNotes}
+            photos={photos}
+            onPhotosChange={setPhotos}
           />
         )}
 

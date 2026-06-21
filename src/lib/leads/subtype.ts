@@ -29,3 +29,20 @@ export function subtypeLabel(
   const list = subtypeList(serviceDetails)
   return list.length > 0 ? list.join(', ') : null
 }
+
+/** How many photos a homeowner can attach to a job at post time. */
+export const MAX_LEAD_PHOTOS = 8
+
+/**
+ * Read the homeowner's attached job photos out of a lead's serviceDetails jsonb.
+ * Photos are optional, so this returns [] when none were shared. The lead's
+ * `photo_url` column mirrors the first of these for legacy single-photo surfaces.
+ */
+export function leadPhotos(
+  serviceDetails: Record<string, unknown> | null | undefined,
+): string[] {
+  const sd = serviceDetails ?? {}
+  return Array.isArray(sd.photos)
+    ? sd.photos.filter((p): p is string => typeof p === 'string')
+    : []
+}

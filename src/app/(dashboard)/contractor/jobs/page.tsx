@@ -57,7 +57,7 @@ export default async function JobsPage() {
         </div>
       )}
 
-      <JobsTable jobs={jobs} canEngage={canEngage} />
+      <JobsTable jobs={jobs} />
     </div>
   )
 }
