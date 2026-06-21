@@ -25,10 +25,13 @@ export function CoverageMap({
   hub,
   origins,
   className,
+  legend,
 }: {
   hub: CoveragePoint | null
   origins: CoveragePoint[]
   className?: string
+  /** Legend labels. Omit for the default lead-flow legend; pass `null` to hide. */
+  legend?: { you?: string; origin: string } | null
 }) {
   const m = useMemo(() => {
     const fc = feature(statesTopo, statesTopo.objects.states)
@@ -72,6 +75,9 @@ export function CoverageMap({
     )
   }
 
+  const lg =
+    legend === null ? null : legend ?? { you: "You", origin: "Lead origin" }
+
   // Sizes relative to the (possibly zoomed) viewBox so dots stay visually consistent.
   const dotR = m.span * 0.011
   const hubR = m.span * 0.016
@@ -93,7 +99,7 @@ export function CoverageMap({
 
           {m.pts.map((o, i) => (
             <circle key={`dot-${i}`} cx={o.xy[0]} cy={o.xy[1]} r={dotR + Math.min(dotR * 1.4, (o.leads ?? 1) * dotR * 0.25)} fill="currentColor" opacity={0.7}>
-              <title>{`${o.name} · ${o.leads} lead${o.leads === 1 ? "" : "s"}`}</title>
+              <title>{o.leads != null ? `${o.name} · ${o.leads} lead${o.leads === 1 ? "" : "s"}` : o.name}</title>
             </circle>
           ))}
 
@@ -108,10 +114,14 @@ export function CoverageMap({
         </g>
       </svg>
 
-      <div className="mt-3 lg:mt-[0.833vw] flex flex-wrap items-center gap-4 lg:gap-[1.111vw] text-xs lg:text-[0.764vw] text-muted-foreground">
-        <span className="flex items-center gap-1.5 lg:gap-[0.417vw]"><span className="size-2.5 rounded-full bg-primary" /> You</span>
-        <span className="flex items-center gap-1.5 lg:gap-[0.417vw]"><span className="size-2.5 rounded-full bg-primary/70" /> Lead origin</span>
-      </div>
+      {lg ? (
+        <div className="mt-3 lg:mt-[0.833vw] flex flex-wrap items-center gap-4 lg:gap-[1.111vw] text-xs lg:text-[0.764vw] text-muted-foreground">
+          {m.hubXY && lg.you ? (
+            <span className="flex items-center gap-1.5 lg:gap-[0.417vw]"><span className="size-2.5 rounded-full bg-primary" /> {lg.you}</span>
+          ) : null}
+          <span className="flex items-center gap-1.5 lg:gap-[0.417vw]"><span className="size-2.5 rounded-full bg-primary/70" /> {lg.origin}</span>
+        </div>
+      ) : null}
     </div>
   )
 }

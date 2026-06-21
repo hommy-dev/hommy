@@ -425,3 +425,25 @@
     transition: none;
   }
 }
+
+/* ── Static gradient frame ─────────────────────────────────────────────────
+   A clean, 4-side gradient border (not the moving rainbow). The interior is a
+   padding-box fill (--gf-fill); only the ring (--gf-width) shows the gradient,
+   which is a soft diagonal: a primary-tinted corner, a neutral middle, and a
+   secondary-tinted corner. Subtle by design. Keep the element's own radius
+   (rounded-*) — the ring follows it. Override width with [--gf-width:1.5px]. */
+.gradient-frame {
+  --gf-fill: var(--card);
+  --gf-width: 2px;
+  border: var(--gf-width) solid transparent;
+  background:
+    linear-gradient(var(--gf-fill), var(--gf-fill)) padding-box,
+    linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--primary) 85%, var(--border)),
+        var(--border) 45%,
+        var(--border) 55%,
+        color-mix(in oklab, var(--secondary) 75%, var(--border))
+      )
+      border-box;
+}

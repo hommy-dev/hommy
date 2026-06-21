@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeToE164 } from '@/lib/phone/e164'
 import { users } from '@/lib/db/schema'
 
 type FieldErrors = Record<string, string>
@@ -36,7 +37,7 @@ export async function updateMyAccount(input: unknown): Promise<Result> {
   const d = parsed.data
   await db
     .update(users)
-    .set({ fullName: d.fullName, phone: d.phone || null })
+    .set({ fullName: d.fullName, phone: d.phone ? (normalizeToE164(d.phone) ?? d.phone) : null })
     .where(eq(users.id, user.id))
 
   return { success: true }

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/reui/phone-input";
 import { IdentityCard } from "@/components/ui/identity-card";
 import { WizardField, WizardStep } from "./wizard-parts";
 import type { FieldErrors } from "./constants";
@@ -86,14 +87,11 @@ export function ContactStep({
       </WizardField>
 
       <WizardField label="Phone" error={errors.phone}>
-        <Input
+        <PhoneInput
           value={phone}
-          onChange={(e) => onPhoneChange(e.target.value)}
-          type="tel"
-          inputMode="tel"
+          onChange={(v) => onPhoneChange(v ?? "")}
+          defaultCountry="US"
           placeholder="(214) 555-0100"
-          className="h-11 lg:h-[3.056vw] bg-card text-left"
-          aria-invalid={!!errors.phone}
         />
       </WizardField>
 

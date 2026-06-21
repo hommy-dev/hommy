@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { updateMyAccount } from "@/lib/actions/account"
 import { showToast } from "@/components/ui/toast"
 import { Input } from "@/components/ui/input"
+import { PhoneInput } from "@/components/reui/phone-input"
 import { EditDialog, Field } from "./edit-dialog"
 
 export function EditAccountDialog({
@@ -64,17 +65,14 @@ export function EditAccountDialog({
         />
       </Field>
       <Field label="Phone" error={errors.phone}>
-        <Input
+        <PhoneInput
           value={phone}
-          onChange={(e) => {
-            setPhone(e.target.value)
+          onChange={(v) => {
+            setPhone(v ?? "")
             setErrors((p) => ({ ...p, phone: "" }))
           }}
-          type="tel"
-          inputMode="tel"
+          defaultCountry="US"
           placeholder="(214) 555-0100"
-          className="h-11 lg:h-[3.056vw]"
-          aria-invalid={!!errors.phone}
         />
       </Field>
     </EditDialog>

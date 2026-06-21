@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { completeOnboarding } from "@/lib/actions/onboarding"
 import { showToast } from "@/components/ui/toast"
+import { PhoneInput } from "@/components/reui/phone-input"
 import {
   GooglePlacesInput,
   type PlaceResult,
@@ -142,12 +143,11 @@ export function OnboardingWizard({
             </Field>
             <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
               <Field label="Phone (optional)">
-                <input
+                <PhoneInput
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  type="tel"
+                  onChange={(v) => setPhone(v ?? "")}
+                  defaultCountry="US"
                   placeholder="(214) 555-0100"
-                  className={inputCls}
                 />
               </Field>
               <Field label="Years in business (optional)">

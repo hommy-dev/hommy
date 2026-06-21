@@ -14,6 +14,7 @@ import { eq } from 'drizzle-orm'
 import { createClient as createSsrClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { provisionHomeowner } from '@/lib/auth/provisioning'
+import { normalizeToE164 } from '@/lib/phone/e164'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 
@@ -40,7 +41,8 @@ export async function createGuestHomeowner(
 ): Promise<GuestHomeownerResult> {
   const email = input.email.trim().toLowerCase()
   const fullName = input.fullName.trim()
-  const phone = input.phone.trim()
+  // Store E.164 so SMS works; fall back to the raw input if it won't parse.
+  const phone = normalizeToE164(input.phone) ?? input.phone.trim()
 
   const admin = createAdminClient()
 

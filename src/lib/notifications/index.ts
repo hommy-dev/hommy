@@ -13,6 +13,8 @@ import { eq } from 'drizzle-orm'
 import { sendEmail } from './email'
 import { sendSms } from './sms'
 import { sendPushToUser } from './push'
+import { isSmsOptedOut } from './opt-out'
+import { normalizeToE164 } from '@/lib/phone/e164'
 import { broadcastUserEvent } from '@/lib/realtime/user-events'
 
 // ============================================================
@@ -185,11 +187,14 @@ export async function sendNotification(
     }
   }
 
-  // 3. SMS — only for high-urgency types when explicitly requested
-  const smsAllowed = doSms && SMS_ALLOWED_TYPES.includes(type) && !!user.phone
-  if (smsAllowed) {
+  // 3. SMS — only for high-urgency types when explicitly requested. Normalize
+  // the stored number to E.164 (so legacy/raw rows still work) and skip anyone
+  // who texted STOP (opt-out compliance).
+  const e164 = normalizeToE164(user.phone)
+  const smsAllowed = doSms && SMS_ALLOWED_TYPES.includes(type) && !!e164
+  if (smsAllowed && !(await isSmsOptedOut(e164!))) {
     const text = smsBody ?? `Homei: ${title}. ${body}`.slice(0, 160)
-    result.sms = await sendSms(user.phone!, text)
+    result.sms = await sendSms(e164!, text)
   }
 
   // 4. Web Push

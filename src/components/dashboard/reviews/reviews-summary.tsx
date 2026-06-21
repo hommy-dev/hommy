@@ -1,12 +1,25 @@
 import type { ReviewsSummary } from "@/lib/data/reviews";
+import { cn } from "@/lib/utils";
 import { Stars } from "@/components/reviews/stars";
 
-/** Average + total + per-star distribution bars. */
-export function ReviewsSummaryCard({ summary }: { summary: ReviewsSummary }) {
+/** Average + total + per-star distribution bars. Pass `flat` to drop the card
+ *  chrome when it already sits inside a bordered section. */
+export function ReviewsSummaryCard({
+  summary,
+  flat,
+}: {
+  summary: ReviewsSummary;
+  flat?: boolean;
+}) {
   const { avgRating, total, distribution } = summary;
 
   return (
-    <div className="grid gap-6 lg:gap-[1.667vw] rounded-md lg:rounded-[0.556vw] border border-border bg-card p-6 lg:p-[1.667vw] sm:grid-cols-[auto_1fr] sm:items-center">
+    <div
+      className={cn(
+        "grid gap-6 lg:gap-[1.667vw] sm:grid-cols-[auto_1fr] sm:items-center",
+        flat ? "" : "rounded-md lg:rounded-[0.556vw] border border-border bg-card p-6 lg:p-[1.667vw]"
+      )}
+    >
       <div className="text-center">
         <p className="text-4xl lg:text-[2.778vw] font-semibold tabular-nums leading-none">
           {avgRating !== null ? avgRating.toFixed(1) : "—"}

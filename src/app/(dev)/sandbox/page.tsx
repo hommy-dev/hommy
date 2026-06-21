@@ -12,6 +12,12 @@ import {
 } from "@/components/dashboard/analytics/climb-variants"
 import { CoverageMap } from "@/components/dashboard/analytics/coverage-map"
 import { HUB, ORIGINS } from "@/components/dashboard/analytics/map-sample"
+import {
+  HeaderVariantCard,
+  HeaderVariantCompact,
+  HeaderVariantImmersive,
+  HEADER_SAMPLE,
+} from "@/components/dashboard/profile/header-variants"
 
 export default function SandboxPage() {
   const [setupOpen, setSetupOpen] = useState(false)
@@ -162,6 +168,28 @@ export default function SandboxPage() {
 
         <div className="max-w-xl lg:max-w-[40vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-4 lg:p-[1.111vw]">
           <CoverageMap hub={HUB} origins={ORIGINS} />
+        </div>
+
+        {/* Profile header variants */}
+        <div className="space-y-2 lg:space-y-[0.556vw]">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
+            Profile header variants
+          </h2>
+          <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
+            Three directions for the contractor profile hero (banner + logo + identity + trust stats). Shown with the default gradient banner and an initials logo.
+          </p>
+        </div>
+
+        <div className="max-w-5xl lg:max-w-[68vw] space-y-10 lg:space-y-[2.778vw]">
+          <Variant label="Variant 1 — Unified card" note="Banner with one card overlapping its bottom edge; logo peeks above, and the trust stats are embedded in the same card with divider lines. Cohesive and premium.">
+            <HeaderVariantCard data={HEADER_SAMPLE} />
+          </Variant>
+          <Variant label="Variant 2 — Compact (no banner)" note="No big banner — a tidy business header with a thin gradient accent strip and an inline stat row. Fast, dense, very dashboard-like.">
+            <HeaderVariantCompact data={HEADER_SAMPLE} />
+          </Variant>
+          <Variant label="Variant 3 — Immersive banner" note="Tall gradient banner with the identity in white over a scrim and frosted-glass stat chips along the bottom. Bold, marketing-forward.">
+            <HeaderVariantImmersive data={HEADER_SAMPLE} />
+          </Variant>
         </div>
 
       </div>

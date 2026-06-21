@@ -162,6 +162,23 @@ export async function getContractorSubtypes(
   return row?.subtypes ?? []
 }
 
+/** How many jobs this company has won (homeowner accepted their quote). A
+ *  lifetime trust signal for the profile stat band. */
+export async function getContractorWonCount(
+  contractorId: string,
+): Promise<number> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(leadRecipients)
+    .where(
+      and(
+        eq(leadRecipients.contractorId, contractorId),
+        eq(leadRecipients.status, 'won'),
+      ),
+    )
+  return row?.value ?? 0
+}
+
 /**
  * All subtypes the roofing service offers (the pick-from list).
  *

@@ -31,13 +31,13 @@ export function PortfolioGallery({ items }: { items: PortfolioProject[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 lg:gap-[0.833vw] sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:gap-[1.111vw] lg:grid-cols-3">
         {items.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setOpenId(p.id)}
-            className="group overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border text-left transition-colors hover:border-foreground/30"
+            className="group overflow-hidden rounded-lg lg:rounded-[0.694vw] border border-border text-left transition-colors hover:border-foreground/30"
           >
             <div className="aspect-[4/3] overflow-hidden bg-muted">
               {p.coverImageUrl ? (
@@ -65,7 +65,7 @@ export function PortfolioGallery({ items }: { items: PortfolioProject[] }) {
 
       {open ? (
         <Dialog open onOpenChange={(o) => !o && setOpenId(null)}>
-          <DialogContent className="sm:max-w-2xl lg:max-w-[55vw] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-xl lg:max-w-[42vw] max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{open.title}</DialogTitle>
               {open.location ? (
@@ -88,7 +88,7 @@ export function PortfolioGallery({ items }: { items: PortfolioProject[] }) {
                     key={m.id}
                     before={m.beforeUrl}
                     after={m.imageUrl}
-                    mode="drag"
+                    mode="hover"
                     className="overflow-hidden rounded-md lg:rounded-[0.556vw]"
                   />
                 ) : (

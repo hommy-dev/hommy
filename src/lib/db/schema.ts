@@ -700,6 +700,21 @@ export const waitlist = pgTable('waitlist', {
 ])
 
 // ============================================================
+// SMS OPT-OUTS — phones that texted STOP (compliance guard)
+// Keyed by E.164 phone (STOP arrives by number, not by user). Checked before
+// every SMS send so we never text an opted-out number. START removes the row.
+// ============================================================
+
+export const smsOptOuts = pgTable('sms_opt_outs', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  phone: text('phone').notNull(), // E.164
+  source: text('source'), // e.g. 'sms_stop'
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('sms_opt_outs_phone_uq').on(t.phone),
+])
+
+// ============================================================
 // RELATIONS (query-builder only — no DB constraints here)
 // ============================================================
 

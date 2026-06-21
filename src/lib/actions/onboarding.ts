@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
+import { normalizeToE164 } from '@/lib/phone/e164'
 import {
   users,
   contractors,
@@ -70,7 +71,10 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
         .where(eq(contractors.id, contractor.id))
 
       if (d.phone) {
-        await tx.update(users).set({ phone: d.phone }).where(eq(users.id, user.id))
+        await tx
+          .update(users)
+          .set({ phone: normalizeToE164(d.phone) ?? d.phone })
+          .where(eq(users.id, user.id))
       }
 
       await tx
