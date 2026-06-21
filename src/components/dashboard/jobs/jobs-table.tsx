@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState } from "@/components/ui/empty-state";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { BoardStatus, JobCard as Job } from "@/lib/data/jobs";
 import { formatDistanceToNow, formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -34,15 +34,18 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
   },
   new: {
     title: "No new leads right now",
-    description: "Fresh leads in your area land here. We'll ping you the moment one comes in.",
+    description:
+      "Fresh leads in your area land here. We'll ping you the moment one comes in.",
   },
   talking: {
     title: "No chats going yet",
-    description: "Once you start chatting with a homeowner, the job moves here.",
+    description:
+      "Once you start chatting with a homeowner, the job moves here.",
   },
   quoted: {
     title: "Nothing quoted yet",
-    description: "Jobs where you've sent a quote wait here until the homeowner decides.",
+    description:
+      "Jobs where you've sent a quote wait here until the homeowner decides.",
   },
   won: {
     title: "No wins yet",
@@ -50,7 +53,8 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
   },
   done: {
     title: "Nothing wrapped up yet",
-    description: "Finished jobs get collected here so you can look back on them.",
+    description:
+      "Finished jobs get collected here so you can look back on them.",
   },
   lost: {
     title: "Nothing closed",
@@ -58,13 +62,27 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
   },
 };
 
-export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean }) {
+export function JobsTable({
+  jobs,
+  canEngage,
+}: {
+  jobs: Job[];
+  canEngage: boolean;
+}) {
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
 
   const counts = useMemo(() => {
-    const c: Record<Tab, number> = { all: 0, new: 0, talking: 0, quoted: 0, won: 0, done: 0, lost: 0 };
+    const c: Record<Tab, number> = {
+      all: 0,
+      new: 0,
+      talking: 0,
+      quoted: 0,
+      won: 0,
+      done: 0,
+      lost: 0,
+    };
     for (const j of jobs) {
       c[j.boardStatus] += 1;
       if (j.boardStatus !== "lost") c.all += 1;
@@ -75,7 +93,8 @@ export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return jobs.filter((j) => {
-      if (tab === "all" ? j.boardStatus === "lost" : j.boardStatus !== tab) return false;
+      if (tab === "all" ? j.boardStatus === "lost" : j.boardStatus !== tab)
+        return false;
       if (!q) return true;
       return [j.homeownerName, j.serviceName, j.subtype, j.city, j.state]
         .filter(Boolean)
@@ -96,11 +115,20 @@ export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean
             onClick={() => setTab(t.key)}
             className={cn(
               "inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.417vw] px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.903vw] font-medium transition-colors",
-              tab === t.key ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted",
+              tab === t.key
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:bg-muted"
             )}
           >
             {t.label}
-            <span className={cn("text-xs lg:text-[0.764vw] tabular-nums", tab === t.key ? "text-background/70" : "text-muted-foreground/70")}>
+            <span
+              className={cn(
+                "text-xs lg:text-[0.764vw] tabular-nums",
+                tab === t.key
+                  ? "text-background/70"
+                  : "text-muted-foreground/70"
+              )}
+            >
               {counts[t.key]}
             </span>
           </button>
@@ -151,7 +179,12 @@ export function JobsTable({ jobs, canEngage }: { jobs: Job[]; canEngage: boolean
             </thead>
             <tbody className="divide-y divide-border">
               {filtered.map((j) => (
-                <JobRow key={j.leadId} job={j} canEngage={canEngage} onView={setOpenLeadId} />
+                <JobRow
+                  key={j.leadId}
+                  job={j}
+                  canEngage={canEngage}
+                  onView={setOpenLeadId}
+                />
               ))}
             </tbody>
           </table>
@@ -177,7 +210,8 @@ function JobRow({
   onView: (leadId: string) => void;
 }) {
   const isNew = job.boardStatus === "new";
-  const place = [job.city, job.state].filter(Boolean).join(", ") || job.zipCode || "—";
+  const place =
+    [job.city, job.state].filter(Boolean).join(", ") || job.zipCode || "—";
 
   return (
     <tr
@@ -185,10 +219,21 @@ function JobRow({
       className="group relative cursor-pointer text-sm lg:text-[0.903vw] transition-colors hover:bg-muted/40"
     >
       <td className="relative py-3 lg:py-[0.833vw] pl-5 lg:pl-[1.528vw] align-middle">
-        <span aria-hidden className={cn("absolute inset-y-0 left-0 w-1 lg:w-[0.278vw]", BOARD_ACCENT[job.boardStatus])} />
+        <span
+          aria-hidden
+          className={cn(
+            "absolute inset-y-0 left-0 w-1 lg:w-[0.278vw]",
+            BOARD_ACCENT[job.boardStatus]
+          )}
+        />
         <span className="flex items-center gap-1.5 lg:gap-[0.417vw] font-medium text-foreground">
           {job.homeownerName ?? "New homeowner"}
-          {job.hasUnread ? <span aria-label="Unread" className="size-2 lg:size-[0.556vw] rounded-full bg-primary" /> : null}
+          {job.hasUnread ? (
+            <span
+              aria-label="Unread"
+              className="size-2 lg:size-[0.556vw] rounded-full bg-primary"
+            />
+          ) : null}
         </span>
       </td>
       <td className="px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] align-middle text-muted-foreground">
@@ -198,22 +243,38 @@ function JobRow({
         {place}
       </td>
       <td className="px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] align-middle">
-        <span className={cn("inline-flex rounded-full px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium", BOARD_META[job.boardStatus].pill)}>
+        <span
+          className={cn(
+            "inline-flex rounded-full px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium",
+            BOARD_META[job.boardStatus].pill
+          )}
+        >
           {BOARD_META[job.boardStatus].label}
         </span>
       </td>
       <td className="px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] align-middle tabular-nums">
-        {job.latestQuoteTotal && !isNew ? formatCurrency(job.latestQuoteTotal) : <span className="text-muted-foreground">—</span>}
+        {job.latestQuoteTotal && !isNew ? (
+          formatCurrency(job.latestQuoteTotal)
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )}
       </td>
       <td className="px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] align-middle whitespace-nowrap text-muted-foreground">
         {isNew && job.slaDeadline ? (
-          <SlaCountdown deadline={job.slaDeadline} compact className="text-xs lg:text-[0.833vw]" />
+          <SlaCountdown
+            deadline={job.slaDeadline}
+            compact
+            className="text-xs lg:text-[0.833vw]"
+          />
         ) : (
           formatDistanceToNow(new Date(job.engagedAt ?? job.offeredAt))
         )}
       </td>
       <td className="px-3 lg:px-[0.833vw] py-3 lg:py-[0.833vw] pr-4 lg:pr-[1.111vw] align-middle text-right whitespace-nowrap">
-        {isNew ? (
+        <Button variant="link">
+          <Icon name="eye" className="size-4 lg:size-[1.111vw]" /> View details
+        </Button>
+        {/* {isNew ? (
           <EngageConfirm
             leadId={job.leadId}
             engagementCreditCost={job.engagementCreditCost}
@@ -238,16 +299,29 @@ function JobRow({
           </Link>
         ) : (
           <span className="text-muted-foreground">—</span>
-        )}
+        )} */}
       </td>
     </tr>
   );
 }
 
-function Th({ children, className }: { children: React.ReactNode; className?: string }) {
+function Th({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <th className={cn("px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] font-medium", className)}>
+    <th
+      className={cn(
+        "px-3 lg:px-[0.833vw] py-2.5 lg:py-[0.694vw] font-medium",
+        className
+      )}
+    >
       {children}
     </th>
   );
 }
+
+

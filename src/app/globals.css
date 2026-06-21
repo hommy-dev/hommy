@@ -386,3 +386,42 @@
 
 
 
+
+/* Overview dashboard — crisp entrance + gated hover lift (design-eng polish:
+   transform/opacity only, custom ease-out, reduced-motion safe). */
+@keyframes homei-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.homei-rise {
+  opacity: 0;
+  animation: homei-rise 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+@media (hover: hover) and (pointer: fine) {
+  .homei-lift {
+    transition:
+      transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .homei-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.16);
+    border-color: color-mix(in oklab, var(--foreground) 16%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .homei-rise {
+    animation: none;
+    opacity: 1;
+  }
+  .homei-lift {
+    transition: none;
+  }
+}

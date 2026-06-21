@@ -11,13 +11,13 @@ export type DashboardNavItem = {
 // dashboard (docs/HOMEI_PLATFORM.md §5). "Jobs" is the contractor's single
 // unified board (new leads → won jobs); Leads + Projects were merged into it.
 export const CONTRACTOR_NAV: DashboardNavItem[] = [
-  { href: "/contractor", label: "Dashboard", icon: "category" },
+  { href: "/contractor", label: "Overview", icon: "category" },
   { href: "/contractor/jobs", label: "Jobs", icon: "work" },
   { href: "/contractor/contacts", label: "Contacts", icon: "user-3" },
   { href: "/contractor/messages", label: "Messages", icon: "chat" },
   { href: "/contractor/storm-alerts", label: "Storm alerts", icon: "danger-triangle" },
   { href: "/contractor/reviews", label: "Reviews", icon: "star" },
-  { href: "/contractor/reputation", label: "Reputation", icon: "chart" },
+  { href: "/contractor/analytics", label: "Analytics", icon: "graph" },
   { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },
 ]
