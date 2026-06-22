@@ -28,7 +28,7 @@ export function FinalCta() {
           aria-hidden
           className="pointer-events-none mt-12 lg:mt-[3.333vw] select-none font-sebenta text-[24vw] font-bold leading-[0.72] tracking-tighter text-secondary-foreground/10 lg:text-[16vw]"
         >
-          Homei
+          Hommy
         </p>
       </div>
     </section>

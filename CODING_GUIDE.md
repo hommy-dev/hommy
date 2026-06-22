@@ -168,7 +168,7 @@ src/
 // src/proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 
-// Homei public surface (homeowners are unauthenticated). The real
+// Hommy public surface (homeowners are unauthenticated). The real
 // implementation lives in src/lib/supabase/middleware.ts (handleProxyAuth);
 // proxy.ts just delegates to it. Everything NOT public requires a session.
 const PUBLIC_PATHS = [

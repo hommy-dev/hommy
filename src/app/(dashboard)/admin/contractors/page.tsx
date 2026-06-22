@@ -20,7 +20,7 @@ export default async function AdminContractorsPage() {
         <EmptyState
           icon="user-3"
           title="No companies yet"
-          description="New companies will show up here as they sign up to Homei."
+          description="New companies will show up here as they sign up to Hommy."
         />
       ) : (
         <ContractorsTable contractors={contractors} />

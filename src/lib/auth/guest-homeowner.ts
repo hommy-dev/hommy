@@ -2,7 +2,7 @@
 // person posting isn't logged in. We auto-create a PRE-CONFIRMED Supabase auth
 // user (no email round-trip), provision the v2 identity rows, set a session
 // cookie, and defer the password (users.password_set = false). See
-// docs/HOMEI_PLATFORM.md §5.2.
+// docs/HOMMY_PLATFORM.md §5.2.
 //
 // NOTE: this supersedes the painters-era src/lib/auth/silent-signup.ts, which
 // still references the dropped homeownerProfiles table and uppercase roles.

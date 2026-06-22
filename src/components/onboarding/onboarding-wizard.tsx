@@ -101,7 +101,7 @@ export function OnboardingWizard({
   return (
     <div className="flex min-h-svh flex-col bg-canvas text-foreground">
       <header className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-between px-6 lg:px-[1.667vw] py-5 lg:py-[1.389vw]">
-        <span className="font-sebenta text-lg lg:text-[1.25vw] font-bold">Homei</span>
+        <span className="font-sebenta text-lg lg:text-[1.25vw] font-bold">Hommy</span>
         <Link
           href="/contractor"
           className="text-xs lg:text-[0.833vw] font-medium text-foreground/50 transition-colors hover:text-foreground"

@@ -1,4 +1,4 @@
-// Homei Service Worker — handles Web Push notifications
+// Hommy Service Worker — handles Web Push notifications
 // Registered by src/hooks/use-push-subscription.ts on mount.
 
 self.addEventListener('install', () => {
@@ -16,10 +16,10 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data.json()
   } catch {
-    data = { title: 'Homei', body: event.data.text() }
+    data = { title: 'Hommy', body: event.data.text() }
   }
 
-  const { title = 'Homei', body = '', actionUrl = '/', entityId } = data
+  const { title = 'Hommy', body = '', actionUrl = '/', entityId } = data
 
   event.waitUntil(
     self.registration.showNotification(title, {

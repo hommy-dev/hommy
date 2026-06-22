@@ -133,7 +133,7 @@ async function ProfileBody() {
               <ReviewsBlock
                 summary={reviews}
                 reviews={reviews.reviews}
-                homeiCount={reviews.homeiCount}
+                hommyCount={reviews.hommyCount}
                 googleCount={reviews.googleCount}
               />
             </SectionCard>
@@ -157,7 +157,7 @@ async function ProfileBody() {
                 </li>
                 <li className="flex items-center gap-2.5 lg:gap-[0.694vw] text-muted-foreground">
                   <Icon name="time-circle" className="size-4 lg:size-[1.111vw]" />
-                  On Homei since {memberSince}
+                  On Hommy since {memberSince}
                 </li>
               </ul>
             </SubSection>

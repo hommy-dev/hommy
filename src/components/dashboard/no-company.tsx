@@ -7,7 +7,7 @@ export function NoCompany() {
   return (
     <div className="flex min-h-svh items-center justify-center bg-canvas px-6 lg:px-[1.667vw] text-foreground">
       <div className="w-full max-w-md lg:max-w-[31.108vw] rounded-lg lg:rounded-[0.833vw] border border-border bg-card p-8 lg:p-[2.222vw] text-center">
-        <span className="font-sebenta text-lg lg:text-[1.25vw] font-bold">Homei</span>
+        <span className="font-sebenta text-lg lg:text-[1.25vw] font-bold">Hommy</span>
         <h1 className="mt-6 lg:mt-[1.667vw] font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
           You’re not part of a company
         </h1>

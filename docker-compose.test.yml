@@ -2,16 +2,16 @@ services:
   postgres-test:
     # PostGIS-enabled image — lead matching uses ST_Covers on a geography column.
     image: postgis/postgis:15-3.4-alpine
-    container_name: homei-postgres-test
+    container_name: hommy-postgres-test
     restart: unless-stopped
     environment:
-      POSTGRES_USER: homei_test
-      POSTGRES_PASSWORD: homei_test
-      POSTGRES_DB: homei_test
+      POSTGRES_USER: hommy_test
+      POSTGRES_PASSWORD: hommy_test
+      POSTGRES_DB: hommy_test
     ports:
       - '54322:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U homei_test']
+      test: ['CMD-SHELL', 'pg_isready -U hommy_test']
       interval: 2s
       timeout: 3s
       retries: 20

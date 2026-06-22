@@ -11,7 +11,7 @@ import { FinalCta } from "@/components/landing-page/final-cta";
 import { SiteFooter } from "@/components/landing-page/site-footer";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-const TITLE = "Homei | Find a roofer you can actually trust";
+const TITLE = "Hommy | Find a roofer you can actually trust";
 const DESCRIPTION =
   "Tell us what's going on with your roof and we'll line up a few licensed, insured local roofers near you. Free to post, no spam calls, no pressure.";
 const OG_IMAGE = "/bg/landing-page-hero.jpeg";
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     type: "website",
-    siteName: "Homei",
+    siteName: "Hommy",
     images: [
       {
         url: OG_IMAGE,

@@ -75,7 +75,7 @@ export function InviteDialog({ canInviteAdmin }: { canInviteAdmin: boolean }) {
       <DialogContent className="sm:max-w-md lg:max-w-[34vw]">
         <DialogHeader>
           <DialogTitle>Invite a teammate</DialogTitle>
-          <DialogDescription>They’ll join your company on Homei.</DialogDescription>
+          <DialogDescription>They’ll join your company on Hommy.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 lg:space-y-[1.111vw]">

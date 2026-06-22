@@ -58,9 +58,9 @@ function whatsNext(d: HomeownerRequestDetail): string {
         ? `We've shared your job with ${pro(d.matchedCount)}. They'll review it and reach out — usually within a day.`
         : "We're still finding pros in your area — we'll alert you the moment one's available.";
     case "interested":
-      return `${pro(d.interestedCount)} reached out to discuss your job. Chat about the details and timing, then ask them to send a quote through Homei.`;
+      return `${pro(d.interestedCount)} reached out to discuss your job. Chat about the details and timing, then ask them to send a quote through Hommy.`;
     case "quotes":
-      return `You've received ${d.quoteCount} quote${d.quoteCount === 1 ? "" : "s"}. Compare them and accept the one you want right here — accepting hires them and confirms the job on Homei. (Never pay or agree off-platform.)`;
+      return `You've received ${d.quoteCount} quote${d.quoteCount === 1 ? "" : "s"}. Compare them and accept the one you want right here — accepting hires them and confirms the job on Hommy. (Never pay or agree off-platform.)`;
     case "hired":
       return "You hired your pro. They'll reach out to schedule — message them anytime.";
     case "done":

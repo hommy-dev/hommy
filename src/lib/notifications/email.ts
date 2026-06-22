@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@homei.com'
+const FROM = process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@hommy.online'
 
 /**
  * A file to attach. Provide EITHER `path` (a hosted URL Resend fetches — e.g. a

@@ -48,7 +48,7 @@ export function ComingSoon({ regionLabel }: { regionLabel: string | null }) {
   return (
     <div className="flex min-h-svh flex-col bg-canvas text-foreground">
       <header className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-center px-6 lg:px-[1.667vw] py-6 lg:py-[1.667vw]">
-        <Link href="/" aria-label="Homei home">
+        <Link href="/" aria-label="Hommy home">
           <Icon name="logo" className="size-9 lg:size-[2.5vw]" />
         </Link>
       </header>
@@ -67,7 +67,7 @@ export function ComingSoon({ regionLabel }: { regionLabel: string | null }) {
                 We&apos;re not in {place} just yet
               </h1>
               <p className="mx-auto mt-2 lg:mt-[0.556vw] max-w-md lg:max-w-[26vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
-                Homei is live in {OPERATING_AREAS_LABEL} and growing fast. Leave your
+                Hommy is live in {OPERATING_AREAS_LABEL} and growing fast. Leave your
                 details and we&apos;ll let you know the moment we reach you.
               </p>
 
@@ -139,7 +139,7 @@ export function ComingSoon({ regionLabel }: { regionLabel: string | null }) {
                   Are you a roofing company?
                 </p>
                 <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.903vw] text-foreground/60">
-                  Companies can join Homei from anywhere.
+                  Companies can join Hommy from anywhere.
                 </p>
               </div>
             </div>
@@ -147,7 +147,7 @@ export function ComingSoon({ regionLabel }: { regionLabel: string | null }) {
               href="/"
               className={cn(buttonVariants({ variant: "surface" }), "shrink-0 font-semibold")}
             >
-              Continue to Homei
+              Continue to Hommy
               <Icon name="arrow-right" className="size-4 lg:size-[1.111vw]" />
             </Link>
           </div>
@@ -188,7 +188,7 @@ function SuccessState({
         You&apos;re on the list
       </h1>
       <p className="mx-auto mt-2 lg:mt-[0.556vw] max-w-md lg:max-w-[26vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
-        Thanks{name}. We&apos;ll email {email} the moment Homei is live in {place}.
+        Thanks{name}. We&apos;ll email {email} the moment Hommy is live in {place}.
       </p>
     </div>
   )

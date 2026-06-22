@@ -35,7 +35,7 @@ export function SiteFooter() {
         <div className="grid gap-10 lg:gap-[2.778vw] sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
             <p className="font-sebenta text-xl lg:text-[1.389vw] font-bold">
-              Homei
+              Hommy
             </p>
             <p className="mt-3 lg:mt-[0.833vw] max-w-xs lg:max-w-[22.22vw] text-sm lg:text-[0.972vw] leading-relaxed">
               Home services, done right. Starting with roofing.
@@ -75,7 +75,7 @@ export function SiteFooter() {
         {/* big wordmark */}
         <div className="mt-8 lg:mt-[2vw] border-t pt-4 lg:pt-[2vw]">
           <p className="text-center text-xs lg:text-[0.833vw]">
-            © 2026 Homei. Licensed and insured roofers only.
+            © 2026 Hommy. Licensed and insured roofers only.
           </p>
         </div>
       </div>

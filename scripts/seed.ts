@@ -54,7 +54,7 @@ type CreditKind = (typeof creditTransactions.kind.enumValues)[number]
 
 /** Deterministic UUID from a tag, so demo rows are stable across re-seeds. */
 function uid(tag: string): string {
-  const h = createHash('sha1').update(`homei-seed:${tag}`).digest('hex')
+  const h = createHash('sha1').update(`hommy-seed:${tag}`).digest('hex')
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`
 }
 
@@ -105,17 +105,17 @@ const HOMEOWNERS = [
     subtype: 'Replacement', sqft: 2200, urgency: 'within_week' as const, engaged: true,
     notes: 'Old asphalt shingle roof, several leaks after last storm.' },
   { hoId: '31111111-1111-4111-8111-222222222222', leadId: '41111111-1111-4111-8111-222222222222', recipientId: '42111111-1111-4111-8111-222222222222',
-    email: 'james.carter@homei.test', fullName: 'James Carter', phone: '+12145550112',
+    email: 'james.carter@hommy.test', fullName: 'James Carter', phone: '+12145550112',
     address: '4400 N Central Expy', zip: '75204', city: 'Dallas', state: 'TX', lat: 32.8121, lng: -96.7866,
     subtype: 'Repair', sqft: 1800, urgency: 'emergency' as const, engaged: false,
     notes: 'Active leak in master bedroom ceiling.' },
   { hoId: '31111111-1111-4111-8111-333333333333', leadId: '41111111-1111-4111-8111-333333333333', recipientId: '42111111-1111-4111-8111-333333333333',
-    email: 'priya.nair@homei.test', fullName: 'Priya Nair', phone: '+12145550113',
+    email: 'priya.nair@hommy.test', fullName: 'Priya Nair', phone: '+12145550113',
     address: '2700 Greenville Ave', zip: '75206', city: 'Dallas', state: 'TX', lat: 32.8138, lng: -96.7702,
     subtype: 'Inspection', sqft: 1600, urgency: 'within_month' as const, engaged: false,
     notes: 'Buying the home — wants a pre-purchase roof inspection.' },
   { hoId: '31111111-1111-4111-8111-444444444444', leadId: '41111111-1111-4111-8111-444444444444', recipientId: '42111111-1111-4111-8111-444444444444',
-    email: 'sofia.reyes@homei.test', fullName: 'Sofia Reyes', phone: '+12145550114',
+    email: 'sofia.reyes@hommy.test', fullName: 'Sofia Reyes', phone: '+12145550114',
     address: '5600 W Lovers Ln', zip: '75209', city: 'Dallas', state: 'TX', lat: 32.8516, lng: -96.8273,
     subtype: 'Replacement', sqft: 3000, urgency: 'planning' as const, engaged: false,
     notes: 'Roof is ~20 years old, planning a replacement next quarter.' },
@@ -346,8 +346,8 @@ async function seedDemo(
   devOwnerId: string,
 ): Promise<void> {
   // ---- Company 1 (Lone Star) extras ----
-  const alex = await ensureUser(supabase, 'alex.rivera@homei.test', 'Alex Rivera', '+12145550131', 'contractor')
-  const sam = await ensureUser(supabase, 'sam.park@homei.test', 'Sam Park', '+12145550132', 'contractor')
+  const alex = await ensureUser(supabase, 'alex.rivera@hommy.test', 'Alex Rivera', '+12145550131', 'contractor')
+  const sam = await ensureUser(supabase, 'sam.park@hommy.test', 'Sam Park', '+12145550132', 'contractor')
   await ensureMember(ID.contractor, alex, 'admin')
   await ensureMember(ID.contractor, sam, 'member')
 
@@ -371,15 +371,15 @@ async function seedDemo(
     singles: [photo('lonestar-3a'), photo('lonestar-3b'), photo('lonestar-3c')],
   })
 
-  await seedClientProject(supabase, ID.contractor, serviceId, { key: 'c1-ethan', name: 'Ethan Brooks', email: 'ethan.brooks@homei.test', phone: '+12145550141', stage: 'completed', value: '12800.00', tags: ['replacement'], review: { rating: 5, comment: 'Crew was on time, cleaned up everything, and the roof looks fantastic. Would hire again.' } })
-  await seedClientProject(supabase, ID.contractor, serviceId, { key: 'c1-ava', name: 'Ava Sullivan', email: 'ava.sullivan@homei.test', phone: '+12145550142', stage: 'completed', value: '9400.00', tags: ['repair'], review: { rating: 4, comment: 'Great work and a fair price. Took a day longer than planned but kept us informed.' } })
-  await seedClientProject(supabase, ID.contractor, serviceId, { key: 'c1-liam', name: 'Liam Foster', email: 'liam.foster@homei.test', phone: '+12145550143', stage: 'in_progress', value: '15600.00', tags: ['replacement'] })
+  await seedClientProject(supabase, ID.contractor, serviceId, { key: 'c1-ethan', name: 'Ethan Brooks', email: 'ethan.brooks@hommy.test', phone: '+12145550141', stage: 'completed', value: '12800.00', tags: ['replacement'], review: { rating: 5, comment: 'Crew was on time, cleaned up everything, and the roof looks fantastic. Would hire again.' } })
+  await seedClientProject(supabase, ID.contractor, serviceId, { key: 'c1-ava', name: 'Ava Sullivan', email: 'ava.sullivan@hommy.test', phone: '+12145550142', stage: 'completed', value: '9400.00', tags: ['repair'], review: { rating: 4, comment: 'Great work and a fair price. Took a day longer than planned but kept us informed.' } })
+  await seedClientProject(supabase, ID.contractor, serviceId, { key: 'c1-liam', name: 'Liam Foster', email: 'liam.foster@hommy.test', phone: '+12145550143', stage: 'in_progress', value: '15600.00', tags: ['replacement'] })
 
   // ---- Company 2 (Summit Exteriors) — dev contractor is a MEMBER here ----
   const C2 = uid('company:summit')
   const [freePlan] = await db.select({ id: plans.id }).from(plans).where(eq(plans.slug, 'free')).limit(1)
-  const jordan = await ensureUser(supabase, 'jordan.lee@homei.test', 'Jordan Lee', '+14695550150', 'contractor')
-  const casey = await ensureUser(supabase, 'casey.morgan@homei.test', 'Casey Morgan', '+14695550151', 'contractor')
+  const jordan = await ensureUser(supabase, 'jordan.lee@hommy.test', 'Jordan Lee', '+14695550150', 'contractor')
+  const casey = await ensureUser(supabase, 'casey.morgan@hommy.test', 'Casey Morgan', '+14695550151', 'contractor')
 
   const C2_LOGO = photo('summit-logo')
   await db
@@ -430,9 +430,9 @@ async function seedDemo(
     singles: [photo('summit-2a'), photo('summit-2b')],
   })
 
-  await seedClientProject(supabase, C2, serviceId, { key: 'c2-grace', name: 'Grace Kim', email: 'grace.kim@homei.test', phone: '+14695550161', stage: 'completed', value: '18900.00', tags: ['storm'], review: { rating: 5, comment: 'Summit handled our storm claim start to finish. Stress-free and the roof is perfect.' } })
-  await seedClientProject(supabase, C2, serviceId, { key: 'c2-lucas', name: 'Lucas Gray', email: 'lucas.gray@homei.test', phone: '+14695550162', stage: 'completed', value: '7200.00', tags: ['repair'], review: { rating: 5, comment: 'Quick repair, very professional crew.' } })
-  await seedClientProject(supabase, C2, serviceId, { key: 'c2-emma', name: 'Emma Diaz', email: 'emma.diaz@homei.test', phone: '+14695550163', stage: 'estimate_sent', value: '11200.00', tags: ['replacement'] })
+  await seedClientProject(supabase, C2, serviceId, { key: 'c2-grace', name: 'Grace Kim', email: 'grace.kim@hommy.test', phone: '+14695550161', stage: 'completed', value: '18900.00', tags: ['storm'], review: { rating: 5, comment: 'Summit handled our storm claim start to finish. Stress-free and the roof is perfect.' } })
+  await seedClientProject(supabase, C2, serviceId, { key: 'c2-lucas', name: 'Lucas Gray', email: 'lucas.gray@hommy.test', phone: '+14695550162', stage: 'completed', value: '7200.00', tags: ['repair'], review: { rating: 5, comment: 'Quick repair, very professional crew.' } })
+  await seedClientProject(supabase, C2, serviceId, { key: 'c2-emma', name: 'Emma Diaz', email: 'emma.diaz@hommy.test', phone: '+14695550163', stage: 'estimate_sent', value: '11200.00', tags: ['replacement'] })
 
   // Offer two existing homeowner leads to Summit as well, so its dashboard/leads
   // page show real offers (a lead fans out to multiple companies).

@@ -61,7 +61,7 @@ async function addExternalReview(
   })
 }
 
-/** A submitted native (Homei) review for the contractor. */
+/** A submitted native (Hommy) review for the contractor. */
 async function addNativeReview(contractorId: string, serviceId: string, rating: number): Promise<void> {
   const ho = await makeHomeowner()
   const contactId = await makeContact(contractorId, ho.homeownerId)
@@ -145,7 +145,7 @@ describe('integrations data', () => {
 
     const combined = await getCombinedReviews(contractorId)
     expect(combined.total).toBe(3)
-    expect(combined.homeiCount).toBe(1)
+    expect(combined.hommyCount).toBe(1)
     expect(combined.googleCount).toBe(2)
     expect(combined.avgRating).toBeCloseTo(11 / 3, 5)
     expect(combined.distribution).toMatchObject({ 2: 1, 4: 1, 5: 1 })
@@ -155,6 +155,6 @@ describe('integrations data', () => {
   it('reports a null average when there are no reviews at all', async () => {
     const contractorId = await makeContractor()
     const combined = await getCombinedReviews(contractorId)
-    expect(combined).toMatchObject({ avgRating: null, total: 0, homeiCount: 0, googleCount: 0 })
+    expect(combined).toMatchObject({ avgRating: null, total: 0, hommyCount: 0, googleCount: 0 })
   })
 })

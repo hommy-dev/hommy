@@ -135,7 +135,7 @@ export function LoginForm() {
         </div>
         <div className="relative flex justify-center">
           <span className="bg-background px-3 lg:px-[0.833vw] text-xs lg:text-[0.833vw] text-muted-foreground">
-            New to Homei?
+            New to Hommy?
           </span>
         </div>
       </div>

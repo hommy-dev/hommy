@@ -6,7 +6,7 @@
 // "+ N more conversations". Each row links to the conversation.
 // ============================================================
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://homei.com'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://hommy.online'
 
 export type DigestConversationRow = {
   conversationId: string
@@ -34,8 +34,8 @@ export function renderMessagesDigestEmail(args: {
 
   const subject =
     totalUnread === 1
-      ? 'You have 1 new message on Homei'
-      : `You have ${totalUnread} new messages on Homei`
+      ? 'You have 1 new message on Hommy'
+      : `You have ${totalUnread} new messages on Hommy`
 
   const rowsHtml = visible
     .map((c) => {
@@ -98,7 +98,7 @@ export function renderMessagesDigestEmail(args: {
                 <tr>
                   <td style="padding:28px 28px 20px;">
                     <p style="margin:0 0 6px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#6c47ff;">
-                      Homei
+                      Hommy
                     </p>
                     <h1 style="margin:0;font-size:20px;font-weight:600;color:#111827;line-height:1.3;">
                       Hi ${escapeHtml(recipientName.split(' ')[0] || 'there')}, you missed ${
@@ -120,7 +120,7 @@ export function renderMessagesDigestEmail(args: {
                 <tr>
                   <td style="padding:24px 28px 28px;">
                     <p style="margin:0;font-size:11px;line-height:1.5;color:#9ca3af;">
-                      You're receiving this digest because you have unread messages on Homei.
+                      You're receiving this digest because you have unread messages on Hommy.
                       We send digests at most once every 15 minutes when you're away.
                     </p>
                   </td>

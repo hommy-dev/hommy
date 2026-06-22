@@ -2,7 +2,7 @@
 //
 // Mirrors photo-upload.ts (unsigned preset, XHR for progress), but posts to the
 // `/auto/upload` endpoint so ANY file type is accepted (image / video / raw),
-// and nests under homei/chat/{conversationId}. Returns a ready-to-store
+// and nests under hommy/chat/{conversationId}. Returns a ready-to-store
 // ChatAttachment — we keep secure_url because raw files deliver from a different
 // path than images.
 
@@ -29,7 +29,7 @@ export async function uploadChatAttachment(args: {
   const form = new FormData()
   form.append('file', args.file)
   form.append('upload_preset', uploadPreset)
-  form.append('folder', `homei/chat/${args.conversationId}`)
+  form.append('folder', `hommy/chat/${args.conversationId}`)
 
   // `auto` lets Cloudinary classify the file (image/video/raw) and accept any type.
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`

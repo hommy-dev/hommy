@@ -85,7 +85,7 @@ async function main() {
 
   console.log('[notifications:test] config', {
     hasResendApiKey: hasResend,
-    from: process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@homei.com (default)',
+    from: process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@hommy.online (default)',
   })
   if (!hasResend) {
     console.warn(

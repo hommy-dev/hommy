@@ -33,8 +33,8 @@ const EVENT_COPY: Record<ScoreEventKind, EventCopy> = {
     blurb: 'A lead timed out before you replied.',
   },
   off_platform_flag: {
-    title: 'Flagged: taken off Homei',
-    blurb: 'A deal appeared to move off-platform. Keep work on Homei to protect your score.',
+    title: 'Flagged: taken off Hommy',
+    blurb: 'A deal appeared to move off-platform. Keep work on Hommy to protect your score.',
   },
   pattern_no_quotes: {
     title: 'Engaging but not quoting',

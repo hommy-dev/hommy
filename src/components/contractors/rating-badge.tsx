@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 /** A plain-language label for a rating — visual/descriptive, not a bare number. */
 export function ratingLabel(avgRating: number | null, totalReviews: number): string {
-  if (!totalReviews || avgRating === null) return "New to Homei";
+  if (!totalReviews || avgRating === null) return "New to Hommy";
   if (avgRating >= 4.5) return "Excellent";
   if (avgRating >= 4.0) return "Highly rated";
   if (avgRating >= 3.5) return "Well rated";
@@ -23,7 +23,7 @@ export function responseLabel(minutes: number | null): string | null {
 
 /**
  * Compact, decision-friendly rating: stars + a descriptive word + review count.
- * For an unrated company it reads "New to Homei" instead of an empty 0★.
+ * For an unrated company it reads "New to Hommy" instead of an empty 0★.
  */
 export function RatingBadge({
   avgRating,

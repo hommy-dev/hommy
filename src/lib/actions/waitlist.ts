@@ -5,7 +5,7 @@
 // we detect from edge geo headers) so we can notify them at launch and see where
 // demand is. continueAsLocal is the safety valve for a mis-geolocated real
 // customer who self-attests they're in an operating state.
-// See docs/HOMEI_PLATFORM.md §0 (multi-vertical) and src/lib/config/service-areas.ts.
+// See docs/HOMMY_PLATFORM.md §0 (multi-vertical) and src/lib/config/service-areas.ts.
 
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'

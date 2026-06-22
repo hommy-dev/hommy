@@ -1,8 +1,8 @@
 // ============================================================
-// HOMEI — DRIZZLE ORM SCHEMA (v2)
+// HOMMY — DRIZZLE ORM SCHEMA (v2)
 // Database: PostgreSQL via Supabase
 // ============================================================
-// Canonical model: docs/HOMEI_PLATFORM.md.
+// Canonical model: docs/HOMMY_PLATFORM.md.
 //
 // IDENTITY: a contractor is a COMPANY with many member users.
 //   users → contractor_members (role) → contractors (company).

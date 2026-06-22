@@ -39,13 +39,13 @@ jobs:
       postgres:
         image: postgis/postgis:15-3.4-alpine
         env:
-          POSTGRES_USER: homei_test
-          POSTGRES_PASSWORD: homei_test
-          POSTGRES_DB: homei_test
+          POSTGRES_USER: hommy_test
+          POSTGRES_PASSWORD: hommy_test
+          POSTGRES_DB: hommy_test
         ports:
           - 54322:5432
         options: >-
-          --health-cmd "pg_isready -U homei_test"
+          --health-cmd "pg_isready -U hommy_test"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
@@ -69,7 +69,7 @@ jobs:
     # constructed (stub URL/key; no real Supabase needed for the smoke).
     env:
       CI: 'true'
-      DATABASE_URL: postgres://homei_test:homei_test@localhost:54322/homei_test
+      DATABASE_URL: postgres://hommy_test:hommy_test@localhost:54322/hommy_test
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: stub-anon-key
       SUPABASE_SERVICE_ROLE_KEY: stub-service-role-key
@@ -77,13 +77,13 @@ jobs:
       postgres:
         image: postgis/postgis:15-3.4-alpine
         env:
-          POSTGRES_USER: homei_test
-          POSTGRES_PASSWORD: homei_test
-          POSTGRES_DB: homei_test
+          POSTGRES_USER: hommy_test
+          POSTGRES_PASSWORD: hommy_test
+          POSTGRES_DB: hommy_test
         ports:
           - 54322:5432
         options: >-
-          --health-cmd "pg_isready -U homei_test"
+          --health-cmd "pg_isready -U hommy_test"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10

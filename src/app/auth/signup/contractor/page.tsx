@@ -4,9 +4,9 @@ import { ContractorSignupForm } from "@/components/auth/contractor-signup-form";
 import { ActivityResetKey } from "@/components/auth/activity-reset-key";
 
 export const metadata: Metadata = {
-  title: "Become a Homei roofer",
+  title: "Become a Hommy roofer",
   description:
-    "Join Homei and get matched with homeowners who need roofing work. No charge to receive a lead. Pay only when you win the job.",
+    "Join Hommy and get matched with homeowners who need roofing work. No charge to receive a lead. Pay only when you win the job.",
 };
 
 const POINTS = [
@@ -21,7 +21,7 @@ export default function ContractorSignupPage() {
       {/* brand panel */}
       <aside className="relative hidden w-[44%] shrink-0 flex-col justify-between overflow-hidden bg-foreground px-12 lg:px-[3.333vw] py-8 lg:py-[2.222vw] text-background lg:flex">
         <Link href="/" className="relative font-sebenta text-xl lg:text-[1.389vw] font-bold">
-          Homei
+          Hommy
         </Link>
 
         <div className="relative max-w-sm lg:max-w-[26.664vw]">
@@ -43,7 +43,7 @@ export default function ContractorSignupPage() {
           </ul>
         </div>
 
-        <p className="relative text-xs lg:text-[0.833vw] text-background/40">© 2026 Homei</p>
+        <p className="relative text-xs lg:text-[0.833vw] text-background/40">© 2026 Hommy</p>
       </aside>
 
       {/* form side */}

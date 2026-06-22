@@ -136,8 +136,8 @@ export async function inviteMember(input: unknown): Promise<Result<{ token: stri
   const link = `${appOrigin()}/invite/${token}`
   await sendEmail(
     email,
-    `You're invited to join ${company?.name ?? "a company"} on Homei`,
-    `<p>You've been invited to join <strong>${company?.name ?? "a company"}</strong> on Homei as ${role}.</p>
+    `You're invited to join ${company?.name ?? "a company"} on Hommy`,
+    `<p>You've been invited to join <strong>${company?.name ?? "a company"}</strong> on Hommy as ${role}.</p>
      <p><a href="${link}">Accept the invitation</a> (expires in ${INVITE_TTL_DAYS} days).</p>
      <p>If the link doesn't work, paste this into your browser:<br/>${link}</p>`,
   ).catch(() => undefined)
@@ -205,8 +205,8 @@ export async function resendInvitation(id: string): Promise<Result<{ token: stri
   const link = `${appOrigin()}/invite/${inv.token}`
   await sendEmail(
     inv.email,
-    `Reminder: join ${company?.name ?? "a company"} on Homei`,
-    `<p>You've been invited to join <strong>${company?.name ?? "a company"}</strong> on Homei as ${inv.role}.</p>
+    `Reminder: join ${company?.name ?? "a company"} on Hommy`,
+    `<p>You've been invited to join <strong>${company?.name ?? "a company"}</strong> on Hommy as ${inv.role}.</p>
      <p><a href="${link}">Accept the invitation</a> (expires in ${INVITE_TTL_DAYS} days).</p>
      <p>If the link doesn't work, paste this into your browser:<br/>${link}</p>`,
   ).catch(() => undefined)

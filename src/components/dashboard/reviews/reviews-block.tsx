@@ -12,7 +12,7 @@ export function ReviewsBlock({
   summary,
   reviews,
   flat,
-  homeiCount,
+  hommyCount,
   googleCount,
 }: {
   summary: ReviewsSummary;
@@ -20,7 +20,7 @@ export function ReviewsBlock({
   /** Drop the summary's own card chrome (when wrapped in a section card). */
   flat?: boolean;
   /** Per-source counts for the combined-view breakdown line. */
-  homeiCount?: number;
+  hommyCount?: number;
   googleCount?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -31,7 +31,7 @@ export function ReviewsBlock({
       <ReviewsSummaryCard
         summary={summary}
         flat={flat}
-        homeiCount={homeiCount}
+        hommyCount={hommyCount}
         googleCount={googleCount}
       />
       <ReviewList reviews={shown} className="space-y-4 lg:space-y-[1.111vw]" />

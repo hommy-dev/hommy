@@ -1,9 +1,9 @@
-// Service areas — WHERE Homei operates. Launch is roofing in Texas + Florida
+// Service areas — WHERE Hommy operates. Launch is roofing in Texas + Florida
 // only, so we gate the homeowner lead funnel by the visitor's region and steer
 // out-of-area homeowners to a waitlist (see /coming-soon). Kept as STATIC config
 // (no DB query) so the gate stays free at the edge in proxy.ts.
 //
-// Service-neutral on purpose (docs/HOMEI_PLATFORM.md §0): this is platform
+// Service-neutral on purpose (docs/HOMMY_PLATFORM.md §0): this is platform
 // coverage, not a roofing concept — other verticals will reuse it.
 
 // ── Where we operate (ISO 3166-2 subdivision codes) ───────────────────────────

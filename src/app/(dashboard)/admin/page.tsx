@@ -87,7 +87,7 @@ async function RecentContractors() {
           size="sm"
           icon="work"
           title="No companies yet"
-          description="New companies will show up here as they sign up to Homei."
+          description="New companies will show up here as they sign up to Hommy."
           className="mt-4 lg:mt-[1.111vw]"
         />
       ) : (

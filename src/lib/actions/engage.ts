@@ -1,6 +1,6 @@
 'use server'
 
-// Engage — the contractor's first move on a lead (docs/HOMEI_PLATFORM.md §4.1
+// Engage — the contractor's first move on a lead (docs/HOMMY_PLATFORM.md §4.1
 // step 3). In one atomic transaction we: row-lock the lead, reserve+charge
 // credits, flip the recipient to `engaged`, and spin up the CRM workspace
 // (contact + project + conversation with the homeowner). Async comms fire

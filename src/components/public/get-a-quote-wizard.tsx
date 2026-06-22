@@ -26,7 +26,7 @@ import {
 
 // Where we stash the in-progress job before a Google round-trip, so it can be
 // restored when the now-signed-in homeowner lands back on the wizard.
-const DRAFT_KEY = "homei:get-a-quote:draft"
+const DRAFT_KEY = "hommy:get-a-quote:draft"
 
 export function GetAQuoteWizard({
   subtypes,
@@ -71,7 +71,7 @@ export function GetAQuoteWizard({
   const [errors, setErrors] = useState<FieldErrors>({})
 
   // Inline existing-account flow. A single account is one role (see
-  // docs/HOMEI_PLATFORM.md §5): a known homeowner is prompted to sign in inline;
+  // docs/HOMMY_PLATFORM.md §5): a known homeowner is prompted to sign in inline;
   // a contractor/admin email is blocked with a "use a different email" note.
   // `emailStatus` also keeps Post disabled WHILE we're checking, so the button
   // never flips enabled → disabled once the result lands.
@@ -310,7 +310,7 @@ export function GetAQuoteWizard({
           href="/"
           className="text-muted-foreground font-sebenta text-lg lg:text-[2vw] font-bold"
         >
-          Homei
+          Hommy
         </Link>
       </header>
 

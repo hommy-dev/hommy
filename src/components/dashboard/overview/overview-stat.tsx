@@ -58,7 +58,7 @@ export function OverviewStat({
 }) {
   const body = (
     <div
-      className="homei-rise homei-lift flex h-full flex-col rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]"
+      className="hommy-rise hommy-lift flex h-full flex-col rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]"
       style={{ animationDelay: `${delayMs}ms` }}
     >
       <div className="flex items-center justify-between gap-2 lg:gap-[0.556vw]">

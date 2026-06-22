@@ -1,10 +1,10 @@
 // ============================================================
-// HOMEI — INNGEST BACKGROUND JOBS
+// HOMMY — INNGEST BACKGROUND JOBS
 // ============================================================
 // Every outbound comm (SMS / email / push) goes through Inngest —
 // never call Plivo / Resend / Web Push directly from request handlers.
 //
-// TODO (next modules, docs/HOMEI_PLATFORM.md §10): storm.poll (cron).
+// TODO (next modules, docs/HOMMY_PLATFORM.md §10): storm.poll (cron).
 // ============================================================
 
 import { leadCreated } from './lead-created'

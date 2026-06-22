@@ -1,5 +1,5 @@
 // Reputation — append a `score_events` row and update the cached
-// `contractors.profile_score` in the same transaction (docs/HOMEI_PLATFORM.md
+// `contractors.profile_score` in the same transaction (docs/HOMMY_PLATFORM.md
 // §4.3). The ledger is the source of truth; the cached score gates matching
 // priority and shows on the public profile. Score floors at 0.
 

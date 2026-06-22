@@ -8,7 +8,7 @@ import {
 const FAQS = [
   {
     q: "Does it cost anything to post a job?",
-    a: "No. Homei is completely free for homeowners. You never pay us a cent. Roofers pay us only when they win your job, so the quote you get is exactly what you pay them.",
+    a: "No. Hommy is completely free for homeowners. You never pay us a cent. Roofers pay us only when they win your job, so the quote you get is exactly what you pay them.",
   },
   {
     q: "Will I get spammed with calls?",

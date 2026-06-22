@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 /**
  * Reusable success checkmark that draws itself in (circle then check) with a
  * pop-in. Inherits color via `currentColor`, so tint it with a text color class.
- * Keyframes live in globals.css (homei-pop-in / homei-draw-circle / homei-draw-check).
+ * Keyframes live in globals.css (hommy-pop-in / hommy-draw-circle / hommy-draw-check).
  */
 export function AnimatedCheck({
   size = 96,
@@ -23,7 +23,7 @@ export function AnimatedCheck({
       style={{
         transform: "scale(0)",
         animation:
-          "homei-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1.3) forwards",
+          "hommy-pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1.3) forwards",
       }}
     >
       <circle
@@ -38,7 +38,7 @@ export function AnimatedCheck({
           strokeDasharray: 252,
           strokeDashoffset: 252,
           animation:
-            "homei-draw-circle 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards",
+            "hommy-draw-circle 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s forwards",
         }}
       />
       <polyline
@@ -52,7 +52,7 @@ export function AnimatedCheck({
           strokeDasharray: 50,
           strokeDashoffset: 50,
           animation:
-            "homei-draw-check 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards",
+            "hommy-draw-check 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards",
         }}
       />
     </svg>

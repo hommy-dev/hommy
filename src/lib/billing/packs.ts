@@ -1,7 +1,7 @@
 // Credit packs + authoritative pricing. 1 credit = $1; larger packs get a small
 // discount. Shared by the Buy-credits UI (display) and the server action (which
 // recomputes the price from the credit quantity so the client can't tamper with
-// the amount). See docs/HOMEI_PLATFORM.md §3.
+// the amount). See docs/HOMMY_PLATFORM.md §3.
 
 export type CreditPack = {
   /** Credits granted. */

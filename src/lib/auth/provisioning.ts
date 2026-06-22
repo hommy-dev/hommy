@@ -123,7 +123,7 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
     year: 'numeric',
   }).format(expiresAt)
   const html = `
-    <h2>Welcome to Homei 👋</h2>
+    <h2>Welcome to Hommy 👋</h2>
     <p>Your account is ready — and we've added <strong>${total} credits</strong> to your wallet to get you started:</p>
     <ul>
       <li><strong>${SIGNUP_BONUS_CREDITS} signup credits</strong> — yours to keep, never expire.</li>
@@ -140,7 +140,7 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
   await sendNotification({
     userId,
     type: 'SYSTEM',
-    title: 'Welcome to Homei 👋',
+    title: 'Welcome to Hommy 👋',
     body: `You've got ${total} credits to start. Receiving leads is free — you only pay 5 to start a chat, and the win fee when a homeowner accepts your quote.`,
     actionUrl: '/contractor',
     emailHtml: html,

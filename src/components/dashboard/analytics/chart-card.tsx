@@ -20,7 +20,7 @@ export function ChartCard({
   children: React.ReactNode
 }) {
   return (
-    <section className={cn("homei-rise flex flex-col rounded-xl lg:rounded-[0.833vw] border border-border bg-card shadow-[0_1px_2px_rgb(0_0_0/0.03)]", className)}>
+    <section className={cn("hommy-rise flex flex-col rounded-xl lg:rounded-[0.833vw] border border-border bg-card shadow-[0_1px_2px_rgb(0_0_0/0.03)]", className)}>
       <header className="flex items-start justify-between gap-3 lg:gap-[0.833vw] px-5 lg:px-[1.389vw] pt-5 lg:pt-[1.389vw] pb-4 lg:pb-[1.111vw]">
         <div className="min-w-0">
           <h3 className="text-sm lg:text-[0.972vw] font-semibold">{title}</h3>

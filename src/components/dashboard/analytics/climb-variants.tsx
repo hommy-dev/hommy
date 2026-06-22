@@ -49,7 +49,7 @@ const LOSE: Item[] = [
   {
     icon: "shield-fail",
     title: "Take a deal off-platform",
-    desc: "Keep the job on Homei so the win counts. This is the biggest risk to your score.",
+    desc: "Keep the job on Hommy so the win counts. This is the biggest risk to your score.",
     points: OFF,
   },
 ]
@@ -170,7 +170,7 @@ export function HowToClimbCards() {
   )
 
   return (
-    <section className="homei-rise space-y-4 lg:space-y-[1.111vw]">
+    <section className="hommy-rise space-y-4 lg:space-y-[1.111vw]">
       <div>
         <h3 className="text-sm lg:text-[0.972vw] font-semibold">How to climb your score</h3>
         <p className="mt-1 lg:mt-[0.278vw] max-w-2xl text-sm lg:text-[0.903vw] text-muted-foreground">{INTRO}</p>

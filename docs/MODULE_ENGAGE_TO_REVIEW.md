@@ -1,11 +1,11 @@
 # Build Plan — Engage → Chat → Quote → Accept → Work → Review
 
-> The next module after lead fan-out. Source of truth for WHAT: `docs/HOMEI_PLATFORM.md` §4, §10.
+> The next module after lead fan-out. Source of truth for WHAT: `docs/HOMMY_PLATFORM.md` §4, §10.
 > Patterns: `CODING_GUIDE.md` (Next.js 16). This file is the HOW and the task order.
 > Status legend: ⬜ not started · 🟦 in progress · ✅ done.
 
 > ## ⚠️ SUPERSEDED in parts (2026-06 — read this first)
-> This file is the **historical build log** for the module; the loop shipped, but the **lead-economy stance changed afterward** (see `HOMEI_PLATFORM.md` header + §4). Where this log conflicts, the platform doc wins. What changed:
+> This file is the **historical build log** for the module; the loop shipped, but the **lead-economy stance changed afterward** (see `HOMMY_PLATFORM.md` header + §4). Where this log conflicts, the platform doc wins. What changed:
 > - **No engage cap / no lock.** Broad fan-out, any offered pro may engage until hire/close. Ignore all `engageSlots` / `status='filled'` / "last-slot race" / D3 / D4 steps below.
 > - **No lead expiry / no SLA cascade.** The `lead.recipient.sla` cron no longer expires offers or cascades — it now only sends a gentle **quote reminder** and auto-closes **abandoned** posts (30d, zero engagement). `slow_response` is no longer emitted.
 > - **Viewing is telemetry only** — `markLeadViewed` no longer tightens any deadline; it's wired into `getJobDetailAction` (opening an offered lead's detail).
@@ -18,7 +18,7 @@
 
 ## 0. Conventions (apply to every task)
 
-### Design system (Homei look)
+### Design system (Hommy look)
 
 Tokens live in `src/app/globals.css`. **Use tokens, never raw hex.**
 

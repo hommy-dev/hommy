@@ -5,7 +5,7 @@
 // auto-create), creates the lead, and FANS IT OUT to eligible verified
 // contractors in the same transaction so the offer is visible in their inbox
 // instantly. An async `lead/created` event then handles notifications.
-// See docs/HOMEI_PLATFORM.md §4 (lead lifecycle) and §5.2 (guest auto-signup).
+// See docs/HOMMY_PLATFORM.md §4 (lead lifecycle) and §5.2 (guest auto-signup).
 
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'

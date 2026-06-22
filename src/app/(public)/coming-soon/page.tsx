@@ -4,9 +4,9 @@ import { GEO_REGION_HEADER, regionLabel } from "@/lib/config/service-areas"
 import { ComingSoon } from "@/components/public/coming-soon"
 
 export const metadata: Metadata = {
-  title: "Coming soon to your area | Homei",
+  title: "Coming soon to your area | Hommy",
   description:
-    "We're not in your area just yet. Join the waitlist and we'll let you know the moment Homei reaches you.",
+    "We're not in your area just yet. Join the waitlist and we'll let you know the moment Hommy reaches you.",
   robots: { index: false, follow: true },
 }
 

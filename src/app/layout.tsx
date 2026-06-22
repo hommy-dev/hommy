@@ -7,7 +7,7 @@ import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Homei - Find Trusted Local Contractors",
+  title: "Hommy - Find Trusted Local Contractors",
   description: "Connect with vetted roofing contractors in your area",
   manifest: "/manifest.json",
 };

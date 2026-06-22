@@ -159,26 +159,26 @@ export async function getExternalMedia(
 
 export type CombinedReviews = ReviewsSummary & {
   /** Per-source counts so the summary can show an honest breakdown. */
-  homeiCount: number
+  hommyCount: number
   googleCount: number
 }
 
 /**
- * Native Homei reviews + imported Google reviews merged into one display
+ * Native Hommy reviews + imported Google reviews merged into one display
  * summary. The combined average is a true weighted mean of all real ratings;
- * the per-source counts power the "N Homei · M Google" sub-line. This is
+ * the per-source counts power the "N Hommy · M Google" sub-line. This is
  * DISPLAY-ONLY — the cached `contractors.avg_rating`/`total_reviews` (which
- * drive ranking/score/matching) remain Homei-only.
+ * drive ranking/score/matching) remain Hommy-only.
  */
 export async function getCombinedReviews(
   contractorId: string,
 ): Promise<CombinedReviews> {
-  const [homei, google] = await Promise.all([
+  const [hommy, google] = await Promise.all([
     getContractorReviews(contractorId),
     getExternalReviews(contractorId),
   ])
 
-  const all = [...homei.reviews, ...google].sort(
+  const all = [...hommy.reviews, ...google].sort(
     (a, b) => b.submittedAt.getTime() - a.submittedAt.getTime(),
   )
 
@@ -194,7 +194,7 @@ export async function getCombinedReviews(
     total: all.length,
     distribution,
     reviews: all,
-    homeiCount: homei.total,
+    hommyCount: hommy.total,
     googleCount: google.length,
   }
 }

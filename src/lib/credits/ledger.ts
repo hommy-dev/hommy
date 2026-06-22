@@ -1,6 +1,6 @@
 // Credit ledger — the ONLY way to move credits. `credit_transactions` is the
 // append-only source of truth; `contractors.credit_balance` is a cached
-// projection updated in the same transaction (docs/HOMEI_PLATFORM.md §3.2).
+// projection updated in the same transaction (docs/HOMMY_PLATFORM.md §3.2).
 //
 // Every helper here MUST run inside a caller-provided Drizzle transaction so the
 // ledger write + balance update + the surrounding business mutation (engage,

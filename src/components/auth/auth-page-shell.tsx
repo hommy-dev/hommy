@@ -32,7 +32,7 @@ export function AuthPageShell({
           >
             <BrandMark className="size-6 lg:size-[1.667vw]" />
             <span className="text-base lg:text-[1.111vw] font-semibold tracking-tight">
-              Homei
+              Hommy
             </span>
           </Link>
           <Link
@@ -99,7 +99,7 @@ function BrandPanel({ variant }: { variant: BrandVariant }) {
           <p className="text-base lg:text-[1.111vw] leading-relaxed text-background/70">{sub}</p>
         </div>
 
-        <p className="text-xs lg:text-[0.833vw] text-background/45">© 2025 Homei, Inc.</p>
+        <p className="text-xs lg:text-[0.833vw] text-background/45">© 2025 Hommy, Inc.</p>
       </div>
     </aside>
   );

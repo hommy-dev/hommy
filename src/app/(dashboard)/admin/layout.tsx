@@ -15,7 +15,7 @@ export default async function AdminLayout({
     <DashboardShell
       navItems={ADMIN_NAV}
       brandHref="/admin"
-      brandLabel="Homei Admin"
+      brandLabel="Hommy Admin"
       footerUser={
         <UserMenu
           user={{

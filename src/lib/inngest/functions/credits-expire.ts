@@ -1,4 +1,4 @@
-// `credits.expire` — daily cron (docs/HOMEI_PLATFORM.md §3.2 / §10). Plan-grant
+// `credits.expire` — daily cron (docs/HOMMY_PLATFORM.md §3.2 / §10). Plan-grant
 // and launch-promo credits carry an `expires_at`; purchased/signup credits never
 // expire. This job writes the negative `expiry` ledger entries for credits left
 // unspent in lapsed lots (FIFO reconciliation in expireStaleCredits) and refreshes

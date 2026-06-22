@@ -1,6 +1,6 @@
-# Homei — Product & Technical Brief
+# Hommy — Product & Technical Brief
 
-> This document is the single source of truth for building the Homei platform. Read every section before writing any code.
+> This document is the single source of truth for building the Hommy platform. Read every section before writing any code.
 > **v2 (2026-06): the lead/money/identity/messaging model changed substantially from v1, and most of v2 is now BUILT** (identity split, credits, lead economy, universal messaging, homeowner dashboard, reviews). Where older notes survive, this document wins.
 > **Phase-1 lead-economy stance (2026-06, supersedes earlier "capped competition" notes):** leads are free, so we **fan out broadly** (ranked by score, up to a configurable max — no fixed engage cap) and **never expire a lead on a contractor**. A lead ends only when the homeowner **hires** or **closes** it (or a 30-day abandoned-post auto-close). Timing is a single **urgency**-based signal used for the fast-responder bonus + a gentle post-engage quote reminder — **not** a deadline or penalty. Reputation is **carrots over sticks**: speed/quotes/wins raise the score and ranking; we don't punish honest declines or slow-but-real deals.
 
@@ -8,13 +8,13 @@
 
 ## 0. Platform Vision & Naming — READ THIS FIRST
 
-**Homei is a multi-vertical home-services platform — NOT a roofing app.** Roofing is **launch vertical #1**. Once it proves out, we add more home services on the same core (deep cleaning, ceiling/drywall, gutters, and other home-related trades). Every agent must build with that future in mind, even while only roofing ships now.
+**Hommy is a multi-vertical home-services platform — NOT a roofing app.** Roofing is **launch vertical #1**. Once it proves out, we add more home services on the same core (deep cleaning, ceiling/drywall, gutters, and other home-related trades). Every agent must build with that future in mind, even while only roofing ships now.
 
 **Scope rule:** Build **only roofing** right now. Do not build other verticals — but never design anything in a way that would block adding them later.
 
 **Naming rules (non-negotiable):**
 
-- The brand/platform name is **Homei**. Never name the platform, or anything core, after roofing.
+- The brand/platform name is **Hommy**. Never name the platform, or anything core, after roofing.
 - **No `roof`/`roofing` in core names** — not table names, column names, shared enum values, route segments, server-action files, function names, or component names. Use service-neutral vocabulary: `services`, `leads`, `contacts`, `projects`, `estimates`, `service_areas`, `reviews`, `credits`, `plans`, `conversations`.
 - Roofing-specific vocabulary is allowed only inside clearly roofing-scoped places (a roofing `service_details` payload, a roofing seed row, a fenced roofing-only module/route).
 
@@ -51,7 +51,7 @@ Sourced pain points this platform addresses (these are the defensible, fact-chec
 - **Most small contractors have no real CRM workflow.** Spreadsheets, sticky notes, group texts.
 - **Storm events create lead overflow** with no system to handle it.
 
-**How Homei is different (the honest pitch):**
+**How Hommy is different (the honest pitch):**
 
 - **Free to receive leads.** You never pay to _see_ a lead, and a lead never expires on you — it's yours to act on until the homeowner hires or closes it.
 - **Pay only when you act, mostly when you win.** A small credit fee to _engage_ (start the conversation), and the **full credit charge only when the homeowner accepts your quote** — i.e. you won the job.
@@ -64,7 +64,7 @@ Sourced pain points this platform addresses (these are the defensible, fact-chec
 
 ## 3. The Credit Economy (platform-level, service-neutral)
 
-Credits are the **universal currency** of Homei. Today they pay for lead engagement; later they pay for AI-agent help, marketing/social management, and other growth features. Because credits drive billing, they are tracked as an **append-only ledger**, never a single mutable balance.
+Credits are the **universal currency** of Hommy. Today they pay for lead engagement; later they pay for AI-agent help, marketing/social management, and other growth features. Because credits drive billing, they are tracked as an **append-only ledger**, never a single mutable balance.
 
 ### 3.1 Plans
 
@@ -115,7 +115,7 @@ This is the heart of the model. Leads are **not** exclusively assigned, **not** 
 We charge a _small_ fee to engage and a _full_ fee to win — so the risk is a contractor engaging cheaply, then taking the homeowner off-platform to dodge the full charge. Mitigations, in order of strength:
 
 1. **Quote acceptance is the win signal, and the homeowner triggers it.** Because homeowners have accounts, _they_ accept a quote (inline in the chat / job detail). The full charge fires on the **homeowner's** action, not the contractor's honesty. This is a natural workflow step, not an artificial button.
-2. **In-product nudges.** The homeowner's "what's next" guidance explicitly says to keep the quote + acceptance on Homei ("never pay or agree off-platform").
+2. **In-product nudges.** The homeowner's "what's next" guidance explicitly says to keep the quote + acceptance on Hommy ("never pay or agree off-platform").
 3. **Reputation (carrots).** Winning + good reviews raise the score; an off-platform flag (homeowner-reported) drops it hard.
 4. **Homeowner close action.** A "Close job / I hired someone" control gives an outcome signal (and the future hook to catch fully off-platform jobs).
 
@@ -152,7 +152,7 @@ users (a person / login)
 - **`users.role`** (platform role): `contractor` | `homeowner` | `admin`.
 - **`contractor_members.role`** (within-company role): `owner` | `admin` | `member`. Drives who can edit billing, invite teammates, etc. — enforced in server actions, not RLS.
 - A **contractor company has many member users**; a user's power inside a company comes from their membership role. The wallet, subscription, leads, contacts, and reviews all belong to the **company**.
-- **Admins** are Homei staff. They can see/join anything (admin → anyone messaging, full panel).
+- **Admins** are Hommy staff. They can see/join anything (admin → anyone messaging, full panel).
 
 ### 5.2 Homeowners are authenticated (changed in v2 — BUILT)
 

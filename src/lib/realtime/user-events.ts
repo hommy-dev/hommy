@@ -14,7 +14,7 @@
 
 import { sendRealtimeBroadcast } from './broadcast'
 
-// ---------- event names (Homei v2 surface) ----------
+// ---------- event names (Hommy v2 surface) ----------
 
 export const USER_EVENTS = {
   // Notification bell (handled by NotificationBell, not the refresh hook).

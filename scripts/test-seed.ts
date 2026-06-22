@@ -54,7 +54,7 @@ type EstStatus = (typeof estimates.status.enumValues)[number]
 
 /** Deterministic UUID from a tag, so re-runs upsert in place. */
 function uid(tag: string): string {
-  const h = createHash('sha1').update(`homei-test:${tag}`).digest('hex')
+  const h = createHash('sha1').update(`hommy-test:${tag}`).digest('hex')
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`
 }
 const logo = (seed: string) => `https://picsum.photos/seed/${seed}/200/200`
@@ -436,7 +436,7 @@ async function main() {
   const FRESHTOP = await ensureContractor({
     id: uid('co:freshtop'),
     companyName: 'FreshTop Roofers',
-    bio: 'New to Homei — established local crew, eager to earn your review.',
+    bio: 'New to Hommy — established local crew, eager to earn your review.',
     yearsInBusiness: 1,
     verified: true,
     avgRating: null,

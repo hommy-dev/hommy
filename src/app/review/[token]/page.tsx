@@ -12,7 +12,7 @@ export default async function ReviewPage({
   return (
     <main className="flex min-h-svh items-center justify-center bg-canvas px-4 py-10">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-6">
-        <p className="font-sebenta text-lg font-bold tracking-tight">Homei</p>
+        <p className="font-sebenta text-lg font-bold tracking-tight">Hommy</p>
 
         {!view ? (
           <Notice

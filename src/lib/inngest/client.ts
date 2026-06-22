@@ -2,7 +2,7 @@
 
 import { Inngest } from "inngest"
 
-export const inngest = new Inngest({ id: "homei" })
+export const inngest = new Inngest({ id: "hommy" })
 
 // ============================================================
 // EVENT TYPES (Phase 1 - no subscription events)
@@ -14,7 +14,7 @@ export const INNGEST_EVENTS = {
   PROJECT_MATCHING_RETRY: "project/matching.retry",
   PROJECT_EXPIRY_SCHEDULED: "project/expiry.scheduled",
 
-  // Lead events (v2 — credit economy, see docs/HOMEI_PLATFORM.md §10)
+  // Lead events (v2 — credit economy, see docs/HOMMY_PLATFORM.md §10)
   LEAD_CREATED: "lead/created",            // fan-out done inline; this drives async comms
   LEAD_ENGAGED: "lead/engaged",            // contractor engaged — charge + project (future module)
   LEAD_RECIPIENT_SLA: "lead/recipient.sla", // offer passed SLA — cascade (future module)

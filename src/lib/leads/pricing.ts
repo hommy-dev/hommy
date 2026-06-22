@@ -1,4 +1,4 @@
-// Per-service lead pricing — see docs/HOMEI_PLATFORM.md §3.3 / §4. Kept as config
+// Per-service lead pricing — see docs/HOMMY_PLATFORM.md §3.3 / §4. Kept as config
 // (not hardcoded in actions) so tiers tune without a migration.
 //
 // The credit economy (1 credit = $1):

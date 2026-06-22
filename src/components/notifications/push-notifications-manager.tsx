@@ -7,7 +7,7 @@ import { showToast } from '@/components/ui/toast'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-const DISMISS_KEY = 'homei_push_banner_dismissed_v1'
+const DISMISS_KEY = 'hommy_push_banner_dismissed_v1'
 
 /**
  * Mounts the push-subscription hook (registers /sw.js and resubscribes

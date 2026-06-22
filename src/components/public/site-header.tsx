@@ -10,7 +10,7 @@ import { MenuToggleIcon } from "@/components/ui/menu-icon"
 
 const LINKS = [
   { name: "How it works", href: "#how-it-works" },
-  { name: "Why Homei", href: "#why" },
+  { name: "Why Hommy", href: "#why" },
   { name: "Reviews", href: "#reviews" },
   { name: "For roofers", href: "/contractors" },
 ]
@@ -151,9 +151,9 @@ export function SiteHeader() {
           <Link
             href="/"
             className="font-sebenta text-xl lg:text-[1.389vw] font-bold tracking-tight text-background"
-            aria-label="Homei home"
+            aria-label="Hommy home"
           >
-            Homei
+            Hommy
           </Link>
         </div>
 

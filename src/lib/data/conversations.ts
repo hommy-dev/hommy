@@ -1,4 +1,4 @@
-// Data layer for the universal messaging graph (docs/HOMEI_PLATFORM.md §6).
+// Data layer for the universal messaging graph (docs/HOMMY_PLATFORM.md §6).
 //
 // A conversation has participants that are either a USER (homeowner/admin) or a
 // CONTRACTOR (the whole company — any active member reads/sends). The viewer is

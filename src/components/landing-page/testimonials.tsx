@@ -14,7 +14,7 @@ const REVIEWS = [
   },
   {
     quote:
-      "We had a leak in the middle of a storm and no clue who to call. Homei had someone at the house the next morning. No drama.",
+      "We had a leak in the middle of a storm and no clue who to call. Hommy had someone at the house the next morning. No drama.",
     name: "James C.",
     image: "/bg/storm-damage.jpg",
   },

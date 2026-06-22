@@ -29,7 +29,7 @@ export default async function HomeownerLayout({
       <DashboardShell
         navItems={HOMEOWNER_NAV}
         brandHref="/homeowner"
-        brandLabel="Homei"
+        brandLabel="Hommy"
         notice={
           <Suspense fallback={null}>
             <HomeownerNotice userId={user.id} firstName={firstName} />

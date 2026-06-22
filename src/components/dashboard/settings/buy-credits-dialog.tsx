@@ -73,7 +73,7 @@ export function BuyCreditsDialog({ triggerClassName }: { triggerClassName?: stri
                 Request received
               </DialogTitle>
               <DialogDescription>
-                Card payments aren&apos;t live on Homei just yet. We&apos;ve logged your request for{" "}
+                Card payments aren&apos;t live on Hommy just yet. We&apos;ve logged your request for{" "}
                 <strong>{credits} credits</strong> ({formatCents(amountCents)}) and pinged the team — we&apos;ll
                 reach out shortly to get you topped up.
               </DialogDescription>

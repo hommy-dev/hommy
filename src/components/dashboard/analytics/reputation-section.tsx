@@ -44,7 +44,7 @@ export async function ReputationSection({
       {/* Left: minimal score + reviews · Right: coverage map */}
       <div className="grid items-stretch gap-4 lg:gap-[1.111vw] lg:grid-cols-2">
         <div className="flex flex-col gap-4 lg:gap-[1.111vw]">
-          <section className="homei-rise flex flex-1 items-center gap-5 lg:gap-[1.389vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+          <section className="hommy-rise flex flex-1 items-center gap-5 lg:gap-[1.389vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
             <Gauge value={currentScore} max={gaugeMax} centerValue={currentScore} centerLabel={status.label} />
             <div className="min-w-0 flex-1 space-y-2 lg:space-y-[0.556vw]">
               <div className="flex flex-wrap items-center gap-2 lg:gap-[0.556vw]">
@@ -65,7 +65,7 @@ export async function ReputationSection({
             </div>
           </section>
 
-          <section className="homei-rise flex flex-1 items-center gap-5 lg:gap-[1.389vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+          <section className="hommy-rise flex flex-1 items-center gap-5 lg:gap-[1.389vw] rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
             <Gauge value={avg ?? 0} max={5} color="orange" centerValue={avg != null ? avg.toFixed(1) : "—"} centerLabel="out of 5" />
             <div className="min-w-0 flex-1 space-y-2 lg:space-y-[0.556vw]">
               <h3 className="text-sm lg:text-[0.972vw] font-semibold">Reviews</h3>
@@ -78,7 +78,7 @@ export async function ReputationSection({
           </section>
         </div>
 
-        <section className="homei-rise flex flex-col rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+        <section className="hommy-rise flex flex-col rounded-xl lg:rounded-[0.833vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
           <header className="mb-3 lg:mb-[0.833vw]">
             <h3 className="text-sm lg:text-[0.972vw] font-semibold">Where your leads come from</h3>
             <p className="mt-0.5 lg:mt-[0.139vw] text-xs lg:text-[0.833vw] text-muted-foreground">

@@ -59,7 +59,7 @@ export type DashboardShellProps = {
 export function DashboardShell({
   navItems,
   brandHref = "/",
-  brandLabel = "Homei",
+  brandLabel = "Hommy",
   notice,
   navUnreadCounts,
   topRight,

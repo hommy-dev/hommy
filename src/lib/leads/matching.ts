@@ -1,6 +1,6 @@
 // Lead matching — given a new lead's service + location, find the contractor
 // companies eligible to receive it. The "free fan-out" of
-// docs/HOMEI_PLATFORM.md §4.1 step 2.
+// docs/HOMMY_PLATFORM.md §4.1 step 2.
 //
 // GEOGRAPHIC matching: a company is eligible when (a) it's verified, (b) it
 // offers this service, and (c) the lead's point falls inside at least one of its

@@ -58,7 +58,7 @@ export function OverviewFeed({
   const isEmpty = actions.length === 0 && activity.length === 0
 
   return (
-    <section className="homei-rise rounded-xl lg:rounded-[0.833vw] border border-border bg-card shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+    <section className="hommy-rise rounded-xl lg:rounded-[0.833vw] border border-border bg-card shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
       <header className="flex flex-wrap items-end justify-between gap-2 lg:gap-[0.556vw] px-5 lg:px-[1.389vw] pt-5 lg:pt-[1.389vw] pb-3 lg:pb-[0.833vw]">
         <div>
           <h2 className="text-sm lg:text-[0.972vw] font-semibold">Your feed</h2>

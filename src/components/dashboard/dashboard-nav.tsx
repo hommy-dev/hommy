@@ -7,8 +7,8 @@ export type DashboardNavItem = {
   icon: IconName
 }
 
-// Homei dashboard nav. Contractors and homeowners both have an authenticated
-// dashboard (docs/HOMEI_PLATFORM.md §5). "Jobs" is the contractor's single
+// Hommy dashboard nav. Contractors and homeowners both have an authenticated
+// dashboard (docs/HOMMY_PLATFORM.md §5). "Jobs" is the contractor's single
 // unified board (new leads → won jobs); Leads + Projects were merged into it.
 export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor", label: "Overview", icon: "category" },
@@ -17,7 +17,7 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   { href: "/contractor/messages", label: "Messages", icon: "chat" },
   // Storm alerts is roofing-only and not part of launch — hidden from nav until
   // the weather poll + alerts pipeline is built (route stub kept at
-  // /contractor/storm-alerts). See docs/HOMEI_PLATFORM.md §573.
+  // /contractor/storm-alerts). See docs/HOMMY_PLATFORM.md §573.
   // Reviews live on the contractor's Profile page (no standalone Reviews page).
   { href: "/contractor/analytics", label: "Analytics", icon: "graph" },
   { href: "/contractor/integrations", label: "Integrations", icon: "globe" },
