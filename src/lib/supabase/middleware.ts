@@ -13,6 +13,7 @@ const PUBLIC_PATHS = [
   "/get-a-quote", // standalone homeowner lead form
   "/thank-you", // post-submission confirmation
   "/coming-soon", // out-of-area homeowner waitlist (geo-gate target)
+  "/blog", // public blog: index, posts, and category filters
   "/contractors", // contractor recruitment landing + /contractors/signup
   "/roofing-contractors", // SEO location pages: /roofing-contractors/[city]-[state]
   "/review", // tokenized public review submission flow

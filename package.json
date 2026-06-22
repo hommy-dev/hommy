@@ -16,6 +16,7 @@
     "test:seed": "tsx scripts/test-seed.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:seed:dev": "tsx scripts/seed.ts --dev",
+    "blog:seed": "tsx scripts/seed-blog.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
