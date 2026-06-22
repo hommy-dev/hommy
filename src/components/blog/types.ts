@@ -1,23 +1,10 @@
-import type { SanityImageValue } from "./sanity-image";
+import type {
+  POSTS_QUERY_RESULT,
+  CATEGORIES_QUERY_RESULT,
+} from "@/sanity.types";
 
-export type PostCard = {
-  _id: string;
-  title: string;
-  slug: string;
-  eyebrow?: string | null;
-  excerpt?: string | null;
-  publishedAt?: string | null;
-  readTime?: number | null;
-  featured?: boolean | null;
-  mainImage?: SanityImageValue;
-  category?: { _id: string; title: string; slug: string } | null;
-  author?: { name: string; slug?: string | null; role?: string | null; image?: SanityImageValue } | null;
-};
-
-export type CategoryItem = {
-  _id: string;
-  title: string;
-  slug: string;
-  description?: string | null;
-  postCount?: number;
-};
+// Single source of truth: derive the card/filter prop types from the generated
+// GROQ result types (sanity.types.ts, produced by `npm run typegen` in the
+// studio) so the query, the data layer, and the UI can never drift.
+export type PostCard = POSTS_QUERY_RESULT[number];
+export type CategoryItem = CATEGORIES_QUERY_RESULT[number];

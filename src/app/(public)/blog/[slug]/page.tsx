@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import type { PortableTextBlock } from "next-sanity";
 
 import { urlFor } from "@/sanity/image";
 import { getPost, getPostSlugs } from "@/lib/data/blog";
@@ -55,7 +56,10 @@ export default async function BlogPostPage({
 
   if (!post) notFound();
 
-  const headings = extractHeadings(post.body);
+  // Generated body is a precise block union; the PortableText renderer takes the
+  // generic PortableTextBlock[] shape, so bridge it once here.
+  const body = (post.body ?? []) as unknown as PortableTextBlock[];
+  const headings = extractHeadings(body);
   const related = (post.relatedPosts ?? []).filter(Boolean);
 
   const metaLine = [
@@ -124,7 +128,7 @@ export default async function BlogPostPage({
       {/* Body + TOC */}
       <div className="mt-12 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
         <article className="mx-auto w-full max-w-2xl text-[1.0625rem] lg:mx-0">
-          <BlogPortableText value={post.body ?? []} />
+          <BlogPortableText value={body} />
         </article>
         {headings.length > 0 && (
           <aside className="hidden lg:block">
