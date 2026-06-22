@@ -15,6 +15,7 @@ export type EstimateSummary = {
   total: string | null
   lineItems: Array<{ label: string; amount: string }>
   scopeNotes: string | null
+  warranty: string | null
   validUntil: Date | null
   sentAt: Date | null
   createdAt: Date

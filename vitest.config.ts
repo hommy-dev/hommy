@@ -10,6 +10,19 @@ export default defineConfig({
   },
   test: {
     globals: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      reportsDirectory: './coverage',
+      // Focus on the business logic the tests are meant to guard. UI, generated
+      // schema, and type-only files would only dilute the signal.
+      include: ['src/lib/**'],
+      exclude: [
+        '**/*.d.ts',
+        'src/lib/db/schema.ts',
+        'src/lib/inngest/**',
+      ],
+    },
     projects: [
       {
         extends: true,

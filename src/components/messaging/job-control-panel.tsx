@@ -78,6 +78,7 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
               : undefined
           }
           initialScopeNotes={quote ? detail.estimates[0]?.scopeNotes : undefined}
+          initialWarranty={quote ? detail.estimates[0]?.warranty : undefined}
         />
       ) : null}
       {panel.canComplete ? (
@@ -91,7 +92,7 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
         onClick={() => setSheetOpen(true)}
         className={cn(btnOutline, "text-muted-foreground hover:text-foreground")}
       >
-        <Icon name="open-panel-right" className="size-4 lg:size-[1.111vw]" /> Details
+        <Icon name="eye" className="size-4 lg:size-[1.111vw]" /> Details
       </button>
 
       <DetailDialog

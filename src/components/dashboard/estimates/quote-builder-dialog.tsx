@@ -29,6 +29,7 @@ export function QuoteBuilderDialog({
   triggerClassName,
   initialItems,
   initialScopeNotes,
+  initialWarranty,
 }: {
   projectId: string;
   triggerLabel?: string;
@@ -37,12 +38,14 @@ export function QuoteBuilderDialog({
   /** Prefill line items (e.g. "Update quote" seeds from the current quote). */
   initialItems?: Row[];
   initialScopeNotes?: string | null;
+  initialWarranty?: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<Row[]>([blankRow()]);
   const [taxRate, setTaxRate] = useState("");
   const [scopeNotes, setScopeNotes] = useState("");
+  const [warranty, setWarranty] = useState("");
   const [validDays, setValidDays] = useState("30");
   const [estimateId, setEstimateId] = useState<string | undefined>(undefined);
   const [pending, start] = useTransition();
@@ -56,6 +59,7 @@ export function QuoteBuilderDialog({
     if (initialItems && initialItems.length > 0) {
       setRows(initialItems.map((r) => ({ ...r })));
       setScopeNotes(initialScopeNotes ?? "");
+      setWarranty(initialWarranty ?? "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -73,6 +77,7 @@ export function QuoteBuilderDialog({
       lineItems: items,
       taxRatePct: parseFloat(taxRate) || 0,
       scopeNotes,
+      warranty,
       validDays: Math.max(1, Math.min(365, parseInt(validDays, 10) || 30)),
     };
   }
@@ -110,6 +115,7 @@ export function QuoteBuilderDialog({
     setRows([blankRow()]);
     setTaxRate("");
     setScopeNotes("");
+    setWarranty("");
     setValidDays("30");
     setEstimateId(undefined);
   }
@@ -197,6 +203,13 @@ export function QuoteBuilderDialog({
               className="h-9 lg:h-[2.5vw] w-24 lg:w-[8vw] rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] text-right text-sm lg:text-[0.903vw] tabular-nums outline-none focus-visible:border-ring"
             />
           </div>
+
+          <input
+            value={warranty}
+            onChange={(e) => setWarranty(e.target.value)}
+            placeholder="Warranty (optional) — e.g. 10-year workmanship warranty"
+            className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
+          />
 
           <textarea
             value={scopeNotes}

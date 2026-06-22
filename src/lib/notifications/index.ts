@@ -10,7 +10,7 @@
 import { db } from '@/lib/db'
 import { notifications, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
-import { sendEmail } from './email'
+import { sendEmail, type EmailAttachment } from './email'
 import { sendSms } from './sms'
 import { sendPushToUser } from './push'
 import { isSmsOptedOut } from './opt-out'
@@ -39,6 +39,7 @@ export interface SendNotificationOptions {
   entityType?: NotificationType
   entityId?: string
   emailHtml?: string   // full HTML email — if omitted, falls back to plain body text
+  emailAttachments?: EmailAttachment[] // files to attach to the email (e.g. a quote PDF)
   smsBody?: string     // custom SMS copy — if omitted, falls back to title + body truncated
   sendSms?: boolean    // default false — high urgency only
   sendEmail?: boolean  // default true
@@ -84,6 +85,7 @@ export async function sendNotification(
     entityType,
     entityId,
     emailHtml,
+    emailAttachments,
     smsBody,
     dedupKey,
     sendInApp = true,
@@ -177,7 +179,7 @@ export async function sendNotification(
   // 2. Email
   if (doEmail && user.email) {
     const html = emailHtml ?? fallbackEmailHtml(title, body, actionUrl)
-    result.email = await sendEmail(user.email, title, html)
+    result.email = await sendEmail(user.email, title, html, emailAttachments)
     // Flag the exact row we created (best-effort, scoped by id).
     if (createdNotificationId) {
       db.update(notifications)

@@ -1,6 +1,7 @@
 import { getAcceptView } from "@/lib/data/accept"
-import { formatCurrency, formatDate } from "@/lib/format"
+import { QuoteDocument } from "@/components/quote/quote-document"
 import { AcceptByTokenButton } from "@/components/accept/accept-by-token-button"
+import { buttonVariants } from "@/components/ui/button"
 
 export default async function AcceptQuotePage({
   params,
@@ -10,11 +11,13 @@ export default async function AcceptQuotePage({
   const { token } = await params
   const view = await getAcceptView(token)
 
-  return (
-    <main className="flex min-h-svh items-center justify-center bg-canvas px-4 py-10">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-6">
-        <p className="font-sebenta text-lg font-bold tracking-tight">Homei</p>
+  const showQuote = view && view.status === "sent" && view.leadStatus !== "awarded"
 
+  return (
+    <main className="flex min-h-svh flex-col items-center bg-canvas px-4 py-10">
+      <p className="font-sebenta text-lg font-bold tracking-tight">Hommy</p>
+
+      <div className="mt-6 w-full max-w-xl">
         {!view ? (
           <Notice
             title="Link not found"
@@ -32,39 +35,53 @@ export default async function AcceptQuotePage({
           />
         ) : view.status !== "sent" ? (
           <Notice title="Quote unavailable" body="This quote can no longer be accepted." />
-        ) : (
-          <div className="mt-5 space-y-5">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                {view.contractorName ?? "A contractor"} sent you a quote for{" "}
-                {view.subtype ?? view.serviceName}.
-              </p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums">
-                {formatCurrency(view.total ?? "0")}
+        ) : showQuote ? (
+          <div className="space-y-5">
+            <QuoteDocument
+              data={{
+                estimateId: view.estimateId,
+                status: view.status,
+                company: {
+                  name: view.contractorName,
+                  logoUrl: view.company.logoUrl,
+                  licenseNumber: view.company.licenseNumber,
+                  insuranceProvider: view.company.insuranceProvider,
+                  yearsInBusiness: view.company.yearsInBusiness,
+                  verified: view.company.verified,
+                  avgRating: view.company.avgRating,
+                  totalReviews: view.company.totalReviews,
+                },
+                serviceName: view.serviceName,
+                subtype: view.subtype,
+                clientName: null,
+                issuedAt: view.issuedAt ? view.issuedAt.toISOString() : null,
+                validUntil: view.validUntil ? view.validUntil.toISOString() : null,
+                lineItems: view.lineItems,
+                subtotal: view.subtotal,
+                taxRate: view.taxRate,
+                taxAmount: view.taxAmount,
+                total: view.total,
+                scopeNotes: view.scopeNotes,
+                warranty: view.warranty,
+              }}
+            />
+
+            <div className="space-y-3 rounded-xl border border-border bg-card p-5 sm:p-6">
+              <AcceptByTokenButton token={token} />
+              <a
+                href={`/api/quotes/${view.estimateId}/pdf?token=${token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: "surface", className: "w-full" })}
+              >
+                Download PDF
+              </a>
+              <p className="text-center text-xs text-muted-foreground">
+                Accepting hires {view.contractorName ?? "this contractor"} and declines the other quotes.
               </p>
             </div>
-
-            <ul className="space-y-1.5 rounded-md border border-border bg-muted/30 p-4 text-sm">
-              {view.lineItems.map((li, i) => (
-                <li key={i} className="flex items-center justify-between gap-3 text-muted-foreground">
-                  <span className="truncate">{li.label}</span>
-                  <span className="tabular-nums">{formatCurrency(li.amount)}</span>
-                </li>
-              ))}
-            </ul>
-
-            {view.scopeNotes ? (
-              <p className="whitespace-pre-wrap text-sm text-foreground/80">{view.scopeNotes}</p>
-            ) : null}
-
-            <p className="text-xs text-muted-foreground">Valid until {formatDate(view.validUntil)}</p>
-
-            <AcceptByTokenButton token={token} />
-            <p className="text-center text-xs text-muted-foreground">
-              Accepting hires {view.contractorName ?? "this contractor"} and declines the other quotes.
-            </p>
           </div>
-        )}
+        ) : null}
       </div>
     </main>
   )
@@ -72,7 +89,7 @@ export default async function AcceptQuotePage({
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
-    <div className="mt-5">
+    <div className="rounded-xl border border-border bg-card p-6">
       <h1 className="text-lg font-semibold">{title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{body}</p>
     </div>

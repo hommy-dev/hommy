@@ -255,14 +255,14 @@ export function RequestDetailSheet({
                           <ContractorProfileDialog
                             contractorId={c.contractorId}
                             contractorName={c.contractorName}
-                            triggerClassName={cn(buttonVariants({ variant: "surface", size: "sm", className: "flex-1" }))}
+                            triggerClassName={cn(buttonVariants({ variant: "surface", className: "flex-1" }))}
                           />
                           {c.conversationId ? (
                             <Link
                               href={`/homeowner/messages/${c.conversationId}`}
-                              className={cn(buttonVariants({ variant: "inverse", size: "sm" }), "flex-1")}
+                              className={cn(buttonVariants({ variant: "inverse", }), "flex-1")}
                             >
-                              <Icon name="message" className="size-4 lg:size-[1.111vw]" /> Chat
+                              <Icon name="chat" className="size-4 lg:size-[1.111vw]" /> Chat
                             </Link>
                           ) : null}
                         </div>

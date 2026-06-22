@@ -84,7 +84,7 @@ export function MessageBubble({
         ) : null}
         <div
           className={cn(
-            'max-w-[80%] lg:max-w-[60%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] leading-relaxed',
+            'max-w-[80%] lg:max-w-[60%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[1vw] leading-relaxed',
             mine
               ? 'bg-primary/90 text-primary-foreground'
               : 'border border-border bg-muted/60 text-foreground',
@@ -124,7 +124,7 @@ export function MessageBubble({
         >
           <AttachmentList files={message.meta.files} mine={mine} />
           {caption ? (
-            <p className="px-1.5 lg:px-[0.417vw] pt-1.5 lg:pt-[0.417vw] text-sm lg:text-[0.903vw] leading-relaxed whitespace-pre-wrap break-words">
+            <p className="px-1.5 lg:px-[0.417vw] pt-1.5 lg:pt-[0.417vw] text-sm lg:text-[1vw] leading-relaxed whitespace-pre-wrap break-words">
               {caption}
             </p>
           ) : null}
@@ -161,7 +161,7 @@ export function MessageBubble({
       ) : null}
       <div
         className={cn(
-          'max-w-[78%] lg:max-w-[55%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] leading-relaxed',
+          'max-w-[78%] lg:max-w-[55%] rounded-lg lg:rounded-[0.694vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[1vw] leading-relaxed',
           mine
             ? 'bg-primary text-primary-foreground'
             : 'border border-border bg-card text-foreground',

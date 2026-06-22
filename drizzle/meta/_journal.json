@@ -99,6 +99,13 @@
       "when": 1782047398008,
       "tag": "0013_chief_spot",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1782057233272,
+      "tag": "0014_elite_speed",
+      "breakpoints": true
     }
   ]
 }

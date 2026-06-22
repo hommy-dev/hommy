@@ -135,9 +135,9 @@ export function MessageComposer({
           disabled={disabled || staged.length >= MAX_ATTACHMENTS_PER_MESSAGE}
           aria-label="Attach files"
           title="Attach files"
-          className="inline-grid size-8 lg:size-[2.222vw] shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+          className="inline-grid size-7 lg:size-[2vw] shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
         >
-          <Icon name="plus" className="size-5 lg:size-[1.389vw]" />
+          <Icon name="plus" className="size-4 lg:size-[1.2vw]" />
         </button>
         <input
           ref={fileRef}

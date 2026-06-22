@@ -13,7 +13,8 @@ import { z } from 'zod'
 import { and, eq, inArray, ne } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
-import { estimates, projects } from '@/lib/db/schema'
+import { estimates, leads, projects, services } from '@/lib/db/schema'
+import { subtypeLabel } from '@/lib/leads/subtype'
 import { getRequiredUser, getRequiredUserId } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
 import { getConversationForUser } from '@/lib/data/conversations'
@@ -35,6 +36,7 @@ const estimateInputSchema = z.object({
   lineItems: z.array(lineItemSchema).min(1, 'Add at least one line item').max(50),
   taxRatePct: z.number().min(0).max(100).default(0),
   scopeNotes: z.string().trim().max(2000).optional().default(''),
+  warranty: z.string().trim().max(200).optional().default(''),
   validDays: z.number().int().min(1).max(365).default(30),
 })
 
@@ -194,6 +196,7 @@ async function upsertDraft(
     taxAmount: totals.taxAmount,
     total: totals.total,
     scopeNotes: input.scopeNotes || null,
+    warranty: input.warranty || null,
     validUntil: new Date(Date.now() + input.validDays * 24 * 60 * 60 * 1000),
   }
 
@@ -223,11 +226,25 @@ export type QuoteDetail = {
   contractorName: string | null
   status: EstimateStatusValue
   subtotal: string | null
+  taxRate: string | null
   taxAmount: string | null
   total: string | null
   lineItems: Array<{ label: string; amount: string }>
   scopeNotes: string | null
+  warranty: string | null
+  issuedAt: string | null
   validUntil: string | null
+  serviceName: string | null
+  subtype: string | null
+  company: {
+    logoUrl: string | null
+    licenseNumber: string | null
+    insuranceProvider: string | null
+    yearsInBusiness: number | null
+    verified: boolean
+    avgRating: string | null
+    totalReviews: number
+  }
 }
 
 type EstimateStatusValue = (typeof estimates.status.enumValues)[number]
@@ -251,16 +268,31 @@ export async function getEstimateForViewer(estimateId: string): Promise<ViewQuot
       projectId: estimates.projectId,
       status: estimates.status,
       subtotal: estimates.subtotal,
+      taxRate: estimates.taxRate,
       taxAmount: estimates.taxAmount,
       total: estimates.total,
       lineItems: estimates.lineItems,
       scopeNotes: estimates.scopeNotes,
+      warranty: estimates.warranty,
+      sentAt: estimates.sentAt,
+      createdAt: estimates.createdAt,
       validUntil: estimates.validUntil,
       contractorName: contractors.companyName,
+      logoUrl: contractors.logoUrl,
+      licenseNumber: contractors.licenseNumber,
+      insuranceProvider: contractors.insuranceProvider,
+      yearsInBusiness: contractors.yearsInBusiness,
+      verificationStatus: contractors.verificationStatus,
+      avgRating: contractors.avgRating,
+      totalReviews: contractors.totalReviews,
+      serviceName: services.name,
+      serviceDetails: leads.serviceDetails,
     })
     .from(estimates)
     .innerJoin(projects, eq(projects.id, estimates.projectId))
     .innerJoin(contractors, eq(contractors.id, projects.contractorId))
+    .innerJoin(leads, eq(leads.id, projects.leadId))
+    .innerJoin(services, eq(services.id, leads.serviceId))
     .where(eq(estimates.id, estimateId))
     .limit(1)
   if (!row) return { ok: false, message: 'That quote no longer exists.' }
@@ -277,11 +309,25 @@ export async function getEstimateForViewer(estimateId: string): Promise<ViewQuot
       contractorName: row.contractorName,
       status: row.status,
       subtotal: row.subtotal,
+      taxRate: row.taxRate,
       taxAmount: row.taxAmount,
       total: row.total,
       lineItems: row.lineItems,
       scopeNotes: row.scopeNotes,
+      warranty: row.warranty,
+      issuedAt: (row.sentAt ?? row.createdAt)?.toISOString() ?? null,
       validUntil: row.validUntil ? row.validUntil.toISOString() : null,
+      serviceName: row.serviceName,
+      subtype: subtypeLabel(row.serviceDetails ?? {}),
+      company: {
+        logoUrl: row.logoUrl,
+        licenseNumber: row.licenseNumber,
+        insuranceProvider: row.insuranceProvider,
+        yearsInBusiness: row.yearsInBusiness,
+        verified: row.verificationStatus === 'verified',
+        avgRating: row.avgRating,
+        totalReviews: row.totalReviews,
+      },
     },
   }
 }

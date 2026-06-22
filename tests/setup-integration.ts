@@ -38,6 +38,11 @@ import { sql } from 'drizzle-orm'
 // DDL applies cleanly.
 // ============================================================
 const SUPABASE_STUBS = `
+-- Lead matching uses a PostGIS geography column + ST_Covers (migration 0006
+-- runs CREATE EXTENSION too). The test DB image must ship PostGIS
+-- (postgis/postgis:* locally and in CI) for this to succeed.
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 CREATE SCHEMA IF NOT EXISTS auth;
 CREATE SCHEMA IF NOT EXISTS realtime;
 CREATE SCHEMA IF NOT EXISTS storage;
@@ -141,11 +146,16 @@ afterEach(async () => {
   await new Promise((r) => setTimeout(r, 25))
 
   // Truncate every public-schema table except drizzle's own migration
-  // ledger. CASCADE handles FK chains (projects → leads → quotes →
-  // jobs → messages, etc).
+  // ledger AND PostGIS's `spatial_ref_sys` — that table lives in `public`
+  // but is reference data the `postgis` extension populated (~8500 SRID
+  // rows). Wiping it makes ST_Buffer/geography inserts fail with
+  // "Cannot find SRID (4326)" on every test after the first. CASCADE
+  // handles FK chains (projects → leads → quotes → jobs → messages, etc).
   const result = await db.execute<{ tablename: string }>(sql`
     SELECT tablename FROM pg_tables
-    WHERE schemaname = 'public' AND tablename NOT LIKE '__drizzle%'
+    WHERE schemaname = 'public'
+      AND tablename NOT LIKE '__drizzle%'
+      AND tablename <> 'spatial_ref_sys'
   `)
   const tables = result.map((r) => r.tablename)
   if (tables.length === 0) return

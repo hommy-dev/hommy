@@ -263,7 +263,7 @@ export function JobCardItem({
               className="flex items-center gap-2 lg:gap-[0.556vw] text-muted-foreground hover:text-primary"
             >
               <Icon
-                name="message"
+                name="chat"
                 className="size-4 lg:size-[1.111vw] shrink-0"
               />
               <span className="truncate">{job.homeownerEmail}</span>

@@ -462,6 +462,7 @@ export const estimates = pgTable('estimates', {
   taxAmount: decimal('tax_amount', { precision: 12, scale: 2 }),
   total: decimal('total', { precision: 12, scale: 2 }),
   scopeNotes: text('scope_notes'),
+  warranty: text('warranty'),
   validUntil: timestamp('valid_until', { withTimezone: true }),
   pdfUrl: text('pdf_url'),
   status: estimateStatus('status').notNull().default('draft'),

@@ -8,11 +8,13 @@ import type { ParticipantIdentity } from "@/lib/data/conversations";
 import { acceptEstimate } from "@/lib/actions/accept-estimate";
 import { getEstimateForViewer, type QuoteDetail } from "@/lib/actions/estimates";
 import { showToast } from "@/components/ui/toast";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
+import { QuoteDocument } from "@/components/quote/quote-document";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -87,7 +89,7 @@ export function QuoteCard({
         </div>
 
         <div className="mt-3 lg:mt-[1.2vw] flex items-center gap-2 lg:gap-[0.556vw]">
-          <ViewQuoteButton estimateId={meta.estimateId} otherName={otherName} />
+          <ViewQuoteButton estimateId={meta.estimateId} viewerType={viewerType} otherName={otherName} />
           {canAccept && !accepted && !superseded ? (
             <button
               type="button"
@@ -104,8 +106,16 @@ export function QuoteCard({
   );
 }
 
-/** "View" trigger + dialog that lazy-loads the full quote (line items, scope). */
-function ViewQuoteButton({ estimateId, otherName }: { estimateId: string; otherName?: string }) {
+/** "View" trigger + dialog that lazy-loads the full quote as a branded document. */
+function ViewQuoteButton({
+  estimateId,
+  viewerType,
+  otherName,
+}: {
+  estimateId: string;
+  viewerType?: ParticipantIdentity["type"];
+  otherName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [quote, setQuote] = useState<QuoteDetail | null>(null);
   const [loading, start] = useTransition();
@@ -126,14 +136,21 @@ function ViewQuoteButton({ estimateId, otherName }: { estimateId: string; otherN
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className={cn(buttonVariants({ variant: "surface", size: "sm", className: "flex-1" }))}
+        className={cn(buttonVariants({ variant: "surface", className: "flex-1" }))}
       >
         View quote
       </button>
 
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md lg:max-w-[40vw]">
-          <DialogHeader>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-md lg:max-w-[40vw] max-h-[90vh] gap-0 overflow-y-auto"
+        >
+          <DialogClose className="absolute top-2 right-2 lg:top-[0.3vw] lg:right-[0vw] z-10 grid size-8 lg:size-[2.222vw] place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            <Icon name="close" className="size-4 lg:size-[1.111vw]" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+          <DialogHeader className="sr-only">
             <DialogTitle>Quote{quote?.contractorName ? ` from ${quote.contractorName}` : ""}</DialogTitle>
             <DialogDescription>
               {otherName ? `Sent in your chat with ${otherName}.` : "Quote details."}
@@ -143,37 +160,45 @@ function ViewQuoteButton({ estimateId, otherName }: { estimateId: string; otherN
           {loading && !quote ? (
             <p className="py-6 lg:py-[1.667vw] text-center text-sm lg:text-[0.903vw] text-muted-foreground">Loading…</p>
           ) : quote ? (
-            <div className="space-y-4 lg:space-y-[1.111vw]">
-              <ul className="divide-y divide-border rounded-md lg:rounded-[0.556vw] border border-border">
-                {quote.lineItems.map((li, i) => (
-                  <li key={i} className="flex items-center justify-between gap-3 lg:gap-[0.833vw] px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw]">
-                    <span className="min-w-0 break-words">{li.label}</span>
-                    <span className="shrink-0 tabular-nums">{formatCurrency(li.amount)}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <dl className="space-y-1 lg:space-y-[0.278vw] rounded-md lg:rounded-[0.556vw] border border-border bg-muted/30 p-3 lg:p-[0.833vw] text-sm lg:text-[0.903vw]">
-                {quote.subtotal ? <Row label="Subtotal" value={formatCurrency(quote.subtotal)} /> : null}
-                {quote.taxAmount ? <Row label="Tax" value={formatCurrency(quote.taxAmount)} /> : null}
-                <div className="flex items-center justify-between pt-1 lg:pt-[0.278vw] font-semibold">
-                  <dt>Total</dt>
-                  <dd className="tabular-nums">{quote.total ? formatCurrency(quote.total) : "—"}</dd>
-                </div>
-              </dl>
-
-              {quote.scopeNotes ? (
-                <div>
-                  <p className="text-xs lg:text-[0.764vw] uppercase tracking-wide text-muted-foreground">Scope</p>
-                  <p className="mt-1 lg:mt-[0.278vw] whitespace-pre-wrap text-sm lg:text-[0.903vw]">{quote.scopeNotes}</p>
-                </div>
-              ) : null}
-
-              {quote.validUntil ? (
-                <p className="text-xs lg:text-[0.764vw] text-muted-foreground">
-                  Valid until {formatDate(new Date(quote.validUntil))}
-                </p>
-              ) : null}
+            <div className="space-y-3 lg:space-y-[0.833vw]">
+            <QuoteDocument
+              data={{
+                estimateId: quote.estimateId,
+                status: quote.status,
+                company: {
+                  name: quote.contractorName,
+                  logoUrl: quote.company.logoUrl,
+                  licenseNumber: quote.company.licenseNumber,
+                  insuranceProvider: quote.company.insuranceProvider,
+                  yearsInBusiness: quote.company.yearsInBusiness,
+                  verified: quote.company.verified,
+                  avgRating: quote.company.avgRating,
+                  totalReviews: quote.company.totalReviews,
+                },
+                serviceName: quote.serviceName,
+                subtype: quote.subtype,
+                // Only the contractor sees a "Prepared for" line; for the
+                // homeowner the quote is theirs, so we omit it.
+                clientName: viewerType === "user" ? null : otherName ?? null,
+                issuedAt: quote.issuedAt,
+                validUntil: quote.validUntil,
+                lineItems: quote.lineItems,
+                subtotal: quote.subtotal,
+                taxRate: quote.taxRate,
+                taxAmount: quote.taxAmount,
+                total: quote.total,
+                scopeNotes: quote.scopeNotes,
+                warranty: quote.warranty,
+              }}
+            />
+            <a
+              href={`/api/quotes/${quote.estimateId}/pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline", size: "lg", className: "w-full" })}
+            >
+              Download PDF
+            </a>
             </div>
           ) : (
             <p className="py-6 lg:py-[1.667vw] text-center text-sm lg:text-[0.903vw] text-muted-foreground">
@@ -183,14 +208,5 @@ function ViewQuoteButton({ estimateId, otherName }: { estimateId: string; otherN
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between text-muted-foreground">
-      <dt>{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
-    </div>
   );
 }

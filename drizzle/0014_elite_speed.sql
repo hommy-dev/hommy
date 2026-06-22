@@ -1,0 +1,1 @@
+ALTER TABLE "estimates" ADD COLUMN "warranty" text;

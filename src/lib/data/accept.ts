@@ -14,11 +14,25 @@ export type AcceptView = {
   contractorName: string | null
   serviceName: string
   subtype: string | null
+  subtotal: string | null
+  taxRate: string | null
+  taxAmount: string | null
   total: string | null
   lineItems: Array<{ label: string; amount: string }>
   scopeNotes: string | null
+  warranty: string | null
+  issuedAt: Date | null
   validUntil: Date | null
   leadStatus: LeadStatus
+  company: {
+    logoUrl: string | null
+    licenseNumber: string | null
+    insuranceProvider: string | null
+    yearsInBusiness: number | null
+    verified: boolean
+    avgRating: string | null
+    totalReviews: number
+  }
 }
 
 export async function getAcceptView(token: string): Promise<AcceptView | null> {
@@ -27,11 +41,24 @@ export async function getAcceptView(token: string): Promise<AcceptView | null> {
     .select({
       estimateId: estimates.id,
       status: estimates.status,
+      subtotal: estimates.subtotal,
+      taxRate: estimates.taxRate,
+      taxAmount: estimates.taxAmount,
       total: estimates.total,
       lineItems: estimates.lineItems,
       scopeNotes: estimates.scopeNotes,
+      warranty: estimates.warranty,
+      sentAt: estimates.sentAt,
+      createdAt: estimates.createdAt,
       validUntil: estimates.validUntil,
       contractorName: contractors.companyName,
+      logoUrl: contractors.logoUrl,
+      licenseNumber: contractors.licenseNumber,
+      insuranceProvider: contractors.insuranceProvider,
+      yearsInBusiness: contractors.yearsInBusiness,
+      verificationStatus: contractors.verificationStatus,
+      avgRating: contractors.avgRating,
+      totalReviews: contractors.totalReviews,
       serviceName: services.name,
       serviceDetails: leads.serviceDetails,
       leadStatus: leads.status,
@@ -51,10 +78,24 @@ export async function getAcceptView(token: string): Promise<AcceptView | null> {
     contractorName: row.contractorName,
     serviceName: row.serviceName,
     subtype: subtypeLabel(row.serviceDetails ?? {}),
+    subtotal: row.subtotal,
+    taxRate: row.taxRate,
+    taxAmount: row.taxAmount,
     total: row.total,
     lineItems: row.lineItems,
     scopeNotes: row.scopeNotes,
+    warranty: row.warranty,
+    issuedAt: row.sentAt ?? row.createdAt,
     validUntil: row.validUntil,
     leadStatus: row.leadStatus,
+    company: {
+      logoUrl: row.logoUrl,
+      licenseNumber: row.licenseNumber,
+      insuranceProvider: row.insuranceProvider,
+      yearsInBusiness: row.yearsInBusiness,
+      verified: row.verificationStatus === 'verified',
+      avgRating: row.avgRating,
+      totalReviews: row.totalReviews,
+    },
   }
 }
