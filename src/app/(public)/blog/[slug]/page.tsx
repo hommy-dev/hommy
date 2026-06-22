@@ -2,51 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
-import type { PortableTextBlock } from "next-sanity";
 
-import { client } from "@/sanity/client";
-import { sanityFetch } from "@/sanity/live";
 import { urlFor } from "@/sanity/image";
-import { POST_QUERY, POST_SLUGS_QUERY } from "@/sanity/queries";
+import { getPost, getPostSlugs } from "@/lib/data/blog";
 import { BlogPortableText } from "@/components/blog/portable-text";
-import { SanityImage, type SanityImageValue } from "@/components/blog/sanity-image";
+import { SanityImage } from "@/components/blog/sanity-image";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { PostCard } from "@/components/blog/post-card";
 import { extractHeadings } from "@/components/blog/headings";
-import type { PostCard as PostCardData } from "@/components/blog/types";
-
-type Author = {
-  name?: string;
-  role?: string | null;
-  bio?: string | null;
-  image?: SanityImageValue;
-  socialLinks?: { _key: string; platform: string; url: string }[] | null;
-};
-
-type Post = {
-  _id: string;
-  title: string;
-  slug: string;
-  eyebrow?: string | null;
-  excerpt?: string | null;
-  publishedAt?: string | null;
-  readTime?: number | null;
-  mainImage?: SanityImageValue;
-  category?: { _id: string; title: string; slug: string } | null;
-  author?: Author | null;
-  body?: PortableTextBlock[] | null;
-  seo?: {
-    metaTitle?: string | null;
-    metaDescription?: string | null;
-    noIndex?: boolean | null;
-    ogImage?: SanityImageValue;
-  } | null;
-  relatedPosts?: PostCardData[] | null;
-};
 
 export async function generateStaticParams() {
-  const slugs = await client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY);
-  return slugs.filter((s) => s.slug).map((s) => ({ slug: s.slug }));
+  const slugs = await getPostSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -55,8 +22,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const { data } = await sanityFetch({ query: POST_QUERY, params: { slug }, stega: false });
-  const post = data as Post | null;
+  const post = await getPost(slug);
   if (!post) return {};
 
   const title = post.seo?.metaTitle ?? post.title;
@@ -85,8 +51,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { data } = await sanityFetch({ query: POST_QUERY, params: { slug } });
-  const post = data as Post | null;
+  const post = await getPost(slug);
 
   if (!post) notFound();
 

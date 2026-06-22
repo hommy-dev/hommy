@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 
-import { sanityFetch } from "@/sanity/live";
-import {
-  POSTS_QUERY,
-  POSTS_BY_CATEGORY_QUERY,
-  CATEGORIES_QUERY,
-} from "@/sanity/queries";
+import { getPosts, getPostsByCategory, getCategories } from "@/lib/data/blog";
 import { CategoryFilter } from "@/components/blog/category-filter";
 import { PostCard, FeaturedCard } from "@/components/blog/post-card";
-import type { PostCard as PostCardData, CategoryItem } from "@/components/blog/types";
 
 export const metadata: Metadata = {
   title: "The Hommy Journal — Roofing tips, costs & guides for homeowners",
@@ -23,15 +17,11 @@ export default async function BlogIndexPage({
 }) {
   const { category } = await searchParams;
 
-  const [{ data: categories }, { data: posts }] = await Promise.all([
-    sanityFetch({ query: CATEGORIES_QUERY }),
-    category
-      ? sanityFetch({ query: POSTS_BY_CATEGORY_QUERY, params: { categorySlug: category } })
-      : sanityFetch({ query: POSTS_QUERY }),
+  const [allCategories, allPosts] = await Promise.all([
+    getCategories(),
+    category ? getPostsByCategory(category) : getPosts(),
   ]);
 
-  const allCategories = (categories ?? []) as CategoryItem[];
-  const allPosts = (posts ?? []) as PostCardData[];
   const activeCategory = category ? allCategories.find((c) => c.slug === category) : undefined;
 
   // On the unfiltered view, lead with the top (featured) post.

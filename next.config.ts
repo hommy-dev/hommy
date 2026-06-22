@@ -1,9 +1,17 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
     '192.168.100.5'
   ],
+
+  // Pin the workspace root. studio-hommy/ ships its own package-lock.json, which
+  // makes Next/Turbopack mis-infer the root and panic ("Next.js package not
+  // found"). Anchoring it here keeps dev stable.
+  turbopack: {
+    root: path.resolve("."),
+  },
 
   // Enables "use cache" directive + PPR — required for this guide
   cacheComponents: true,
