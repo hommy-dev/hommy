@@ -1,12 +1,17 @@
-// Blog read layer. Uses the plain Sanity client wrapped in `"use cache"` (per
-// CLAUDE.md — cacheComponents is on; do NOT use next-sanity's Live `sanityFetch`
-// here, it sets fetch tags that require a use-cache scope yet also reads cookies,
-// which conflict). Content is published-only and revalidates on the `standard`
-// profile; future Studio webhooks can `updateTag('post')` / `updateTag('category')`.
-import { cacheLife, cacheTag } from "next/cache";
+// Blog read layer.
+//
+// Page-render reads use next-sanity's Live `sanityFetch` INSIDE `"use cache"`
+// functions (cacheComponents is on). In that scope `sanityFetch` auto-tags the
+// result with Sanity syncTags and sets a long `cacheLife`; `<SanityLive />`
+// (root layout) streams content changes and revalidates those tags — real-time
+// updates with no webhook. `sanityFetch` must NOT be called outside `"use cache"`.
+//
+// `generateStaticParams` runs at build (not a cache scope), so it uses the plain
+// authed client directly. The dataset is private, hence the tokened clients.
 import type { PortableTextBlock } from "next-sanity";
 
-import { serverClient as client } from "@/sanity/server-client";
+import { client } from "@/sanity/client";
+import { sanityFetch } from "@/sanity/live";
 import {
   POSTS_QUERY,
   POSTS_BY_CATEGORY_QUERY,
@@ -48,36 +53,36 @@ export type BlogPost = {
 
 export async function getPosts(): Promise<PostCard[]> {
   "use cache";
-  cacheLife("standard");
-  cacheTag("post");
-  return (await client.fetch(POSTS_QUERY)) as PostCard[];
+  const { data } = await sanityFetch({ query: POSTS_QUERY });
+  return (data ?? []) as PostCard[];
 }
 
 export async function getPostsByCategory(categorySlug: string): Promise<PostCard[]> {
   "use cache";
-  cacheLife("standard");
-  cacheTag("post", `category:${categorySlug}`);
-  return (await client.fetch(POSTS_BY_CATEGORY_QUERY, { categorySlug })) as PostCard[];
+  const { data } = await sanityFetch({
+    query: POSTS_BY_CATEGORY_QUERY,
+    params: { categorySlug },
+  });
+  return (data ?? []) as PostCard[];
 }
 
 export async function getCategories(): Promise<CategoryItem[]> {
   "use cache";
-  cacheLife("standard");
-  cacheTag("category");
-  return (await client.fetch(CATEGORIES_QUERY)) as CategoryItem[];
+  const { data } = await sanityFetch({ query: CATEGORIES_QUERY });
+  return (data ?? []) as CategoryItem[];
 }
 
 export async function getPost(slug: string): Promise<BlogPost | null> {
   "use cache";
-  cacheLife("standard");
-  cacheTag("post", `post:${slug}`);
-  return (await client.fetch(POST_QUERY, { slug })) as BlogPost | null;
+  const { data } = await sanityFetch({ query: POST_QUERY, params: { slug } });
+  return (data ?? null) as BlogPost | null;
 }
 
+// Build-time only — plain fresh fetch (not Live, not cached). Public dataset, so
+// tokenless; `useCdn: false` guarantees fresh slugs for generateStaticParams.
 export async function getPostSlugs(): Promise<string[]> {
-  "use cache";
-  cacheLife("standard");
-  cacheTag("post");
-  const rows = (await client.fetch(POST_SLUGS_QUERY)) as { slug: string }[];
+  const rows = (await client
+    .withConfig({ useCdn: false })
+    .fetch(POST_SLUGS_QUERY)) as { slug: string }[];
   return rows.filter((r) => r.slug).map((r) => r.slug);
 }

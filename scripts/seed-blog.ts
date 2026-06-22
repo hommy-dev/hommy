@@ -133,7 +133,7 @@ async function uploadImage(relPath: string): Promise<string> {
 
 const authors = [
   {
-    _id: 'author.maria-chen',
+    _id: 'author-maria-chen',
     name: 'Maria Chen',
     slug: 'maria-chen',
     role: 'Home Services Editor',
@@ -145,7 +145,7 @@ const authors = [
     ],
   },
   {
-    _id: 'author.james-patterson',
+    _id: 'author-james-patterson',
     name: 'James Patterson',
     slug: 'james-patterson',
     role: 'Roofing Specialist',
@@ -156,11 +156,11 @@ const authors = [
 ]
 
 const categories = [
-  {_id: 'category.roofing-101', title: 'Roofing 101', slug: 'roofing-101', description: 'The fundamentals every homeowner should know about their roof.'},
-  {_id: 'category.maintenance', title: 'Maintenance', slug: 'maintenance', description: 'Keep your roof healthy and avoid costly surprises.'},
-  {_id: 'category.storm-damage', title: 'Storm & Damage', slug: 'storm-damage', description: 'What to do when the weather does a number on your roof.'},
-  {_id: 'category.costs', title: 'Costs & Financing', slug: 'costs-financing', description: 'Real numbers, budgeting tips, and how to pay for the work.'},
-  {_id: 'category.hiring', title: 'Hiring a Pro', slug: 'hiring-a-pro', description: 'Find, vet, and work with a contractor you can trust.'},
+  {_id: 'category-roofing-101', title: 'Roofing 101', slug: 'roofing-101', description: 'The fundamentals every homeowner should know about their roof.'},
+  {_id: 'category-maintenance', title: 'Maintenance', slug: 'maintenance', description: 'Keep your roof healthy and avoid costly surprises.'},
+  {_id: 'category-storm-damage', title: 'Storm & Damage', slug: 'storm-damage', description: 'What to do when the weather does a number on your roof.'},
+  {_id: 'category-costs', title: 'Costs & Financing', slug: 'costs-financing', description: 'Real numbers, budgeting tips, and how to pay for the work.'},
+  {_id: 'category-hiring', title: 'Hiring a Pro', slug: 'hiring-a-pro', description: 'Find, vet, and work with a contractor you can trust.'},
 ]
 
 type PostSeed = {
@@ -186,8 +186,8 @@ const posts: PostSeed[] = [
     eyebrow: 'GUIDE',
     excerpt:
       'Asphalt, metal, tile, or slate? The right roof depends on your climate, budget, and how long you plan to stay. Here is how the pros decide.',
-    category: 'category.roofing-101',
-    author: 'author.maria-chen',
+    category: 'category-roofing-101',
+    author: 'author-maria-chen',
     cover: 'bg/roof-replacement.jpg',
     coverAlt: 'A freshly replaced residential roof under a clear sky',
     readTime: 7,
@@ -223,8 +223,8 @@ const posts: PostSeed[] = [
     eyebrow: 'CHECKLIST',
     excerpt:
       'Most roof problems are cheap to fix early and expensive to ignore. Here are the warning signs worth a five-minute look from the ground.',
-    category: 'category.maintenance',
-    author: 'author.james-patterson',
+    category: 'category-maintenance',
+    author: 'author-james-patterson',
     cover: 'bg/roof-repair.jpg',
     coverAlt: 'Close-up of damaged shingles being repaired',
     readTime: 6,
@@ -263,8 +263,8 @@ const posts: PostSeed[] = [
     eyebrow: 'HOW TO',
     excerpt:
       'High winds and hail can wreck a roof in minutes. Move fast, document everything, and avoid the storm-chasers — here is the right order of operations.',
-    category: 'category.storm-damage',
-    author: 'author.maria-chen',
+    category: 'category-storm-damage',
+    author: 'author-maria-chen',
     cover: 'bg/storm-damage.jpg',
     coverAlt: 'A roof with visible storm damage after severe weather',
     readTime: 8,
@@ -293,8 +293,8 @@ const posts: PostSeed[] = [
     eyebrow: 'COSTS',
     excerpt:
       'Roof replacement runs anywhere from $8,000 to $30,000+. Here is what actually drives the price — and how to make sure you are comparing quotes fairly.',
-    category: 'category.costs',
-    author: 'author.maria-chen',
+    category: 'category-costs',
+    author: 'author-maria-chen',
     cover: 'bg/house-lake.avif',
     coverAlt: 'A well-maintained house with a new roof beside a lake',
     readTime: 9,
@@ -330,8 +330,8 @@ const posts: PostSeed[] = [
     eyebrow: 'HIRING',
     excerpt:
       'A great roofer will happily answer these. A bad one will dodge them. Use this list to separate the pros from the pretenders.',
-    category: 'category.hiring',
-    author: 'author.james-patterson',
+    category: 'category-hiring',
+    author: 'author-james-patterson',
     cover: 'bg/worker-0.jpeg',
     coverAlt: 'A professional roofing contractor on a job site',
     readTime: 6,
@@ -369,8 +369,8 @@ const posts: PostSeed[] = [
     eyebrow: 'CHECKLIST',
     excerpt:
       'Twenty minutes each season is all it takes to add years to your roof. Here is the simple, season-by-season routine the pros recommend.',
-    category: 'category.maintenance',
-    author: 'author.maria-chen',
+    category: 'category-maintenance',
+    author: 'author-maria-chen',
     cover: 'bg/roof-inspection.jpg',
     coverAlt: 'A homeowner reviewing a roof maintenance checklist',
     readTime: 5,
@@ -465,7 +465,7 @@ async function main() {
   //    targets all exist first and references stay strong)
   for (const post of posts) {
     await client.createOrReplace({
-      _id: `post.${post.slug}`,
+      _id: `post-${post.slug}`,
       _type: 'post',
       title: post.title,
       slug: {_type: 'slug', current: post.slug},
@@ -495,12 +495,12 @@ async function main() {
   for (const post of posts) {
     if (!post.related?.length) continue
     await client
-      .patch(`post.${post.slug}`)
+      .patch(`post-${post.slug}`)
       .set({
         relatedPosts: post.related.map((slug) => ({
           _type: 'reference',
           _key: key(),
-          _ref: `post.${slug}`,
+          _ref: `post-${slug}`,
         })),
       })
       .commit()

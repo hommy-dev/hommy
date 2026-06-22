@@ -1,16 +1,18 @@
-// Live Content API — real-time content + Visual Editing.
-// Requires <SanityLive /> to be rendered in the root layout.
+// Live Content API — real-time content via Next.js Cache Components.
+// Requires <SanityLive /> in the root layout and `cacheComponents: true` in
+// next.config. `sanityFetch` must be called inside a `"use cache"` function
+// (see src/lib/data/blog.ts): there it auto-tags results with Sanity syncTags,
+// and <SanityLive /> revalidates them on content change (no webhook needed).
+//
+// The production dataset is public, so published reads are tokenless and served
+// from the CDN (fastest). The tokens below are only used for draft preview
+// (Presentation / Visual Editing) when that is enabled later.
 import { defineLive } from "next-sanity/live";
 
 import { client } from "./client";
 
 export const { sanityFetch, SanityLive } = defineLive({
-  client: client.withConfig({
-    // Live Content requires a recent API version.
-    apiVersion: "2026-06-01",
-  }),
-  // Optional — only needed to preview drafts (Presentation tool / Visual Editing).
-  // Create one at https://www.sanity.io/manage (Viewer role) and set SANITY_API_READ_TOKEN.
+  client: client.withConfig({ apiVersion: "2026-06-01" }),
   serverToken: process.env.SANITY_API_READ_TOKEN,
   browserToken: process.env.SANITY_API_READ_TOKEN,
 });
