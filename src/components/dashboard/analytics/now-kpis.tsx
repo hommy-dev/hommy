@@ -1,9 +1,7 @@
 import { getContractorOverview } from "@/lib/data/overview"
 import { scoreStanding } from "@/lib/reputation/labels"
+import { creditStatView } from "@/lib/credits/stat"
 import { OverviewStat, type StatDelta } from "@/components/dashboard/overview/overview-stat"
-
-// Below this a company can't engage a lead (engage costs 5).
-const LOW_CREDIT_BALANCE = 5
 
 function upDown(n: number, label: string): StatDelta | undefined {
   if (n > 0) return { label: `${n} ${label}`, dir: "up" }
@@ -26,9 +24,7 @@ export async function NowKpis({
 }) {
   const o = await getContractorOverview(contractorId, userId)
   const standing = scoreStanding(profileScore)
-
-  const creditTone = creditBalance < 0 ? "destructive" : creditBalance < LOW_CREDIT_BALANCE ? "warning" : "success"
-  const creditHint = creditBalance < 0 ? "You owe credits" : creditBalance < LOW_CREDIT_BALANCE ? "Running low" : "Healthy balance"
+  const credits = creditStatView(creditBalance, o.creditsTrend7d)
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-[1.111vw]">
@@ -53,10 +49,10 @@ export async function NowKpis({
       <OverviewStat
         label="Credits"
         value={creditBalance}
-        hint={creditHint}
-        tone={creditTone}
+        hint={credits.hint}
+        tone={credits.tone}
         href="/contractor/settings/billing"
-        delta={upDown(o.creditsTrend7d, "this week")}
+        delta={credits.delta}
         series={o.creditsSeries}
         delayMs={120}
       />

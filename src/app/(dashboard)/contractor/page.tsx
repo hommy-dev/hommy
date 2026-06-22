@@ -3,6 +3,7 @@ import Link from "next/link"
 import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser, type Contractor } from "@/lib/data/dashboard"
 import { getContractorOverview } from "@/lib/data/overview"
+import { creditStatView } from "@/lib/credits/stat"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { scoreStanding } from "@/lib/reputation/labels"
 import { SetupGate } from "@/components/dashboard/setup-gate"
@@ -125,10 +126,7 @@ async function OverviewContent({
   const o = await getContractorOverview(contractor.id, userId)
   const balance = contractor.creditBalance
   const standing = scoreStanding(contractor.profileScore)
-
-  const creditTone = balance < 0 ? "destructive" : balance < LOW_CREDIT_BALANCE ? "warning" : "success"
-  const creditHint =
-    balance < 0 ? "You owe credits" : balance < LOW_CREDIT_BALANCE ? "Running low" : "Healthy balance"
+  const credits = creditStatView(balance, o.creditsTrend7d)
 
   // Build the prioritized action list (most urgent first).
   const actions: ActionRow[] = []
@@ -219,10 +217,10 @@ async function OverviewContent({
         <OverviewStat
           label="Credits"
           value={balance}
-          hint={creditHint}
-          tone={creditTone}
+          hint={credits.hint}
+          tone={credits.tone}
           href="/contractor/settings/billing"
-          delta={upDown(o.creditsTrend7d, "this week")}
+          delta={credits.delta}
           series={o.creditsSeries}
           delayMs={120}
         />
