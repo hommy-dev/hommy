@@ -179,7 +179,7 @@ Anyone can message anyone: homeowner ↔ company, company ↔ company, admin ↔
 
 - **`conversations`** — `type` (`direct` | `lead` | `engagement` | `support`) + optional polymorphic `context`. The job/lead workspace conversation uses **`context_type = 'project'`, `context_id = projects.id`** (created at engage). The job control panel + all rich cards key off this — use `'project'`, not `'lead'`.
 - **`conversation_participants`** — a participant is a **`user`** (homeowner, admin, or a specific person) **or a `contractor`** (the whole company — any active member reads/sends). `last_read_at` per participant drives unread counts.
-- **`messages`** — `sender_type` (`user` | `contractor` | `system`), `sender_id`, `body`, `channel` (`platform` | `sms` | `email`), `external_id`, and a structured **`meta` jsonb** for rich cards (see below). In-app realtime + SMS/email bridges (Plivo/Resend).
+- **`messages`** — `sender_type` (`user` | `contractor` | `system`), `sender_id`, `body`, `channel` (`platform` | `sms` | `email`), `external_id`, and a structured **`meta` jsonb** for rich cards (see below). In-app realtime + SMS/email bridges (Twilio/Resend).
 
 **Rich message `meta` (the `MessageMeta` union, rendered as cards in the thread):**
 - `kind: 'quote'` — the inline quote card (`estimateId`, `total`, `status`). Homeowner **accepts / views** it here; aligned to the contractor's side; status copy personalized per viewer ("Awaiting your decision" vs "Awaiting the homeowner's decision").
@@ -203,7 +203,7 @@ Use this stack exactly. (Reconciled with the installed codebase.)
 - **Background jobs:** Inngest (`src/lib/inngest`).
 - **File storage:** **Cloudinary** (`src/lib/cloudinary/*`, `next-cloudinary`).
 - **Payments:** Stripe — **subscriptions (plan → monthly credit grant + seats + features) AND one-time credit purchases** (Checkout + Customer Portal + webhooks). No Connect / no money between homeowner and contractor.
-- **SMS / voice:** **Plivo** (replaces Twilio) where SMS/notifications are needed.
+- **SMS:** **Twilio** where SMS/notifications are needed (`sendSms` in `src/lib/notifications/sms.ts` is provider-agnostic and also supports Textbelt/Plivo fallbacks, but Twilio is the provider in use).
 - **Email:** Resend.
 - **Push:** Web Push (VAPID; `web-push`, `public/sw.js`).
 - **Maps / Geocoding:** Google Places (New) — `PlaceAutocompleteElement`, `@googlemaps/js-api-loader`.
@@ -463,7 +463,7 @@ messages {
   sender_id: uuid (nullable)
   body: text                       // fallback / non-thread surfaces
   channel: enum('platform','sms','email')
-  external_id: text (nullable)     // Plivo/Resend id
+  external_id: text (nullable)     // Twilio/Resend id
   meta: jsonb (nullable)           // MessageMeta union → rich card:
                                    //   { kind:'quote', estimateId, total, status }
                                    //   { kind:'event', event, actorType, actorId }   (personalized, sided)
@@ -582,7 +582,7 @@ Use Supabase Realtime (broadcast-based; see `src/lib/realtime/*`) for: new messa
 
 ## 12. Notifications
 
-Every notification goes through one `sendNotification()` core: writes a per-user `notifications` row → checks preferences → push (Web Push) → SMS (Plivo) → email (Resend) per type. Never call Plivo/Resend directly from page handlers — go through Inngest events.
+Every notification goes through one `sendNotification()` core: writes a per-user `notifications` row → checks preferences → push (Web Push) → SMS (Twilio) → email (Resend) per type. Never call Twilio/Resend directly from page handlers — go through Inngest events.
 
 ---
 
@@ -595,7 +595,7 @@ Every notification goes through one `sendNotification()` core: writes a per-user
 - **Contractor (auth, role `contractor`):** `/contractor` — command center, **`/contractor/jobs`** — the unified board (offers → engage → quote → won → done; **Leads + Projects were merged into it**, so `/contractor/leads` redirects here), contacts, messages, storm-alerts, reviews, **team** (members + invites), **billing** (plan + credits + purchase), profile, settings. (`src/app/(dashboard)/contractor/`)
 - **Admin (auth, role `admin`):** `/admin` — leads, contractors (verify), members, storm-events, plans/credits, analytics, settings. (`src/app/(dashboard)/admin/`)
 - **Tokenized (no session needed):** quote acceptance link, review submission link, invitation accept link.
-- **API route handlers:** `/api/inngest`, `/api/push/*`, `/api/webhooks/stripe`, `/api/webhooks/plivo` (inbound SMS), `/api/webhooks/resend` (inbound email).
+- **API route handlers:** `/api/inngest`, `/api/push/*`, `/api/webhooks/stripe`, `/api/webhooks/twilio` (inbound SMS), `/api/webhooks/resend` (inbound email).
 
 ---
 
@@ -611,8 +611,8 @@ INNGEST_SIGNING_KEY  INNGEST_EVENT_KEY   (+ INNGEST_DEV=1 locally)
 # Stripe (subscriptions + one-time credit purchases)
 STRIPE_SECRET_KEY  STRIPE_WEBHOOK_SECRET  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
-# Plivo (SMS / voice)
-PLIVO_AUTH_ID  PLIVO_AUTH_TOKEN  PLIVO_SENDER_ID
+# Twilio (SMS) — either a single from-number or a Messaging Service SID
+TWILIO_ACCOUNT_SID  TWILIO_AUTH_TOKEN  TWILIO_PHONE_NUMBER  (or TWILIO_MESSAGING_SERVICE_SID)
 
 # Email (Resend)
 RESEND_API_KEY  NEXT_PUBLIC_FROM_EMAIL

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone Sanity Studio — has its own toolchain/config.
+    "studio-hommy/**",
   ]),
   // Honor the `_`-prefix convention for intentionally-unused vars/args.
   {

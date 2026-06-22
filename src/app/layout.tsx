@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { inter, sebenta } from "@/style/font";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
+import { SanityLive } from "@/sanity/live";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -43,6 +44,8 @@ export default function RootLayout({
             </AnchoredToastProvider>
           </ToastProvider>
         </ThemeProvider>
+        {/* Sanity Live Content API — enables real-time content updates */}
+        <SanityLive />
       </body>
     </html>
   );

@@ -1,0 +1,29 @@
+{
+  "name": "studio-hommy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sanity Studio for Hommy",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity start",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "schema:deploy": "sanity schema deploy",
+    "typegen": "sanity schema extract && sanity typegen generate"
+  },
+  "keywords": [
+    "sanity"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@sanity/vision": "^6.1.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sanity": "^6.1.0",
+    "styled-components": "^6.4.2"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

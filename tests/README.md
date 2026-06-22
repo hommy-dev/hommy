@@ -86,7 +86,7 @@ import { engageLead } from '@/lib/actions/engage'
 - Always assert **post-condition state**, not just "the function returned ok":
   which rows changed, to what status, which Inngest events fired.
 - Don't test the framework. Drizzle inserts and Zod parsing are not yours to test.
-- The realtime transport, Resend, Plivo and web-push all funnel through one seam
+- The realtime transport, Resend, Twilio and web-push all funnel through one seam
   each — mock that seam, not every caller.
 
 ## What is **not** scripted (manual only)
