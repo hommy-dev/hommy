@@ -73,6 +73,11 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: stub-anon-key
       SUPABASE_SERVICE_ROLE_KEY: stub-service-role-key
+      # next dev (the Playwright web server) does NOT read .env.test, so the
+      # public Sanity ids must be provided here or src/sanity/env.ts throws.
+      NEXT_PUBLIC_SANITY_PROJECT_ID: v6wykinx
+      NEXT_PUBLIC_SANITY_DATASET: production
+      NEXT_PUBLIC_SANITY_API_VERSION: '2026-06-01'
     services:
       postgres:
         image: postgis/postgis:15-3.4-alpine
