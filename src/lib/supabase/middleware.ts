@@ -23,6 +23,7 @@ const PUBLIC_PATHS = [
   "/auth/signup",
   "/auth/callback",
   "/api/inngest",
+  "/api/geo-debug", // TEMP: echoes Vercel edge geo headers for gate debugging
   "/sandbox", // dev-only component preview
 ];
 

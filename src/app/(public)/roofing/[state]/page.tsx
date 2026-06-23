@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { states } from "@/lib/db/schema";
 import { getStateWithCities } from "@/lib/data/locations";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
-// Prerender the operating states; unknown state slugs fall through to notFound().
-// (dynamicParams config is incompatible with cacheComponents — the page guards instead.)
-export async function generateStaticParams() {
-  const rows = await db.select({ slug: states.slug }).from(states).where(eq(states.isOperating, true));
-  return rows.map((s) => ({ state: s.slug }));
-}
+// State hubs render on-demand (no generateStaticParams): the operating-state set
+// is DB-driven and can be empty (e.g. unseeded prod), which cacheComponents
+// disallows for prerender. Matches the [city]/[subtype] pages. Unknown state
+// slugs fall through to notFound() below.
 
 export async function generateMetadata({
   params,
