@@ -11,8 +11,8 @@ import {
 // exactly what location production assigns to a given visitor (e.g. a real
 // Bahawalnagar, PK visitor who is wrongly hitting /coming-soon). Remove once the
 // service-area gate is fixed. Public (added to PUBLIC_PATHS in middleware.ts).
-export const dynamic = "force-dynamic";
-
+// No route segment config — reading headers() already makes this dynamic, and
+// `export const dynamic` is incompatible with cacheComponents.
 export async function GET() {
   const h = await headers();
   const region = h.get(GEO_REGION_HEADER);
