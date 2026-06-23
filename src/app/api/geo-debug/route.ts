@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import {
-  GEO_CITY_HEADER,
   GEO_COUNTRY_HEADER,
   GEO_REGION_HEADER,
-  isServedLocation,
+  isServedCountry,
 } from "@/lib/config/service-areas";
 
 // TEMPORARY diagnostic — echoes the raw Vercel edge geo headers so we can see
-// exactly what location production assigns to a given visitor (e.g. a real
-// Bahawalnagar, PK visitor who is wrongly hitting /coming-soon). Remove once the
-// service-area gate is fixed. Public (added to PUBLIC_PATHS in middleware.ts).
+// exactly what location production assigns to a given visitor. The lead funnel
+// now gates by COUNTRY only (US), so `wouldBeServed` reflects that. Remove once
+// no longer needed. Public (added to PUBLIC_PATHS in middleware.ts).
 // No route segment config — reading headers() already makes this dynamic, and
 // `export const dynamic` is incompatible with cacheComponents.
+const GEO_CITY_HEADER = "x-vercel-ip-city";
+
 export async function GET() {
   const h = await headers();
   const region = h.get(GEO_REGION_HEADER);
@@ -28,7 +29,7 @@ export async function GET() {
       [`${GEO_CITY_HEADER} (decoded)`]: city,
     },
     decoded: { region, country, city },
-    wouldBeServed: isServedLocation(region, country, city),
-    note: "If wouldBeServed is false, the gate will redirect you to /coming-soon. Compare the decoded city/region to the OPERATING_CITIES / OPERATING_STATES config.",
+    wouldBeServed: isServedCountry(country),
+    note: "Gate is country-only now: wouldBeServed is true iff country is in OPERATING_COUNTRIES (US). If false, the lead funnel redirects to /coming-soon.",
   });
 }

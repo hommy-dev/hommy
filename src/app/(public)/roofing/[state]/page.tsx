@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStateWithCities } from "@/lib/data/locations";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
+import { ogImageMeta } from "@/lib/og";
 import { BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
 // State hubs render on-demand (no generateStaticParams): the operating-state set
@@ -25,6 +26,17 @@ export async function generateMetadata({
     alternates: { canonical: `/roofing/${state}` },
     // Thin hub (no indexable cities yet) stays out of the index.
     robots: SITE_INDEXABLE && data.totalIndexable > 0 ? undefined : { index: false, follow: true },
+    ...ogImageMeta({
+      title: `Roofers across ${data.state.name}`,
+      kicker: "Roofing",
+      stats: [
+        ...(data.totalIndexable > 0
+          ? [{ value: String(data.totalIndexable), label: "Cities covered" }]
+          : []),
+        { value: "Free", label: "To get quotes" },
+        { value: "0", label: "Spam calls" },
+      ],
+    }),
   };
 }
 

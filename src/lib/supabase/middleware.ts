@@ -9,7 +9,6 @@ import {
 const PUBLIC_PATHS = [
   "/",
   "/get-a-quote", // standalone homeowner lead form
-  "/thank-you", // post-submission confirmation
   "/coming-soon", // out-of-area homeowner waitlist (geo-gate target)
   "/blog", // public blog: index, posts, and category filters
   "/privacy", // public legal: privacy policy
@@ -23,6 +22,7 @@ const PUBLIC_PATHS = [
   "/auth/signup",
   "/auth/callback",
   "/api/inngest",
+  "/og", // dynamic social-share image route (public; crawlers fetch it)
   "/api/geo-debug", // TEMP: echoes Vercel edge geo headers for gate debugging
   "/sandbox", // dev-only component preview
 ];
@@ -30,7 +30,7 @@ const PUBLIC_PATHS = [
 // Homeowner lead-funnel paths gated by country. We launch in the US only, so
 // homeowners outside the US are redirected to /coming-soon before they fill the
 // form. Contractor/auth/marketing routes stay open to everyone.
-const GEO_GATED_PATHS = ["/get-a-quote", "/thank-you"];
+const GEO_GATED_PATHS = ["/get-a-quote"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(

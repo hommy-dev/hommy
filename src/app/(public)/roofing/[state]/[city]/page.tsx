@@ -10,6 +10,7 @@ import {
 import { INDEX_MIN_PROS } from "@/lib/config/seo";
 import { ROOFING_SUBTYPE_PAGES } from "@/lib/config/roofing-subtypes";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
+import { ogImageMeta } from "@/lib/og";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
 // City pages render on-demand (no generateStaticParams): the indexable set is
@@ -27,12 +28,24 @@ export async function generateMetadata({
   const { proCount } = await getCitySupplyForCity(state, city);
   const indexable = SITE_INDEXABLE && proCount >= INDEX_MIN_PROS;
 
+  const title = `Roofers in ${cityRow.name}, ${cityRow.stateCode}`;
   return {
-    title: `Roofers in ${cityRow.name}, ${cityRow.stateCode}`,
+    title,
     description: `Find licensed, insured roofers serving ${cityRow.name}, ${cityRow.stateName}. Compare local pros, ratings, and get free, no-obligation quotes on Hommy.`,
     alternates: { canonical: `/roofing/${state}/${city}` },
     // The thin-content gate: noindex (but still followable) until supply clears the bar.
     robots: indexable ? undefined : { index: false, follow: true },
+    ...ogImageMeta({
+      title,
+      kicker: `Roofing · ${cityRow.stateName}`,
+      stats: [
+        ...(proCount > 0
+          ? [{ value: String(proCount), label: "Vetted pros" }]
+          : []),
+        { value: "Free", label: "To get quotes" },
+        { value: "0", label: "Spam calls" },
+      ],
+    }),
   };
 }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getStatesWithCounts } from "@/lib/data/locations";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
+import { ogImageMeta } from "@/lib/og";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
 const TITLE = "Roofing contractors near you";
@@ -14,6 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
     description: DESCRIPTION,
     alternates: { canonical: "/roofing" },
     robots: SITE_INDEXABLE ? undefined : { index: false, follow: false },
+    ...ogImageMeta({
+      title: "Find a roofer you can actually trust",
+      kicker: "Roofing",
+      stats: [
+        { value: "Licensed", label: "& insured pros" },
+        { value: "Free", label: "To get quotes" },
+        { value: "0", label: "Spam calls" },
+      ],
+    }),
   };
 }
 

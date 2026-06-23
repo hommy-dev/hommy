@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { getRooferBySlug } from "@/lib/data/roofers";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
+import { ogImageMeta } from "@/lib/og";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
 // Render on-demand (no generateStaticParams): the verified set can be empty,
@@ -18,6 +19,18 @@ export async function generateMetadata({
   const roofer = await getRooferBySlug(slug);
   if (!roofer) return {};
   const name = roofer.companyName ?? "Roofing contractor";
+  // Only emit stats that are real — never fabricate ratings/reviews.
+  const stats = [
+    ...(roofer.avgRating
+      ? [{ value: `${roofer.avgRating.toFixed(1)}★`, label: "Avg rating" }]
+      : []),
+    ...(roofer.totalReviews > 0
+      ? [{ value: String(roofer.totalReviews), label: "Reviews" }]
+      : []),
+    ...(roofer.cities.length > 0
+      ? [{ value: String(roofer.cities.length), label: "Service areas" }]
+      : []),
+  ];
   return {
     title: `${name} — Roofing Contractor`,
     description:
@@ -25,6 +38,11 @@ export async function generateMetadata({
       `${name} is a licensed, insured roofing contractor on Hommy. See reviews, service areas, and get a free quote.`,
     alternates: { canonical: `/roofers/${slug}` },
     robots: SITE_INDEXABLE ? undefined : { index: false, follow: true },
+    ...ogImageMeta({
+      title: name,
+      kicker: "Verified roofing contractor",
+      stats,
+    }),
   };
 }
 

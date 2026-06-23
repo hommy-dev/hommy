@@ -10,6 +10,7 @@ import {
 import { getRoofingSubtypePage } from "@/lib/config/roofing-subtypes";
 import { INDEX_MIN_PROS } from "@/lib/config/seo";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
+import { ogImageMeta } from "@/lib/og";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
 // On-demand (no generateStaticParams). Unknown city/subtype → notFound().
@@ -32,11 +33,23 @@ export async function generateMetadata({
   const indexable =
     SITE_INDEXABLE && citySupply.proCount >= INDEX_MIN_PROS && subSupply.proCount >= 1;
 
+  const title = `${sub.heading} in ${cityRow.name}, ${cityRow.stateCode}`;
   return {
-    title: `${sub.heading} in ${cityRow.name}, ${cityRow.stateCode}`,
+    title,
     description: `Compare local, vetted roofers for ${sub.noun} in ${cityRow.name}, ${cityRow.stateName}. Free quotes, no spam calls — only the pros you choose, on Hommy.`,
     alternates: { canonical: `/roofing/${state}/${city}/${subtype}` },
     robots: indexable ? undefined : { index: false, follow: true },
+    ...ogImageMeta({
+      title,
+      kicker: `${sub.heading} · ${cityRow.stateName}`,
+      stats: [
+        ...(subSupply.proCount > 0
+          ? [{ value: String(subSupply.proCount), label: "Vetted pros" }]
+          : []),
+        { value: "Free", label: "To get quotes" },
+        { value: "0", label: "Spam calls" },
+      ],
+    }),
   };
 }
 
