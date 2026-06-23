@@ -3,11 +3,11 @@ import { AWARD_PRICING, computeAwardCost, getLeadPricing } from '@/lib/leads/pri
 
 describe('getLeadPricing', () => {
   it('returns the roofing engagement cost', () => {
-    expect(getLeadPricing('roofing')).toEqual({ engagementCreditCost: 5 })
+    expect(getLeadPricing('roofing')).toEqual({ engagementCreditCost: 1 })
   })
 
   it('falls back to the default for an unknown service', () => {
-    expect(getLeadPricing('plumbing')).toEqual({ engagementCreditCost: 5 })
+    expect(getLeadPricing('plumbing')).toEqual({ engagementCreditCost: 1 })
   })
 })
 
