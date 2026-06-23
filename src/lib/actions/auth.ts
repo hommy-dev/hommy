@@ -240,12 +240,14 @@ export async function signupContractor(
     return { success: false, error: error?.message || 'Could not create your account' }
   }
 
+  const referredByCode = ((formData.get('ref') as string | null) ?? '').trim() || undefined
   try {
     await provisionContractor({
       userId: data.user.id,
       email: parsed.data.email,
       fullName: parsed.data.fullName,
       passwordSet: true,
+      referredByCode,
     })
   } catch (err) {
     console.error('[signupContractor] provisioning failed', err)
@@ -265,14 +267,15 @@ export async function signupContractor(
  * Returns a Google OAuth URL for contractor signup. The callback (intent=contractor)
  * provisions the company scaffolding after the session is established.
  */
-export async function startContractorGoogleSignup(): Promise<
+export async function startContractorGoogleSignup(referralCode?: string): Promise<
   ActionResult<{ url: string }>
 > {
   const supabase = await createClient()
   const origin = getAppOrigin()
+  const ref = referralCode ? `&ref=${encodeURIComponent(referralCode)}` : ''
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${origin}/auth/callback?intent=contractor&next=/onboarding` },
+    options: { redirectTo: `${origin}/auth/callback?intent=contractor&next=/onboarding${ref}` },
   })
   if (error || !data.url) {
     return { success: false, error: error?.message || 'Could not start Google sign-in' }

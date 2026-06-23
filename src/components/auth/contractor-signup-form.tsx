@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 type FieldErrors = Record<string, string>
 
-export function ContractorSignupForm() {
+export function ContractorSignupForm({ referralCode }: { referralCode?: string }) {
   const router = useRouter()
   const [pending, startSubmit] = useTransition()
   const [googlePending, startGoogle] = useTransition()
@@ -25,7 +25,7 @@ export function ContractorSignupForm() {
 
   function handleGoogle() {
     startGoogle(async () => {
-      const res = await startContractorGoogleSignup()
+      const res = await startContractorGoogleSignup(referralCode)
       if (!res.success) {
         showToast(res.error, { type: "error" })
         return
@@ -86,6 +86,11 @@ export function ContractorSignupForm() {
       <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
         Free to join. You only pay credits when you win a job.
       </p>
+      {referralCode && (
+        <p className="mt-3 lg:mt-[0.833vw] rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-[13px] lg:text-[0.903vw] text-primary">
+          🎁 You were referred — you both get <strong>25 bonus credits</strong> once you&apos;re verified.
+        </p>
+      )}
 
       <Button
         type="button"
@@ -106,6 +111,7 @@ export function ContractorSignupForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-[1.111vw]" noValidate>
+        {referralCode && <input type="hidden" name="ref" value={referralCode} />}
         <Field id="signup-fullName" label="Full name" error={errors.fullName}>
           <Input
             id="signup-fullName"

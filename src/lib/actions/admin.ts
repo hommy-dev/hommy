@@ -11,6 +11,7 @@ import { broadcastCreditsChanged } from '@/lib/credits/notify'
 import { getAdminContractorDetail, type AdminContractorDetail } from '@/lib/data/admin'
 import { revalidateCityPages } from '@/lib/data/locations'
 import { revalidateRoofers } from '@/lib/data/roofers'
+import { REFERRAL_CREDITS, REFERRAL_EXPIRES_MONTHS } from '@/lib/contractor/referral'
 
 type Result = { success: true } | { success: false; error: string }
 
@@ -33,10 +34,62 @@ export async function decideVerification(input: unknown): Promise<Result> {
   }
   const { contractorId, decision } = parsed.data
 
-  await db
-    .update(contractors)
-    .set({ verificationStatus: decision })
-    .where(eq(contractors.id, contractorId))
+  // On verification, pay the referral reward ONCE (to both companies) inside the
+  // same transaction that flips the status — guarded by referral_rewarded_at and
+  // a row lock so concurrent verifies can't double-pay.
+  let payout: { referrerId: string; refereeBalance: number; referrerBalance: number } | null = null
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(contractors)
+      .set({ verificationStatus: decision })
+      .where(eq(contractors.id, contractorId))
+
+    if (decision !== 'verified') return
+
+    const [referee] = await tx
+      .select({
+        referredBy: contractors.referredByContractorId,
+        rewardedAt: contractors.referralRewardedAt,
+      })
+      .from(contractors)
+      .where(eq(contractors.id, contractorId))
+      .for('update')
+      .limit(1)
+
+    if (referee?.referredBy && !referee.rewardedAt && referee.referredBy !== contractorId) {
+      const expiresAt = new Date()
+      expiresAt.setMonth(expiresAt.getMonth() + REFERRAL_EXPIRES_MONTHS)
+      const refereeBalance = await grantCredits(tx, {
+        contractorId,
+        kind: 'referral',
+        amount: REFERRAL_CREDITS,
+        expiresAt,
+        sourceType: 'referral',
+        sourceId: referee.referredBy,
+      })
+      const referrerBalance = await grantCredits(tx, {
+        contractorId: referee.referredBy,
+        kind: 'referral',
+        amount: REFERRAL_CREDITS,
+        expiresAt,
+        sourceType: 'referral',
+        sourceId: contractorId,
+      })
+      await tx
+        .update(contractors)
+        .set({ referralRewardedAt: new Date() })
+        .where(eq(contractors.id, contractorId))
+      payout = { referrerId: referee.referredBy, refereeBalance, referrerBalance }
+    }
+  })
+
+  // Notify both wallets after commit (the referrer likely has a live session).
+  if (payout) {
+    const p: { referrerId: string; refereeBalance: number; referrerBalance: number } = payout
+    void broadcastCreditsChanged(contractorId, p.refereeBalance)
+    void broadcastCreditsChanged(p.referrerId, p.referrerBalance)
+  }
 
   revalidatePath('/admin/verification')
   revalidatePath('/admin')

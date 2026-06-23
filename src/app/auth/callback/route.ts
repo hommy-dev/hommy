@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
           email: data.user.email ?? '',
           fullName,
           passwordSet: false,
+          referredByCode: url.searchParams.get('ref') ?? undefined,
         })
       } else {
         await provisionHomeowner({

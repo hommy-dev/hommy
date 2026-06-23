@@ -21,6 +21,7 @@ import {
   homeowners,
 } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
+import { assignReferralCodeIfMissing, resolveReferrer } from '@/lib/contractor/referral'
 import { sendNotification } from '@/lib/notifications'
 
 /** Free credits every new company gets, no strings, never expires. */
@@ -35,11 +36,14 @@ export async function provisionContractor({
   email,
   fullName,
   passwordSet = true,
+  referredByCode,
 }: {
   userId: string
   email: string
   fullName: string | null
   passwordSet?: boolean
+  /** Referral code from ?ref=… — records who referred this company (credited on verify). */
+  referredByCode?: string
 }): Promise<void> {
   // Ensure the public.users row exists (upsert — the user may already exist).
   await db
@@ -104,6 +108,19 @@ export async function provisionContractor({
         sourceType: 'launch_promo',
       })
     }
+
+    // Referral: mint this company's own shareable code, and record who referred
+    // it (if any). Credits are NOT granted here — they fire on verification.
+    await assignReferralCodeIfMissing(tx, company.id)
+    if (referredByCode) {
+      const referrerId = await resolveReferrer(tx, referredByCode)
+      if (referrerId && referrerId !== company.id) {
+        await tx
+          .update(contractors)
+          .set({ referredByContractorId: referrerId })
+          .where(eq(contractors.id, company.id))
+      }
+    }
   })
 
   // Welcome — what they got + how credits work. Best-effort (never block signup).
@@ -132,7 +149,7 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
     <h3>How credits work</h3>
     <ul>
       <li><strong>Getting leads is free.</strong> Every matching job shows up at no cost.</li>
-      <li><strong>5 credits to start a chat</strong> — unlocks the homeowner's contact details.</li>
+      <li><strong>1 credit to start a chat</strong> — unlocks the homeowner's contact details.</li>
       <li><strong>You only pay the win fee when you win</strong> — a small % of the job, charged when the homeowner accepts your quote. No win, no fee.</li>
     </ul>
     <p><a href="${APP_URL}/contractor">Open your dashboard →</a></p>
@@ -141,7 +158,7 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
     userId,
     type: 'SYSTEM',
     title: 'Welcome to Hommy 👋',
-    body: `You've got ${total} credits to start. Receiving leads is free — you only pay 5 to start a chat, and the win fee when a homeowner accepts your quote.`,
+    body: `You've got ${total} credits to start. Receiving leads is free — you only pay 1 credit to start a chat, and the win fee when a homeowner accepts your quote.`,
     actionUrl: '/contractor',
     emailHtml: html,
     dedupKey: `welcome:${userId}`,

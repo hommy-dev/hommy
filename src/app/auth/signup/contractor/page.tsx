@@ -15,7 +15,12 @@ const POINTS = [
   "A CRM built for how roofers really work",
 ];
 
-export default function ContractorSignupPage() {
+export default async function ContractorSignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const { ref } = await searchParams;
   return (
     <div className="flex min-h-svh bg-canvas text-foreground">
       {/* brand panel */}
@@ -49,7 +54,7 @@ export default function ContractorSignupPage() {
       {/* form side */}
       <main className="flex flex-1 items-center justify-center w-full max-w-md lg:max-w-[31.108vw] mx-auto py-8 lg:py-[2.222vw]">
         <ActivityResetKey>
-          <ContractorSignupForm />
+          <ContractorSignupForm referralCode={ref} />
         </ActivityResetKey>
       </main>
     </div>

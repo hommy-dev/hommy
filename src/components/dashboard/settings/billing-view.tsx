@@ -22,6 +22,7 @@ const KIND_LABEL: Record<CreditKind, string> = {
   promo: "Promo credits",
   expiry: "Credits expired",
   adjustment: "Adjustment",
+  referral: "Referral bonus",
 }
 
 const FEATURE_LABEL: Record<string, string> = {

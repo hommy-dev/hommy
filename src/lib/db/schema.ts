@@ -42,6 +42,7 @@ import {
   uniqueIndex,
   primaryKey,
   customType,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
 
@@ -68,7 +69,7 @@ export const billingInterval = pgEnum('billing_interval', ['month', 'year'])
 export const subscriptionStatus = pgEnum('subscription_status', ['active', 'past_due', 'canceled', 'trialing'])
 export const creditTxnKind = pgEnum('credit_txn_kind', [
   'signup_bonus', 'purchase', 'plan_grant', 'lead_engagement', 'lead_won',
-  'ai_agent', 'marketing', 'refund', 'promo', 'expiry', 'adjustment',
+  'ai_agent', 'marketing', 'refund', 'promo', 'expiry', 'adjustment', 'referral',
 ])
 // purchase_intents — a contractor's request to buy credits. v1 has no payment
 // integration: the intent is recorded and platform admins are notified so they
@@ -153,10 +154,16 @@ export const contractors = pgTable('contractors', {
   avgResponseTimeMinutes: integer('avg_response_time_minutes'),
   avgRating: decimal('avg_rating', { precision: 3, scale: 2 }),
   totalReviews: integer('total_reviews').notNull().default(0),
+  // Referral program: shareable code, the company that referred this one, and a
+  // pay-once guard (set when both sides are credited on this company's verify).
+  referralCode: text('referral_code'),
+  referredByContractorId: uuid('referred_by_contractor_id').references((): AnyPgColumn => contractors.id, { onDelete: 'set null' }),
+  referralRewardedAt: timestamp('referral_rewarded_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('contractors_verification_idx').on(t.verificationStatus),
   uniqueIndex('contractors_slug_uq').on(t.slug),
+  uniqueIndex('contractors_referral_code_uq').on(t.referralCode),
 ])
 
 // contractor_members — a user's seat in a company (+ role). Many users per company.

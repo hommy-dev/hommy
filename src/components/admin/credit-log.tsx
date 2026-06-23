@@ -19,6 +19,7 @@ const KIND_LABEL: Record<AdminCreditLogRow["kind"], string> = {
   promo: "Promo credits",
   expiry: "Credits expired",
   adjustment: "Admin adjustment",
+  referral: "Referral bonus",
 };
 
 export function CreditLog({ rows }: { rows: AdminCreditLogRow[] }) {

@@ -120,6 +120,13 @@
       "when": 1782206819843,
       "tag": "0016_spotty_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1782215555232,
+      "tag": "0017_old_steel_serpent",
+      "breakpoints": true
     }
   ]
 }

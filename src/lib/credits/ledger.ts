@@ -94,7 +94,7 @@ type GrantArgs = {
   contractorId: string
   kind: Extract<
     CreditKind,
-    'signup_bonus' | 'purchase' | 'plan_grant' | 'promo' | 'refund' | 'adjustment'
+    'signup_bonus' | 'purchase' | 'plan_grant' | 'promo' | 'refund' | 'adjustment' | 'referral'
   >
   /** Positive number of credits to grant. */
   amount: number
