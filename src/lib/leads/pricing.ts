@@ -39,11 +39,11 @@ export const AWARD_PRICING = {
 // Keyed by `services.slug`. Roofing values match scripts/seed.ts so seeded and
 // freshly-posted leads price identically.
 const PRICING_BY_SERVICE: Record<string, LeadPricing> = {
-  roofing: { engagementCreditCost: 5 },
+  roofing: { engagementCreditCost: 1 },
 }
 
 const DEFAULT_PRICING: LeadPricing = {
-  engagementCreditCost: 5,
+  engagementCreditCost: 1,
 }
 
 /** Engagement-cost snapshot for a service. Falls back to a sane default for any
