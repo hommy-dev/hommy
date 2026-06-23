@@ -404,8 +404,8 @@ async function seedDemo(
   const C2_LOGO = photo('summit-logo')
   await db
     .insert(contractors)
-    .values({ id: C2, companyName: 'Summit Exteriors', bio: 'Roofing & exteriors for North Dallas. Storm-damage specialists who handle the insurance paperwork for you.', logoUrl: C2_LOGO, licenseNumber: 'TX-ROOF-90233', yearsInBusiness: 8, verificationStatus: 'verified', creditBalance: 23, profileScore: 90, avgRating: '5.00', totalReviews: 2 })
-    .onConflictDoUpdate({ target: contractors.id, set: { companyName: 'Summit Exteriors', bio: 'Roofing & exteriors for North Dallas. Storm-damage specialists who handle the insurance paperwork for you.', logoUrl: C2_LOGO, verificationStatus: 'verified', creditBalance: 23, avgRating: '5.00', totalReviews: 2 } })
+    .values({ id: C2, companyName: 'Summit Exteriors', slug: 'summit-exteriors', bio: 'Roofing & exteriors for North Dallas. Storm-damage specialists who handle the insurance paperwork for you.', logoUrl: C2_LOGO, licenseNumber: 'TX-ROOF-90233', yearsInBusiness: 8, verificationStatus: 'verified', creditBalance: 23, profileScore: 90, avgRating: '5.00', totalReviews: 2 })
+    .onConflictDoUpdate({ target: contractors.id, set: { companyName: 'Summit Exteriors', slug: 'summit-exteriors', bio: 'Roofing & exteriors for North Dallas. Storm-damage specialists who handle the insurance paperwork for you.', logoUrl: C2_LOGO, verificationStatus: 'verified', creditBalance: 23, avgRating: '5.00', totalReviews: 2 } })
 
   await ensureMember(C2, jordan, 'owner')
   await ensureMember(C2, devOwnerId, 'member')
@@ -549,8 +549,8 @@ async function seedDevFixtures(serviceId: string, growthPlanId: string): Promise
   const C1_LOGO = photo('lonestar-logo')
   await db
     .insert(contractors)
-    .values({ id: ID.contractor, companyName: 'Lone Star Roofing Co.', bio: 'Family-owned roofing contractor serving the Dallas metro since 2009. Licensed, insured, and known for clean tear-offs and on-time crews.', logoUrl: C1_LOGO, licenseNumber: 'TX-ROOF-44821', yearsInBusiness: 16, verificationStatus: 'verified', creditBalance: 328, profileScore: 100, avgRating: '4.50', totalReviews: 2 })
-    .onConflictDoUpdate({ target: contractors.id, set: { companyName: 'Lone Star Roofing Co.', bio: 'Family-owned roofing contractor serving the Dallas metro since 2009. Licensed, insured, and known for clean tear-offs and on-time crews.', logoUrl: C1_LOGO, verificationStatus: 'verified', creditBalance: 328, profileScore: 100, avgRating: '4.50', totalReviews: 2 } })
+    .values({ id: ID.contractor, companyName: 'Lone Star Roofing Co.', slug: 'lone-star-roofing-co', bio: 'Family-owned roofing contractor serving the Dallas metro since 2009. Licensed, insured, and known for clean tear-offs and on-time crews.', logoUrl: C1_LOGO, licenseNumber: 'TX-ROOF-44821', yearsInBusiness: 16, verificationStatus: 'verified', creditBalance: 328, profileScore: 100, avgRating: '4.50', totalReviews: 2 })
+    .onConflictDoUpdate({ target: contractors.id, set: { companyName: 'Lone Star Roofing Co.', slug: 'lone-star-roofing-co', bio: 'Family-owned roofing contractor serving the Dallas metro since 2009. Licensed, insured, and known for clean tear-offs and on-time crews.', logoUrl: C1_LOGO, verificationStatus: 'verified', creditBalance: 328, profileScore: 100, avgRating: '4.50', totalReviews: 2 } })
 
   await db
     .insert(contractorMembers)

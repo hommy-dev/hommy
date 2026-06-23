@@ -6,6 +6,8 @@ import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
 import { revalidateCityPages } from '@/lib/data/locations'
+import { revalidateRoofers } from '@/lib/data/roofers'
+import { assignContractorSlugIfMissing } from '@/lib/contractor/slug'
 import { normalizeToE164 } from '@/lib/phone/e164'
 import {
   users,
@@ -71,6 +73,9 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
         .set({ companyName: d.companyName, yearsInBusiness: d.yearsInBusiness ?? null })
         .where(eq(contractors.id, contractor.id))
 
+      // First time the company is named → mint its stable /roofers/[slug] URL.
+      await assignContractorSlugIfMissing(tx, contractor.id, d.companyName)
+
       if (d.phone) {
         await tx
           .update(users)
@@ -104,8 +109,10 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
     return { success: false, error: 'Could not save your details. Please try again.' }
   }
 
-  // New company coverage may make cities indexable — refresh SEO caches.
+  // New company coverage may make cities indexable, and the company now has a
+  // slug for its future public profile — refresh SEO caches.
   revalidateCityPages()
+  revalidateRoofers()
 
   return { success: true }
 }

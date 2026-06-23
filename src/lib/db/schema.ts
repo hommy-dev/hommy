@@ -133,6 +133,10 @@ export const users = pgTable('users', {
 export const contractors = pgTable('contractors', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   companyName: text('company_name'),
+  // Stable public URL slug for /roofers/[slug] (generated once the company is
+  // named; never changes after). Nullable until set; Postgres treats NULLs as
+  // distinct so many unnamed companies coexist under the unique index.
+  slug: text('slug'),
   bio: text('bio'),
   logoUrl: text('logo_url'),
   bannerUrl: text('banner_url'),
@@ -152,6 +156,7 @@ export const contractors = pgTable('contractors', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('contractors_verification_idx').on(t.verificationStatus),
+  uniqueIndex('contractors_slug_uq').on(t.slug),
 ])
 
 // contractor_members — a user's seat in a company (+ role). Many users per company.

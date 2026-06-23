@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/seo";
 import { getPostSlugs } from "@/lib/data/blog";
 import { getIndexableCities, getStatesWithCounts } from "@/lib/data/locations";
+import { getVerifiedRooferSlugs } from "@/lib/data/roofers";
 
 // Generated sitemap. Lists the public, indexable routes + blog posts. As pSEO
 // location pages land (/roofing/[state]/[city], /roofers/[slug]), add them here
@@ -30,9 +31,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let locationRoutes: MetadataRoute.Sitemap = [];
   try {
-    const [statesWith, indexableCities] = await Promise.all([
+    const [statesWith, indexableCities, roofers] = await Promise.all([
       getStatesWithCounts(),
       getIndexableCities(),
+      getVerifiedRooferSlugs(),
     ]);
     locationRoutes = [
       ...statesWith
@@ -48,6 +50,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly" as const,
         priority: 0.7,
         lastModified: c.updatedAt,
+      })),
+      // Verified contractor profiles.
+      ...roofers.map((r) => ({
+        url: absoluteUrl(`/roofers/${r.slug}`),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+        lastModified: r.updatedAt,
       })),
     ];
   } catch {

@@ -5,6 +5,9 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
+import { assignContractorSlugIfMissing } from '@/lib/contractor/slug'
+import { revalidateCityPages } from '@/lib/data/locations'
+import { revalidateRoofers } from '@/lib/data/roofers'
 import { normalizeToE164 } from '@/lib/phone/e164'
 import { contractors, users } from '@/lib/db/schema'
 
@@ -44,6 +47,10 @@ export async function updateBusinessProfile(input: unknown): Promise<Result> {
           : {}),
       })
       .where(eq(contractors.id, contractor.id))
+
+    // Mint the stable /roofers/[slug] URL the first time a company is named.
+    await assignContractorSlugIfMissing(tx, contractor.id, d.companyName)
+
     if (d.phone !== undefined) {
       await tx
         .update(users)
@@ -51,6 +58,10 @@ export async function updateBusinessProfile(input: unknown): Promise<Result> {
         .where(eq(users.id, user.id))
     }
   })
+
+  // Name / logo / bio changes surface on the public profile + city pro cards.
+  revalidateRoofers()
+  revalidateCityPages()
 
   return { success: true }
 }

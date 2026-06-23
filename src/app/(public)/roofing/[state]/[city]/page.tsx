@@ -135,15 +135,27 @@ export default async function CityPage({
                   <span className="size-12 shrink-0 rounded-full bg-muted" />
                 )}
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-foreground">{p.companyName ?? "Verified roofer"}</p>
+                  {p.slug ? (
+                    <Link
+                      href={`/roofers/${p.slug}`}
+                      className="block truncate font-semibold text-foreground hover:text-primary"
+                    >
+                      {p.companyName ?? "Verified roofer"}
+                    </Link>
+                  ) : (
+                    <p className="truncate font-semibold text-foreground">{p.companyName ?? "Verified roofer"}</p>
+                  )}
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {p.avgRating != null && p.totalReviews > 0
                       ? `★ ${p.avgRating.toFixed(1)} (${p.totalReviews})`
                       : "Newly verified"}
                     {p.yearsInBusiness ? ` · ${p.yearsInBusiness} yrs` : ""}
                   </p>
-                  <Link href={quoteHref} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-                    Get a quote →
+                  <Link
+                    href={p.slug ? `/roofers/${p.slug}` : quoteHref}
+                    className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+                  >
+                    {p.slug ? "View profile →" : "Get a quote →"}
                   </Link>
                 </div>
               </li>

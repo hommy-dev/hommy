@@ -189,12 +189,12 @@ export async function getCity(stateSlug: string, citySlug: string): Promise<City
 
 export type ProCard = {
   id: string
+  slug: string | null // → /roofers/[slug] when set
   companyName: string | null
   avgRating: number | null
   totalReviews: number
   yearsInBusiness: number | null
   logoUrl: string | null
-  // TODO(phase 2): profileHref → /roofers/[slug] once contractors have a slug column.
 }
 
 /**
@@ -244,6 +244,7 @@ export async function getCitySupplyForCity(
   const rows = await db
     .select({
       id: contractors.id,
+      slug: contractors.slug,
       companyName: contractors.companyName,
       avgRating: contractors.avgRating,
       totalReviews: contractors.totalReviews,
@@ -261,6 +262,7 @@ export async function getCitySupplyForCity(
     return [
       {
         id: r.id,
+        slug: r.slug,
         companyName: r.companyName,
         avgRating: r.avgRating != null ? parseFloat(r.avgRating) : null,
         totalReviews: r.totalReviews,
