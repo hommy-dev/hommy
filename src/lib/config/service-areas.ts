@@ -1,84 +1,59 @@
-// Service areas — WHERE Hommy operates. Launch is roofing in Texas + Florida
-// only, so we gate the homeowner lead funnel by the visitor's region and steer
-// out-of-area homeowners to a waitlist (see /coming-soon). Kept as STATIC config
-// (no DB query) so the gate stays free at the edge in proxy.ts.
+// Service areas — WHERE Hommy operates. At launch we gate the homeowner lead
+// funnel by COUNTRY: Hommy is live in the United States, and visitors outside
+// the US are steered to a waitlist (see /coming-soon). Country-level IP geo is
+// highly reliable (unlike city/region geolocation), so this gate is both simple
+// and robust — no risk of wrongly blocking a real in-area customer because their
+// ISP/mobile carrier resolves to the wrong city.
 //
-// Service-neutral on purpose (docs/HOMMY_PLATFORM.md §0): this is platform
-// coverage, not a roofing concept — other verticals will reuse it.
+// Kept as STATIC config (no DB query) so the gate stays free at the edge in
+// proxy.ts. Service-neutral on purpose (docs/HOMMY_PLATFORM.md §0): this is
+// platform coverage, not a roofing concept — other verticals will reuse it.
 
-// ── Where we operate (ISO 3166-2 subdivision codes) ───────────────────────────
-/** The states we serve at launch. Add a code here to open a new state. */
+// ── Where we operate (ISO 3166-1 alpha-2 country codes) ───────────────────────
+/** Countries we serve at launch. Add a code here to open a new country. */
+export const OPERATING_COUNTRIES = ['US'] as const
+
+export type OperatingCountry = (typeof OPERATING_COUNTRIES)[number]
+
+/** Human label for marketing copy, e.g. "the United States". */
+export const OPERATING_AREAS_LABEL = 'the United States'
+
+// ── SEO coverage (states) ─────────────────────────────────────────────────────
+// NOT used for gating — only to drive SEO location pages (/roofing/[state]) and
+// to render friendly state names. The lead funnel is gated by COUNTRY (above),
+// not by state, so a US visitor in any state passes.
+/** States with dedicated SEO location pages. Add a code to publish a new state. */
 export const OPERATING_STATES = ['TX', 'FL'] as const
 
 export type OperatingState = (typeof OPERATING_STATES)[number]
 
-/**
- * Specific served cities OUTSIDE the operating states, matched by country +
- * city name. Region (province) codes are too coarse to open a single city, so
- * we match the edge city header directly. Add a row to open a new city.
- */
-export const OPERATING_CITIES: { country: string; city: string }[] = [
-  { country: 'PK', city: 'Bahawalnagar' },
-]
-
-/** Full names for friendly copy on the coming-soon page. */
+/** Full names for friendly copy / SEO pages. */
 export const OPERATING_STATE_NAMES: Record<OperatingState, string> = {
   TX: 'Texas',
   FL: 'Florida',
 }
 
-/** Human label for marketing copy, e.g. "Texas and Florida". */
-export const OPERATING_AREAS_LABEL = 'Texas and Florida'
-
 // ── Geo detection (Vercel edge headers) ───────────────────────────────────────
 // Vercel injects these on every incoming request in production. They are ABSENT
-// in local `next dev` — callers must fail open when the region is unknown.
-/** ISO 3166-2 subdivision code, e.g. "TX", "FL", "CA". */
-export const GEO_REGION_HEADER = 'x-vercel-ip-country-region'
+// in local `next dev` — callers must fail open when the country is unknown.
 /** ISO 3166-1 alpha-2 country code, e.g. "US". */
 export const GEO_COUNTRY_HEADER = 'x-vercel-ip-country'
-/** City name, e.g. "Austin", "Bahawalnagar" (percent-encoded by Vercel). */
-export const GEO_CITY_HEADER = 'x-vercel-ip-city'
+/** ISO 3166-2 subdivision code, e.g. "TX", "FL", "CA" (for SEO/personalized copy). */
+export const GEO_REGION_HEADER = 'x-vercel-ip-country-region'
 
-/** Cookie that lets a mis-geolocated real customer bypass the gate (safety valve). */
+/** Cookie that lets a mis-geolocated or testing visitor bypass the gate (safety valve). */
 export const AREA_BYPASS_COOKIE = 'hommy-area'
 export const AREA_BYPASS_VALUE = 'ok'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 /**
- * Is this visitor inside a state we serve? Region codes are US-specific, so a
- * non-US region (e.g. "ON") simply won't match. Returns false ONLY when the
- * region is known and not served — callers decide what to do with `null`.
+ * Is this visitor in a country we serve? Returns false ONLY when the country is
+ * KNOWN and not served — callers fail open on `null` (local dev, missing header)
+ * rather than wrongly block.
  */
-export function isServedRegion(
-  region: string | null | undefined,
-  country?: string | null,
-): boolean {
-  if (!region) return false
-  if (country && country.toUpperCase() !== 'US') return false
-  return (OPERATING_STATES as readonly string[]).includes(region.toUpperCase())
-}
-
-/** Is this visitor in a specifically-served city (e.g. Bahawalnagar, PK)? */
-export function isServedCity(
-  city: string | null | undefined,
-  country?: string | null,
-): boolean {
-  if (!city) return false
-  const c = (country ?? '').toUpperCase()
-  const name = city.trim().toLowerCase()
-  return OPERATING_CITIES.some(
-    (o) => o.country.toUpperCase() === c && o.city.toLowerCase() === name,
-  )
-}
-
-/** Served if the visitor's state OR their city is in our coverage. */
-export function isServedLocation(
-  region: string | null | undefined,
-  country: string | null | undefined,
-  city: string | null | undefined,
-): boolean {
-  return isServedRegion(region, country) || isServedCity(city, country)
+export function isServedCountry(country: string | null | undefined): boolean {
+  if (!country) return false
+  return (OPERATING_COUNTRIES as readonly string[]).includes(country.toUpperCase())
 }
 
 /** Full state name for a region code, or null when unknown (for personalized copy). */

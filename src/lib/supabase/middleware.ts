@@ -2,10 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   AREA_BYPASS_COOKIE,
   AREA_BYPASS_VALUE,
-  GEO_CITY_HEADER,
   GEO_COUNTRY_HEADER,
-  GEO_REGION_HEADER,
-  isServedLocation,
+  isServedCountry,
 } from "@/lib/config/service-areas";
 
 const PUBLIC_PATHS = [
@@ -28,9 +26,9 @@ const PUBLIC_PATHS = [
   "/sandbox", // dev-only component preview
 ];
 
-// Homeowner lead-funnel paths gated by region. We only serve some states at
-// launch, so out-of-area homeowners are redirected to /coming-soon before they
-// fill the form. Contractor/auth/marketing routes stay open to everyone.
+// Homeowner lead-funnel paths gated by country. We launch in the US only, so
+// homeowners outside the US are redirected to /coming-soon before they fill the
+// form. Contractor/auth/marketing routes stay open to everyone.
 const GEO_GATED_PATHS = ["/get-a-quote", "/thank-you"];
 
 function isPublicPath(pathname: string): boolean {
@@ -71,23 +69,21 @@ export function handleProxyAuth(request: NextRequest): NextResponse {
 
   if (shouldSkipEntirely(pathname)) return NextResponse.next();
 
-  // Region gate (homeowner lead funnel only). Reading edge geo headers is free —
-  // no network call, keeping the proxy's zero-latency contract. We FAIL OPEN:
-  // if the region is unknown (local dev, missing header) we let the request
-  // through rather than wrongly block. A bypass cookie covers mis-geolocated
-  // real customers who self-attest they're in an operating state.
+  // Country gate (homeowner lead funnel only). Reading the edge geo header is
+  // free — no network call, keeping the proxy's zero-latency contract. We FAIL
+  // OPEN: if the country is unknown (local dev, missing header) we let the
+  // request through rather than wrongly block. A bypass cookie covers a
+  // mis-geolocated real customer (or internal testing) who self-attests they're
+  // in an operating country.
   if (isGeoGatedPath(pathname)) {
     const bypassed =
       request.cookies.get(AREA_BYPASS_COOKIE)?.value === AREA_BYPASS_VALUE;
     if (!bypassed) {
-      const region = request.headers.get(GEO_REGION_HEADER);
       const country = request.headers.get(GEO_COUNTRY_HEADER);
-      const cityRaw = request.headers.get(GEO_CITY_HEADER);
-      const city = cityRaw ? decodeURIComponent(cityRaw) : null;
 
-      // Block only when the visitor's location is KNOWN and not served. When no
-      // geo headers are present (local dev) we fail open and let them through.
-      if ((region || city) && !isServedLocation(region, country, city)) {
+      // Block only when the country is KNOWN and not served. When no geo header
+      // is present (local dev) we fail open and let them through.
+      if (country && !isServedCountry(country)) {
         return NextResponse.redirect(new URL("/coming-soon", request.url));
       }
     }

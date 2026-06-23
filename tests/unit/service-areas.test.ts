@@ -1,64 +1,44 @@
 import { describe, expect, it } from 'vitest'
 import {
-  isServedCity,
-  isServedLocation,
-  isServedRegion,
-  OPERATING_CITIES,
+  isServedCountry,
+  regionLabel,
+  OPERATING_COUNTRIES,
   OPERATING_STATES,
 } from '@/lib/config/service-areas'
 
-describe('isServedRegion', () => {
-  it('serves the operating states (case-insensitive)', () => {
-    expect(isServedRegion('TX')).toBe(true)
-    expect(isServedRegion('fl')).toBe(true)
-    expect(isServedRegion('TX', 'US')).toBe(true)
+describe('isServedCountry', () => {
+  it('serves the operating countries (case-insensitive)', () => {
+    expect(isServedCountry('US')).toBe(true)
+    expect(isServedCountry('us')).toBe(true)
   })
 
-  it('rejects non-operating or unknown regions', () => {
-    expect(isServedRegion('CA')).toBe(false)
-    expect(isServedRegion(null)).toBe(false)
-    expect(isServedRegion(undefined)).toBe(false)
-    expect(isServedRegion('')).toBe(false)
+  it('rejects non-operating or unknown countries', () => {
+    expect(isServedCountry('PK')).toBe(false)
+    expect(isServedCountry('CA')).toBe(false)
+    expect(isServedCountry(null)).toBe(false)
+    expect(isServedCountry(undefined)).toBe(false)
+    expect(isServedCountry('')).toBe(false)
   })
 
-  it('rejects a served state code in a non-US country', () => {
-    expect(isServedRegion('TX', 'CA')).toBe(false)
+  it('keeps OPERATING_COUNTRIES as the source of truth', () => {
+    expect([...OPERATING_COUNTRIES]).toEqual(['US'])
+  })
+})
+
+describe('regionLabel', () => {
+  it('maps a known state code to its full name (case-insensitive)', () => {
+    expect(regionLabel('TX')).toBe('Texas')
+    expect(regionLabel('fl')).toBe('Florida')
   })
 
-  it('keeps OPERATING_STATES as the source of truth', () => {
+  it('returns null for unknown or missing regions', () => {
+    expect(regionLabel('CA')).toBeNull()
+    expect(regionLabel(null)).toBeNull()
+    expect(regionLabel(undefined)).toBeNull()
+    expect(regionLabel('')).toBeNull()
+  })
+
+  it('still exposes OPERATING_STATES for SEO pages', () => {
     expect([...OPERATING_STATES]).toEqual(['TX', 'FL'])
-  })
-})
-
-describe('isServedCity', () => {
-  it('serves Bahawalnagar, PK (case- and space-insensitive)', () => {
-    expect(isServedCity('Bahawalnagar', 'PK')).toBe(true)
-    expect(isServedCity('  bahawalnagar ', 'pk')).toBe(true)
-  })
-
-  it('requires the matching country', () => {
-    expect(isServedCity('Bahawalnagar', 'US')).toBe(false)
-    expect(isServedCity('Bahawalnagar')).toBe(false) // no country → no match
-  })
-
-  it('rejects other cities and empties', () => {
-    expect(isServedCity('Lahore', 'PK')).toBe(false)
-    expect(isServedCity(null, 'PK')).toBe(false)
-  })
-
-  it('exposes Bahawalnagar in OPERATING_CITIES', () => {
-    expect(OPERATING_CITIES).toContainEqual({ country: 'PK', city: 'Bahawalnagar' })
-  })
-})
-
-describe('isServedLocation', () => {
-  it('is true when EITHER the region or the city is served', () => {
-    expect(isServedLocation('TX', 'US', 'Austin')).toBe(true) // region
-    expect(isServedLocation('PB', 'PK', 'Bahawalnagar')).toBe(true) // city
-  })
-
-  it('is false when neither matches', () => {
-    expect(isServedLocation('PB', 'PK', 'Lahore')).toBe(false)
-    expect(isServedLocation(null, null, null)).toBe(false)
   })
 })
