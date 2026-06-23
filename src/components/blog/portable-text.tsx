@@ -93,11 +93,11 @@ function toEmbedUrl(raw: string): string | null {
 
 const components: PortableTextComponents = {
   block: {
-    normal: ({ children }) => <p className="my-5 leading-7 text-foreground/90">{children}</p>,
+    normal: ({ children }) => <p className="my-5 lg:my-[1.389vw] leading-7 lg:leading-[1.944vw] text-foreground/90">{children}</p>,
     h2: ({ children, value }) => (
       <h2
         id={slugifyHeading(blockText(value as PortableTextBlock))}
-        className="mt-12 mb-4 scroll-mt-28 font-sebenta text-2xl font-bold tracking-tight text-foreground lg:text-3xl"
+        className="mt-12 lg:mt-[3.333vw] mb-4 lg:mb-[1.111vw] scroll-mt-28 lg:scroll-mt-[7.778vw] font-sebenta text-2xl font-bold tracking-tight text-foreground lg:text-[2.083vw]"
       >
         {children}
       </h2>
@@ -105,36 +105,36 @@ const components: PortableTextComponents = {
     h3: ({ children, value }) => (
       <h3
         id={slugifyHeading(blockText(value as PortableTextBlock))}
-        className="mt-9 mb-3 scroll-mt-28 font-sebenta text-xl font-bold tracking-tight text-foreground lg:text-2xl"
+        className="mt-9 lg:mt-[2.5vw] mb-3 lg:mb-[0.833vw] scroll-mt-28 lg:scroll-mt-[7.778vw] font-sebenta text-xl font-bold tracking-tight text-foreground lg:text-[1.667vw]"
       >
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className="mt-6 mb-2 text-lg font-semibold text-foreground">{children}</h4>
+      <h4 className="mt-6 lg:mt-[1.667vw] mb-2 lg:mb-[0.556vw] text-lg lg:text-[1.25vw] font-semibold text-foreground">{children}</h4>
     ),
     blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-4 border-primary/40 pl-5 text-lg italic text-muted-foreground">
+      <blockquote className="my-6 lg:my-[1.667vw] border-l-4 border-primary/40 pl-5 lg:pl-[1.389vw] text-lg lg:text-[1.25vw] italic text-muted-foreground">
         {children}
       </blockquote>
     ),
   },
   list: {
-    bullet: ({ children }) => <ul className="my-5 ml-6 list-disc space-y-2 text-foreground/90">{children}</ul>,
-    number: ({ children }) => <ol className="my-5 ml-6 list-decimal space-y-2 text-foreground/90">{children}</ol>,
+    bullet: ({ children }) => <ul className="my-5 lg:my-[1.389vw] ml-6 lg:ml-[1.667vw] list-disc space-y-2 lg:space-y-[0.556vw] text-foreground/90">{children}</ul>,
+    number: ({ children }) => <ol className="my-5 lg:my-[1.389vw] ml-6 lg:ml-[1.667vw] list-decimal space-y-2 lg:space-y-[0.556vw] text-foreground/90">{children}</ol>,
   },
   listItem: {
-    bullet: ({ children }) => <li className="leading-7 pl-1">{children}</li>,
-    number: ({ children }) => <li className="leading-7 pl-1">{children}</li>,
+    bullet: ({ children }) => <li className="leading-7 lg:leading-[1.944vw] pl-1 lg:pl-[0.278vw]">{children}</li>,
+    number: ({ children }) => <li className="leading-7 lg:leading-[1.944vw] pl-1 lg:pl-[0.278vw]">{children}</li>,
   },
   marks: {
     strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     underline: ({ children }) => <span className="underline underline-offset-2">{children}</span>,
     code: ({ children }) => (
-      <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-foreground">{children}</code>
+      <code className="rounded lg:rounded-[0.324vw] bg-muted px-1.5 lg:px-[0.417vw] py-0.5 lg:py-[0.139vw] font-mono text-[0.85em] text-foreground">{children}</code>
     ),
-    highlight: ({ children }) => <mark className="rounded bg-secondary/40 px-1 text-foreground">{children}</mark>,
+    highlight: ({ children }) => <mark className="rounded lg:rounded-[0.324vw] bg-secondary/40 px-1 lg:px-[0.278vw] text-foreground">{children}</mark>,
     link: ({ children, value }) => {
       const href = resolveHref(value as LinkValue);
       const external = (value as LinkValue).linkType === "external";
@@ -156,8 +156,8 @@ const components: PortableTextComponents = {
       const image = (value as { asset?: SanityImageValue; alt?: string; caption?: string }).asset;
       if (!image?.asset) return null;
       return (
-        <figure className="my-8">
-          <div className="overflow-hidden rounded-xl border border-border bg-muted">
+        <figure className="my-8 lg:my-[2.222vw]">
+          <div className="overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-muted">
             <SanityImage
               value={image}
               alt={(value as { alt?: string }).alt}
@@ -167,7 +167,7 @@ const components: PortableTextComponents = {
             />
           </div>
           {(value as { caption?: string }).caption && (
-            <figcaption className="mt-2 text-center text-sm text-muted-foreground">
+            <figcaption className="mt-2 lg:mt-[0.556vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">
               {(value as { caption?: string }).caption}
             </figcaption>
           )}
@@ -179,11 +179,11 @@ const components: PortableTextComponents = {
       const style = calloutStyles[v.tone ?? "info"] ?? calloutStyles.info;
       const Icon = style.icon;
       return (
-        <div className={cn("my-8 flex gap-3 rounded-xl border p-5", style.wrap)}>
-          <Icon className="mt-0.5 size-5 shrink-0" />
-          <div className="space-y-1">
+        <div className={cn("my-8 lg:my-[2.222vw] flex gap-3 lg:gap-[0.833vw] rounded-xl lg:rounded-[0.926vw] border p-5 lg:p-[1.389vw]", style.wrap)}>
+          <Icon className="mt-0.5 lg:mt-[0.139vw] size-5 lg:size-[1.389vw] shrink-0" />
+          <div className="space-y-1 lg:space-y-[0.278vw]">
             {v.title && <p className="font-semibold">{v.title}</p>}
-            {v.content && <p className="text-sm leading-6 opacity-90">{v.content}</p>}
+            {v.content && <p className="text-sm lg:text-[0.972vw] leading-6 lg:leading-[1.667vw] opacity-90">{v.content}</p>}
           </div>
         </div>
       );
@@ -191,12 +191,12 @@ const components: PortableTextComponents = {
     pullQuote: ({ value }) => {
       const v = value as { quote?: string; attribution?: string };
       return (
-        <figure className="my-10 border-y border-border py-8 text-center">
-          <blockquote className="font-sebenta text-2xl font-medium leading-snug text-foreground lg:text-3xl">
+        <figure className="my-10 lg:my-[2.778vw] border-y border-border py-8 lg:py-[2.222vw] text-center">
+          <blockquote className="font-sebenta text-2xl font-medium leading-snug text-foreground lg:text-[2.083vw]">
             “{v.quote}”
           </blockquote>
           {v.attribution && (
-            <figcaption className="mt-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            <figcaption className="mt-4 lg:mt-[1.111vw] text-sm lg:text-[0.972vw] font-medium uppercase tracking-wide text-muted-foreground">
               {v.attribution}
             </figcaption>
           )}
@@ -208,7 +208,7 @@ const components: PortableTextComponents = {
       const href = v.link ? resolveHref(v.link) : "#";
       const newTab = v.link?.openInNewTab;
       return (
-        <div className="my-8 flex justify-center">
+        <div className="my-8 lg:my-[2.222vw] flex justify-center">
           <Button asChild size="lg" variant={v.variant === "secondary" ? "outline" : "default"}>
             <Link href={href} target={newTab ? "_blank" : undefined} rel={newTab ? "noopener noreferrer" : undefined}>
               {v.label}
@@ -222,8 +222,8 @@ const components: PortableTextComponents = {
       const embed = v.url ? toEmbedUrl(v.url) : null;
       if (!embed) return null;
       return (
-        <figure className="my-8">
-          <div className="aspect-video overflow-hidden rounded-xl border border-border bg-black">
+        <figure className="my-8 lg:my-[2.222vw]">
+          <div className="aspect-video overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-black">
             <iframe
               src={embed}
               title={v.caption ?? "Embedded video"}
@@ -233,7 +233,7 @@ const components: PortableTextComponents = {
             />
           </div>
           {v.caption && (
-            <figcaption className="mt-2 text-center text-sm text-muted-foreground">{v.caption}</figcaption>
+            <figcaption className="mt-2 lg:mt-[0.556vw] text-center text-sm lg:text-[0.972vw] text-muted-foreground">{v.caption}</figcaption>
           )}
         </figure>
       );

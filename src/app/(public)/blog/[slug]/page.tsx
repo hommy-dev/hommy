@@ -70,9 +70,9 @@ export default async function BlogPostPage({
     .join(" · ");
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pb-24 pt-8 lg:px-10 lg:pt-12">
+    <div className="mx-auto max-w-6xl lg:max-w-[80vw] px-5 pb-24 lg:pb-[6.667vw] pt-8 lg:px-[2.778vw] lg:pt-[3.333vw]">
       {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
+      <nav className="mb-8 lg:mb-[2.222vw] flex items-center gap-2 lg:gap-[0.556vw] text-sm lg:text-[0.972vw] text-muted-foreground" aria-label="Breadcrumb">
         <Link href="/blog" className="hover:text-foreground">
           Journal
         </Link>
@@ -87,21 +87,21 @@ export default async function BlogPostPage({
       </nav>
 
       {/* Header */}
-      <header className="mx-auto max-w-3xl text-center">
+      <header className="mx-auto max-w-3xl lg:max-w-[53.328vw] text-center">
         {post.eyebrow && (
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">
+          <p className="mb-3 lg:mb-[0.833vw] text-sm lg:text-[0.972vw] font-semibold uppercase tracking-widest text-primary">
             {post.eyebrow}
           </p>
         )}
-        <h1 className="font-sebenta text-3xl font-bold leading-tight tracking-tight text-foreground lg:text-5xl">
+        <h1 className="font-sebenta text-3xl font-bold leading-tight tracking-tight text-foreground lg:text-[3.333vw]">
           {post.title}
         </h1>
         {post.excerpt && (
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">{post.excerpt}</p>
+          <p className="mx-auto mt-4 lg:mt-[1.111vw] max-w-2xl lg:max-w-[46.662vw] text-lg lg:text-[1.25vw] text-muted-foreground">{post.excerpt}</p>
         )}
-        <div className="mt-6 flex items-center justify-center gap-3 text-sm text-muted-foreground">
+        <div className="mt-6 lg:mt-[1.667vw] flex items-center justify-center gap-3 lg:gap-[0.833vw] text-sm lg:text-[0.972vw] text-muted-foreground">
           {post.author?.image?.asset && (
-            <span className="relative size-9 overflow-hidden rounded-full bg-muted">
+            <span className="relative size-9 lg:size-[2.5vw] overflow-hidden rounded-full bg-muted">
               <SanityImage value={post.author.image} alt={post.author.name ?? ""} fill sizes="36px" />
             </span>
           )}
@@ -114,7 +114,7 @@ export default async function BlogPostPage({
 
       {/* Cover */}
       {post.mainImage?.asset && (
-        <div className="relative mx-auto mt-10 aspect-[16/9] max-w-4xl overflow-hidden rounded-2xl border border-border bg-muted">
+        <div className="relative mx-auto mt-10 lg:mt-[2.778vw] aspect-[16/9] max-w-4xl lg:max-w-[62.216vw] overflow-hidden rounded-2xl lg:rounded-[1.111vw] border border-border bg-muted">
           <SanityImage
             value={post.mainImage}
             alt={post.title}
@@ -126,13 +126,13 @@ export default async function BlogPostPage({
       )}
 
       {/* Body + TOC */}
-      <div className="mt-12 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
-        <article className="mx-auto w-full max-w-2xl text-[1.0625rem] lg:mx-0">
+      <div className="mt-12 lg:mt-[3.333vw] lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-[3.333vw]">
+        <article className="mx-auto w-full max-w-2xl lg:max-w-[46.662vw] text-[1.0625rem] lg:text-[1.18vw] lg:mx-0">
           <BlogPortableText value={body} />
         </article>
         {headings.length > 0 && (
           <aside className="hidden lg:block">
-            <div className="sticky top-24">
+            <div className="sticky top-24 lg:top-[6.667vw]">
               <TableOfContents headings={headings} />
             </div>
           </aside>
@@ -141,19 +141,19 @@ export default async function BlogPostPage({
 
       {/* Author bio */}
       {post.author?.bio && (
-        <div className="mx-auto mt-16 max-w-2xl rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-start gap-4">
+        <div className="mx-auto mt-16 lg:mt-[4.444vw] max-w-2xl lg:max-w-[46.662vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-6 lg:p-[1.667vw]">
+          <div className="flex items-start gap-4 lg:gap-[1.111vw]">
             {post.author.image?.asset && (
-              <span className="relative size-14 shrink-0 overflow-hidden rounded-full bg-muted">
+              <span className="relative size-14 lg:size-[3.889vw] shrink-0 overflow-hidden rounded-full bg-muted">
                 <SanityImage value={post.author.image} alt={post.author.name ?? ""} fill sizes="56px" />
               </span>
             )}
             <div>
-              <p className="font-sebenta text-lg font-bold text-foreground">{post.author.name}</p>
+              <p className="font-sebenta text-lg lg:text-[1.25vw] font-bold text-foreground">{post.author.name}</p>
               {post.author.role && (
-                <p className="text-sm text-muted-foreground">{post.author.role}</p>
+                <p className="text-sm lg:text-[0.972vw] text-muted-foreground">{post.author.role}</p>
               )}
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{post.author.bio}</p>
+              <p className="mt-2 lg:mt-[0.556vw] text-sm lg:text-[0.972vw] leading-6 lg:leading-[1.667vw] text-muted-foreground">{post.author.bio}</p>
             </div>
           </div>
         </div>
@@ -161,11 +161,11 @@ export default async function BlogPostPage({
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="mt-20">
-          <h2 className="mb-6 font-sebenta text-2xl font-bold tracking-tight text-foreground">
+        <section className="mt-20 lg:mt-[5.556vw]">
+          <h2 className="mb-6 lg:mb-[1.667vw] font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight text-foreground">
             Related articles
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 lg:gap-[1.667vw] sm:grid-cols-2 lg:grid-cols-3">
             {related.map((p) => (
               <PostCard key={p._id} post={p} />
             ))}

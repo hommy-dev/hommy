@@ -15,7 +15,7 @@ function meta(post: PostCardData): string {
 /** Standard post card for the blog grid. */
 export function PostCard({ post, priority }: { post: PostCardData; priority?: boolean }) {
   return (
-    <article className="hommy-lift group flex flex-col overflow-hidden rounded-2xl border border-border bg-card">
+    <article className="hommy-lift group flex flex-col overflow-hidden rounded-2xl lg:rounded-[1.111vw] border border-border bg-card">
       <Link href={`/blog/${post.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-muted">
         <SanityImage
           value={post.mainImage}
@@ -26,13 +26,13 @@ export function PostCard({ post, priority }: { post: PostCardData; priority?: bo
           className="transition-transform duration-500 group-hover:scale-105"
         />
         {post.eyebrow && (
-          <span className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-foreground backdrop-blur">
+          <span className="absolute left-3 lg:left-[0.833vw] top-3 lg:top-[0.833vw] rounded-full bg-background/90 px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wide text-foreground backdrop-blur">
             {post.eyebrow}
           </span>
         )}
       </Link>
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex flex-1 flex-col p-5 lg:p-[1.389vw]">
+        <div className="mb-2 lg:mb-[0.556vw] flex items-center gap-2 lg:gap-[0.556vw] text-xs lg:text-[0.833vw] text-muted-foreground">
           {post.category && (
             <Link
               href={`/blog?category=${post.category.slug}`}
@@ -44,18 +44,18 @@ export function PostCard({ post, priority }: { post: PostCardData; priority?: bo
           {post.category && <span aria-hidden>·</span>}
           <span>{meta(post)}</span>
         </div>
-        <h3 className="font-sebenta text-lg font-bold leading-snug tracking-tight text-foreground">
+        <h3 className="font-sebenta text-lg lg:text-[1.25vw] font-bold leading-snug tracking-tight text-foreground">
           <Link href={`/blog/${post.slug}`} className="after:absolute hover:text-primary">
             {post.title}
           </Link>
         </h3>
         {post.excerpt && (
-          <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">{post.excerpt}</p>
+          <p className="mt-2 lg:mt-[0.556vw] line-clamp-3 text-sm lg:text-[0.972vw] leading-6 lg:leading-[1.667vw] text-muted-foreground">{post.excerpt}</p>
         )}
         {post.author?.name && (
-          <div className="mt-4 flex items-center gap-2 pt-1 text-xs text-muted-foreground">
+          <div className="mt-4 lg:mt-[1.111vw] flex items-center gap-2 lg:gap-[0.556vw] pt-1 lg:pt-[0.278vw] text-xs lg:text-[0.833vw] text-muted-foreground">
             {post.author.image?.asset && (
-              <span className="relative size-6 overflow-hidden rounded-full bg-muted">
+              <span className="relative size-6 lg:size-[1.667vw] overflow-hidden rounded-full bg-muted">
                 <SanityImage value={post.author.image} alt={post.author.name} fill sizes="24px" />
               </span>
             )}
@@ -70,7 +70,7 @@ export function PostCard({ post, priority }: { post: PostCardData; priority?: bo
 /** Large featured card used at the top of the index. */
 export function FeaturedCard({ post }: { post: PostCardData }) {
   return (
-    <article className="hommy-lift group grid overflow-hidden rounded-3xl border border-border bg-card md:grid-cols-2">
+    <article className="hommy-lift group grid overflow-hidden rounded-3xl lg:rounded-[1.574vw] border border-border bg-card md:grid-cols-2">
       <Link href={`/blog/${post.slug}`} className="relative block aspect-[16/10] overflow-hidden bg-muted md:aspect-auto">
         <SanityImage
           value={post.mainImage}
@@ -81,22 +81,22 @@ export function FeaturedCard({ post }: { post: PostCardData }) {
           className="transition-transform duration-500 group-hover:scale-105"
         />
       </Link>
-      <div className="flex flex-col justify-center p-6 lg:p-10">
-        <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-          <span className={cn("rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondary-foreground")}>
+      <div className="flex flex-col justify-center p-6 lg:p-[2.778vw]">
+        <div className="mb-3 lg:mb-[0.833vw] flex items-center gap-2 lg:gap-[0.556vw] text-xs lg:text-[0.833vw] text-muted-foreground">
+          <span className={cn("rounded-full bg-secondary px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wide text-secondary-foreground")}>
             {post.eyebrow ?? "Featured"}
           </span>
           {post.category && <span className="font-medium text-primary">{post.category.title}</span>}
         </div>
-        <h2 className="font-sebenta text-2xl font-bold leading-tight tracking-tight text-foreground lg:text-4xl">
+        <h2 className="font-sebenta text-2xl font-bold leading-tight tracking-tight text-foreground lg:text-[2.5vw]">
           <Link href={`/blog/${post.slug}`} className="hover:text-primary">
             {post.title}
           </Link>
         </h2>
         {post.excerpt && (
-          <p className="mt-3 max-w-prose text-muted-foreground lg:text-lg">{post.excerpt}</p>
+          <p className="mt-3 lg:mt-[0.833vw] max-w-prose text-muted-foreground lg:text-[1.25vw]">{post.excerpt}</p>
         )}
-        <div className="mt-5 text-sm text-muted-foreground">{meta(post)}</div>
+        <div className="mt-5 lg:mt-[1.389vw] text-sm lg:text-[0.972vw] text-muted-foreground">{meta(post)}</div>
       </div>
     </article>
   );

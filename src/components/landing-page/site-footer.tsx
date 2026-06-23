@@ -23,7 +23,8 @@ const FOOTER = [
     links: [
       { href: "#", label: "About" },
       { href: "#", label: "Contact" },
-      { href: "#", label: "Privacy" },
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/terms", label: "Terms of Service" },
     ],
   },
 ];

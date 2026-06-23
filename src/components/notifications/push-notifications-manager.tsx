@@ -110,6 +110,9 @@ export function PushNotificationsManager() {
             Get a desktop alert when a new lead, quote, or message arrives — even
             when this tab is closed.
           </p>
+          <p className="text-[11px] lg:text-[0.764vw] leading-snug text-muted-foreground/80">
+            Key updates also reach you by email and SMS.
+          </p>
         </div>
         <button
           type="button"

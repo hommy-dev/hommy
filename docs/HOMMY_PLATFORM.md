@@ -203,7 +203,7 @@ Use this stack exactly. (Reconciled with the installed codebase.)
 - **Background jobs:** Inngest (`src/lib/inngest`).
 - **File storage:** **Cloudinary** (`src/lib/cloudinary/*`, `next-cloudinary`).
 - **Payments:** Stripe — **subscriptions (plan → monthly credit grant + seats + features) AND one-time credit purchases** (Checkout + Customer Portal + webhooks). No Connect / no money between homeowner and contractor.
-- **SMS:** **Twilio** where SMS/notifications are needed (`sendSms` in `src/lib/notifications/sms.ts` is provider-agnostic and also supports Textbelt/Plivo fallbacks, but Twilio is the provider in use).
+- **SMS:** **Twilio** where SMS/notifications are needed (`sendSms` in `src/lib/notifications/sms.ts`; Twilio is the only provider, falling back to a logging no-op when unconfigured).
 - **Email:** Resend.
 - **Push:** Web Push (VAPID; `web-push`, `public/sw.js`).
 - **Maps / Geocoding:** Google Places (New) — `PlaceAutocompleteElement`, `@googlemaps/js-api-loader`.

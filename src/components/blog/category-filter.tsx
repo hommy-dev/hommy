@@ -12,9 +12,9 @@ export function CategoryFilter({
   active?: string;
 }) {
   const pill =
-    "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors whitespace-nowrap";
+    "rounded-full border px-4 lg:px-[1.111vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.972vw] font-medium transition-colors whitespace-nowrap";
   return (
-    <nav className="flex flex-wrap items-center gap-2" aria-label="Filter posts by category">
+    <nav className="flex flex-wrap items-center gap-2 lg:gap-[0.556vw]" aria-label="Filter posts by category">
       <Link
         href="/blog"
         className={cn(

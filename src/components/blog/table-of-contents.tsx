@@ -31,17 +31,17 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   if (headings.length === 0) return null;
 
   return (
-    <nav aria-label="Table of contents" className="text-sm">
-      <p className="mb-3 font-semibold uppercase tracking-widest text-muted-foreground">
+    <nav aria-label="Table of contents" className="text-sm lg:text-[0.972vw]">
+      <p className="mb-3 lg:mb-[0.833vw] font-semibold uppercase tracking-widest text-muted-foreground">
         On this page
       </p>
-      <ul className="space-y-2 border-l border-border">
+      <ul className="space-y-2 lg:space-y-[0.556vw] border-l border-border">
         {headings.map((h) => (
           <li key={h.slug} style={{ paddingLeft: h.level === 3 ? 16 : 0 }}>
             <a
               href={`#${h.slug}`}
               className={cn(
-                "-ml-px block border-l-2 pl-4 leading-snug transition-colors",
+                "-ml-px lg:-ml-[0.069vw] block border-l-2 pl-4 lg:pl-[1.111vw] leading-snug transition-colors",
                 active === h.slug
                   ? "border-primary font-medium text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground",

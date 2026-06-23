@@ -40,9 +40,6 @@ function parseBody(argv: string[]): string | undefined {
 }
 
 function activeProvider(): string {
-  if (process.env.TEXTBELT_KEY) return 'Textbelt'
-  if (process.env.PLIVO_AUTH_ID && process.env.PLIVO_AUTH_TOKEN && process.env.PLIVO_SENDER_ID)
-    return 'Plivo'
   if (
     process.env.TWILIO_ACCOUNT_SID &&
     process.env.TWILIO_AUTH_TOKEN &&
@@ -50,7 +47,7 @@ function activeProvider(): string {
   ) {
     return process.env.TWILIO_MESSAGING_SERVICE_SID ? 'Twilio (Messaging Service)' : 'Twilio (from number)'
   }
-  return 'STUB (no provider configured — will only log)'
+  return 'STUB (Twilio not configured — will only log)'
 }
 
 async function main() {

@@ -44,22 +44,18 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-canvas text-foreground">
-      <SiteHeader />
-      <main>
-        <Hero />
-        <TrustStrip />
-        <Statement />
-        <HowItWorks />
-        <Services />
-        <FeatureSection />
-        {/* Testimonials go live once we have real reviews to show. */}
-        {/* <Testimonials /> */}
-        <Faq />
-        {/* <ProCta /> */}
-        <FinalCta />
-      </main>
-      <SiteFooter />
-    </div>
+    <main>
+      <Hero />
+      <TrustStrip />
+      <Statement />
+      <HowItWorks />
+      <Services />
+      {/* <FeatureSection /> */}
+      {/* Testimonials go live once we have real reviews to show. */}
+      {/* <Testimonials /> */}
+      <Faq />
+      {/* <ProCta /> */}
+      <FinalCta />
+    </main>
   );
 }

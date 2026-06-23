@@ -140,12 +140,12 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "absolute top-0 w-full flex flex-col items-center transition-all duration-300 ease-out text-background",
+        "absolute top-0 w-full flex flex-col items-center transition-all duration-300 ease-out bg-foreground text-background",
         isOpen ? "z-[920]" : "z-50",
       )}
     >
       {/* Main Header Row */}
-      <div className="relative w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
+      <div className="relative max-w-[90vw] mx-auto w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
         {/* Left: Logo */}
         <div className="flex-1 flex items-center">
           <Link
