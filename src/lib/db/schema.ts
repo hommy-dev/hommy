@@ -392,6 +392,8 @@ export const leads = pgTable('leads', {
   index('leads_homeowner_idx').on(t.homeownerId),
   index('leads_awarded_to_idx').on(t.awardedTo),
   index('leads_storm_event_idx').on(t.stormEventId),
+  // Per-city demand aggregate for SEO city pages (filters on state/city/createdAt).
+  index('leads_state_city_idx').on(t.state, t.city),
 ])
 
 // lead_recipients — the fan-out + cascade + per-contractor lead state.
@@ -779,6 +781,40 @@ export const waitlist = pgTable('waitlist', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('waitlist_email_uq').on(t.email),
+])
+
+// ============================================================
+// PLATFORM GEOGRAPHY — canonical states + cities (service-neutral)
+// Drives SEO location pages (/roofing/[state]/[city]). A city page becomes
+// indexable only when enough verified pros cover it (see src/lib/data/locations.ts);
+// the canonical list here keeps URLs clean and stable regardless of supply.
+// ============================================================
+
+export const states = pgTable('states', {
+  code: text('code').primaryKey(),            // ISO 3166-2 subdivision, e.g. 'TX'
+  name: text('name').notNull(),               // 'Texas'
+  slug: text('slug').notNull(),               // 'texas'
+  isOperating: boolean('is_operating').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('states_slug_uq').on(t.slug),
+])
+
+export const cities = pgTable('cities', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  stateCode: text('state_code').notNull().references(() => states.code, { onDelete: 'cascade' }),
+  slug: text('slug').notNull(),               // 'dallas'
+  name: text('name').notNull(),               // 'Dallas'
+  lat: doublePrecision('lat').notNull(),      // centroid → fed to findEligibleContractors
+  lng: doublePrecision('lng').notNull(),
+  population: integer('population'),
+  intro: text('intro'),                       // optional editorial copy per city
+  faq: jsonb('faq').$type<{ q: string; a: string }[]>(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('cities_state_slug_uq').on(t.stateCode, t.slug),
+  index('cities_state_idx').on(t.stateCode),
+  index('cities_population_idx').on(t.population),
 ])
 
 // ============================================================

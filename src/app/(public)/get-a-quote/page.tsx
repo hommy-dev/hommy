@@ -1,8 +1,16 @@
+import type { Metadata } from "next"
 import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { services } from "@/lib/db/schema"
 import { getOptionalUser } from "@/lib/auth/session"
 import { GetAQuoteWizard } from "@/components/public/get-a-quote-wizard"
+
+export const metadata: Metadata = {
+  title: "Get a Free Roofing Quote",
+  description:
+    "Tell us about your roof and get matched with licensed, insured local roofers. Free to post, no obligation, no spam calls — you choose who you talk to.",
+  alternates: { canonical: "/get-a-quote" },
+}
 
 // Post-a-job intake. Works for guests (auto-signup on submit) and for logged-in
 // homeowners (contact step is skipped). Subtypes come from the roofing service

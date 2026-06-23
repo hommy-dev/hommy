@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
+import { revalidateCityPages } from '@/lib/data/locations'
 import { normalizeToE164 } from '@/lib/phone/e164'
 import {
   users,
@@ -102,6 +103,9 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
     console.error('[completeOnboarding] failed', err)
     return { success: false, error: 'Could not save your details. Please try again.' }
   }
+
+  // New company coverage may make cities indexable — refresh SEO caches.
+  revalidateCityPages()
 
   return { success: true }
 }

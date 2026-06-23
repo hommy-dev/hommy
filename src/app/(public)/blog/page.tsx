@@ -5,9 +5,12 @@ import { CategoryFilter } from "@/components/blog/category-filter";
 import { PostCard, FeaturedCard } from "@/components/blog/post-card";
 
 export const metadata: Metadata = {
-  title: "The Hommy Journal — Roofing tips, costs & guides for homeowners",
+  // `absolute` opts out of the "%s | Hommy" template — the brand is already in the title.
+  title: { absolute: "The Hommy Journal — Roofing tips, costs & guides for homeowners" },
   description:
     "Practical advice on roofing, maintenance, storm damage, costs, and hiring a contractor you can trust — from the Hommy team.",
+  // Consolidate the ?category= filtered views onto the canonical /blog.
+  alternates: { canonical: "/blog" },
 };
 
 export default async function BlogIndexPage({

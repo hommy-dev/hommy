@@ -9,6 +9,7 @@ import { contractors, purchaseIntents } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
 import { broadcastCreditsChanged } from '@/lib/credits/notify'
 import { getAdminContractorDetail, type AdminContractorDetail } from '@/lib/data/admin'
+import { revalidateCityPages } from '@/lib/data/locations'
 
 type Result = { success: true } | { success: false; error: string }
 
@@ -38,6 +39,8 @@ export async function decideVerification(input: unknown): Promise<Result> {
 
   revalidatePath('/admin/verification')
   revalidatePath('/admin')
+  // Verifying/unverifying a company changes a city's supply → refresh SEO caches.
+  revalidateCityPages()
   return { success: true }
 }
 

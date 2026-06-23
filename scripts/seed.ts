@@ -21,6 +21,7 @@
 
 import 'dotenv/config'
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { eq, sql } from 'drizzle-orm'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { db } from '../src/lib/db'
@@ -47,7 +48,10 @@ import {
   portfolioProjects,
   portfolioImages,
   reviews,
+  states,
+  cities,
 } from '../src/lib/db/schema'
+import { OPERATING_STATES, OPERATING_STATE_NAMES } from '../src/lib/config/service-areas'
 
 type ProjectStage = (typeof projects.stage.enumValues)[number]
 type CreditKind = (typeof creditTransactions.kind.enumValues)[number]
@@ -67,6 +71,22 @@ const ROOFING = {
   slug: 'roofing',
   name: 'Roofing',
   subtypes: ['Repair', 'Replacement', 'Inspection', 'Storm Damage'],
+}
+
+/** Canonical TX/FL cities for SEO location pages — see scripts/data/build-cities.mjs. */
+const CITY_DATA = JSON.parse(
+  readFileSync(new URL('./data/us-cities.tx-fl.json', import.meta.url), 'utf8'),
+) as { name: string; stateCode: string; lat: number; lng: number; population: number }[]
+
+/** URL-safe slug from a place name (e.g. "Fort Worth" → "fort-worth"). */
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
 }
 
 const PLANS = [
@@ -488,7 +508,36 @@ async function seedReference(): Promise<{ serviceId: string; growthPlanId: strin
     if (p.slug === 'growth') growthPlanId = row.id
   }
 
-  console.log(`✓ reference: roofing service + ${PLANS.length} plans`)
+  // Canonical geography for SEO location pages: operating states + their cities.
+  for (const code of OPERATING_STATES) {
+    const name = OPERATING_STATE_NAMES[code]
+    await db
+      .insert(states)
+      .values({ code, name, slug: slugify(name), isOperating: true })
+      .onConflictDoUpdate({ target: states.code, set: { name, slug: slugify(name), isOperating: true } })
+  }
+
+  // Dedupe within (stateCode, slug); CITY_DATA is sorted by population desc, so
+  // the larger place wins a slug collision (e.g. duplicate "Springfield"-style names).
+  const seen = new Set<string>()
+  const cityRows = CITY_DATA.flatMap((c) => {
+    const slug = slugify(c.name)
+    const key = `${c.stateCode}:${slug}`
+    if (seen.has(key)) return []
+    seen.add(key)
+    return [{ id: uid(`city:${key}`), stateCode: c.stateCode, slug, name: c.name, lat: c.lat, lng: c.lng, population: c.population }]
+  })
+  for (let i = 0; i < cityRows.length; i += 200) {
+    await db
+      .insert(cities)
+      .values(cityRows.slice(i, i + 200))
+      .onConflictDoUpdate({
+        target: [cities.stateCode, cities.slug],
+        set: { name: sql`excluded.name`, lat: sql`excluded.lat`, lng: sql`excluded.lng`, population: sql`excluded.population` },
+      })
+  }
+
+  console.log(`✓ reference: roofing service + ${PLANS.length} plans + ${OPERATING_STATES.length} states + ${cityRows.length} cities`)
   return { serviceId: svc.id, growthPlanId }
 }
 
@@ -647,6 +696,7 @@ const ALL_TABLES = [
   'contractor_invitations', 'contractor_members', 'contractors',
   'homeowners', 'notifications', 'push_subscriptions', 'users',
   'storm_events', 'plans', 'services',
+  'cities', 'states',
 ]
 
 async function resetDatabase(): Promise<void> {

@@ -6,6 +6,8 @@ import type { PortableTextBlock } from "next-sanity";
 
 import { urlFor } from "@/sanity/image";
 import { getPost, getPostSlugs } from "@/lib/data/blog";
+import { SITE_NAME, absoluteUrl } from "@/lib/seo";
+import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
 import { BlogPortableText } from "@/components/blog/portable-text";
 import { SanityImage } from "@/components/blog/sanity-image";
 import { TableOfContents } from "@/components/blog/table-of-contents";
@@ -36,6 +38,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `/blog/${slug}` },
     robots: post.seo?.noIndex ? { index: false, follow: false } : undefined,
     openGraph: {
       title,
@@ -62,6 +65,16 @@ export default async function BlogPostPage({
   const headings = extractHeadings(body);
   const related = (post.relatedPosts ?? []).filter(Boolean);
 
+  const canonicalUrl = absoluteUrl(`/blog/${slug}`);
+  const heroImage = post.mainImage?.asset
+    ? urlFor(post.mainImage).width(1200).height(630).fit("crop").url()
+    : undefined;
+  const breadcrumbItems = [
+    { name: "Home", url: absoluteUrl("/") },
+    { name: "Journal", url: absoluteUrl("/blog") },
+    { name: post.title, url: canonicalUrl },
+  ];
+
   const metaLine = [
     post.publishedAt && format(new Date(post.publishedAt), "MMMM d, yyyy"),
     post.readTime && `${post.readTime} min read`,
@@ -71,6 +84,29 @@ export default async function BlogPostPage({
 
   return (
     <div className="mx-auto max-w-6xl lg:max-w-[80vw] px-5 pb-24 lg:pb-[6.667vw] pt-8 lg:px-[2.778vw] lg:pt-[3.333vw]">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: post.title,
+          ...(post.excerpt ? { description: post.excerpt } : {}),
+          ...(heroImage ? { image: [heroImage] } : {}),
+          ...(post.publishedAt
+            ? { datePublished: post.publishedAt, dateModified: post.publishedAt }
+            : {}),
+          ...(post.author?.name
+            ? { author: { "@type": "Person", name: post.author.name } }
+            : {}),
+          publisher: {
+            "@type": "Organization",
+            name: SITE_NAME,
+            logo: { "@type": "ImageObject", url: absoluteUrl("/logo/logo.png") },
+          },
+          mainEntityOfPage: canonicalUrl,
+        }}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+
       {/* Breadcrumb */}
       <nav className="mb-8 lg:mb-[2.222vw] flex items-center gap-2 lg:gap-[0.556vw] text-sm lg:text-[0.972vw] text-muted-foreground" aria-label="Breadcrumb">
         <Link href="/blog" className="hover:text-foreground">

@@ -10,6 +10,7 @@ import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser, getMembershipRole } from '@/lib/data/dashboard'
 import { contractorServices, serviceAreas, services } from '@/lib/db/schema'
+import { revalidateCityPages } from '@/lib/data/locations'
 
 type Result<T = undefined> =
   | { success: true; data?: T }
@@ -141,6 +142,9 @@ export async function addServiceArea(
 
   const [row] = await db.insert(serviceAreas).values(values).returning(RETURNING)
 
+  // New coverage may push a city across the indexability threshold — refresh SEO caches.
+  revalidateCityPages()
+
   return {
     success: true,
     data: { ...row, areaType: row.areaType === 'polygon' ? 'polygon' : 'circle', polygon: row.polygon ?? null },
@@ -155,6 +159,9 @@ export async function removeServiceArea(id: string): Promise<Result> {
   await db
     .delete(serviceAreas)
     .where(and(eq(serviceAreas.id, id), eq(serviceAreas.contractorId, ctx.contractorId)))
+
+  // Dropping coverage may take a city below the threshold — refresh SEO caches.
+  revalidateCityPages()
 
   return { success: true }
 }

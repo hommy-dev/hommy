@@ -17,7 +17,7 @@ const PUBLIC_PATHS = [
   "/privacy", // public legal: privacy policy
   "/terms", // public legal: terms of service
   "/contractors", // contractor recruitment landing + /contractors/signup
-  "/roofing-contractors", // SEO location pages: /roofing-contractors/[city]-[state]
+  "/roofing", // SEO location pages: /roofing, /roofing/[state], /roofing/[state]/[city]
   "/review", // tokenized public review submission flow
   "/accept", // tokenized public quote-acceptance flow
   "/auth/login",

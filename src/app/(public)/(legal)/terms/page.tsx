@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { LEGAL } from "@/lib/legal";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Hommy",
+  // Root template appends " | Hommy".
+  title: "Terms of Service",
   description:
     "The terms that govern your use of the Hommy platform, including our role as a marketplace, fees, disclaimers, and dispute resolution.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsOfServicePage() {

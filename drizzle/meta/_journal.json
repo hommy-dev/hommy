@@ -106,6 +106,13 @@
       "when": 1782057233272,
       "tag": "0014_elite_speed",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1782204086195,
+      "tag": "0015_cheerful_puma",
+      "breakpoints": true
     }
   ]
 }

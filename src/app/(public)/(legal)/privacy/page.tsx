@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { LEGAL } from "@/lib/legal";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Hommy",
+  // Root template appends " | Hommy".
+  title: "Privacy Policy",
   description:
     "How Hommy collects, uses, shares, and protects your information, and the choices and rights you have.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPolicyPage() {
