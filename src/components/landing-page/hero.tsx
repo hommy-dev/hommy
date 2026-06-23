@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { LogoMarquee } from "@/components/public/logo-marquee";
+import { HeroTrust } from "@/components/public/hero-trust";
 import { Icon } from "@/components/ui/icon";
 
 // ⬇ SWAP THIS for your real home/roof photo: drop it in public/bg/ and change
@@ -27,7 +27,12 @@ export function Hero() {
           Find a roofer you can actually trust.
         </h1>
 
-        <LogoMarquee className="mt-10 lg:mt-[2.778vw] w-full max-w-2xl lg:max-w-[46.662vw]" />
+        <p className="mt-5 lg:mt-[1.5vw] max-w-xl lg:max-w-[34vw] text-base leading-relaxed text-background lg:text-[1.25vw]">
+          Get free quotes from licensed, background-checked local roofers and only
+          hear from the pros you choose.
+        </p>
+
+        {/* <HeroTrust className="mt-7 lg:mt-[2vw] w-full max-w-2xl lg:max-w-[46.662vw]" /> */}
 
         <Link
           href="/get-a-quote"
