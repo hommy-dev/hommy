@@ -1,19 +1,20 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import type { User } from "@supabase/supabase-js"
-import { cn } from "@/lib/utils"
-import { createClient } from "@/lib/supabase/client"
-import { MenuToggleIcon } from "@/components/ui/menu-icon"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { MenuToggleIcon } from "@/components/ui/menu-icon";
+import { Icon } from "../ui/icon";
 
 const LINKS = [
   { name: "How it works", href: "#how-it-works" },
   { name: "Why Hommy", href: "#why" },
   { name: "Reviews", href: "#reviews" },
   { name: "For roofers", href: "/contractors" },
-]
+];
 
 // Role → dashboard home. Mirrors ROLE_DEFAULT_PATH in src/lib/actions/auth.ts
 // and ROLE_HOMES in src/lib/auth/session.ts.
@@ -21,141 +22,149 @@ const ROLE_HOMES: Record<string, string> = {
   contractor: "/contractor",
   homeowner: "/homeowner",
   admin: "/admin",
-}
+};
 
 // Role is stamped into Supabase user_metadata at signup (auth.ts) and by the
 // admin script, so the marketing header can resolve the dashboard link
 // client-side without a DB round-trip.
 function getDashboardHref(user: User): string {
-  const role = user.user_metadata?.role as string | undefined
-  return (role && ROLE_HOMES[role]) || "/"
+  const role = user.user_metadata?.role as string | undefined;
+  return (role && ROLE_HOMES[role]) || "/";
 }
 
 // In-page anchors are tracked by scroll position; the "/contractors" route is
 // matched against the pathname. Both feed the same `activeHref`.
 const SECTION_IDS = LINKS.filter((l) => l.href.startsWith("#")).map((l) =>
-  l.href.slice(1),
-)
+  l.href.slice(1)
+);
 
 export function SiteHeader() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
-  const router = useRouter()
-  const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [user, setUser] = useState<User | null>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   // Until the Supabase client confirms the session we don't know which buttons
   // to show, so the auth slot renders a placeholder rather than flashing the
   // signed-out CTAs and then swapping them.
-  const [authResolved, setAuthResolved] = useState(false)
+  const [authResolved, setAuthResolved] = useState(false);
 
   // Client-side auth state — resolve the user and keep it in sync with sign-in
   // / sign-out happening in other tabs or via the auth flow.
   useEffect(() => {
-    const supabase = createClient()
-    let active = true
+    const supabase = createClient();
+    let active = true;
 
     supabase.auth.getUser().then(({ data }) => {
-      if (!active) return
-      setUser(data.user ?? null)
-      setAuthResolved(true)
-    })
+      if (!active) return;
+      setUser(data.user ?? null);
+      setAuthResolved(true);
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!active) return
-      setUser(session?.user ?? null)
-      setAuthResolved(true)
-    })
+      if (!active) return;
+      setUser(session?.user ?? null);
+      setAuthResolved(true);
+    });
 
     return () => {
-      active = false
-      subscription.unsubscribe()
-    }
-  }, [])
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    setIsOpen(false)
-    router.refresh()
-  }
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setIsOpen(false);
+    router.refresh();
+  };
 
-  const dashboardHref = user ? getDashboardHref(user) : "/"
+  const dashboardHref = user ? getDashboardHref(user) : "/";
+
+  // Home: transparent header sitting over the dark hero (light text).
+  // Other pages: solid canvas header (dark text) so it reads on a light bg.
+  const isHome = pathname === "/";
+  const navText = isHome ? "text-background" : "text-foreground";
+  const navTextMuted = isHome ? "text-background/80" : "text-foreground/70";
 
   // Scroll-spy: the active link follows the section currently in view, so the
   // underline moves when you actually arrive at a section — never optimistically
   // on click (the one thing the reference header got wrong).
   useEffect(() => {
-    if (pathname !== "/") return
-    const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(
-      (el): el is HTMLElement => el !== null,
-    )
-    if (sections.length === 0) return
+    if (pathname !== "/") return;
+    const sections = SECTION_IDS.map((id) =>
+      document.getElementById(id)
+    ).filter((el): el is HTMLElement => el !== null);
+    if (sections.length === 0) return;
 
-    const visible = new Map<string, number>()
+    const visible = new Map<string, number>();
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting)
-            visible.set(entry.target.id, entry.intersectionRatio)
-          else visible.delete(entry.target.id)
+            visible.set(entry.target.id, entry.intersectionRatio);
+          else visible.delete(entry.target.id);
         }
-        let best: string | null = null
-        let bestRatio = 0
+        let best: string | null = null;
+        let bestRatio = 0;
         for (const [id, ratio] of visible) {
           if (ratio > bestRatio) {
-            best = id
-            bestRatio = ratio
+            best = id;
+            bestRatio = ratio;
           }
         }
-        setActiveSection(best)
+        setActiveSection(best);
       },
-      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.5, 1] },
-    )
+      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.5, 1] }
+    );
 
-    sections.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [pathname])
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [pathname]);
 
   const activeHref =
     pathname === "/"
       ? activeSection
         ? `#${activeSection}`
         : null
-      : LINKS.find((l) => l.href !== "/" && pathname.startsWith(l.href))?.href ??
-        null
+      : LINKS.find((l) => l.href !== "/" && pathname.startsWith(l.href))
+          ?.href ?? null;
 
   // Lock body scroll when the mobile menu is open
   useEffect(() => {
     if (isOpen) {
-      const prev = document.body.style.overflow
-      document.body.style.overflow = "hidden"
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.overflow = prev
-      }
+        document.body.style.overflow = prev;
+      };
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   return (
     <header
       className={cn(
-        "absolute top-0 w-full flex flex-col items-center transition-all duration-300 ease-out bg-foreground text-background",
-        isOpen ? "z-[920]" : "z-50",
+        "absolute top-0 w-full flex flex-col items-center transition-all duration-300 ease-out",
+        isHome ? "bg-transparent text-background" : "bg-canvas text-foreground",
+        isOpen ? "z-[920]" : "z-50"
       )}
     >
       {/* Main Header Row */}
       <div className="relative max-w-[90vw] mx-auto w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
         {/* Left: Logo */}
-        <div className="flex-1 flex items-center">
-          <Link
-            href="/"
-            className="font-sebenta text-xl lg:text-[1.389vw] font-bold tracking-tight text-background"
-            aria-label="Hommy home"
-          >
+        <Link
+          href="/"
+          className="flex-1 flex gap-2 lg:gap-[0.6vw] items-center"
+          aria-label="Hommy home"
+        >
+          <Icon name="logo" className="size-8 lg:size-[2.5vw]" />
+          <span className="font-sebenta text-xl lg:text-[1.5vw] font-bold tracking-tight leading-[100%]">
             Hommy
-          </Link>
-        </div>
+          </span>
+        </Link>
 
         <DesktopNav links={LINKS} activeHref={activeHref} />
 
@@ -179,7 +188,12 @@ export function SiteHeader() {
                 </button> */}
                 <Link
                   href={dashboardHref}
-                  className="relative flex items-center gap-1.5 lg:gap-[0.417vw] h-full cursor-pointer transition-all duration-300 group border-2 border-background/60 text-background hover:border-background/90 rounded-md lg:rounded-[0.556vw] px-4 lg:px-[1.111vw] py-1.5 lg:py-[0.417vw]"
+                  className={cn(
+                    "relative flex items-center gap-1.5 lg:gap-[0.417vw] h-full cursor-pointer transition-all duration-300 group border-2 rounded-md lg:rounded-[0.556vw] px-4 lg:px-[1.111vw] py-1.5 lg:py-[0.417vw]",
+                    isHome
+                      ? "border-background/60 text-background hover:border-background/90"
+                      : "border-foreground/30 text-foreground hover:border-foreground/60"
+                  )}
                 >
                   <span className="text-[15px] lg:text-[1.042vw] tracking-wide">
                     Dashboard
@@ -192,12 +206,12 @@ export function SiteHeader() {
                   href="/auth/login"
                   className={cn(
                     "relative flex items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] px-2.5 lg:px-[0.694vw] py-1.5 lg:py-[0.417vw] h-full cursor-pointer transition-all duration-300 group",
-                    pathname === "/auth/login"
-                      ? ""
-                      : "",
+                    pathname === "/auth/login" ? "" : ""
                   )}
                 >
-                  <span className="text-[15px] lg:text-[1.042vw] tracking-wide">Sign in</span>
+                  <span className="text-[15px] lg:text-[1.042vw] tracking-wide">
+                    Sign in
+                  </span>
                 </Link>
                 <Link
                   href="#quote"
@@ -250,7 +264,7 @@ export function SiteHeader() {
         className={cn(
           "w-full overflow-hidden border-t border-foreground/5 md:hidden",
           isOpen ? "max-h-96 lg:max-h-[26.667vw]" : "max-h-0",
-          "transition-[max-height] duration-300 ease-out",
+          "transition-[max-height] duration-300 ease-out"
         )}
       >
         <nav className="mx-auto flex flex-col gap-1 lg:gap-[0.278vw] px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
@@ -262,7 +276,7 @@ export function SiteHeader() {
               aria-current={activeHref === l.href ? "page" : undefined}
               className={cn(
                 "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
-                activeHref === l.href ? "text-background" : "text-background/80",
+                activeHref === l.href ? navText : navTextMuted
               )}
             >
               {l.name}
@@ -272,7 +286,10 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={handleSignOut}
-              className="rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-left text-[15px] lg:text-[1.042vw] text-background/80 hover:bg-foreground/5"
+              className={cn(
+                "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-left text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
+                navTextMuted
+              )}
             >
               Sign out
             </button>
@@ -280,7 +297,10 @@ export function SiteHeader() {
             <Link
               href="/auth/login"
               onClick={() => setIsOpen(false)}
-              className="rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] text-background/80 hover:bg-foreground/5"
+              className={cn(
+                "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
+                navTextMuted
+              )}
             >
               Sign in
             </Link>
@@ -288,7 +308,7 @@ export function SiteHeader() {
         </nav>
       </div>
     </header>
-  )
+  );
 }
 
 /**
@@ -299,13 +319,13 @@ function DesktopNav({
   links,
   activeHref,
 }: {
-  links: { name: string; href: string }[]
-  activeHref: string | null
+  links: { name: string; href: string }[];
+  activeHref: string | null;
 }) {
   return (
     <nav className="hidden md:flex items-center gap-8 lg:gap-[2.222vw] h-full md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
       {links.map((link) => {
-        const isActive = activeHref === link.href
+        const isActive = activeHref === link.href;
         return (
           <Link
             key={link.name}
@@ -321,17 +341,15 @@ function DesktopNav({
               <span
                 className={cn(
                   "absolute inset-0 transition-colors duration-300 text-nowrap",
-                  isActive
-                    ? ""
-                    : "",
+                  isActive ? "" : ""
                 )}
               >
                 {link.name}
               </span>
             </span>
           </Link>
-        )
+        );
       })}
     </nav>
-  )
+  );
 }

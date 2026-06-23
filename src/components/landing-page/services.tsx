@@ -45,30 +45,32 @@ export function Services() {
         {/* compact card grid */}
         <div className="mt-12 lg:mt-[3.333vw] grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-[1.3vw] lg:gap-y-[2.222vw]">
           {SERVICES.map((s) => (
-            <div key={s.title} className="group block">
-              <div className="relative aspect-[4/4] w-full overflow-hidden rounded-md lg:rounded-[0.5vw] bg-muted">
-                <Image
-                  src={s.src}
-                  alt={s.title}
-                  fill
-                  quality={90}
-                  // Images are landscape but the card is portrait (4/5), so
-                  // object-cover renders them ~2x wider than the column. The
-                  // sizes hint is inflated to match, otherwise the browser
-                  // under-fetches and the photo looks soft/upscaled.
-                  sizes="(min-width: 1024px) 48vw, 100vw"
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                />
+            <div key={s.title} className="group flex flex-col justify-between">
+              <div>
+                <div className="relative aspect-[4/4] w-full overflow-hidden rounded-md lg:rounded-[0.5vw] bg-muted">
+                  <Image
+                    src={s.src}
+                    alt={s.title}
+                    fill
+                    quality={90}
+                    // Images are landscape but the card is portrait (4/5), so
+                    // object-cover renders them ~2x wider than the column. The
+                    // sizes hint is inflated to match, otherwise the browser
+                    // under-fetches and the photo looks soft/upscaled.
+                    sizes="(min-width: 1024px) 48vw, 100vw"
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                  />
+                </div>
+                <h3 className="mt-4 lg:mt-[1.111vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-lg lg:text-[1.389vw] font-bold tracking-tight">
+                  {s.title}
+                </h3>
+                <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[1.042vw] leading-relaxed text-muted-foreground font-medium">
+                  {s.body}
+                </p>
               </div>
-              <h3 className="mt-4 lg:mt-[1.111vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-lg lg:text-[1.389vw] font-bold tracking-tight">
-                {s.title}
-              </h3>
-              <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[1.042vw] leading-relaxed text-muted-foreground font-medium">
-                {s.body}
-              </p>
               <Link
                 href="/get-a-quote"
-                className="w-full mt-4 lg:mt-[1vw] inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 border-primary/10 group-hover:border-primary/50 px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.8vw] text-base lg:text-[1.111vw] text-primary transition-colors"
+                className="w-full mt-4 lg:mt-[1vw] inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 lg:border-[0.2vw] border-primary/40 group-hover:border-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.8vw] text-base lg:text-[1.111vw] text-primary transition-colors"
               >
                 Post a job
                 <Icon

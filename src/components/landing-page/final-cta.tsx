@@ -3,8 +3,8 @@ import { Icon } from "../ui/icon";
 
 export function FinalCta() {
   return (
-    <section className="px-4 lg:px-[1.111vw] pb-4 lg:pb-[1.111vw] sm:px-5">
-      <div className="relative max-w-[90vw] mx-auto overflow-hidden rounded-2xl lg:rounded-[1.111vw] bg-secondary px-6 lg:px-[1.667vw] pt-20 text-center text-secondary-foreground lg:pt-[7.778vw]">
+    <section className="px-4 lg:px-[1.111vw] pb-4 lg:pb-[4vw] sm:px-5">
+      <div className="relative max-w-[90vw] mx-auto overflow-hidden rounded-2xl lg:rounded-[1.111vw] bg-secondary px-6 lg:px-[1.667vw] py-20 text-center text-secondary-foreground lg:py-[7vw]">
         <h2 className="mx-auto max-w-2xl lg:max-w-[46.662vw] font-sebenta text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-[4.167vw]">
           Ready for a roof you can trust?
         </h2>
@@ -24,12 +24,12 @@ export function FinalCta() {
         </Link>
 
         {/* Oversized wordmark anchored to the bottom edge */}
-        <p
+        {/* <p
           aria-hidden
           className="pointer-events-none mt-12 lg:mt-[3.333vw] select-none font-sebenta text-[24vw] font-bold leading-[0.72] tracking-tighter text-secondary-foreground/10 lg:text-[16vw]"
         >
           Hommy
-        </p>
+        </p> */}
       </div>
     </section>
   );
