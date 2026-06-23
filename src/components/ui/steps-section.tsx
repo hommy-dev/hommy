@@ -9,7 +9,10 @@ interface Feature {
   step: string
   title?: string
   content: string
-  image: string
+  /** Background image for the step. Ignored when `scene` is provided. */
+  image?: string
+  /** A bespoke animated illustration rendered instead of `image`. */
+  scene?: React.ReactNode
   icon?: string
 }
 
@@ -165,14 +168,17 @@ export function StepsSection({
                   animate={{ y: "0%" }}
                   transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <Image
-                    src={feature.image}
-                    alt={feature.title || feature.step}
-                    className="w-full h-full object-cover"
-                    width={1000}
-                    height={500}
-                    priority={layer.id === 0}
-                  />
+                  {feature.scene ??
+                    (feature.image ? (
+                      <Image
+                        src={feature.image}
+                        alt={feature.title || feature.step}
+                        className="w-full h-full object-cover"
+                        width={1000}
+                        height={500}
+                        priority={layer.id === 0}
+                      />
+                    ) : null)}
                 </motion.div>
               )
             })}

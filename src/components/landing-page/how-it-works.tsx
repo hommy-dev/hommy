@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import { StepsSection } from "../ui/steps-section";
+import { MatchProsScene } from "./scenes/match-pros-scene";
+import { RoofIntakeScene } from "./scenes/roof-intake-scene";
+import { CompareQuotesScene } from "./scenes/compare-quotes-scene";
+import { LeadFeedScene } from "./scenes/lead-feed-scene";
+import { QuoteChatScene } from "./scenes/quote-chat-scene";
+import { WinWorkScene } from "./scenes/win-work-scene";
 
 const HOMEOWNER_STEPS = [
   {
@@ -9,21 +15,21 @@ const HOMEOWNER_STEPS = [
     title: "Tell us about your roof",
     content:
       "Tell us what's going on, where you are, and when you need it done. Takes about two minutes.",
-    image: "/bg/worker-1.jpeg",
+    scene: <RoofIntakeScene />,
   },
   {
     step: "Step two",
     title: "We match local pros",
     content:
       "Your job goes straight to a handful of licensed, insured roofers who actually work in your neighborhood.",
-    image: "/bg/roof-inspection.jpg",
+    scene: <MatchProsScene />,
   },
   {
     step: "Step three",
     title: "Compare & pick",
     content:
       "Compare the quotes side by side and go with the roofer that feels right. No pressure, no obligation.",
-    image: "/bg/roof-replacement.jpg",
+    scene: <CompareQuotesScene />,
   },
 ];
 
@@ -33,21 +39,21 @@ const ROOFER_STEPS = [
     title: "Get matched leads",
     content:
       "See jobs from homeowners near you that fit what you do and where you work. Free to look, every time.",
-    image: "/bg/worker-1.jpeg",
+    scene: <LeadFeedScene />,
   },
   {
     step: "Step two",
     title: "Message the ones you want",
     content:
       "Spend a credit to start a chat and quote the jobs worth your time. No wasted calls, no buying lead packs.",
-    image: "/bg/roof-repair.jpg",
+    scene: <QuoteChatScene />,
   },
   {
     step: "Step three",
     title: "Win the work",
     content:
       "Get hired, earn reviews, and pay the full fee only when a homeowner says yes to your quote.",
-    image: "/bg/roof-replacement.jpg",
+    scene: <WinWorkScene />,
   },
 ];
 
@@ -87,6 +93,7 @@ export function HowItWorks() {
         tabs={TABS}
         activeTab={tab}
         onTabChange={(id) => setTab(id as TabId)}
+        autoPlayInterval={6000}
         className="max-w-[90vw] mx-auto"
       />
     </section>

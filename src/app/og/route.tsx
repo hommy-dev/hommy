@@ -2,14 +2,15 @@ import { ImageResponse } from "next/og";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// Dynamic Open Graph image (1200×630). Renders a clean, light-on-brand card from
+// Dynamic Open Graph image (1200×630). Renders the landing-hero look — the roof
+// photo full-bleed, a dark scrim for legibility, and centered light text — from
 // query params: ?t=<title>&k=<kicker>&s=<value>~<label>&s=… (up to 3 stats).
 // Built by src/lib/og.ts (ogImageUrl / ogImageMeta), which the SEO pages call in
 // their generateMetadata.
 //
 // Runs on the default Node runtime (cacheComponents forbids a `runtime` export),
-// so we can read the brand font off disk once at module load; the route output
-// is immutable per-URL and cached hard at the CDN (headers below).
+// so we can read the brand font + hero photo off disk once at module load; the
+// route output is immutable per-URL and cached hard at the CDN (headers below).
 
 // Brand display font (Sebenta). Read once, reused across requests.
 const FONT_DIR = join(process.cwd(), "public/font/sebenta");
@@ -17,15 +18,20 @@ const fontMedium = readFileSync(join(FONT_DIR, "sebenta-medium.otf"));
 const fontSemibold = readFileSync(join(FONT_DIR, "sebenta-semibold.otf"));
 const fontBold = readFileSync(join(FONT_DIR, "sebenta-bold.otf"));
 
-// Brand palette (light theme — see src/app/globals.css). No gray text: an OG
-// image renders small in feeds, so secondary text uses full brand colors (ink
-// or indigo) rather than a low-contrast muted gray that would wash out.
-const BG = "#fbfaff"; // warm off-white / faint lavender
-const INK = "#0f1a0a"; // primary text
-const ACCENT = "#1f00ce"; // brand indigo (eyebrow + labels + mark)
-const HAIRLINE = "#ded7f4"; // divider / box borders (non-text)
+// Hero background — an OG-sized (1200×630) crop of the landing photo, kept small
+// (~67KB) so we're not base64-embedding the 2MB original on every render. Satori
+// only decodes JPEG/PNG (no AVIF/WebP), so this is a .jpg. Read + encoded once.
+const heroBuf = readFileSync(join(process.cwd(), "public/bg/og-hero.jpg"));
+const HERO_DATA_URI = `data:image/jpeg;base64,${heroBuf.toString("base64")}`;
 
-const PAD_X = 60; // horizontal content inset (the divider ignores this)
+// Palette for text-over-photo. Light theme on the card itself washes out on a
+// busy photo, so text is white/light and a scrim does the contrast work.
+const WHITE = "#ffffff"; // headline + brand wordmark + stat values
+const SOFT = "#eef0ff"; // trust line / secondary text (faint lavender-white)
+const ACCENT = "#cdbcff"; // light indigo for the eyebrow + dot + stat labels
+const HAIRLINE = "rgba(255,255,255,0.45)"; // stat-box borders on the photo
+
+const PAD_X = 60; // horizontal content inset
 
 // Hommy logo mark — the 4 paths from public/logo/logo.svg (viewBox 0 0 512 512).
 const LOGO_PATHS = [
@@ -64,31 +70,89 @@ export async function GET(request: Request): Promise<Response> {
     (
       <div
         style={{
+          position: "relative",
           display: "flex",
-          flexDirection: "column",
           height: "100%",
           width: "100%",
-          justifyContent: "space-between",
-          padding: "50px 0 40px",
-          backgroundColor: BG,
           fontFamily: "Sebenta",
         }}
       >
-        {/* Top: kicker + headline (inset) */}
+        {/* Full-bleed hero photo */}
+        <img
+          src={HERO_DATA_URI}
+          width={1200}
+          height={630}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+
+        {/* Scrim — keeps light text legible over both the sky and the red tiles */}
         <div
           style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage:
+              "linear-gradient(180deg, rgba(8,10,28,0.42) 0%, rgba(8,10,28,0.30) 42%, rgba(8,10,28,0.52) 74%, rgba(8,10,28,0.82) 100%)",
+          }}
+        />
+
+        {/* Centered content */}
+        <div
+          style={{
+            position: "relative",
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            height: "100%",
+            width: "100%",
+            paddingTop: 90,
             paddingLeft: PAD_X,
             paddingRight: PAD_X,
+            textAlign: "center",
           }}
         >
+          {/* Brand lockup */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: 30,
+            }}
+          >
+            <svg width="46" height="46" viewBox="0 0 512 512">
+              {LOGO_PATHS.map((d) => (
+                <path key={d} d={d} fill={WHITE} />
+              ))}
+            </svg>
+            <div
+              style={{
+                fontSize: 32,
+                fontWeight: 600,
+                letterSpacing: -0.5,
+                color: WHITE,
+                marginLeft: 11,
+              }}
+            >
+              Hommy
+            </div>
+          </div>
+
           {kicker ? (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                marginBottom: 26,
+                marginBottom: 22,
               }}
             >
               <div
@@ -113,119 +177,85 @@ export async function GET(request: Request): Promise<Response> {
               </div>
             </div>
           ) : null}
+
           <div
             style={{
               display: "flex",
               maxWidth: 1000,
               fontSize: headlineSize(title.length),
-              fontWeight: 600,
-              lineHeight: 1.12,
-              letterSpacing: -0.4,
-              color: INK,
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: -0.6,
+              color: WHITE,
+              textAlign: "center",
             }}
           >
             {title}
           </div>
-        </div>
 
-        {/* Bottom: full-width hairline, then inset brand + stats */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
               display: "flex",
-              height: 1,
-              width: "100%",
-              backgroundColor: HAIRLINE,
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-              paddingLeft: PAD_X,
-              paddingRight: PAD_X,
-              marginTop: 34,
+              marginTop: 24,
+              fontSize: 22,
+              fontWeight: 500,
+              letterSpacing: 0.2,
+              color: SOFT,
             }}
           >
-            {/* Brand lockup + trust line */}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <svg width="48" height="48" viewBox="0 0 512 512">
-                  {LOGO_PATHS.map((d) => (
-                    <path key={d} d={d} fill={ACCENT} />
-                  ))}
-                </svg>
+            Licensed · Insured · Background-checked pros
+          </div>
+
+          {/* Stats */}
+          {stats.length ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                marginTop: 34,
+              }}
+            >
+              {stats.map((s, i) => (
                 <div
+                  key={`${s.value}-${s.label}`}
                   style={{
-                    fontSize: 32,
-                    fontWeight: 600,
-                    letterSpacing: -0.5,
-                    color: INK,
-                    marginLeft: 11,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginLeft: i ? 30 : 0,
                   }}
                 >
-                  Hommy
-                </div>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  marginTop: 12,
-                  fontSize: 18,
-                  fontWeight: 500,
-                  letterSpacing: 0.2,
-                  color: INK,
-                }}
-              >
-                Licensed · Insured · Background-checked pros
-              </div>
-            </div>
-
-            {/* Stats */}
-            {stats.length ? (
-              <div style={{ display: "flex", alignItems: "flex-end" }}>
-                {stats.map((s, i) => (
                   <div
-                    key={`${s.value}-${s.label}`}
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      marginLeft: i ? 28 : 0,
+                      fontSize: 40,
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      marginBottom: 10,
+                      color: WHITE,
                     }}
                   >
-                    <div
-                      style={{
-                        fontSize: 40,
-                        fontWeight: 700,
-                        lineHeight: 1,
-                        marginBottom: 10,
-                        color: INK,
-                      }}
-                    >
-                      {s.value}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        padding: "5px 9px",
-                        borderRadius: 7,
-                        border: `1px solid ${HAIRLINE}`,
-                        fontSize: 14,
-                        fontWeight: 600,
-                        letterSpacing: 1,
-                        textTransform: "uppercase",
-                        color: ACCENT,
-                      }}
-                    >
-                      {s.label}
-                    </div>
+                    {s.value}
                   </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      padding: "5px 9px",
+                      borderRadius: 7,
+                      border: `1px solid ${HAIRLINE}`,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      letterSpacing: 1,
+                      textTransform: "uppercase",
+                      color: SOFT,
+                    }}
+                  >
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     ),
