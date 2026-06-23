@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/seo";
 import { getPostSlugs } from "@/lib/data/blog";
-import { getIndexableCities, getStatesWithCounts } from "@/lib/data/locations";
+import { getIndexableCities, getStatesWithCounts, getIndexableSubtypePages } from "@/lib/data/locations";
 import { getVerifiedRooferSlugs } from "@/lib/data/roofers";
+import { SUBTYPE_LABEL_TO_SLUG } from "@/lib/config/roofing-subtypes";
 
 // Generated sitemap. Lists the public, indexable routes + blog posts. As pSEO
 // location pages land (/roofing/[state]/[city], /roofers/[slug]), add them here
@@ -31,10 +32,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let locationRoutes: MetadataRoute.Sitemap = [];
   try {
-    const [statesWith, indexableCities, roofers] = await Promise.all([
+    const [statesWith, indexableCities, roofers, subtypePages] = await Promise.all([
       getStatesWithCounts(),
       getIndexableCities(),
       getVerifiedRooferSlugs(),
+      getIndexableSubtypePages(),
     ]);
     locationRoutes = [
       ...statesWith
@@ -58,6 +60,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
         lastModified: r.updatedAt,
       })),
+      // Subtype × city long-tail pages (gated: indexable city + a pro offers it).
+      ...subtypePages.flatMap((p) => {
+        const slug = SUBTYPE_LABEL_TO_SLUG[p.subtypeLabel];
+        if (!slug) return [];
+        return [
+          {
+            url: absoluteUrl(`/roofing/${p.stateSlug}/${p.citySlug}/${slug}`),
+            changeFrequency: "weekly" as const,
+            priority: 0.6,
+            lastModified: p.updatedAt,
+          },
+        ];
+      }),
     ];
   } catch {
     // DB unreachable at build — ship the rest rather than fail.

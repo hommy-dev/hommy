@@ -320,3 +320,129 @@ export async function getCityStormHistory(
     .orderBy(desc(stormEvents.detectedAt))
     .limit(5)
 }
+
+/** City supply filtered to a single roofing subtype label (e.g. "Repair"). */
+export async function getCitySubtypeSupply(
+  stateSlug: string,
+  citySlug: string,
+  label: string,
+): Promise<{ proCount: number; pros: ProCard[] }> {
+  'use cache'
+  cacheLife('standard')
+  cacheTag('cities', `city:${stateSlug}/${citySlug}`)
+  const [city, serviceId] = await Promise.all([getCity(stateSlug, citySlug), roofingServiceId()])
+  if (!city || !serviceId) return { proCount: 0, pros: [] }
+
+  const point = sql`ST_SetSRID(ST_MakePoint(${city.lng}, ${city.lat}), 4326)::geography`
+  const offersSubtype = sql`${label} = ANY(${contractorServices.subtypes})`
+  const covers = sql`ST_Covers(${serviceAreas.geom}, ${point})`
+  const eligible = and(
+    eq(contractors.verificationStatus, 'verified'),
+    isNotNull(serviceAreas.geom),
+    offersSubtype,
+    covers,
+  )
+
+  const [counted] = await db
+    .select({ count: sql<number>`count(distinct ${contractors.id})::int` })
+    .from(contractors)
+    .innerJoin(
+      contractorServices,
+      and(eq(contractorServices.contractorId, contractors.id), eq(contractorServices.serviceId, serviceId)),
+    )
+    .innerJoin(serviceAreas, eq(serviceAreas.contractorId, contractors.id))
+    .where(eligible)
+  const proCount = counted?.count ?? 0
+  if (proCount === 0) return { proCount: 0, pros: [] }
+
+  const rows = await db
+    .selectDistinct({
+      id: contractors.id,
+      slug: contractors.slug,
+      companyName: contractors.companyName,
+      avgRating: contractors.avgRating,
+      totalReviews: contractors.totalReviews,
+      yearsInBusiness: contractors.yearsInBusiness,
+      logoUrl: contractors.logoUrl,
+      profileScore: contractors.profileScore,
+    })
+    .from(contractors)
+    .innerJoin(
+      contractorServices,
+      and(eq(contractorServices.contractorId, contractors.id), eq(contractorServices.serviceId, serviceId)),
+    )
+    .innerJoin(serviceAreas, eq(serviceAreas.contractorId, contractors.id))
+    .where(eligible)
+    .orderBy(desc(contractors.profileScore))
+    .limit(CITY_PRO_LIMIT)
+
+  const pros: ProCard[] = rows.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    companyName: r.companyName,
+    avgRating: r.avgRating != null ? parseFloat(r.avgRating) : null,
+    totalReviews: r.totalReviews,
+    yearsInBusiness: r.yearsInBusiness,
+    logoUrl: r.logoUrl,
+  }))
+  return { proCount, pros }
+}
+
+export type IndexableSubtypePage = {
+  stateSlug: string
+  citySlug: string
+  subtypeLabel: string
+  updatedAt: Date
+}
+
+/**
+ * Indexable (city × subtype) pairs for the sitemap: cities that clear
+ * INDEX_MIN_PROS where at least one covering verified roofer offers the subtype.
+ * The VALUES list mirrors ROOFING_SUBTYPE_PAGES labels — keep them in sync.
+ */
+export async function getIndexableSubtypePages(): Promise<IndexableSubtypePage[]> {
+  'use cache'
+  cacheLife('standard')
+  cacheTag('cities', 'cities:index')
+  const serviceId = await roofingServiceId()
+  if (!serviceId) return []
+
+  const result = await db.execute(sql`
+    WITH idx AS (
+      SELECT ci.slug AS city_slug, s.slug AS state_slug, ci.lat AS lat, ci.lng AS lng, ci.created_at AS updated_at
+      FROM ${cities} ci
+      JOIN ${states} s ON s.code = ci.state_code
+      WHERE (
+        SELECT count(DISTINCT ct.id)
+        FROM ${contractors} ct
+        JOIN ${contractorServices} cs ON cs.contractor_id = ct.id AND cs.service_id = ${serviceId}
+        JOIN ${serviceAreas} sa ON sa.contractor_id = ct.id
+        WHERE ct.verification_status = 'verified' AND sa.geom IS NOT NULL
+          AND ST_Covers(sa.geom, ST_SetSRID(ST_MakePoint(ci.lng, ci.lat), 4326)::geography)
+      ) >= ${INDEX_MIN_PROS}
+    )
+    SELECT idx.city_slug, idx.state_slug, idx.updated_at, sub.label
+    FROM idx
+    CROSS JOIN (VALUES ('Repair'), ('Replacement'), ('Inspection'), ('Storm Damage')) AS sub(label)
+    WHERE EXISTS (
+      SELECT 1
+      FROM ${contractors} ct
+      JOIN ${contractorServices} cs ON cs.contractor_id = ct.id AND cs.service_id = ${serviceId} AND sub.label = ANY(cs.subtypes)
+      JOIN ${serviceAreas} sa ON sa.contractor_id = ct.id
+      WHERE ct.verification_status = 'verified' AND sa.geom IS NOT NULL
+        AND ST_Covers(sa.geom, ST_SetSRID(ST_MakePoint(idx.lng, idx.lat), 4326)::geography)
+    )
+  `)
+  const rows = result as unknown as Array<{
+    city_slug: string
+    state_slug: string
+    updated_at: string | Date
+    label: string
+  }>
+  return rows.map((r) => ({
+    stateSlug: r.state_slug,
+    citySlug: r.city_slug,
+    subtypeLabel: r.label,
+    updatedAt: new Date(r.updated_at),
+  }))
+}

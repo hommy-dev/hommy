@@ -8,19 +8,13 @@ import {
   getCityStormHistory,
 } from "@/lib/data/locations";
 import { INDEX_MIN_PROS } from "@/lib/config/seo";
+import { ROOFING_SUBTYPE_PAGES } from "@/lib/config/roofing-subtypes";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
 
 // City pages render on-demand (no generateStaticParams): the indexable set is
 // supply-driven and can be empty, which cacheComponents disallows for prerender.
 // Indexability is enforced per-request via the noindex gate + sitemap instead.
-
-const ROOFING_SERVICES = [
-  { name: "Roof repair", blurb: "Fix leaks, missing shingles, and storm damage before it spreads." },
-  { name: "Roof replacement", blurb: "Full tear-off and re-roof when repairs no longer make sense." },
-  { name: "Roof inspection", blurb: "Know the real condition of your roof — and what it needs." },
-  { name: "Storm damage", blurb: "Hail and wind damage assessments, often tied to an insurance claim." },
-];
 
 export async function generateMetadata({
   params,
@@ -188,15 +182,21 @@ export default async function CityPage({
         </section>
       )}
 
-      {/* Services */}
+      {/* Services → subtype pages */}
       <section className="mt-12">
         <h2 className="font-sebenta text-2xl font-bold text-foreground">Roofing services in {cityRow.name}</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {ROOFING_SERVICES.map((s) => (
-            <div key={s.name} className="rounded-2xl border border-border bg-card p-5">
-              <p className="font-semibold text-foreground">{s.name}</p>
+          {ROOFING_SUBTYPE_PAGES.map((s) => (
+            <Link
+              key={s.slug}
+              href={`/roofing/${state}/${city}/${s.slug}`}
+              className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+            >
+              <p className="font-semibold text-foreground">
+                {s.heading} in {cityRow.name}
+              </p>
               <p className="mt-1 text-sm text-muted-foreground">{s.blurb}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

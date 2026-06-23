@@ -63,6 +63,9 @@ export async function updateServiceSubtypes(input: unknown): Promise<Result> {
       set: { subtypes },
     })
 
+  // Changing which subtypes a company offers shifts subtype-page supply.
+  revalidateCityPages()
+
   return { success: true }
 }
 
