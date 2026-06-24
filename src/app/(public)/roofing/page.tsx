@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getStatesWithCounts } from "@/lib/data/locations";
+import { getRoofersDirectory } from "@/lib/data/roofers";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { ogImageMeta } from "@/lib/og";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
+import { RoofingHero } from "@/components/roofing/roofing-hero";
+import { RoofersDirectory } from "@/components/roofing/roofers-directory";
+import { RoofingLocationCard } from "@/components/roofing/roofing-location-card";
+import { RoofingPageSections } from "@/components/roofing/roofing-page-sections";
 
 const TITLE = "Roofing contractors near you";
 const DESCRIPTION =
-  "Find licensed, insured, background-checked roofers in your city. Compare local pros, get free quotes, and only hear from the ones you choose — on Hommy.";
+  "Find licensed, insured, background-checked roofers in your city. Compare local pros, get free quotes, and only hear from the ones you choose.";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -28,10 +32,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RoofingHubPage() {
-  const states = await getStatesWithCounts();
+  const [states, dir] = await Promise.all([
+    getStatesWithCounts(),
+    getRoofersDirectory({ page: 0, pageSize: 12 }),
+  ]);
+  // Only surface states that actually have inventory — no "coming soon" shells.
+  const liveStates = states.filter((s) => s.indexableCityCount > 0);
 
   return (
-    <div className="mx-auto max-w-5xl px-5 pb-24 pt-12 lg:pt-16">
+    <>
+    <div className="mx-auto px-5 pb-10 pt-28 lg:max-w-[95vw] lg:px-[1.389vw] lg:pb-[2vw] lg:pt-[10vw]">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: absoluteUrl("/") },
@@ -47,41 +57,47 @@ export default async function RoofingHubPage() {
         }}
       />
 
-      <header className="max-w-2xl">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Roofing</p>
-        <h1 className="font-sebenta text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Find a roofer you can actually trust, in your city
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          {DESCRIPTION} Pick your state to see roofers serving your area.
-        </p>
-      </header>
+      <RoofingHero
+        title="Find a roofer you can actually trust"
+        intro={DESCRIPTION}
+        ctaHref="/get-a-quote"
+      />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        {states.map((s) => (
-          <Link
-            key={s.code}
-            href={`/roofing/${s.slug}`}
-            className="flex items-center justify-between rounded-2xl border border-border bg-card px-6 py-5 transition-colors hover:border-primary/40"
-          >
-            <span className="font-sebenta text-xl font-bold text-foreground">{s.name}</span>
-            <span className="text-sm text-muted-foreground">
-              {s.indexableCityCount > 0 ? `${s.indexableCityCount} cities` : "Coming soon"}
-            </span>
-          </Link>
-        ))}
-      </div>
+      {/* Companies first — the full directory */}
+      <section className="mt-12 lg:mt-[3.5vw]">
+        <RoofersDirectory
+          initialItems={dir.items}
+          initialTotal={dir.total}
+          initialHasMore={dir.hasMore}
+        />
+      </section>
 
-      <div className="mt-12 rounded-2xl border border-border bg-card p-6 text-center">
-        <p className="font-sebenta text-xl font-bold text-foreground">Don&apos;t see your city?</p>
-        <p className="mt-2 text-muted-foreground">Post your job and we&apos;ll match you with local roofers as they join.</p>
-        <Link
-          href="/get-a-quote"
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-background"
-        >
-          Post a job
-        </Link>
-      </div>
+      {/* Browse by area (only states with real inventory) */}
+      {liveStates.length > 0 && (
+        <section className="mt-14 lg:mt-[4vw]">
+          <h2 className="font-sebenta text-2xl font-semibold tracking-tight text-foreground lg:text-[1.944vw]">
+            Browse roofers by area
+          </h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-[1.667vw] lg:grid-cols-3 lg:gap-[1.111vw]">
+            {liveStates.map((s) => (
+              <RoofingLocationCard
+                key={s.code}
+                href={`/roofing/${s.slug}`}
+                name={s.name}
+                count={`${s.indexableCityCount} ${s.indexableCityCount === 1 ? "city" : "cities"}`}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
     </div>
+    <RoofingPageSections
+      ctaTitle="Don't see your city?"
+      ctaBody="Post your job for free and we'll match you with local roofers as they join."
+      ctaHref="/get-a-quote"
+      ctaLabel="Post a job"
+    />
+    </>
   );
 }

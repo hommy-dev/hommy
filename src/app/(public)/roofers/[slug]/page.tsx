@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
 import { getRooferBySlug } from "@/lib/data/roofers";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { ogImageMeta } from "@/lib/og";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
+import { Icon } from "@/components/ui/icon";
+import { type ProfileStat } from "@/components/dashboard/profile/profile-header";
+import { ContractorProfileView } from "@/components/contractors/contractor-profile-view";
 
 // Render on-demand (no generateStaticParams): the verified set can be empty,
 // which cacheComponents disallows for prerender. Unknown/unverified → notFound().
+
+const monthYear = (d: Date) =>
+  new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(d);
 
 export async function generateMetadata({
   params,
@@ -19,30 +24,25 @@ export async function generateMetadata({
   const roofer = await getRooferBySlug(slug);
   if (!roofer) return {};
   const name = roofer.companyName ?? "Roofing contractor";
+  const rating = roofer.reviews.avgRating;
   // Only emit stats that are real — never fabricate ratings/reviews.
   const stats = [
-    ...(roofer.avgRating
-      ? [{ value: `${roofer.avgRating.toFixed(1)}★`, label: "Avg rating" }]
-      : []),
-    ...(roofer.totalReviews > 0
-      ? [{ value: String(roofer.totalReviews), label: "Reviews" }]
+    ...(rating ? [{ value: `${rating.toFixed(1)}★`, label: "Avg rating" }] : []),
+    ...(roofer.reviews.total > 0
+      ? [{ value: String(roofer.reviews.total), label: "Reviews" }]
       : []),
     ...(roofer.cities.length > 0
       ? [{ value: String(roofer.cities.length), label: "Service areas" }]
       : []),
   ];
   return {
-    title: `${name} — Roofing Contractor`,
+    title: `${name}, Roofing Contractor`,
     description:
       roofer.bio?.slice(0, 155) ??
-      `${name} is a licensed, insured roofing contractor on Hommy. See reviews, service areas, and get a free quote.`,
+      `${name} is a licensed, insured roofing contractor on Hommy. See reviews, past work, service areas, and get a free quote.`,
     alternates: { canonical: `/roofers/${slug}` },
     robots: SITE_INDEXABLE ? undefined : { index: false, follow: true },
-    ...ogImageMeta({
-      title: name,
-      kicker: "Verified roofing contractor",
-      stats,
-    }),
+    ...ogImageMeta({ title: name, kicker: "Verified roofing contractor", stats }),
   };
 }
 
@@ -57,14 +57,36 @@ export default async function RooferProfilePage({
 
   const name = roofer.companyName ?? "Roofing contractor";
   const quoteHref = "/get-a-quote";
-  const hasRating = roofer.avgRating != null && roofer.totalReviews > 0;
+  // Combined (Hommy + Google) rating for DISPLAY — matches the dashboard profile.
+  const rating = roofer.reviews.avgRating;
+  // AggregateRating schema uses the cached Hommy-native rating only.
+  const hasNativeRating = roofer.nativeAvgRating != null && roofer.nativeTotalReviews > 0;
+
+  const metaLine = [
+    "Roofing",
+    roofer.yearsInBusiness != null
+      ? `${roofer.yearsInBusiness} year${roofer.yearsInBusiness === 1 ? "" : "s"} in business`
+      : null,
+    roofer.areas[0]?.label ?? null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const stats: ProfileStat[] = [
+    { label: "Rating", value: rating ? rating.toFixed(1) : "—", star: true },
+    { label: roofer.reviews.total === 1 ? "Review" : "Reviews", value: String(roofer.reviews.total) },
+    ...(roofer.yearsInBusiness != null
+      ? [{ label: "Years", value: String(roofer.yearsInBusiness) } satisfies ProfileStat]
+      : []),
+    { label: roofer.wonCount === 1 ? "Job won" : "Jobs won", value: String(roofer.wonCount) },
+  ];
 
   return (
-    <div className="mx-auto max-w-4xl px-5 pb-24 pt-12 lg:pt-16">
+    <div className="mx-auto px-5 pb-16 pt-28 lg:max-w-[80vw] lg:px-[1.389vw] lg:pb-[5vw] lg:pt-[7vw]">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: absoluteUrl("/") },
-          { name: "Roofing", url: absoluteUrl("/roofing") },
+          { name: "Roofing companies", url: absoluteUrl("/roofers") },
           { name, url: absoluteUrl(`/roofers/${slug}`) },
         ]}
       />
@@ -79,110 +101,54 @@ export default async function RooferProfilePage({
           ...(roofer.cities.length > 0
             ? { areaServed: roofer.cities.map((c) => ({ "@type": "City", name: c.name })) }
             : {}),
-          // Only emit a rating when it's real — never fabricate.
-          ...(hasRating
+          ...(hasNativeRating
             ? {
                 aggregateRating: {
                   "@type": "AggregateRating",
-                  ratingValue: roofer.avgRating!.toFixed(1),
-                  reviewCount: roofer.totalReviews,
+                  ratingValue: roofer.nativeAvgRating!.toFixed(1),
+                  reviewCount: roofer.nativeTotalReviews,
                 },
               }
             : {}),
         }}
       />
 
-      <nav className="mb-6 text-sm text-muted-foreground" aria-label="Breadcrumb">
-        <Link href="/roofing" className="hover:text-foreground">Roofing</Link>
-        <span aria-hidden> / </span>
+      <nav
+        className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground lg:mb-[1.5vw] lg:gap-[0.4vw] lg:text-[0.903vw]"
+        aria-label="Breadcrumb"
+      >
+        <Link href="/roofers" className="hover:text-foreground">
+          Roofing companies
+        </Link>
+        <span aria-hidden>/</span>
         <span className="text-foreground">{name}</span>
       </nav>
 
-      {/* Header */}
-      <header className="flex items-start gap-5">
-        {roofer.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- arbitrary contractor logo URL
-          <img src={roofer.logoUrl} alt={name} className="size-20 shrink-0 rounded-2xl object-cover" />
-        ) : (
-          <span className="size-20 shrink-0 rounded-2xl bg-muted" />
-        )}
-        <div className="min-w-0">
-          <h1 className="font-sebenta text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
-            {name}
-          </h1>
-          <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-            <span className="font-medium text-primary">✓ Verified, licensed &amp; insured</span>
-            {hasRating && <span>★ {roofer.avgRating!.toFixed(1)} ({roofer.totalReviews})</span>}
-            {roofer.yearsInBusiness ? <span>{roofer.yearsInBusiness} yrs in business</span> : null}
-            {roofer.licenseNumber ? <span>License {roofer.licenseNumber}</span> : null}
-          </p>
+      <ContractorProfileView
+        name={name}
+        verified={roofer.verified}
+        logoUrl={roofer.logoUrl}
+        metaLine={metaLine}
+        stats={stats}
+        bio={roofer.bio}
+        portfolio={roofer.portfolio}
+        googleMedia={roofer.googleMedia}
+        reviews={roofer.reviews}
+        subtypes={roofer.subtypes}
+        areas={roofer.areas}
+        memberSince={monthYear(roofer.createdAt)}
+        canManage={false}
+        editHref=""
+        primaryCta={
           <Link
             href={quoteHref}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-background"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 lg:gap-[0.4vw] lg:rounded-[0.694vw] lg:px-[1.667vw] lg:py-[0.8vw] lg:text-[1.05vw]"
           >
             Get a free quote
+            <Icon name="arrow-right" className="size-5 lg:size-[1.2vw]" />
           </Link>
-        </div>
-      </header>
-
-      {/* Bio */}
-      {roofer.bio && (
-        <section className="mt-10 max-w-2xl">
-          <h2 className="font-sebenta text-2xl font-bold text-foreground">About {name}</h2>
-          <p className="mt-3 leading-relaxed text-muted-foreground">{roofer.bio}</p>
-        </section>
-      )}
-
-      {/* Service areas → city pages (internal links) */}
-      {roofer.cities.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-sebenta text-2xl font-bold text-foreground">Areas served</h2>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {roofer.cities.map((c) => (
-              <li key={`${c.stateSlug}/${c.citySlug}`}>
-                <Link
-                  href={`/roofing/${c.stateSlug}/${c.citySlug}`}
-                  className="inline-block rounded-full border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors hover:border-primary/40"
-                >
-                  {c.name}, {c.stateCode}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* Reviews */}
-      {roofer.reviews.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-sebenta text-2xl font-bold text-foreground">Reviews</h2>
-          <ul className="mt-4 space-y-4">
-            {roofer.reviews.map((r) => (
-              <li key={r.id} className="rounded-2xl border border-border bg-card p-5">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground">{r.reviewerName ?? "Verified homeowner"}</span>
-                  <span className="text-sm text-muted-foreground">★ {r.rating}</span>
-                </div>
-                {r.comment && <p className="mt-2 text-muted-foreground">{r.comment}</p>}
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {format(new Date(r.submittedAt), "MMMM yyyy")}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* CTA */}
-      <section className="mt-14 rounded-2xl border border-border bg-card p-8 text-center">
-        <p className="font-sebenta text-2xl font-bold text-foreground">Want a quote from {name}?</p>
-        <p className="mt-2 text-muted-foreground">
-          Post your roofing job on Hommy — it&apos;s free, and you choose who you talk to.
-        </p>
-        <Link href={quoteHref} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3 font-medium text-background">
-          Get a free quote
-        </Link>
-      </section>
+        }
+      />
     </div>
   );
 }

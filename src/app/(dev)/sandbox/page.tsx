@@ -18,6 +18,12 @@ import {
   HeaderVariantImmersive,
   HEADER_SAMPLE,
 } from "@/components/dashboard/profile/header-variants"
+import {
+  CardVariantA,
+  CardVariantB,
+  CardVariantC,
+  CardVariantD,
+} from "@/components/roofing/roofer-card-variants"
 
 export default function SandboxPage() {
   const [setupOpen, setSetupOpen] = useState(false)
@@ -153,6 +159,32 @@ export default function SandboxPage() {
           </Variant>
           <Variant label="Variant 3 — Journey" note="Teaches the platform flow (lead → engage → quote → win → review) with score gains along the path, and a penalties footer.">
             <ClimbVariantJourney />
+          </Variant>
+        </div>
+
+        {/* Roofer card variants */}
+        <div className="space-y-2 lg:space-y-[0.556vw]">
+          <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
+            Roofer card — layout variants
+          </h2>
+          <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
+            Four directions for the company card&apos;s photo treatment + buttons. Shown at real 2-col
+            card width (~560px). Click any photo to open the lightbox.
+          </p>
+        </div>
+
+        <div className="max-w-[560px] lg:max-w-[40vw] space-y-10 lg:space-y-[2.778vw]">
+          <Variant label="Variant A — one button + big image right" note="Info with a single primary 'Get a quote' button (half width) and a 'View profile' text link; the whole right side is one large photo with a count badge.">
+            <CardVariantA />
+          </Variant>
+          <Variant label="Variant B — 2×2 photo grid right" note="Info + two buttons on the left; a tidy 2×2 grid of photos on the right with a '+N' on the last tile.">
+            <CardVariantB />
+          </Variant>
+          <Variant label="Variant C — banner on top" note="A wide photo banner across the top, then info + two buttons below. Most image-forward.">
+            <CardVariantC />
+          </Variant>
+          <Variant label="Variant D — full image right + overlay" note="Info + two buttons on the left; one full-height photo on the right with a 'View N photos' gradient overlay.">
+            <CardVariantD />
           </Variant>
         </div>
 

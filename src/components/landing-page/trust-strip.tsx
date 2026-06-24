@@ -19,7 +19,7 @@ const STATS = [
 export function TrustStrip() {
   return (
     <section className="bg-background">
-      <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]">
+      <div className="lg:max-w-[95vw] mx-auto px-5 lg:px-[1.389vw] py-24 lg:py-[8.889vw]">
         <div className="">
           <h2 className="font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold  tracking-tight">
             A better way to hire a roofer.

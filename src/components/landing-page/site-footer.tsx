@@ -32,7 +32,7 @@ const FOOTER = [
 export function SiteFooter() {
   return (
     <footer className="bg-background">
-      <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-[4.444vw] pb-12 lg:pb-[2vw]">
+      <div className="lg:max-w-[95vw] mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-[4.444vw] pb-12 lg:pb-[2vw]">
         <div className="grid gap-10 lg:gap-[2.778vw] sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
             <p className="font-sebenta text-xl lg:text-[1.389vw] font-bold">

@@ -9,15 +9,11 @@ import {
 } from "@/lib/data/dashboard"
 import { getPortfolio } from "@/lib/data/portfolio"
 import { getCombinedReviews, getExternalMedia } from "@/lib/data/integrations"
-import { ServiceTag } from "@/components/ui/service-tag"
 import { getVerificationState } from "@/lib/contractor/verification"
 import { scoreStanding } from "@/lib/reputation/labels"
-import { WorkGallery } from "@/components/dashboard/profile/work-gallery"
-import { ReviewsBlock } from "@/components/dashboard/reviews/reviews-block"
-import { ProfileHeader, type ProfileStat } from "@/components/dashboard/profile/profile-header"
-import { ProfileCompleteness, type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
-import { CoverageCard } from "@/components/dashboard/profile/coverage-card"
-import { Icon } from "@/components/ui/icon"
+import { type ProfileStat } from "@/components/dashboard/profile/profile-header"
+import { type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
+import { ContractorProfileView } from "@/components/contractors/contractor-profile-view"
 import { ProfileSkeleton } from "@/components/dashboard/skeletons"
 
 const COMPANY_SETTINGS = "/contractor/settings/company"
@@ -92,134 +88,22 @@ async function ProfileBody() {
   ]
 
   return (
-    <div className="mx-auto w-full space-y-6 lg:space-y-[1.667vw]">
-      <ProfileHeader
-        name={name}
-        verified={verified}
-        logoUrl={c.logoUrl}
-        metaLine={metaLine}
-        stats={stats}
-        canManage={canManage}
-        editHref={COMPANY_SETTINGS}
-      />
-
-      {canManage ? <ProfileCompleteness items={completeness} /> : null}
-
-      {/* Body — main column + sidebar of clean section cards */}
-      <div className="grid gap-6 lg:gap-[1.667vw] lg:grid-cols-[1.7fr_1fr] lg:items-start">
-        <div className="min-w-0 space-y-8 lg:space-y-[2.222vw]">
-          <SectionCard title="About">
-            {c.bio ? (
-              <p className="max-w-prose text-[15px] lg:text-[1.042vw] leading-relaxed text-foreground/80">
-                {c.bio}
-              </p>
-            ) : (
-              <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-                {canManage
-                  ? "No description yet. Add a short bio so homeowners get a feel for your work."
-                  : "No description yet."}
-              </p>
-            )}
-          </SectionCard>
-
-          {portfolio.length > 0 || googleMedia.length > 0 ? (
-            <SectionCard title="Recent work">
-              <WorkGallery portfolio={portfolio} google={googleMedia} />
-            </SectionCard>
-          ) : null}
-
-          {reviews.total > 0 ? (
-            <SectionCard title="Reviews">
-              <ReviewsBlock
-                summary={reviews}
-                reviews={reviews.reviews}
-                hommyCount={reviews.hommyCount}
-                googleCount={reviews.googleCount}
-              />
-            </SectionCard>
-          ) : null}
-        </div>
-
-        <aside className="lg:sticky lg:top-6 lg:self-start">
-          <div className="divide-y divide-border rounded-2xl lg:rounded-[1.111vw] border border-border bg-card">
-            <SubSection title="Details">
-              <ul className="space-y-3 lg:space-y-[0.833vw] text-sm lg:text-[0.972vw]">
-                <li className="flex items-center gap-2.5 lg:gap-[0.694vw]">
-                  <Icon
-                    name={verified ? "shield-done" : "shield-fail"}
-                    className={
-                      verified
-                        ? "size-4 lg:size-[1.111vw] text-secondary"
-                        : "size-4 lg:size-[1.111vw] text-muted-foreground"
-                    }
-                  />
-                  {verified ? "Licensed & insured" : "Verification pending"}
-                </li>
-                <li className="flex items-center gap-2.5 lg:gap-[0.694vw] text-muted-foreground">
-                  <Icon name="time-circle" className="size-4 lg:size-[1.111vw]" />
-                  On Hommy since {memberSince}
-                </li>
-              </ul>
-            </SubSection>
-
-            <SubSection title="Services">
-              {subtypes.length > 0 ? (
-                <div className="flex flex-wrap gap-2 lg:gap-[0.556vw]">
-                  {subtypes.map((s) => (
-                    <ServiceTag key={s} label={s} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm lg:text-[0.972vw] text-muted-foreground">
-                  {canManage
-                    ? "No services yet. Add the services you offer so the right jobs reach you."
-                    : "No services listed yet."}
-                </p>
-              )}
-            </SubSection>
-
-            <SubSection title="Coverage">
-              <CoverageCard areas={areas} canManage={canManage} />
-            </SubSection>
-          </div>
-        </aside>
-      </div>
-    </div>
-  )
-}
-
-// An open section: a bold heading + content, no bordered box.
-function SectionCard({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section>
-      <h2 className="mb-4 lg:mb-[1.111vw] text-base lg:text-[1.25vw] font-semibold tracking-tight text-foreground">
-        {title}
-      </h2>
-      {children}
-    </section>
-  )
-}
-
-// A sub-section inside the sidebar card (divided rows).
-function SubSection({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="p-5 lg:p-[1.389vw]">
-      <h2 className="mb-3 lg:mb-[0.833vw] text-sm lg:text-[0.972vw] font-semibold text-foreground">
-        {title}
-      </h2>
-      {children}
-    </div>
+    <ContractorProfileView
+      name={name}
+      verified={verified}
+      logoUrl={c.logoUrl}
+      metaLine={metaLine}
+      stats={stats}
+      bio={c.bio}
+      portfolio={portfolio}
+      googleMedia={googleMedia}
+      reviews={reviews}
+      subtypes={subtypes}
+      areas={areas}
+      memberSince={memberSince}
+      canManage={canManage}
+      editHref={COMPANY_SETTINGS}
+      completeness={completeness}
+    />
   )
 }

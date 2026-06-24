@@ -27,7 +27,7 @@ export default async function BlogIndexPage({
   const activeCategory = category ? allCategories.find((c) => c.slug === category) : undefined;
 
   return (
-    <div className="mx-auto lg:max-w-[90vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[12vw]">
+    <div className="mx-auto lg:max-w-[95vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[12vw]">
       {/* Hero — centered title only */}
       <header className="mb-10 text-center lg:mb-[3vw]">
         <h1 className="font-sebenta text-4xl font-bold leading-[1.05] tracking-tight text-foreground lg:text-[3.889vw]">

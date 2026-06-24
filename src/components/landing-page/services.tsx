@@ -28,7 +28,7 @@ const SERVICES = [
 export function Services() {
   return (
     <section className="scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[6.667vw] bg-background">
-      <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw]">
+      <div className="lg:max-w-[95vw] mx-auto px-5 lg:px-[1.389vw]">
         {/* header: copy left, CTA right on desktop */}
         <div className="flex flex-col gap-6 lg:gap-[1.667vw] lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-xl lg:max-w-[50vw]">

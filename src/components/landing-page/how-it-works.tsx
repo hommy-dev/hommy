@@ -94,7 +94,7 @@ export function HowItWorks() {
         activeTab={tab}
         onTabChange={(id) => setTab(id as TabId)}
         autoPlayInterval={6000}
-        className="lg:max-w-[90vw] mx-auto"
+        className="lg:max-w-[95vw] mx-auto"
       />
     </section>
   );

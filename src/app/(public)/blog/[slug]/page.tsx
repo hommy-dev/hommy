@@ -85,7 +85,7 @@ export default async function BlogPostPage({
     .join(" · ");
 
   return (
-    <div className="mx-auto lg:max-w-[90vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[7vw]">
+    <div className="mx-auto lg:max-w-[95vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[7vw]">
       <JsonLd
         data={{
           "@context": "https://schema.org",

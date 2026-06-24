@@ -2,9 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStateWithCities } from "@/lib/data/locations";
+import { getRoofersDirectory } from "@/lib/data/roofers";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { ogImageMeta } from "@/lib/og";
 import { BreadcrumbJsonLd } from "@/components/seo/structured-data";
+import { RoofingHero } from "@/components/roofing/roofing-hero";
+import { RoofersDirectory } from "@/components/roofing/roofers-directory";
+import { RoofingLocationCard } from "@/components/roofing/roofing-location-card";
+import { RoofingEmpty } from "@/components/roofing/roofing-empty";
+import { RoofingPageSections } from "@/components/roofing/roofing-page-sections";
 
 // State hubs render on-demand (no generateStaticParams): the operating-state set
 // is DB-driven and can be empty (e.g. unseeded prod), which cacheComponents
@@ -49,8 +55,12 @@ export default async function StateHubPage({
   const data = await getStateWithCities(state);
   if (!data) notFound();
 
+  const quoteHref = `/get-a-quote?where=${encodeURIComponent(data.state.name)}`;
+  const dir = await getRoofersDirectory({ stateSlug: state, page: 0, pageSize: 12 });
+
   return (
-    <div className="mx-auto max-w-5xl px-5 pb-24 pt-12 lg:pt-16">
+    <>
+    <div className="mx-auto px-5 pb-10 pt-28 lg:max-w-[95vw] lg:px-[1.389vw] lg:pb-[2vw] lg:pt-[10vw]">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: absoluteUrl("/") },
@@ -59,52 +69,69 @@ export default async function StateHubPage({
         ]}
       />
 
-      <nav className="mb-6 text-sm text-muted-foreground" aria-label="Breadcrumb">
+      <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground lg:mb-[1.5vw] lg:gap-[0.4vw] lg:text-[0.903vw]" aria-label="Breadcrumb">
         <Link href="/roofing" className="hover:text-foreground">
           Roofing
         </Link>
-        <span aria-hidden> / </span>
+        <span aria-hidden>/</span>
         <span className="text-foreground">{data.state.name}</span>
       </nav>
 
-      <header className="max-w-2xl">
-        <h1 className="font-sebenta text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Roofing contractors in {data.state.name}
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Licensed, insured, background-checked roofers serving {data.state.name}. Choose your city to compare local pros.
-        </p>
-      </header>
+      <RoofingHero
+        title={`Roofing contractors in ${data.state.name}`}
+        intro={`Licensed, insured, background-checked roofers serving ${data.state.name}. Free to post, no spam calls, and you only hear from the pros you choose.`}
+        ctaHref={quoteHref}
+      />
 
-      {data.cities.length > 0 ? (
-        <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {data.cities.map((c) => (
-            <li key={c.slug}>
-              <Link
+      {/* Companies first — the directory scoped to this state */}
+      {dir.total > 0 && (
+        <section className="mt-12 lg:mt-[3.5vw]">
+          <RoofersDirectory
+            initialItems={dir.items}
+            initialTotal={dir.total}
+            initialHasMore={dir.hasMore}
+            scope={{ stateSlug: state, placeLabel: data.state.name }}
+            quoteHref={quoteHref}
+          />
+        </section>
+      )}
+
+      {/* Browse by city */}
+      {data.cities.length > 0 && (
+        <section className="mt-14 lg:mt-[4vw]">
+          <h2 className="font-sebenta text-2xl font-semibold tracking-tight text-foreground lg:text-[1.944vw]">
+            Browse roofers by city
+          </h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-[1.667vw] lg:grid-cols-4 lg:gap-[1.111vw]">
+            {data.cities.map((c) => (
+              <RoofingLocationCard
+                key={c.slug}
                 href={`/roofing/${state}/${c.slug}`}
-                className="block rounded-xl border border-border bg-card px-4 py-3 font-medium text-foreground transition-colors hover:border-primary/40"
-              >
-                Roofers in {c.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="mt-10 rounded-2xl border border-border bg-card p-6 text-center">
-          <p className="text-muted-foreground">
-            We&apos;re onboarding roofers across {data.state.name} now. Post your job and we&apos;ll match you as pros join.
-          </p>
+                name={c.name}
+                count="View roofers"
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Nothing yet */}
+      {dir.total === 0 && data.cities.length === 0 && (
+        <div className="mt-10 lg:mt-[3vw]">
+          <RoofingEmpty
+            message={`We're adding roofers across ${data.state.name} now. Post your job for free and we'll match you with local pros as they join.`}
+            href="/get-a-quote"
+          />
         </div>
       )}
 
-      <div className="mt-12 text-center">
-        <Link
-          href="/get-a-quote"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-background"
-        >
-          Post a job
-        </Link>
-      </div>
     </div>
+    <RoofingPageSections
+      ctaTitle={`Let's get your ${data.state.name} roof sorted.`}
+      ctaBody="Post your job for free and compare quotes from local, vetted roofers."
+      ctaHref="/get-a-quote"
+      ctaLabel="Post a job"
+    />
+    </>
   );
 }

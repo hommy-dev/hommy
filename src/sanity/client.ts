@@ -6,6 +6,6 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: true, // set false if statically generating pages, using ISR, or tag-based revalidation
+  useCdn: false, // tag-based revalidation via Live Content API — CDN would serve stale reads
 });
 

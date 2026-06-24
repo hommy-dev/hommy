@@ -11,7 +11,13 @@ import { INDEX_MIN_PROS } from "@/lib/config/seo";
 import { ROOFING_SUBTYPE_PAGES } from "@/lib/config/roofing-subtypes";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { ogImageMeta } from "@/lib/og";
+import { getRoofersDirectory } from "@/lib/data/roofers";
 import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
+import { Icon } from "@/components/ui/icon";
+import { RoofingHero } from "@/components/roofing/roofing-hero";
+import { RoofersDirectory } from "@/components/roofing/roofers-directory";
+import { RoofingEmpty } from "@/components/roofing/roofing-empty";
+import { RoofingPageSections } from "@/components/roofing/roofing-page-sections";
 
 // City pages render on-demand (no generateStaticParams): the indexable set is
 // supply-driven and can be empty, which cacheComponents disallows for prerender.
@@ -58,17 +64,18 @@ export default async function CityPage({
   const cityRow = await getCity(state, city);
   if (!cityRow) notFound();
 
-  const [supply, demand, storms] = await Promise.all([
-    getCitySupplyForCity(state, city),
+  const place = `${cityRow.name}, ${cityRow.stateCode}`;
+  const quoteHref = `/get-a-quote?where=${encodeURIComponent(place)}`;
+
+  const [dir, demand, storms] = await Promise.all([
+    getRoofersDirectory({ near: { lat: cityRow.lat, lng: cityRow.lng }, page: 0, pageSize: 12 }),
     getCityDemand(cityRow.stateCode, cityRow.name),
     getCityStormHistory(cityRow.stateCode, cityRow.name),
   ]);
 
-  const place = `${cityRow.name}, ${cityRow.stateCode}`;
-  const quoteHref = `/get-a-quote?where=${encodeURIComponent(place)}`;
-
   return (
-    <div className="mx-auto max-w-4xl px-5 pb-24 pt-12 lg:pt-16">
+    <>
+    <div className="mx-auto px-5 pb-10 pt-28 lg:max-w-[95vw] lg:px-[1.389vw] lg:pb-[2vw] lg:pt-[10vw]">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: absoluteUrl("/") },
@@ -91,104 +98,58 @@ export default async function CityPage({
         }}
       />
 
-      <nav className="mb-6 text-sm text-muted-foreground" aria-label="Breadcrumb">
+      <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground lg:mb-[1.5vw] lg:gap-[0.4vw] lg:text-[0.903vw]" aria-label="Breadcrumb">
         <Link href="/roofing" className="hover:text-foreground">Roofing</Link>
-        <span aria-hidden> / </span>
+        <span aria-hidden>/</span>
         <Link href={`/roofing/${state}`} className="hover:text-foreground">{cityRow.stateName}</Link>
-        <span aria-hidden> / </span>
+        <span aria-hidden>/</span>
         <span className="text-foreground">{cityRow.name}</span>
       </nav>
 
-      <header className="max-w-2xl">
-        <h1 className="font-sebenta text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          Roofers in {cityRow.name}, {cityRow.stateCode}
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          {cityRow.intro ??
-            `Compare licensed, insured, background-checked roofers serving ${cityRow.name}. Post your job free, get quotes, and only hear from the pros you choose.`}
-        </p>
-        {demand.recentRequests > 0 && (
-          <p className="mt-3 text-sm font-medium text-primary">
-            {demand.recentRequests} {demand.recentRequests === 1 ? "homeowner" : "homeowners"} requested roofing quotes in {cityRow.name} recently.
-          </p>
-        )}
-        <Link
-          href={quoteHref}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-background"
-        >
-          Get free quotes
-        </Link>
-      </header>
+      <RoofingHero
+        title={`Roofers in ${cityRow.name}, ${cityRow.stateCode}`}
+        intro={
+          cityRow.intro ??
+          `Compare licensed, insured, background-checked roofers serving ${cityRow.name}. Free to post, no spam calls, and you only hear from the pros you choose.`
+        }
+        ctaHref={quoteHref}
+        demand={
+          demand.recentRequests > 0
+            ? `${demand.recentRequests} ${demand.recentRequests === 1 ? "homeowner" : "homeowners"} asked for quotes here recently`
+            : null
+        }
+      />
 
-      {/* Pros */}
-      <section className="mt-12">
-        <h2 className="font-sebenta text-2xl font-bold text-foreground">
-          {supply.proCount > 0
-            ? `${supply.proCount} verified ${supply.proCount === 1 ? "roofer" : "roofers"} serving ${cityRow.name}`
-            : `Roofers serving ${cityRow.name}`}
-        </h2>
-        {supply.pros.length > 0 ? (
-          <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-            {supply.pros.map((p) => (
-              <li key={p.id} className="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
-                {p.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- arbitrary contractor logo URL (matches dashboard convention)
-                  <img
-                    src={p.logoUrl}
-                    alt={p.companyName ?? "Roofer"}
-                    className="size-12 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="size-12 shrink-0 rounded-full bg-muted" />
-                )}
-                <div className="min-w-0">
-                  {p.slug ? (
-                    <Link
-                      href={`/roofers/${p.slug}`}
-                      className="block truncate font-semibold text-foreground hover:text-primary"
-                    >
-                      {p.companyName ?? "Verified roofer"}
-                    </Link>
-                  ) : (
-                    <p className="truncate font-semibold text-foreground">{p.companyName ?? "Verified roofer"}</p>
-                  )}
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {p.avgRating != null && p.totalReviews > 0
-                      ? `★ ${p.avgRating.toFixed(1)} (${p.totalReviews})`
-                      : "Newly verified"}
-                    {p.yearsInBusiness ? ` · ${p.yearsInBusiness} yrs` : ""}
-                  </p>
-                  <Link
-                    href={p.slug ? `/roofers/${p.slug}` : quoteHref}
-                    className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-                  >
-                    {p.slug ? "View profile →" : "Get a quote →"}
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
+      {/* Companies — the directory scoped to this city */}
+      <section className="mt-12 lg:mt-[3.5vw]">
+        {dir.total > 0 ? (
+          <RoofersDirectory
+            initialItems={dir.items}
+            initialTotal={dir.total}
+            initialHasMore={dir.hasMore}
+            scope={{ near: { lat: cityRow.lat, lng: cityRow.lng }, placeLabel: place }}
+            quoteHref={quoteHref}
+          />
         ) : (
-          <div className="mt-6 rounded-2xl border border-border bg-card p-6">
-            <p className="text-muted-foreground">
-              We&apos;re onboarding roofers in {cityRow.name} now. Post your job and we&apos;ll match you with local pros as they join — free, no obligation.
-            </p>
-            <Link href={quoteHref} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-medium text-background">
-              Post a job
-            </Link>
-          </div>
+          <RoofingEmpty
+            message={`We're adding roofers in ${cityRow.name} now. Post your job for free and we'll match you with local pros as they join.`}
+            href={quoteHref}
+          />
         )}
       </section>
 
       {/* Storm context (only when real data exists) */}
       {storms.length > 0 && (
-        <section className="mt-12">
-          <h2 className="font-sebenta text-2xl font-bold text-foreground">Recent storm activity near {cityRow.name}</h2>
-          <ul className="mt-4 space-y-2 text-muted-foreground">
+        <section className="mt-14 lg:mt-[4vw]">
+          <h2 className="font-sebenta text-2xl font-semibold tracking-tight text-foreground lg:text-[1.944vw]">Recent storm activity near {cityRow.name}</h2>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:mt-[1.667vw] lg:gap-[0.9vw]">
             {storms.map((s, i) => (
-              <li key={i} className="rounded-lg border border-border bg-card px-4 py-3">
-                <span className="font-medium text-foreground capitalize">{s.eventType.replace(/_/g, " ")}</span>
-                {s.severity ? ` · ${s.severity}` : ""} · {new Date(s.detectedAt).toLocaleDateString()}
+              <li key={i} className="flex items-center gap-3 rounded-lg bg-card px-4 py-3 ring-1 ring-foreground/10 lg:gap-[0.8vw] lg:rounded-[0.556vw] lg:px-[1.111vw] lg:py-[0.9vw]">
+                <Icon name="storm" className="size-5 shrink-0 text-primary lg:size-[1.4vw]" />
+                <span className="text-sm text-muted-foreground lg:text-[0.97vw]">
+                  <span className="font-semibold capitalize text-foreground">{s.eventType.replace(/_/g, " ")}</span>
+                  {s.severity ? ` · ${s.severity}` : ""} · {new Date(s.detectedAt).toLocaleDateString()}
+                </span>
               </li>
             ))}
           </ul>
@@ -196,19 +157,17 @@ export default async function CityPage({
       )}
 
       {/* Services → subtype pages */}
-      <section className="mt-12">
-        <h2 className="font-sebenta text-2xl font-bold text-foreground">Roofing services in {cityRow.name}</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <section className="mt-14 lg:mt-[4vw]">
+        <h2 className="font-sebenta text-2xl font-semibold tracking-tight text-foreground lg:text-[1.944vw]">Roofing services in {cityRow.name}</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:mt-[1.667vw] lg:grid-cols-4 lg:gap-[1.111vw]">
           {ROOFING_SUBTYPE_PAGES.map((s) => (
             <Link
               key={s.slug}
               href={`/roofing/${state}/${city}/${s.slug}`}
-              className="block rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+              className="flex flex-col rounded-lg bg-card p-5 ring-1 ring-foreground/10 transition-shadow hover:ring-foreground/25 lg:rounded-[0.556vw] lg:p-[1.389vw]"
             >
-              <p className="font-semibold text-foreground">
-                {s.heading} in {cityRow.name}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">{s.blurb}</p>
+              <p className="font-semibold text-foreground lg:text-[1.111vw]">{s.heading}</p>
+              <p className="mt-1.5 text-sm text-muted-foreground lg:mt-[0.4vw] lg:text-[0.903vw]">{s.blurb}</p>
             </Link>
           ))}
         </div>
@@ -216,29 +175,26 @@ export default async function CityPage({
 
       {/* FAQ (only when curated) */}
       {cityRow.faq && cityRow.faq.length > 0 && (
-        <section className="mt-12">
-          <h2 className="font-sebenta text-2xl font-bold text-foreground">Common questions</h2>
-          <dl className="mt-4 space-y-4">
+        <section className="mt-14 max-w-3xl lg:mt-[4vw] lg:max-w-[62vw]">
+          <h2 className="font-sebenta text-2xl font-semibold tracking-tight text-foreground lg:text-[1.944vw]">Common questions</h2>
+          <dl className="mt-6 space-y-3 lg:mt-[1.667vw] lg:space-y-[0.9vw]">
             {cityRow.faq.map((f, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-card p-5">
-                <dt className="font-semibold text-foreground">{f.q}</dt>
-                <dd className="mt-1 text-muted-foreground">{f.a}</dd>
+              <div key={i} className="rounded-lg bg-card p-5 ring-1 ring-foreground/10 lg:rounded-[0.556vw] lg:p-[1.389vw]">
+                <dt className="font-semibold text-foreground lg:text-[1.111vw]">{f.q}</dt>
+                <dd className="mt-1.5 text-muted-foreground lg:mt-[0.4vw] lg:text-[1.02vw]">{f.a}</dd>
               </div>
             ))}
           </dl>
         </section>
       )}
 
-      {/* Final CTA */}
-      <section className="mt-14 rounded-2xl border border-border bg-card p-8 text-center">
-        <p className="font-sebenta text-2xl font-bold text-foreground">Ready for a roof you can trust?</p>
-        <p className="mt-2 text-muted-foreground">
-          Post your {cityRow.name} roofing job free and compare quotes from local, vetted roofers.
-        </p>
-        <Link href={quoteHref} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3 font-medium text-background">
-          Get free quotes
-        </Link>
-      </section>
     </div>
+    <RoofingPageSections
+      ctaTitle={`Let's get your ${cityRow.name} roof sorted.`}
+      ctaBody="Post your job for free and compare quotes from local, vetted roofers."
+      ctaHref={quoteHref}
+      ctaLabel="Get free quotes"
+    />
+    </>
   );
 }

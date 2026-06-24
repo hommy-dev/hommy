@@ -26,9 +26,9 @@ export const ROOFING_SUBTYPE_PAGES: RoofingSubtypePage[] = [
     heading: "Roof Repair",
     blurb: "Fix leaks, missing shingles, and storm damage before it spreads.",
     intro: (city) =>
-      `Got a leak, missing shingles, or flashing damage in ${city}? Compare local, vetted roofers who handle repairs — most can assess and quote quickly, and many repairs are far cheaper than a full replacement.`,
+      `Got a leak, missing shingles, or flashing damage in ${city}? Compare local, vetted roofers who handle repairs. Most can take a look and quote quickly, and a repair often costs far less than a full replacement.`,
     faq: [
-      { q: "How much does roof repair cost?", a: "Minor repairs (a few shingles, sealing flashing) are typically modest; larger leaks or structural damage cost more. Get free quotes to compare — there's no obligation." },
+      { q: "How much does roof repair cost?", a: "Minor repairs like a few shingles or sealing flashing are usually modest, while larger leaks or structural damage cost more. Get a few free quotes to compare. There's no obligation." },
       { q: "Should I repair or replace my roof?", a: "If the roof is relatively young and the damage is localized, repair is usually the call. If it's near end-of-life or damaged in many spots, replacement may cost less over time. A roofer can advise after a look." },
       { q: "How fast can a roofer come out?", a: "Many local roofers respond within a day for active leaks. Post your job and choose who reaches out." },
     ],
@@ -40,7 +40,7 @@ export const ROOFING_SUBTYPE_PAGES: RoofingSubtypePage[] = [
     heading: "Roof Replacement",
     blurb: "Full tear-off and re-roof when repairs no longer make sense.",
     intro: (city) =>
-      `Planning a full re-roof in ${city}? Compare licensed roofers for a tear-off and replacement — see ratings, ask about materials (asphalt, metal, tile), and get free quotes before you commit.`,
+      `Planning a full re-roof in ${city}? Compare licensed roofers for a tear-off and replacement. See their ratings, ask about materials like asphalt, metal, and tile, and get free quotes before you commit.`,
     faq: [
       { q: "How much does a new roof cost?", a: "It depends on size, pitch, and material. Asphalt shingle is the most affordable; metal and tile cost more but last longer. Compare a few quotes to gauge a fair price for your home." },
       { q: "How long does a roof replacement take?", a: "Most residential re-roofs take 1–3 days, weather permitting." },
@@ -52,7 +52,7 @@ export const ROOFING_SUBTYPE_PAGES: RoofingSubtypePage[] = [
     label: "Inspection",
     noun: "roof inspection",
     heading: "Roof Inspection",
-    blurb: "Know the real condition of your roof — and what it needs.",
+    blurb: "Know the real condition of your roof, and what it needs.",
     intro: (city) =>
       `Want to know the real condition of your roof in ${city}? Local roofers offer inspections for peace of mind, before buying a home, or to document storm damage for an insurance claim.`,
     faq: [
@@ -68,9 +68,9 @@ export const ROOFING_SUBTYPE_PAGES: RoofingSubtypePage[] = [
     heading: "Storm Damage Repair",
     blurb: "Hail and wind damage assessments, often tied to an insurance claim.",
     intro: (city) =>
-      `Hit by hail or high winds in ${city}? Compare roofers who specialize in storm damage — many document the damage and help with the insurance claim, then repair or replace what's needed.`,
+      `Hit by hail or high winds in ${city}? Compare roofers who specialize in storm damage. Many document the damage and help with the insurance claim, then repair or replace what's needed.`,
     faq: [
-      { q: "Does insurance cover storm damage?", a: "Often yes — hail and wind damage are commonly covered. A roofer can inspect, document the damage, and help you file. Keep the quote and any agreement on-platform." },
+      { q: "Does insurance cover storm damage?", a: "Often yes. Hail and wind damage are commonly covered. A roofer can inspect, document the damage, and help you file. Keep the quote and any agreement on the platform." },
       { q: "How soon should I act after a storm?", a: "Sooner is better: temporary leaks worsen, and many policies have claim windows. A quick inspection establishes the damage." },
       { q: "What's the process?", a: "Inspection → documentation → insurance claim → approved repair or replacement. A storm-savvy roofer guides each step." },
     ],

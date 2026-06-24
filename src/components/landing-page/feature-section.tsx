@@ -213,7 +213,7 @@ export function FeatureSection() {
       ref={rootRef}
       className="scroll-mt-20 lg:scroll-mt-[5.556vw] bg-canvas"
     >
-      <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] pt-24 lg:pt-[6.667vw] text-center">
+      <div className="lg:max-w-[95vw] mx-auto px-5 lg:px-[1.389vw] pt-24 lg:pt-[6.667vw] text-center">
         <h2 className="font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold tracking-tight">
           One platform to run the work
         </h2>
@@ -224,7 +224,7 @@ export function FeatureSection() {
       </div>
 
       <div ref={pinRef} className="relative">
-        <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-0 lg:flex lg:min-h-screen lg:items-center">
+        <div className="lg:max-w-[95vw] mx-auto px-5 lg:px-[1.389vw] py-16 lg:py-0 lg:flex lg:min-h-screen lg:items-center">
           <div className="relative flex flex-col gap-6 lg:block lg:h-[34vw] lg:w-full lg:gap-0 lg:overflow-hidden">
             {FEATURES.map((feature, i) => (
               <div

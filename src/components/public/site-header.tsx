@@ -178,7 +178,7 @@ export function SiteHeader() {
       )}
     >
       {/* Main Header Row */}
-      <div className="relative lg:max-w-[90vw] mx-auto w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
+      <div className="relative lg:max-w-[95vw] mx-auto w-full flex items-center justify-between gap-4 lg:gap-[1.111vw] px-4 lg:px-[1.111vw] md:px-6 py-3.5 lg:py-[0.972vw] mx-auto]">
         {/* Left: Logo */}
         <Link
           href="/"
@@ -316,7 +316,7 @@ export function SiteHeader() {
             </Link>
           ))}
           <Link
-            href="/roofing"
+            href="/roofers"
             onClick={() => setIsOpen(false)}
             className={cn(
               "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
@@ -496,7 +496,7 @@ function ServicesMenu({ name, pathname }: { name: string; pathname: string }) {
               ))}
               <div className="my-1 lg:my-[0.278vw] h-px bg-foreground/10" />
               <Link
-                href="/roofing"
+                href="/roofers"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-between gap-2 lg:gap-[0.556vw] rounded-sm lg:rounded-[0.347vw] px-2.5 lg:px-[0.694vw] py-2.5 lg:py-[0.694vw] text-[13px] lg:text-[0.903vw] font-semibold text-primary transition-colors hover:bg-foreground/[0.05]"
               >

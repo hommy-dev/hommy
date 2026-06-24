@@ -37,7 +37,7 @@ export function Testimonials() {
       id="reviews"
       className="scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[6.667vw]"
     >
-      <div className="lg:max-w-[90vw] mx-auto px-5 lg:px-[1.389vw]">
+      <div className="lg:max-w-[95vw] mx-auto px-5 lg:px-[1.389vw]">
         {/* bottom row — testimonial left, image right */}
         <div className="mt-16 lg:mt-[4.444vw] grid gap-10 lg:gap-[2.778vw] lg:grid-cols-2">
           <div className="h-full flex flex-col justify-between gap-4 lg:gap-[2vw]">

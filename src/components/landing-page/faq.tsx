@@ -60,9 +60,9 @@ export function Faq() {
       />
       <section
         id="faq"
-        className="bg-background scroll-mt-20 lg:scroll-mt-[5.556vw] py-24 lg:py-[8.889vw]"
+        className="bg-background scroll-mt-20 lg:scroll-mt-[5.556vw] pt-24 lg:pt-[8.889vw]"
       >
-      <div className="lg:max-w-[90vw] mx-auto grid gap-12 lg:gap-[3.333vw] px-5 lg:px-[1.389vw] lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="lg:max-w-[95vw] mx-auto grid gap-12 lg:gap-[3.333vw] px-5 lg:px-[1.389vw] lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <h2 className="mt-4 lg:mt-[1.111vw] font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold  tracking-tight">
             Common Questions, Answered

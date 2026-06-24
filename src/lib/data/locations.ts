@@ -41,7 +41,7 @@ export function revalidateCityPages(): void {
 }
 
 /** Resolve the roofing service id once (cached). */
-async function roofingServiceId(): Promise<string | null> {
+export async function roofingServiceId(): Promise<string | null> {
   'use cache'
   cacheLife('static')
   cacheTag('services')
@@ -195,6 +195,10 @@ export type ProCard = {
   totalReviews: number
   yearsInBusiness: number | null
   logoUrl: string | null
+  /** Roofing subtypes offered (Repair, Replacement, …) — for card service chips. */
+  subtypes?: string[]
+  /** A few work-photo URLs (portfolio covers, else Google media) for the card. */
+  images?: string[]
 }
 
 /**
@@ -250,8 +254,13 @@ export async function getCitySupplyForCity(
       totalReviews: contractors.totalReviews,
       yearsInBusiness: contractors.yearsInBusiness,
       logoUrl: contractors.logoUrl,
+      subtypes: contractorServices.subtypes,
     })
     .from(contractors)
+    .leftJoin(
+      contractorServices,
+      and(eq(contractorServices.contractorId, contractors.id), eq(contractorServices.serviceId, serviceId)),
+    )
     .where(inArray(contractors.id, ids))
   const byId = new Map(rows.map((r) => [r.id, r]))
 
@@ -268,6 +277,7 @@ export async function getCitySupplyForCity(
         totalReviews: r.totalReviews,
         yearsInBusiness: r.yearsInBusiness,
         logoUrl: r.logoUrl,
+        subtypes: r.subtypes ?? [],
       },
     ]
   })
@@ -364,6 +374,7 @@ export async function getCitySubtypeSupply(
       totalReviews: contractors.totalReviews,
       yearsInBusiness: contractors.yearsInBusiness,
       logoUrl: contractors.logoUrl,
+      subtypes: contractorServices.subtypes,
       profileScore: contractors.profileScore,
     })
     .from(contractors)
@@ -384,9 +395,11 @@ export async function getCitySubtypeSupply(
     totalReviews: r.totalReviews,
     yearsInBusiness: r.yearsInBusiness,
     logoUrl: r.logoUrl,
+    subtypes: r.subtypes ?? [],
   }))
   return { proCount, pros }
 }
+
 
 export type IndexableSubtypePage = {
   stateSlug: string
