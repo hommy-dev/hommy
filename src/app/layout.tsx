@@ -1,7 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
-import { SITE_INDEXABLE, SITE_NAME, SITE_URL, OG_IMAGE } from "@/lib/seo";
+import { SITE_INDEXABLE, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { ogImageUrl } from "@/lib/og";
 import { inter, sebenta } from "@/style/font";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
@@ -11,6 +12,10 @@ import { Suspense } from "react";
 const DEFAULT_TITLE = "Hommy — Find a roofer you can actually trust";
 const DEFAULT_DESCRIPTION =
   "Hommy connects homeowners with licensed, insured, background-checked local roofers. Free to post a job, no spam calls — you choose the pros you talk to.";
+
+// Default share card for any page that doesn't set its own — the dynamic /og
+// route, rendered to match the landing hero. Pages override via ogImageMeta().
+const DEFAULT_OG_CARD = ogImageUrl({ title: "Find a roofer you can actually trust" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,10 +36,10 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [
       {
-        url: OG_IMAGE,
+        url: DEFAULT_OG_CARD,
         width: 1200,
         height: 630,
-        alt: "A well-kept home with a freshly finished roof",
+        alt: DEFAULT_TITLE,
       },
     ],
   },
@@ -42,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
-    images: [OG_IMAGE],
+    images: [DEFAULT_OG_CARD],
   },
   // Pre-launch: keep the whole site out of search engines. Pages inherit this
   // unless they set their own `robots`. Flip SITE_INDEXABLE at launch.
