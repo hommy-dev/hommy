@@ -90,9 +90,7 @@ export const POST_QUERY = defineQuery(`
       name,
       "slug": slug.current,
       role,
-      bio,
-      image { ${IMAGE_FRAGMENT} },
-      socialLinks[]{ _key, platform, url }
+      image { ${IMAGE_FRAGMENT} }
     },
     body[]{
       ...,

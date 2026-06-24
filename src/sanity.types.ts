@@ -205,13 +205,6 @@ export type Author = {
     _type: "image";
   };
   role?: string;
-  bio?: string;
-  socialLinks?: Array<{
-    platform: "twitter" | "linkedin" | "instagram" | "github" | "website";
-    url: string;
-    _type: "socialLink";
-    _key: string;
-  }>;
 };
 
 export type Slug = {
@@ -481,7 +474,7 @@ export type CATEGORIES_QUERY_RESULT = Array<{
 
 // Source: ../src/sanity/queries.ts
 // Variable: POST_QUERY
-// Query: *[_type == "post" && slug.current == $slug][0]{    _id,    title,    "slug": slug.current,    eyebrow,    excerpt,    publishedAt,    _updatedAt,    readTime,    featured,    mainImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop },      category->{ _id, title, "slug": slug.current },    author->{      name,      "slug": slug.current,      role,      bio,      image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop },      socialLinks[]{ _key, platform, url }    },    body[]{      ...,      _type == "imageBlock" => {        ...,        asset{          asset->{ _id, url, metadata { lqip, dimensions { width, height } } },          hotspot,          crop        }      },      markDefs[]{        ...,        _type == "link" => {          ...,          internalLink->{ _type, "slug": slug.current }        }      }    },    seo {      metaTitle,      metaDescription,      noIndex,      ogImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop }    },    relatedPosts[]->{        _id,  title,  "slug": slug.current,  eyebrow,  excerpt,  publishedAt,  readTime,  featured,  mainImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop },    category->{ _id, title, "slug": slug.current },    author->{    name,    "slug": slug.current,    role,    image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop }  }    }  }
+// Query: *[_type == "post" && slug.current == $slug][0]{    _id,    title,    "slug": slug.current,    eyebrow,    excerpt,    publishedAt,    _updatedAt,    readTime,    featured,    mainImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop },      category->{ _id, title, "slug": slug.current },    author->{      name,      "slug": slug.current,      role,      image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop }    },    body[]{      ...,      _type == "imageBlock" => {        ...,        asset{          asset->{ _id, url, metadata { lqip, dimensions { width, height } } },          hotspot,          crop        }      },      markDefs[]{        ...,        _type == "link" => {          ...,          internalLink->{ _type, "slug": slug.current }        }      }    },    seo {      metaTitle,      metaDescription,      noIndex,      ogImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop }    },    relatedPosts[]->{        _id,  title,  "slug": slug.current,  eyebrow,  excerpt,  publishedAt,  readTime,  featured,  mainImage {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop },    category->{ _id, title, "slug": slug.current },    author->{    name,    "slug": slug.current,    role,    image {   asset->{    _id,    url,    metadata { lqip, dimensions { width, height } }  },  alt,  hotspot,  crop }  }    }  }
 export type POST_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -517,7 +510,6 @@ export type POST_QUERY_RESULT = {
     name: string;
     slug: string;
     role: string | null;
-    bio: string | null;
     image: {
       asset: {
         _id: string;
@@ -534,11 +526,6 @@ export type POST_QUERY_RESULT = {
       hotspot: SanityImageHotspot | null;
       crop: SanityImageCrop | null;
     } | null;
-    socialLinks: Array<{
-      _key: string;
-      platform: "github" | "instagram" | "linkedin" | "twitter" | "website";
-      url: string;
-    }> | null;
   };
   body: Array<
     | {
@@ -713,7 +700,7 @@ declare module "@sanity/client" {
     '\n  *[_type == "post" && defined(slug.current)]\n    | order(featured desc, publishedAt desc) {\n    \n  _id,\n  title,\n  "slug": slug.current,\n  eyebrow,\n  excerpt,\n  publishedAt,\n  readTime,\n  featured,\n  mainImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n  \n  category->{ _id, title, "slug": slug.current }\n,\n  \n  author->{\n    name,\n    "slug": slug.current,\n    role,\n    image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n  }\n\n\n  }\n': POSTS_QUERY_RESULT;
     '\n  *[_type == "post" && defined(slug.current) && category->slug.current == $categorySlug]\n    | order(featured desc, publishedAt desc) {\n    \n  _id,\n  title,\n  "slug": slug.current,\n  eyebrow,\n  excerpt,\n  publishedAt,\n  readTime,\n  featured,\n  mainImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n  \n  category->{ _id, title, "slug": slug.current }\n,\n  \n  author->{\n    name,\n    "slug": slug.current,\n    role,\n    image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n  }\n\n\n  }\n': POSTS_BY_CATEGORY_QUERY_RESULT;
     '\n  *[_type == "category"] | order(title asc) {\n    _id,\n    title,\n    "slug": slug.current,\n    description,\n    "postCount": count(*[_type == "post" && references(^._id) && defined(slug.current)])\n  }\n': CATEGORIES_QUERY_RESULT;
-    '\n  *[_type == "post" && slug.current == $slug][0]{\n    _id,\n    title,\n    "slug": slug.current,\n    eyebrow,\n    excerpt,\n    publishedAt,\n    _updatedAt,\n    readTime,\n    featured,\n    mainImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n    \n  category->{ _id, title, "slug": slug.current }\n,\n    author->{\n      name,\n      "slug": slug.current,\n      role,\n      bio,\n      image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n      socialLinks[]{ _key, platform, url }\n    },\n    body[]{\n      ...,\n      _type == "imageBlock" => {\n        ...,\n        asset{\n          asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n          hotspot,\n          crop\n        }\n      },\n      markDefs[]{\n        ...,\n        _type == "link" => {\n          ...,\n          internalLink->{ _type, "slug": slug.current }\n        }\n      }\n    },\n    seo {\n      metaTitle,\n      metaDescription,\n      noIndex,\n      ogImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n    },\n    relatedPosts[]->{\n      \n  _id,\n  title,\n  "slug": slug.current,\n  eyebrow,\n  excerpt,\n  publishedAt,\n  readTime,\n  featured,\n  mainImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n  \n  category->{ _id, title, "slug": slug.current }\n,\n  \n  author->{\n    name,\n    "slug": slug.current,\n    role,\n    image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n  }\n\n\n    }\n  }\n': POST_QUERY_RESULT;
+    '\n  *[_type == "post" && slug.current == $slug][0]{\n    _id,\n    title,\n    "slug": slug.current,\n    eyebrow,\n    excerpt,\n    publishedAt,\n    _updatedAt,\n    readTime,\n    featured,\n    mainImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n    \n  category->{ _id, title, "slug": slug.current }\n,\n    author->{\n      name,\n      "slug": slug.current,\n      role,\n      image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n    },\n    body[]{\n      ...,\n      _type == "imageBlock" => {\n        ...,\n        asset{\n          asset->{ _id, url, metadata { lqip, dimensions { width, height } } },\n          hotspot,\n          crop\n        }\n      },\n      markDefs[]{\n        ...,\n        _type == "link" => {\n          ...,\n          internalLink->{ _type, "slug": slug.current }\n        }\n      }\n    },\n    seo {\n      metaTitle,\n      metaDescription,\n      noIndex,\n      ogImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n    },\n    relatedPosts[]->{\n      \n  _id,\n  title,\n  "slug": slug.current,\n  eyebrow,\n  excerpt,\n  publishedAt,\n  readTime,\n  featured,\n  mainImage { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n },\n  \n  category->{ _id, title, "slug": slug.current }\n,\n  \n  author->{\n    name,\n    "slug": slug.current,\n    role,\n    image { \n  asset->{\n    _id,\n    url,\n    metadata { lqip, dimensions { width, height } }\n  },\n  alt,\n  hotspot,\n  crop\n }\n  }\n\n\n    }\n  }\n': POST_QUERY_RESULT;
     '\n  *[_type == "post" && defined(slug.current)]{ "slug": slug.current }\n': POST_SLUGS_QUERY_RESULT;
   }
 }

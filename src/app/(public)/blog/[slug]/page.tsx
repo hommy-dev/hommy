@@ -12,6 +12,8 @@ import { BlogPortableText } from "@/components/blog/portable-text";
 import { SanityImage } from "@/components/blog/sanity-image";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { PostCard } from "@/components/blog/post-card";
+import { ShareRail } from "@/components/blog/share-rail";
+import { BlogCta } from "@/components/blog/blog-cta";
 import { extractHeadings } from "@/components/blog/headings";
 
 export async function generateStaticParams() {
@@ -83,7 +85,7 @@ export default async function BlogPostPage({
     .join(" · ");
 
   return (
-    <div className="mx-auto max-w-6xl lg:max-w-[80vw] px-5 pb-24 lg:pb-[6.667vw] pt-8 lg:px-[2.778vw] lg:pt-[3.333vw]">
+    <div className="mx-auto lg:max-w-[90vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[7vw]">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -108,7 +110,7 @@ export default async function BlogPostPage({
       <BreadcrumbJsonLd items={breadcrumbItems} />
 
       {/* Breadcrumb */}
-      <nav className="mb-8 lg:mb-[2.222vw] flex items-center gap-2 lg:gap-[0.556vw] text-sm lg:text-[0.972vw] text-muted-foreground" aria-label="Breadcrumb">
+      <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground lg:mb-[2vw] lg:gap-[0.556vw] lg:text-[0.903vw]" aria-label="Breadcrumb">
         <Link href="/blog" className="hover:text-foreground">
           Journal
         </Link>
@@ -122,86 +124,76 @@ export default async function BlogPostPage({
         )}
       </nav>
 
-      {/* Header */}
-      <header className="mx-auto max-w-3xl lg:max-w-[53.328vw] text-center">
-        {post.eyebrow && (
-          <p className="mb-3 lg:mb-[0.833vw] text-sm lg:text-[0.972vw] font-semibold uppercase tracking-widest text-primary">
-            {post.eyebrow}
-          </p>
-        )}
-        <h1 className="font-sebenta text-3xl font-bold leading-tight tracking-tight text-foreground lg:text-[3.333vw]">
-          {post.title}
-        </h1>
-        {post.excerpt && (
-          <p className="mx-auto mt-4 lg:mt-[1.111vw] max-w-2xl lg:max-w-[46.662vw] text-lg lg:text-[1.25vw] text-muted-foreground">{post.excerpt}</p>
-        )}
-        <div className="mt-6 lg:mt-[1.667vw] flex items-center justify-center gap-3 lg:gap-[0.833vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          {post.author?.image?.asset && (
-            <span className="relative size-9 lg:size-[2.5vw] overflow-hidden rounded-full bg-muted">
-              <SanityImage value={post.author.image} alt={post.author.name ?? ""} fill sizes="36px" />
-            </span>
+      {/* Hero — two columns: title + meta on the left, cover on the right */}
+      <header className="grid items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-[3.5vw]">
+        <div>
+          <h1 className="font-sebenta text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-4xl lg:text-[3.05vw]">
+            {post.title}
+          </h1>
+          {post.excerpt && (
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground lg:mt-[1.2vw] lg:text-[1.18vw]">
+              {post.excerpt}
+            </p>
           )}
-          <div className="text-left">
-            {post.author?.name && <p className="font-medium text-foreground">{post.author.name}</p>}
-            {metaLine && <p>{metaLine}</p>}
-          </div>
-        </div>
-      </header>
-
-      {/* Cover */}
-      {post.mainImage?.asset && (
-        <div className="relative mx-auto mt-10 lg:mt-[2.778vw] aspect-[16/9] max-w-4xl lg:max-w-[62.216vw] overflow-hidden rounded-2xl lg:rounded-[1.111vw] border border-border bg-muted">
-          <SanityImage
-            value={post.mainImage}
-            alt={post.title}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 896px"
-          />
-        </div>
-      )}
-
-      {/* Body + TOC */}
-      <div className="mt-12 lg:mt-[3.333vw] lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-[3.333vw]">
-        <article className="mx-auto w-full max-w-2xl lg:max-w-[46.662vw] text-[1.0625rem] lg:text-[1.18vw] lg:mx-0">
-          <BlogPortableText value={body} />
-        </article>
-        {headings.length > 0 && (
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 lg:top-[6.667vw]">
-              <TableOfContents headings={headings} />
-            </div>
-          </aside>
-        )}
-      </div>
-
-      {/* Author bio */}
-      {post.author?.bio && (
-        <div className="mx-auto mt-16 lg:mt-[4.444vw] max-w-2xl lg:max-w-[46.662vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-6 lg:p-[1.667vw]">
-          <div className="flex items-start gap-4 lg:gap-[1.111vw]">
-            {post.author.image?.asset && (
-              <span className="relative size-14 lg:size-[3.889vw] shrink-0 overflow-hidden rounded-full bg-muted">
-                <SanityImage value={post.author.image} alt={post.author.name ?? ""} fill sizes="56px" />
+          <div className="mt-6 flex items-center gap-3 text-sm text-muted-foreground lg:mt-[1.8vw] lg:gap-[0.833vw] lg:text-[0.903vw]">
+            {post.author?.image?.asset && (
+              <span className="relative size-10 shrink-0 overflow-hidden rounded-full bg-muted lg:size-[2.8vw]">
+                <SanityImage value={post.author.image} alt={post.author.name ?? ""} fill sizes="44px" />
               </span>
             )}
             <div>
-              <p className="font-sebenta text-lg lg:text-[1.25vw] font-bold text-foreground">{post.author.name}</p>
-              {post.author.role && (
-                <p className="text-sm lg:text-[0.972vw] text-muted-foreground">{post.author.role}</p>
-              )}
-              <p className="mt-2 lg:mt-[0.556vw] text-sm lg:text-[0.972vw] leading-6 lg:leading-[1.667vw] text-muted-foreground">{post.author.bio}</p>
+              {post.author?.name && <p className="font-semibold text-foreground">{post.author.name}</p>}
+              {metaLine && <p>{metaLine}</p>}
             </div>
           </div>
         </div>
-      )}
+
+        {post.mainImage?.asset && (
+          <div className="relative aspect-video overflow-hidden rounded-lg bg-muted ring-1 ring-foreground/10 lg:rounded-[0.556vw]">
+            <SanityImage
+              value={post.mainImage}
+              alt={post.title}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 45vw"
+            />
+          </div>
+        )}
+      </header>
+
+      {/* Body — share rail pinned left, article fills the middle, TOC + CTA pinned right */}
+      <div className="mt-12 lg:mt-[4.5vw] lg:flex lg:gap-[3.5vw]">
+        <aside className="hidden shrink-0 lg:block">
+          <div className="sticky top-[4vw]">
+            <ShareRail direction="vertical" />
+          </div>
+        </aside>
+
+        <article className="mx-auto w-full max-w-2xl text-[1.0625rem] lg:mx-0 lg:max-w-none lg:flex-1 lg:text-[1.1vw]">
+          <BlogPortableText value={body} />
+        </article>
+
+        <aside className="hidden shrink-0 lg:block lg:w-[20vw]">
+          <div className="sticky top-[4vw] space-y-[1.5vw]">
+            {headings.length > 0 && <TableOfContents headings={headings} />}
+            <BlogCta />
+          </div>
+        </aside>
+
+        {/* Mobile: share + CTA below the article */}
+        <div className="mt-12 space-y-8 lg:hidden">
+          <ShareRail direction="horizontal" />
+          <BlogCta />
+        </div>
+      </div>
 
       {/* Related */}
       {related.length > 0 && (
         <section className="mt-20 lg:mt-[5.556vw]">
-          <h2 className="mb-6 lg:mb-[1.667vw] font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight text-foreground">
-            Related articles
+          <h2 className="mb-6 font-sebenta text-2xl font-bold tracking-tight text-foreground lg:mb-[1.667vw] lg:text-[1.944vw]">
+            You may also like
           </h2>
-          <div className="grid gap-6 lg:gap-[1.667vw] sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-[1.667vw] lg:gap-y-[2.778vw]">
             {related.map((p) => (
               <PostCard key={p._id} post={p} />
             ))}

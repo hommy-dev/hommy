@@ -4,7 +4,7 @@ import { Icon } from "../ui/icon";
 export function FinalCta() {
   return (
     <section className="px-4 lg:px-[1.111vw] pb-4 lg:pb-[6vw] sm:px-5 bg-background">
-      <div className="bg-[url('/bg/cta.jpg')] bg-cover relative max-w-[90vw] mx-auto overflow-hidden rounded-2xl lg:rounded-[1.111vw] px-6 lg:px-[1.667vw] py-20 text-center text-foreground lg:py-[7vw]">
+      <div className="bg-[url('/bg/cta.jpg')] bg-cover relative lg:max-w-[90vw] mx-auto overflow-hidden rounded-2xl lg:rounded-[1.111vw] px-6 lg:px-[1.667vw] py-20 text-center text-foreground lg:py-[7vw]">
         <h2 className="mx-auto max-w-2xl lg:max-w-[46.662vw] font-sebenta text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-[4.167vw]">
           Ready for a roof you can trust?
         </h2>

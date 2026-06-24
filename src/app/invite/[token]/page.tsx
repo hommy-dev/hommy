@@ -34,7 +34,7 @@ export default async function InvitePage({
   const user = await getOptionalUser()
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-canvas px-6 lg:px-[1.667vw] text-foreground">
+    <main className="flex min-h-svh items-center justify-center bg-canvas px-6 lg:px-[1.667vw] text-foreground">
       <div className="w-full max-w-md lg:max-w-[31.108vw] rounded-lg lg:rounded-[0.833vw] border border-border bg-card p-8 lg:p-[2.222vw] text-center">
         <Link href="/" className="font-sebenta text-lg lg:text-[1.25vw] font-bold">
           Hommy
@@ -68,6 +68,6 @@ export default async function InvitePage({
           />
         )}
       </div>
-    </div>
+    </main>
   )
 }

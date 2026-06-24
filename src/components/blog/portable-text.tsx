@@ -157,7 +157,7 @@ const components: PortableTextComponents = {
       if (!image?.asset) return null;
       return (
         <figure className="my-8 lg:my-[2.222vw]">
-          <div className="overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-muted">
+          <div className="overflow-hidden rounded-lg lg:rounded-[0.556vw] bg-muted ring-1 ring-foreground/10">
             <SanityImage
               value={image}
               alt={(value as { alt?: string }).alt}
@@ -179,7 +179,7 @@ const components: PortableTextComponents = {
       const style = calloutStyles[v.tone ?? "info"] ?? calloutStyles.info;
       const Icon = style.icon;
       return (
-        <div className={cn("my-8 lg:my-[2.222vw] flex gap-3 lg:gap-[0.833vw] rounded-xl lg:rounded-[0.926vw] border p-5 lg:p-[1.389vw]", style.wrap)}>
+        <div className={cn("my-8 lg:my-[2.222vw] flex gap-3 lg:gap-[0.833vw] rounded-lg lg:rounded-[0.556vw] border p-5 lg:p-[1.389vw]", style.wrap)}>
           <Icon className="mt-0.5 lg:mt-[0.139vw] size-5 lg:size-[1.389vw] shrink-0" />
           <div className="space-y-1 lg:space-y-[0.278vw]">
             {v.title && <p className="font-semibold">{v.title}</p>}
@@ -223,7 +223,7 @@ const components: PortableTextComponents = {
       if (!embed) return null;
       return (
         <figure className="my-8 lg:my-[2.222vw]">
-          <div className="aspect-video overflow-hidden rounded-xl lg:rounded-[0.926vw] border border-border bg-black">
+          <div className="aspect-video overflow-hidden rounded-lg lg:rounded-[0.556vw] bg-black ring-1 ring-foreground/10">
             <iframe
               src={embed}
               title={v.caption ?? "Embedded video"}
