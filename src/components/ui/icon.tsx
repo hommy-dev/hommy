@@ -58,6 +58,7 @@ export type IconName =
   | "image"
   | "image-3"
   | "info-square"
+  | "support"
   | "location"
   | "lock"
   | "login"

@@ -30,6 +30,7 @@ export type NotificationType =
   | 'REVIEW'
   | 'MESSAGE'
   | 'SYSTEM'
+  | 'SUPPORT'
 
 export interface SendNotificationOptions {
   userId: string

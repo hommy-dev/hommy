@@ -11,6 +11,7 @@ import { getUnreadCountAction } from "@/lib/notifications/actions"
 import { countUnreadConversations } from "@/lib/data/conversations"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { DashboardHeaderActions } from "@/components/dashboard/dashboard-header-actions"
+import { SupportButton } from "@/components/support/support-button"
 import { UserMenu } from "@/components/dashboard/user-menu"
 import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
 import { NoCompany } from "@/components/dashboard/no-company"
@@ -62,9 +63,12 @@ export default async function DashboardLayout({
           </Suspense>
         }
         topRight={
-          <Suspense fallback={<HeaderActionsSkeleton />}>
-            <ContractorHeaderActions userId={user.id} credits={contractor.creditBalance} />
-          </Suspense>
+          <>
+            <Suspense fallback={<HeaderActionsSkeleton />}>
+              <ContractorHeaderActions userId={user.id} credits={contractor.creditBalance} />
+            </Suspense>
+            <SupportButton basePath="/contractor/messages" />
+          </>
         }
       >
         {children}

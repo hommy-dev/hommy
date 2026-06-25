@@ -226,7 +226,7 @@ function ComboboxChips({
     <ComboboxPrimitive.Chips
       data-slot="combobox-chips"
       className={cn(
-        "flex min-h-9 lg:min-h-[2.5vw] flex-wrap items-center gap-1.5 lg:gap-[0.417vw] rounded-4xl lg:rounded-[1.574vw] border border-input bg-input/30 bg-clip-padding px-2.5 lg:px-[0.694vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.972vw] transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-[3px] has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-1.5 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
+        "flex min-h-9 lg:min-h-[2.5vw] flex-wrap items-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw]  border border-input bg-input/30 bg-clip-padding px-2.5 lg:px-[0.694vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.972vw] transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-[3px] has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-1.5 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
         className
       )}
       {...props}
@@ -246,7 +246,7 @@ function ComboboxChip({
     <ComboboxPrimitive.Chip
       data-slot="combobox-chip"
       className={cn(
-        "flex h-[calc(--spacing(5.5))] w-fit items-center justify-center gap-1 lg:gap-[0.278vw] rounded-4xl lg:rounded-[1.574vw] bg-muted-foreground/10 px-2 lg:px-[0.556vw] text-xs lg:text-[0.833vw] font-medium whitespace-nowrap text-foreground has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
+        "flex h-[calc(--spacing(5.5))] w-fit items-center justify-center gap-1 lg:gap-[0.278vw] rounded-md lg:rounded-[0.556vw]  bg-muted-foreground/10 px-2 lg:px-[0.556vw] text-xs lg:text-[0.833vw] font-medium whitespace-nowrap text-foreground has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-disabled:opacity-50 has-data-[slot=combobox-chip-remove]:pr-0",
         className
       )}
       {...props}

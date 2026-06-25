@@ -29,7 +29,7 @@ export type ConversationSummary = {
   contextId: string | null
   otherName: string
   otherAvatarUrl: string | null
-  otherKind: 'homeowner' | 'contractor'
+  otherKind: 'homeowner' | 'contractor' | 'support'
   lastMessageBody: string | null
   lastMessageAt: Date | null
   hasUnread: boolean
@@ -53,7 +53,7 @@ export type ConversationDetail = {
   me: ParticipantIdentity
   otherName: string
   otherAvatarUrl: string | null
-  otherKind: 'homeowner' | 'contractor'
+  otherKind: 'homeowner' | 'contractor' | 'support'
 }
 
 /** Companies the user is an active member of (their contractor "seats"). */
@@ -207,8 +207,11 @@ export const listConversationsForUser = cache(async (userId: string): Promise<Co
   const otherContractorIds = [...others.values()].filter((o) => o.type === 'contractor').map((o) => o.id)
   const [userRows, contractorRows] = await Promise.all([
     otherUserIds.length
-      ? db.select({ id: users.id, name: users.fullName }).from(users).where(inArray(users.id, otherUserIds))
-      : Promise.resolve([] as { id: string; name: string | null }[]),
+      ? db
+          .select({ id: users.id, name: users.fullName, avatar: users.avatarUrl })
+          .from(users)
+          .where(inArray(users.id, otherUserIds))
+      : Promise.resolve([] as { id: string; name: string | null; avatar: string | null }[]),
     otherContractorIds.length
       ? db
           .select({ id: contractors.id, name: contractors.companyName, logo: contractors.logoUrl })
@@ -223,6 +226,7 @@ export const listConversationsForUser = cache(async (userId: string): Promise<Co
     const me = meByConvo.get(c.id)!
     const other = others.get(c.id)
     const lm = latestByConvo.get(c.id)
+    const isSupport = c.contextType === 'support'
     const display =
       other?.type === 'contractor'
         ? {
@@ -231,9 +235,10 @@ export const listConversationsForUser = cache(async (userId: string): Promise<Co
             kind: 'contractor' as const,
           }
         : {
-            name: (other ? userMap.get(other.id)?.name : null) ?? 'Homeowner',
-            avatar: null,
-            kind: 'homeowner' as const,
+            name:
+              (other ? userMap.get(other.id)?.name : null) ?? (isSupport ? 'Hommy Support' : 'Homeowner'),
+            avatar: (other ? userMap.get(other.id)?.avatar : null) ?? null,
+            kind: (isSupport ? 'support' : 'homeowner') as 'support' | 'homeowner',
           }
     const hasUnread = Boolean(
       lm &&
@@ -290,9 +295,10 @@ export const getConversationForUser = cache(async (
 
   const other = parts.find((p) => !(p.type === me.type && p.id === me.id))
 
-  let otherName = 'Homeowner'
+  const isSupport = convo.contextType === 'support'
+  let otherName = isSupport ? 'Hommy Support' : 'Homeowner'
   let otherAvatarUrl: string | null = null
-  let otherKind: 'homeowner' | 'contractor' = 'homeowner'
+  let otherKind: 'homeowner' | 'contractor' | 'support' = isSupport ? 'support' : 'homeowner'
   if (other?.type === 'contractor') {
     const [c] = await db
       .select({ name: contractors.companyName, logo: contractors.logoUrl })
@@ -303,8 +309,13 @@ export const getConversationForUser = cache(async (
     otherName = c?.name ?? 'Contractor'
     otherAvatarUrl = c?.logo ?? null
   } else if (other?.type === 'user') {
-    const [u] = await db.select({ name: users.fullName }).from(users).where(eq(users.id, other.id)).limit(1)
-    otherName = u?.name ?? 'Homeowner'
+    const [u] = await db
+      .select({ name: users.fullName, avatar: users.avatarUrl })
+      .from(users)
+      .where(eq(users.id, other.id))
+      .limit(1)
+    otherName = u?.name ?? otherName
+    otherAvatarUrl = u?.avatar ?? null
   }
 
   return {

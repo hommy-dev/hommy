@@ -15,12 +15,26 @@ export function ParticipantAvatar({
   name,
   className,
   online,
+  src,
 }: {
   name: string
   className?: string
   online?: boolean
+  /** Optional image URL; falls back to initials when absent. */
+  src?: string | null
 }) {
-  const avatar = (
+  const avatar = src ? (
+    // eslint-disable-next-line @next/next/no-img-element -- small avatar; next/image is overkill here
+    <img
+      src={src}
+      alt=""
+      aria-hidden
+      className={cn(
+        'size-9 lg:size-[2.5vw] shrink-0 rounded-full bg-muted object-cover select-none',
+        className,
+      )}
+    />
+  ) : (
     <span
       className={cn(
         'grid size-9 lg:size-[2.5vw] shrink-0 place-items-center rounded-full bg-muted text-xs lg:text-[0.833vw] font-semibold text-muted-foreground select-none',

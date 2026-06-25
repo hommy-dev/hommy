@@ -42,6 +42,7 @@ export const ADMIN_NAV: DashboardNavItem[] = [
   { href: "/admin/leads", label: "Leads", icon: "discovery" },
   { href: "/admin/contractors", label: "Contractors", icon: "user-3" },
   { href: "/admin/storm-events", label: "Storm events", icon: "danger-triangle" },
+  { href: "/admin/support", label: "Support", icon: "ticket" },
   { href: "/admin/disputes", label: "Disputes", icon: "scale" },
   { href: "/admin/quotes", label: "Quotes", icon: "paper" },
   { href: "/admin/jobs", label: "Jobs", icon: "calendar" },

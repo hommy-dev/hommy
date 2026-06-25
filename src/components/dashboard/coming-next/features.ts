@@ -73,7 +73,7 @@ export const FEATURES: FeatureDef[] = [
   },
   {
     key: "more",
-    title: "And a lot more",
+    title: "Share us what you need",
     description:
       "We are building Hommy with you. The features you vote for are the ones we build first.",
     status: "exploring",

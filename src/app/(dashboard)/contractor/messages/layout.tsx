@@ -32,9 +32,11 @@ async function MessagesInbox() {
     listConversationSummaries(),
   ])
 
-  // No conversations yet → the right pane explains how chats start for a pro.
+  // No real (non-support) chats yet → the right pane explains how chats start for
+  // a pro. The pinned Hommy Support thread doesn't count as "you have chats".
+  const realChats = conversations.filter((c) => c.contextType !== "support")
   const emptyInbox: InboxEmptyKind | null =
-    conversations.length === 0 ? "contractor-no-chats" : null
+    realChats.length === 0 ? "contractor-no-chats" : null
 
   return (
     <MessagesShell

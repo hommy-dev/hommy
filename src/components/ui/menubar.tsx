@@ -13,7 +13,7 @@ function Menubar({
   return (
     <MenubarPrimitive.Root
       data-slot="menubar"
-      className={cn("flex h-9 lg:h-[2.5vw] items-center rounded-4xl lg:rounded-[1.574vw] border p-1 lg:p-[0.278vw]", className)}
+      className={cn("flex h-9 lg:h-[2.5vw] items-center rounded-md lg:rounded-[0.556vw] border p-1 lg:p-[0.278vw]", className)}
       {...props}
     />
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, type ReactNode } from "react"
+import { useState, useTransition, type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -32,6 +32,9 @@ export function EditDialog({
   saveLabel = "Save changes",
   canSave = true,
   wide = false,
+  triggerVariant = "outline",
+  triggerSize,
+  triggerClassName,
 }: {
   title: string
   description?: string
@@ -44,6 +47,9 @@ export function EditDialog({
   saveLabel?: string
   canSave?: boolean
   wide?: boolean
+  triggerVariant?: ComponentProps<typeof Button>["variant"]
+  triggerSize?: ComponentProps<typeof Button>["size"]
+  triggerClassName?: string
 }) {
   const [open, setOpen] = useState(false)
   const [pending, start] = useTransition()
@@ -66,10 +72,10 @@ export function EditDialog({
     >
       <DialogTrigger asChild>
         <Button
-          variant="outline"
-          size={iconOnly ? "icon-sm" : "sm"}
+          variant={triggerVariant}
+          size={triggerSize ?? (iconOnly ? "icon-sm" : "sm")}
           aria-label={iconOnly ? triggerLabel : undefined}
-          className={cn(!iconOnly && "gap-1.5 lg:gap-[0.417vw]")}
+          className={cn(!iconOnly && "gap-1.5 lg:gap-[0.417vw]", triggerClassName)}
         >
           <Icon name={triggerIcon} className="size-4 lg:size-[1.111vw]" />
           {iconOnly ? null : triggerLabel}

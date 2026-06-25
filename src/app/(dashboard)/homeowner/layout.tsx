@@ -1,17 +1,22 @@
-import { Suspense, type ReactNode } from "react"
-import { getRequiredUser } from "@/lib/auth/session"
-import { getUnreadCountAction } from "@/lib/notifications/actions"
-import { countUnreadConversations } from "@/lib/data/conversations"
-import { getHomeownerForUser, getHomeownerNoticeData, type HomeownerNoticeData } from "@/lib/data/homeowner"
-import { DashboardShell } from "@/components/dashboard/dashboard-shell"
-import { SidebarNotice } from "@/components/dashboard/sidebar-notice"
-import { UserMenu } from "@/components/dashboard/user-menu"
-import { NotificationBell } from "@/components/notifications/notification-bell"
-import { HOMEOWNER_NAV } from "@/components/dashboard/dashboard-nav"
-import { HeaderActionsSkeleton } from "@/components/dashboard/skeletons"
-import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount"
-import { PushNotificationsManager } from "@/components/notifications/push-notifications-manager"
-import { AnalyticsIdentify } from "@/components/analytics/analytics-identify"
+import { Suspense, type ReactNode } from "react";
+import { getRequiredUser } from "@/lib/auth/session";
+import { getUnreadCountAction } from "@/lib/notifications/actions";
+import { countUnreadConversations } from "@/lib/data/conversations";
+import {
+  getHomeownerForUser,
+  getHomeownerNoticeData,
+  type HomeownerNoticeData,
+} from "@/lib/data/homeowner";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { SidebarNotice } from "@/components/dashboard/sidebar-notice";
+import { UserMenu } from "@/components/dashboard/user-menu";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { SupportButton } from "@/components/support/support-button";
+import { HOMEOWNER_NAV } from "@/components/dashboard/dashboard-nav";
+import { HeaderActionsSkeleton } from "@/components/dashboard/skeletons";
+import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount";
+import { PushNotificationsManager } from "@/components/notifications/push-notifications-manager";
+import { AnalyticsIdentify } from "@/components/analytics/analytics-identify";
 
 // Shell paints after auth + the message-badge count (both fast); the notice and
 // the notification bell count stream into Suspense slots. The user menu needs no
@@ -19,11 +24,11 @@ import { AnalyticsIdentify } from "@/components/analytics/analytics-identify"
 export default async function HomeownerLayout({
   children,
 }: {
-  children: ReactNode
+  children: ReactNode;
 }) {
-  const user = await getRequiredUser("homeowner")
-  const unreadMessages = await countUnreadConversations(user.id)
-  const firstName = (user.fullName || user.email).split(" ")[0]
+  const user = await getRequiredUser("homeowner");
+  const unreadMessages = await countUnreadConversations(user.id);
+  const firstName = (user.fullName || user.email).split(" ")[0];
 
   return (
     <>
@@ -38,9 +43,12 @@ export default async function HomeownerLayout({
         }
         navUnreadCounts={{ "/homeowner/messages": unreadMessages }}
         topRight={
-          <Suspense fallback={<HeaderActionsSkeleton />}>
-            <HomeownerBell userId={user.id} />
-          </Suspense>
+          <>
+            <Suspense fallback={<HeaderActionsSkeleton />}>
+              <HomeownerBell userId={user.id} />
+            </Suspense>
+            <SupportButton basePath="/homeowner/messages" />
+          </>
         }
         footerUser={
           <UserMenu
@@ -59,20 +67,26 @@ export default async function HomeownerLayout({
       <PushNotificationsManager />
       <AnalyticsIdentify userId={user.id} email={user.email} role="homeowner" />
     </>
-  )
+  );
 }
 
-async function HomeownerNotice({ userId, firstName }: { userId: string; firstName: string }) {
-  const ho = await getHomeownerForUser(userId)
-  if (!ho) return null
-  const noticeData = await getHomeownerNoticeData(ho.id)
-  if (!noticeData) return null
-  return buildHomeownerNotice(noticeData, firstName)
+async function HomeownerNotice({
+  userId,
+  firstName,
+}: {
+  userId: string;
+  firstName: string;
+}) {
+  const ho = await getHomeownerForUser(userId);
+  if (!ho) return null;
+  const noticeData = await getHomeownerNoticeData(ho.id);
+  if (!noticeData) return null;
+  return buildHomeownerNotice(noticeData, firstName);
 }
 
 async function HomeownerBell({ userId }: { userId: string }) {
-  const unreadCount = await getUnreadCountAction()
-  return <NotificationBell userId={userId} initialUnreadCount={unreadCount} />
+  const unreadCount = await getUnreadCountAction();
+  return <NotificationBell userId={userId} initialUnreadCount={unreadCount} />;
 }
 
 /**
@@ -91,7 +105,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         body="Post a job and local pros come to you with quotes."
         cta={{ label: "Post a job", href: "/get-a-quote" }}
       />
-    )
+    );
   }
 
   if (d.quotes > 0) {
@@ -101,11 +115,13 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         icon="document"
         eyebrow="Quotes"
         urgent
-        title={d.quotes === 1 ? "Quotes are in" : `Quotes in on ${d.quotes} jobs`}
+        title={
+          d.quotes === 1 ? "Quotes are in" : `Quotes in on ${d.quotes} jobs`
+        }
         body="Compare them and pick the pro you want."
         cta={{ label: "Review quotes", href: "/homeowner" }}
       />
-    )
+    );
   }
 
   if (d.reviewPending.count > 0) {
@@ -118,7 +134,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         body="A quick review helps other homeowners choose."
         cta={{ label: "Leave a review", href: "/homeowner" }}
       />
-    )
+    );
   }
 
   if (d.interested > 0) {
@@ -128,11 +144,15 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         icon="chat"
         eyebrow="Interested"
         urgent
-        title={d.interested === 1 ? "A pro is talking to you" : `${d.interested} pros are talking to you`}
+        title={
+          d.interested === 1
+            ? "A pro is talking to you"
+            : `${d.interested} pros are talking to you`
+        }
         body="Reply to get quotes rolling."
         cta={{ label: "Open messages", href: "/homeowner/messages" }}
       />
-    )
+    );
   }
 
   if (d.waiting > 0) {
@@ -145,7 +165,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         body="Local pros are looking. First messages usually land within a day."
         cta={{ label: "View jobs", href: "/homeowner" }}
       />
-    )
+    );
   }
 
   if (d.hired.count > 0) {
@@ -158,7 +178,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         body="They’ll reach out to schedule. Message them anytime."
         cta={{ label: "Open chat", href: "/homeowner/messages" }}
       />
-    )
+    );
   }
 
   return (
@@ -170,5 +190,5 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
       body="Post a job and start getting quotes in about a minute."
       cta={{ label: "Post a job", href: "/get-a-quote" }}
     />
-  )
+  );
 }

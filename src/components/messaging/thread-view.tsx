@@ -229,11 +229,11 @@ export function ThreadView({
         </Link>
         {name ? (
           <>
-            <ParticipantAvatar name={name} />
+            <ParticipantAvatar name={name} src={summary?.otherAvatarUrl} />
             <div className="min-w-0 leading-tight">
               <p className="truncate text-sm lg:text-[0.972vw] font-semibold">{name}</p>
               <p className="truncate text-xs lg:text-[0.764vw] text-muted-foreground">
-                {kind === "contractor" ? "Contractor" : "Homeowner"}
+                {kind === "support" ? "Support team" : kind === "contractor" ? "Contractor" : "Homeowner"}
               </p>
             </div>
           </>
@@ -284,6 +284,7 @@ export function ThreadView({
                     message={m}
                     viewerType={me?.type}
                     otherName={name}
+                    otherAvatarUrl={summary?.otherAvatarUrl}
                     reviewState={
                       thread?.panel
                         ? {

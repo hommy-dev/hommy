@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 import type { ThreadMessage, ParticipantIdentity } from '@/lib/data/conversations'
 import type { MessageMeta } from '@/lib/db/schema'
+import { Icon } from '@/components/ui/icon'
 import { QuoteCard } from './quote-card'
 import { ReviewCard } from './review-card'
 import { AttachmentList } from './attachment-list'
@@ -48,11 +49,13 @@ export function MessageBubble({
   message,
   viewerType,
   otherName,
+  otherAvatarUrl,
   reviewState,
 }: {
   message: DisplayMessage
   viewerType?: ParticipantIdentity['type']
   otherName?: string
+  otherAvatarUrl?: string | null
   reviewState?: ReviewState
 }) {
   // Rich quote payload → card the homeowner (a 'user' participant) can accept.
@@ -80,7 +83,7 @@ export function MessageBubble({
     return (
       <div className={cn('flex items-end gap-2 lg:gap-[0.556vw]', mine ? 'justify-end' : 'justify-start')}>
         {!mine ? (
-          <ParticipantAvatar name={otherName ?? '?'} className="size-7 lg:size-[2vw] self-end" />
+          <ParticipantAvatar name={otherName ?? '?'} src={otherAvatarUrl} className="size-7 lg:size-[2vw] self-end" />
         ) : null}
         <div
           className={cn(
@@ -113,7 +116,7 @@ export function MessageBubble({
     return (
       <div className={cn('flex items-end gap-2 lg:gap-[0.556vw]', mine ? 'justify-end' : 'justify-start')}>
         {!mine ? (
-          <ParticipantAvatar name={otherName ?? '?'} className="size-7 lg:size-[2vw] self-end" />
+          <ParticipantAvatar name={otherName ?? '?'} src={otherAvatarUrl} className="size-7 lg:size-[2vw] self-end" />
         ) : null}
         <div
           className={cn(
@@ -142,6 +145,42 @@ export function MessageBubble({
     )
   }
 
+  // Feature suggestion → a styled idea card on the sender's side.
+  if (message.meta?.kind === 'feature_request') {
+    const mine = message.isMine
+    const { subject, details } = message.meta
+    return (
+      <div className={cn('flex items-end gap-2 lg:gap-[0.556vw]', mine ? 'justify-end' : 'justify-start')}>
+        {!mine ? (
+          <ParticipantAvatar name={otherName ?? '?'} src={otherAvatarUrl} className="size-7 lg:size-[2vw] self-end" />
+        ) : null}
+        <div
+          className={cn(
+            'max-w-[85%] lg:max-w-[62%] rounded-lg lg:rounded-[0.694vw] border p-3 lg:p-[0.833vw]',
+            mine ? 'border-primary/30 bg-primary/5' : 'border-border bg-card',
+          )}
+        >
+          <div className="flex items-center gap-1.5 lg:gap-[0.417vw] text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wide text-primary">
+            <Icon name="lightbulb" className="size-3.5 lg:size-[0.972vw]" />
+            Feature idea
+          </div>
+          <p className="mt-1.5 lg:mt-[0.417vw] text-sm lg:text-[0.972vw] font-semibold text-foreground">
+            {subject}
+          </p>
+          <p className="mt-1 lg:mt-[0.278vw] whitespace-pre-wrap break-words text-sm lg:text-[0.903vw] text-muted-foreground">
+            {details}
+          </p>
+          <span
+            suppressHydrationWarning
+            className="mt-1.5 lg:mt-[0.417vw] block text-right text-[10px] lg:text-[0.694vw] text-muted-foreground"
+          >
+            {timeLabel(message.createdAt)}
+          </span>
+        </div>
+      </div>
+    )
+  }
+
   // Legacy plain system note (no structured meta) → centered notice.
   if (message.senderType === 'system') {
     return (
@@ -157,7 +196,7 @@ export function MessageBubble({
   return (
     <div className={cn('flex items-end gap-2 lg:gap-[0.556vw]', mine ? 'justify-end' : 'justify-start')}>
       {!mine ? (
-        <ParticipantAvatar name={otherName ?? '?'} className="size-7 lg:size-[2vw] self-end" />
+        <ParticipantAvatar name={otherName ?? '?'} src={otherAvatarUrl} className="size-7 lg:size-[2vw] self-end" />
       ) : null}
       <div
         className={cn(

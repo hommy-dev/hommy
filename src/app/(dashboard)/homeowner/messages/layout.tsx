@@ -36,9 +36,10 @@ async function MessagesInbox() {
   ])
 
   // Why is the inbox empty? Drives the right pane's personalized empty state.
-  // Only dig into jobs when there are no conversations at all.
+  // The pinned Hommy Support thread doesn't count — only real job chats do.
+  const realChats = conversations.filter((c) => c.contextType !== "support")
   let emptyInbox: InboxEmptyKind | null = null
-  if (conversations.length === 0) {
+  if (realChats.length === 0) {
     const ho = await getHomeownerForUser(user.id)
     const leads = ho ? await getHomeownerLeads(ho.id) : []
     emptyInbox = leads.length > 0 ? "homeowner-waiting" : "homeowner-no-job"

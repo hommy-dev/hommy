@@ -36,6 +36,7 @@ import { getJobPanelForConversation, type JobPanel } from '@/lib/data/jobs'
 import { sendNotification } from '@/lib/notifications'
 import { broadcastUserEvent } from '@/lib/realtime/user-events'
 import { sendRealtimeBroadcast } from '@/lib/realtime/broadcast'
+import { isSupportConversation, notifyAdminsOfSupportMessage } from '@/lib/support/server'
 
 type Fail<E extends string> = { ok: false; error: E; message: string }
 
@@ -138,9 +139,22 @@ export async function sendMessage(
   // What the rail/notification shows. A file-only message has no body, so fall
   // back to a short attachment label.
   const preview = body || attachmentPreview(files)
-  void fanOutInbox(conversationId, me, userId, preview, createdAt).catch((e) =>
-    console.error('[sendMessage] inbox fan-out threw', e),
-  )
+  // Fan-out (fire-and-forget). Support threads take a dedicated path: ping the
+  // platform team + patch the requester's own rail, but skip the participant
+  // fan-out (the platform "Hommy Support" user isn't a notifiable party).
+  void (async () => {
+    if (me.type === 'user' && (await isSupportConversation(conversationId))) {
+      await notifyAdminsOfSupportMessage(conversationId, preview.slice(0, 140))
+      await broadcastUserEvent(userId, 'message:new', {
+        conversationId,
+        preview: preview.slice(0, 140),
+        createdAt,
+        mine: true,
+      })
+      return
+    }
+    await fanOutInbox(conversationId, me, userId, preview, createdAt)
+  })().catch((e) => console.error('[sendMessage] fan-out threw', e))
 
   return { ok: true, message }
 }

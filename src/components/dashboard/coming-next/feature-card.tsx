@@ -10,6 +10,7 @@ import { showToast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { type FeatureDef } from "./features"
 import { SCENES } from "./scenes"
+import { SuggestFeatureDialog } from "./suggest-feature-dialog"
 
 // Panel tint follows the feature's accent.
 const ACCENT_PANEL: Record<FeatureDef["accent"], string> = {
@@ -69,7 +70,7 @@ export function FeatureCard({
       </div>
 
       <div className="flex flex-1 flex-col p-4 lg:p-[1.389vw]">
-        <h3 className="font-sebenta text-base lg:text-[1.25vw] font-bold tracking-tight">
+        <h3 className="text-base lg:text-[1.25vw] font-bold">
           {feature.title}
         </h3>
         <p className="mt-1 lg:mt-[0.278vw] flex-1 text-sm lg:text-[0.972vw] leading-relaxed text-muted-foreground">
@@ -92,10 +93,7 @@ export function FeatureCard({
             {voted ? "We'll notify you" : "Notify me"}
           </Button>
         ) : (
-          <div className="mt-5 lg:mt-[1.389vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-xs lg:text-[0.833vw] font-medium text-muted-foreground">
-            <Icon name="message" className="size-3.5 lg:size-[0.972vw]" />
-            Got an idea? Tell us in Messages.
-          </div>
+          <SuggestFeatureDialog />
         )}
       </div>
     </motion.div>

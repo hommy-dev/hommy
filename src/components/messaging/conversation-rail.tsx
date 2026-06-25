@@ -194,7 +194,11 @@ export function ConversationRail({
                       active ? "bg-accent" : "hover:bg-muted/60",
                     )}
                   >
-                    <ParticipantAvatar name={c.otherName} className="size-10 lg:size-[2.778vw] border" />
+                    <ParticipantAvatar
+                      name={c.otherName}
+                      src={c.otherAvatarUrl}
+                      className="size-10 lg:size-[2.778vw] border"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2 lg:gap-[0.556vw]">
                         <p

@@ -117,6 +117,9 @@ export const users = pgTable('users', {
   email: text('email').notNull(),
   fullName: text('full_name'),
   phone: text('phone'),
+  // Optional avatar URL. Used for the platform "Hommy Support" identity (the
+  // brand logo) and available for future per-user avatars.
+  avatarUrl: text('avatar_url'),
   role: userRole('role').notNull(),
   // false for auto-created homeowners until they set a password (deferred-password flow)
   passwordSet: boolean('password_set').notNull().default(false),
@@ -581,6 +584,13 @@ export type MessageMeta =
       kind: 'attachment'
       files: ChatAttachment[]
     }
+  | {
+      // A feature suggestion submitted from the "Suggest a feature" button, posted
+      // into the user's Hommy Support thread and rendered as a styled card.
+      kind: 'feature_request'
+      subject: string
+      details: string
+    }
 
 export const messages = pgTable('messages', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
@@ -807,6 +817,34 @@ export const featureInterest = pgTable('feature_interest', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('feature_interest_user_feature_uq').on(t.userId, t.featureKey),
+])
+
+// support_tickets — the per-user "Hommy Support" thread sidecar. The actual
+// conversation lives on the messaging graph (conversations with contextType
+// 'support'); this row carries the admin triage state (status/priority/assignee)
+// for ONE ongoing thread per user. status/priority are free text validated in
+// src/lib/support/constants.ts. See src/lib/actions/support.ts.
+export const supportTickets = pgTable('support_tickets', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+  requesterId: uuid('requester_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  requesterRole: text('requester_role').notNull(), // snapshot: 'contractor' | 'homeowner'
+  ref: text('ref').notNull(), // human-friendly, e.g. 'HOM-7F3K2Q'
+  // What the current/last request is about (feature_request | problem | billing |
+  // other), chosen by the user when starting a request. Null until first chosen.
+  category: text('category'),
+  status: text('status').notNull().default('open'),
+  priority: text('priority').notNull().default('normal'),
+  assignedAdminId: uuid('assigned_admin_id').references(() => users.id, { onDelete: 'set null' }),
+  lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+}, (t) => [
+  uniqueIndex('support_tickets_conversation_uq').on(t.conversationId),
+  uniqueIndex('support_tickets_requester_uq').on(t.requesterId), // one ongoing thread per user
+  uniqueIndex('support_tickets_ref_uq').on(t.ref),
+  index('support_tickets_status_idx').on(t.status),
 ])
 
 // ============================================================
