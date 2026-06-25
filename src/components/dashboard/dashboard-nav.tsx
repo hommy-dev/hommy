@@ -21,6 +21,7 @@ export const CONTRACTOR_NAV: DashboardNavItem[] = [
   // Reviews live on the contractor's Profile page (no standalone Reviews page).
   { href: "/contractor/analytics", label: "Analytics", icon: "graph" },
   { href: "/contractor/integrations", label: "Integrations", icon: "globe" },
+  { href: "/contractor/coming-next", label: "What's next", icon: "discovery" },
   { href: "/contractor/profile", label: "Profile", icon: "profile" },
   { href: "/contractor/settings", label: "Settings", icon: "setting" },
 ]

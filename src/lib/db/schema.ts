@@ -795,6 +795,20 @@ export const waitlist = pgTable('waitlist', {
   uniqueIndex('waitlist_email_uq').on(t.email),
 ])
 
+// feature_interest — a logged-in user's "notify me / upvote" on a roadmap
+// feature shown on /contractor/coming-next. One row per (user, feature_key);
+// count(*) per feature_key is the demand signal we use to prioritize the build
+// order. feature_key is a stable slug owned by the app (see
+// src/components/dashboard/coming-next/features.ts), not a FK.
+export const featureInterest = pgTable('feature_interest', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  featureKey: text('feature_key').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('feature_interest_user_feature_uq').on(t.userId, t.featureKey),
+])
+
 // ============================================================
 // PLATFORM GEOGRAPHY — canonical states + cities (service-neutral)
 // Drives SEO location pages (/roofing/[state]/[city]). A city page becomes
