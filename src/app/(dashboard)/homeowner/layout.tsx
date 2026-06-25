@@ -11,6 +11,7 @@ import { HOMEOWNER_NAV } from "@/components/dashboard/dashboard-nav"
 import { HeaderActionsSkeleton } from "@/components/dashboard/skeletons"
 import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount"
 import { PushNotificationsManager } from "@/components/notifications/push-notifications-manager"
+import { AnalyticsIdentify } from "@/components/analytics/analytics-identify"
 
 // Shell paints after auth + the message-badge count (both fast); the notice and
 // the notification bell count stream into Suspense slots. The user menu needs no
@@ -56,6 +57,7 @@ export default async function HomeownerLayout({
       </DashboardShell>
       <RealtimeUserEventsMount userId={user.id} role="homeowner" />
       <PushNotificationsManager />
+      <AnalyticsIdentify userId={user.id} email={user.email} role="homeowner" />
     </>
   )
 }

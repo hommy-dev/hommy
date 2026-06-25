@@ -5,7 +5,9 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 
-const FAQS = [
+export type FaqItem = { q: string; a: string };
+
+const FAQS: FaqItem[] = [
   {
     q: "Does it cost anything to post a job?",
     a: "No. Hommy is completely free for homeowners. You never pay us a cent. Roofers pay us only when they win your job, so the quote you get is exactly what you pay them.",
@@ -40,7 +42,13 @@ const FAQS = [
   },
 ];
 
-export function Faq() {
+export function Faq({
+  faqs = FAQS,
+  title = "Common Questions, Answered",
+}: {
+  faqs?: FaqItem[];
+  title?: string;
+} = {}) {
   return (
     <>
       {/* FAQPage structured data so the questions can surface as rich results. */}
@@ -50,7 +58,7 @@ export function Faq() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            mainEntity: FAQS.map((f) => ({
+            mainEntity: faqs.map((f) => ({
               "@type": "Question",
               name: f.q,
               acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -65,12 +73,12 @@ export function Faq() {
       <div className="lg:max-w-[95vw] mx-auto grid gap-12 lg:gap-[3.333vw] px-5 lg:px-[1.389vw] lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <h2 className="mt-4 lg:mt-[1.111vw] font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold  tracking-tight">
-            Common Questions, Answered
+            {title}
           </h2>
         </div>
 
         <Accordion type="single" collapsible className="h-fit border-border">
-          {FAQS.map((f) => (
+          {faqs.map((f) => (
             <AccordionItem key={f.q} value={f.q}>
               <AccordionTrigger className="py-5 lg:py-[1.389vw] text-[17px] lg:text-[1.2vw] font-semibold hover:no-underline">
                 {f.q}

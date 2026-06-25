@@ -43,6 +43,7 @@ import { recordScoreEvent } from '@/lib/reputation/score'
 import { broadcastCreditsChanged } from '@/lib/credits/notify'
 import { SCORE_DELTAS, FAST_ENGAGE_FRACTION, responseWindowHours, quoteReminderHours } from '@/lib/config/tunables'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
+import { captureServerEvent } from '@/lib/analytics/posthog-server'
 
 type EngageError =
   | 'UNAUTHENTICATED'
@@ -221,6 +222,15 @@ export async function engageLead(leadId: string): Promise<EngageResult> {
   } catch (err) {
     console.error('[engageLead] inngest send failed (non-fatal)', err)
   }
+
+  // Funnel: contractor engaged a lead (small charge paid). Grouped by company so
+  // the per-company funnel engage → quote → won lines up across team members.
+  captureServerEvent(
+    user.id,
+    'lead_engaged',
+    { leadId, creditsSpent: outcome.creditsSpent, balanceAfter: outcome.balanceAfter },
+    { company: contractor.id },
+  )
 
   // Refresh the header credit chip / sidebar balance live for the whole company.
   void broadcastCreditsChanged(contractor.id, outcome.balanceAfter)

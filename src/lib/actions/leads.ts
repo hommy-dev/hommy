@@ -18,6 +18,7 @@ import { getLeadPricing } from '@/lib/leads/pricing'
 import { normalizePostalCode } from '@/lib/geo/postal'
 import { MAX_LEAD_PHOTOS, NOT_SURE_SUBTYPE } from '@/lib/leads/subtype'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
+import { captureServerEvent } from '@/lib/analytics/posthog-server'
 import { homeowners, leadRecipients, leads, services } from '@/lib/db/schema'
 
 type FieldErrors = Record<string, string>
@@ -222,6 +223,16 @@ export async function createLead(
   } catch (err) {
     console.error('[createLead] inngest send failed (non-fatal)', err)
   }
+
+  // Funnel: homeowner posted a job (top of the lead lifecycle). Attributed to
+  // the homeowner user — works for both logged-in and guest-auto-created posters.
+  captureServerEvent(homeownerUserId, 'lead_posted', {
+    leadId,
+    matchedCount,
+    urgency: d.urgency,
+    subtypes,
+    isGuest: !user,
+  })
 
   revalidatePath('/contractor/jobs')
   revalidatePath('/homeowner')

@@ -7,6 +7,8 @@ export type SanityImageValue = {
   asset?: {
     _id?: string;
     url?: string;
+    extension?: string | null;
+    mimeType?: string | null;
     metadata?: {
       lqip?: string | null;
       dimensions?: { width: number; height: number } | null;
@@ -16,6 +18,21 @@ export type SanityImageValue = {
   hotspot?: unknown;
   crop?: unknown;
 } | null;
+
+/**
+ * Sanity's image transform pipeline flattens animated GIFs to a single frame,
+ * so a GIF must be served as its original asset URL with next/image's optimizer
+ * disabled. Detect it from the asset's extension/mimeType (falling back to the
+ * `-gif` suffix Sanity appends to asset `_id`s).
+ */
+function isAnimatedFormat(asset: NonNullable<SanityImageValue>["asset"]): boolean {
+  if (!asset) return false;
+  return (
+    asset.extension === "gif" ||
+    asset.mimeType === "image/gif" ||
+    Boolean(asset._id?.endsWith("-gif"))
+  );
+}
 
 type SanityImageProps = {
   value: SanityImageValue | undefined;
@@ -50,16 +67,24 @@ export function SanityImage({
   const blur = lqip ? { placeholder: "blur" as const, blurDataURL: lqip } : {};
   const resolvedAlt = alt ?? value.alt ?? "";
 
+  // Animated GIFs must bypass the transform pipeline (which would freeze them)
+  // and next/image's optimizer (which would re-encode to a static frame).
+  const animated = isAnimatedFormat(value.asset);
+  const animatedProps = animated ? { unoptimized: true } : {};
+
   if (fill) {
     return (
       <Image
-        src={urlFor(value).width(1600).fit("crop").auto("format").url()}
+        src={
+          animated ? (value.asset.url ?? "") : urlFor(value).width(1600).fit("crop").auto("format").url()
+        }
         alt={resolvedAlt}
         fill
         sizes={sizes ?? "100vw"}
         priority={priority}
         className={cn("object-cover", className)}
         {...blur}
+        {...animatedProps}
       />
     );
   }
@@ -70,7 +95,7 @@ export function SanityImage({
 
   return (
     <Image
-      src={urlFor(value).width(width).auto("format").url()}
+      src={animated ? (value.asset.url ?? "") : urlFor(value).width(width).auto("format").url()}
       alt={resolvedAlt}
       width={width}
       height={height}
@@ -78,6 +103,7 @@ export function SanityImage({
       priority={priority}
       className={className}
       {...blur}
+      {...animatedProps}
     />
   );
 }

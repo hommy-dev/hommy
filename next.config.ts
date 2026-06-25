@@ -1,7 +1,35 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
+// PostHog reverse proxy. The browser SDK posts to /ingest (see
+// src/components/analytics/posthog-provider.tsx); these rewrites forward that to
+// PostHog so ad-blockers — which block *.posthog.com — can't drop our analytics.
+// us.i.posthog.com -> us-assets.i.posthog.com for the static bundle host.
+const POSTHOG_HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
+const POSTHOG_ASSETS_HOST = POSTHOG_HOST.replace(
+  ".i.posthog.com",
+  "-assets.i.posthog.com",
+);
+
 const nextConfig: NextConfig = {
+  // Needed so the trailing-slash on /ingest/* paths isn't redirected away before
+  // the rewrite runs.
+  skipTrailingSlashRedirect: true,
+
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: `${POSTHOG_ASSETS_HOST}/static/:path*`,
+      },
+      {
+        source: "/ingest/:path*",
+        destination: `${POSTHOG_HOST}/:path*`,
+      },
+    ];
+  },
+
   allowedDevOrigins: [
     '192.168.100.5'
   ],

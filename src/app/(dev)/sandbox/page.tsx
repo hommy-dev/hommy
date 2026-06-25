@@ -24,6 +24,7 @@ import {
   CardVariantC,
   CardVariantD,
 } from "@/components/roofing/roofer-card-variants"
+import { EmailPreview } from "@/components/dev/email-preview"
 
 export default function SandboxPage() {
   const [setupOpen, setSetupOpen] = useState(false)
@@ -40,6 +41,13 @@ export default function SandboxPage() {
             A place to preview UI in isolation, outside the real flows.
           </p>
         </header>
+
+        <Section
+          title="Transactional emails"
+          desc="The shared email layout (Editorial) — every Hommy email now renders through it: new lead, welcome, quote accepted, generic system fallback, and the message digest. Shown in isolated iframes, exactly as an inbox renders them."
+        >
+          <EmailPreview />
+        </Section>
 
         <Section
           title="Setup popup (Phase 3)"

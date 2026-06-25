@@ -27,6 +27,7 @@ import {
   postSystemMessage,
 } from '@/lib/messaging/system'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
+import { captureServerEvent } from '@/lib/analytics/posthog-server'
 
 type AcceptError =
   | 'NOT_FOUND'
@@ -251,6 +252,21 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
       const convo = await getProjectConversationId(pid)
       if (convo) await postSystemMessage(convo, 'The homeowner accepted another contractor’s quote.').catch(() => {})
     }),
+  )
+
+  // Funnel: quote accepted = job won — the bottom of the money funnel. Attributed
+  // to the accepting homeowner, grouped by the winning company so it closes that
+  // company's engage → quote → won sequence.
+  captureServerEvent(
+    hoRow?.userId ?? '',
+    'quote_accepted',
+    {
+      estimateId,
+      leadId: outcome.leadId,
+      winnerContractorId: outcome.winnerContractorId,
+      creditsCharged: outcome.creditsCharged,
+    },
+    { company: outcome.winnerContractorId },
   )
 
   // Refresh the winning company's credit chip live (the win fee just landed).

@@ -33,6 +33,28 @@ export const OPERATING_STATE_NAMES: Record<OperatingState, string> = {
   FL: 'Florida',
 }
 
+/**
+ * Every US state + DC, code → name. We seed the FULL geography (states + their
+ * cities) so any market is ready the moment a roofer covers it — no per-city
+ * babysitting as we scale. `isOperating` (which states are *marketed* / shown on
+ * the /roofing hub) stays controlled by OPERATING_STATES above; seeding a state
+ * here does NOT publish it, and lead matching is geo-generic regardless.
+ */
+export const US_STATES: Record<string, string> = {
+  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'District of Columbia',
+  FL: 'Florida', GA: 'Georgia', HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois',
+  IN: 'Indiana', IA: 'Iowa', KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana',
+  ME: 'Maine', MD: 'Maryland', MA: 'Massachusetts', MI: 'Michigan',
+  MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri', MT: 'Montana',
+  NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota',
+  OH: 'Ohio', OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania',
+  RI: 'Rhode Island', SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee',
+  TX: 'Texas', UT: 'Utah', VT: 'Vermont', VA: 'Virginia', WA: 'Washington',
+  WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+}
+
 // ── Geo detection (Vercel edge headers) ───────────────────────────────────────
 // Vercel injects these on every incoming request in production. They are ABSENT
 // in local `next dev` — callers must fail open when the country is unknown.

@@ -29,7 +29,8 @@ export const authorType = defineType({
       name: 'image',
       title: 'Photo',
       type: 'image',
-      options: {hotspot: true},
+      description: 'Static image or an animated GIF. GIFs are served as the original file so the animation is preserved.',
+      options: {hotspot: true, accept: 'image/png,image/jpeg,image/webp,image/gif,image/avif'},
       fields: [
         defineField({
           name: 'alt',

@@ -11,6 +11,7 @@ import { db } from '@/lib/db'
 import { notifications, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { sendEmail, type EmailAttachment } from './email'
+import { renderEmail } from './email/template'
 import { sendSms } from './sms'
 import { sendPushToUser } from './push'
 import { isSmsOptedOut } from './opt-out'
@@ -210,7 +211,8 @@ export async function sendNotification(
 }
 
 // ============================================================
-// FALLBACK EMAIL HTML (plain body — used when no custom template)
+// FALLBACK EMAIL HTML — used when a caller doesn't supply custom HTML.
+// Built on the shared layout so every email looks like one product.
 // ============================================================
 
 function fallbackEmailHtml(
@@ -218,20 +220,10 @@ function fallbackEmailHtml(
   body: string,
   actionUrl?: string
 ): string {
-  const cta = actionUrl
-    ? `<a href="${actionUrl}" style="display:inline-block;margin-top:20px;background:#1f00ce;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;font-size:14px;">Open →</a>`
-    : ''
-  return `<!DOCTYPE html><html><body style="font-family:sans-serif;background:#f4f4f5;padding:40px 20px;">
-<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;">
-  <div style="background:#1f00ce;padding:20px 32px;"><span style="color:#fff;font-size:18px;font-weight:700;">Hommy</span></div>
-  <div style="padding:32px;">
-    <h2 style="margin:0 0 12px;font-size:20px;color:#18181b;">${title}</h2>
-    <p style="margin:0;color:#71717a;line-height:1.6;">${body}</p>
-    ${cta}
-  </div>
-  <div style="background:#f9f9fb;border-top:1px solid #e4e4e7;padding:16px 32px;text-align:center;">
-    <p style="margin:0;color:#a1a1aa;font-size:12px;">© ${new Date().getFullYear()} Hommy</p>
-  </div>
-</div>
-</body></html>`
+  return renderEmail({
+    preheader: body,
+    heading: title,
+    intro: body,
+    cta: actionUrl ? { label: 'Open Hommy', url: actionUrl } : undefined,
+  })
 }

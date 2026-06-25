@@ -31,7 +31,7 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
   if (headings.length === 0) return null;
 
   return (
-    <nav aria-label="Table of contents" className="text-sm lg:text-[0.972vw]">
+    <nav aria-label="Table of contents" className="text-sm lg:text-[1vw] font-medium">
       <p className="mb-3 lg:mb-[0.833vw] font-semibold uppercase tracking-widest text-muted-foreground">
         On this page
       </p>

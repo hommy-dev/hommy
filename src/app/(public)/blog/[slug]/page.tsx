@@ -85,7 +85,7 @@ export default async function BlogPostPage({
     .join(" · ");
 
   return (
-    <div className="mx-auto lg:max-w-[95vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[7vw]">
+    <div className="mx-auto lg:max-w-[95vw] px-5 pb-24 pt-28 lg:px-[1.389vw] lg:pb-[6.667vw] lg:pt-[10vw]">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -169,7 +169,7 @@ export default async function BlogPostPage({
           </div>
         </aside>
 
-        <article className="mx-auto w-full max-w-2xl text-[1.0625rem] lg:mx-0 lg:max-w-none lg:flex-1 lg:text-[1.1vw]">
+        <article className="mx-auto w-full max-w-2xl text-[1.0625rem] lg:mx-0 lg:max-w-none lg:flex-1 lg:text-[1.2vw] font-medium">
           <BlogPortableText value={body} />
         </article>
 

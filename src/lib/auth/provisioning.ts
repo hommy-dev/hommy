@@ -23,6 +23,7 @@ import {
 import { grantCredits } from '@/lib/credits/ledger'
 import { assignReferralCodeIfMissing, resolveReferrer } from '@/lib/contractor/referral'
 import { sendNotification } from '@/lib/notifications'
+import { renderEmail } from '@/lib/notifications/email/template'
 
 /** Free credits every new company gets, no strings, never expires. */
 export const SIGNUP_BONUS_CREDITS = 50
@@ -129,7 +130,7 @@ export async function provisionContractor({
   )
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? ''
+const APP_URL = process.env.NEXT_PUBLIC_SITE_URL ?? ''
 
 /** First-run welcome: explains the starting credits + how the economy works. */
 async function sendContractorWelcome({ userId, expiresAt }: { userId: string; expiresAt: Date }): Promise<void> {
@@ -139,21 +140,28 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
     day: 'numeric',
     year: 'numeric',
   }).format(expiresAt)
-  const html = `
-    <h2>Welcome to Hommy 👋</h2>
-    <p>Your account is ready — and we've added <strong>${total} credits</strong> to your wallet to get you started:</p>
-    <ul>
-      <li><strong>${SIGNUP_BONUS_CREDITS} signup credits</strong> — yours to keep, never expire.</li>
-      <li><strong>${LAUNCH_PROMO_CREDITS} launch-bonus credits</strong> — use them before <strong>${expiresStr}</strong>.</li>
-    </ul>
-    <h3>How credits work</h3>
-    <ul>
-      <li><strong>Getting leads is free.</strong> Every matching job shows up at no cost.</li>
-      <li><strong>1 credit to start a chat</strong> — unlocks the homeowner's contact details.</li>
-      <li><strong>You only pay the win fee when you win</strong> — a small % of the job, charged when the homeowner accepts your quote. No win, no fee.</li>
-    </ul>
-    <p><a href="${APP_URL}/contractor">Open your dashboard →</a></p>
-  `
+  const html = renderEmail({
+    preheader: `Your account is ready — we've added ${total} credits to get you started.`,
+    heading: 'Welcome to Hommy',
+    intro: `Your account is ready — and we've added <strong>${total} credits</strong> to your wallet to get you started.`,
+    highlight: {
+      label: 'Your starting credits',
+      rows: [
+        { label: 'Signup credits (never expire)', value: `${SIGNUP_BONUS_CREDITS}` },
+        { label: `Launch bonus (use by ${expiresStr})`, value: `${LAUNCH_PROMO_CREDITS}` },
+      ],
+    },
+    paragraphs: ['Here’s how credits work:'],
+    bullets: [
+      { strong: 'Getting leads is free.', text: 'Every matching job shows up at no cost.' },
+      { strong: '1 credit to start a chat,', text: "which unlocks the homeowner's contact details." },
+      {
+        strong: 'You only pay the win fee when you win',
+        text: 'a small % of the job, charged when the homeowner accepts your quote. No win, no fee.',
+      },
+    ],
+    cta: { label: 'Open your dashboard', url: `${APP_URL}/contractor` },
+  })
   await sendNotification({
     userId,
     type: 'SYSTEM',

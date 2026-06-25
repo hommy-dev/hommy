@@ -10,6 +10,8 @@ const IMAGE_FRAGMENT = /* groq */ `
   asset->{
     _id,
     url,
+    extension,
+    mimeType,
     metadata { lqip, dimensions { width, height } }
   },
   alt,

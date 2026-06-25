@@ -3,6 +3,7 @@ import { getRequiredUser } from "@/lib/auth/session"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { UserMenu } from "@/components/dashboard/user-menu"
 import { ADMIN_NAV } from "@/components/dashboard/dashboard-nav"
+import { AnalyticsIdentify } from "@/components/analytics/analytics-identify"
 
 export default async function AdminLayout({
   children,
@@ -12,22 +13,25 @@ export default async function AdminLayout({
   const user = await getRequiredUser("admin")
 
   return (
-    <DashboardShell
-      navItems={ADMIN_NAV}
-      brandHref="/admin"
-      brandLabel="Hommy Admin"
-      footerUser={
-        <UserMenu
-          user={{
-            email: user.email,
-            fullName: user.fullName || user.email,
-            avatarUrl: null,
-          }}
-          settingsHref="/admin/settings"
-        />
-      }
-    >
-      {children}
-    </DashboardShell>
+    <>
+      <DashboardShell
+        navItems={ADMIN_NAV}
+        brandHref="/admin"
+        brandLabel="Hommy Admin"
+        footerUser={
+          <UserMenu
+            user={{
+              email: user.email,
+              fullName: user.fullName || user.email,
+              avatarUrl: null,
+            }}
+            settingsHref="/admin/settings"
+          />
+        }
+      >
+        {children}
+      </DashboardShell>
+      <AnalyticsIdentify userId={user.id} email={user.email} role="admin" />
+    </>
   )
 }

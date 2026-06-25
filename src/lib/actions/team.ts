@@ -15,6 +15,7 @@ import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser, getMembershipRole } from '@/lib/data/dashboard'
 import { getTeam } from '@/lib/data/team'
 import { sendEmail } from '@/lib/notifications/email'
+import { renderEmail } from '@/lib/notifications/email/template'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
@@ -134,12 +135,17 @@ export async function inviteMember(input: unknown): Promise<Result<{ token: stri
     .where(eq(contractors.id, ctx.contractorId))
     .limit(1)
   const link = `${appOrigin()}/invite/${token}`
+  const companyName = company?.name ?? 'a company'
   await sendEmail(
     email,
-    `You're invited to join ${company?.name ?? "a company"} on Hommy`,
-    `<p>You've been invited to join <strong>${company?.name ?? "a company"}</strong> on Hommy as ${role}.</p>
-     <p><a href="${link}">Accept the invitation</a> (expires in ${INVITE_TTL_DAYS} days).</p>
-     <p>If the link doesn't work, paste this into your browser:<br/>${link}</p>`,
+    `You're invited to join ${companyName} on Hommy`,
+    renderEmail({
+      preheader: `Join ${companyName} on Hommy as ${role}.`,
+      heading: `You're invited to join ${companyName}`,
+      intro: `You've been invited to join <strong>${companyName}</strong> on Hommy as <strong>${role}</strong>.`,
+      cta: { label: 'Accept the invitation', url: link },
+      note: `This invitation expires in ${INVITE_TTL_DAYS} days. If the button doesn't work, paste this link into your browser: ${link}`,
+    }),
   ).catch(() => undefined)
 
   revalidatePath('/contractor/settings/team')
@@ -203,12 +209,17 @@ export async function resendInvitation(id: string): Promise<Result<{ token: stri
     .where(eq(contractors.id, ctx.contractorId))
     .limit(1)
   const link = `${appOrigin()}/invite/${inv.token}`
+  const companyName = company?.name ?? 'a company'
   await sendEmail(
     inv.email,
-    `Reminder: join ${company?.name ?? "a company"} on Hommy`,
-    `<p>You've been invited to join <strong>${company?.name ?? "a company"}</strong> on Hommy as ${inv.role}.</p>
-     <p><a href="${link}">Accept the invitation</a> (expires in ${INVITE_TTL_DAYS} days).</p>
-     <p>If the link doesn't work, paste this into your browser:<br/>${link}</p>`,
+    `Reminder: join ${companyName} on Hommy`,
+    renderEmail({
+      preheader: `Join ${companyName} on Hommy as ${inv.role}.`,
+      heading: `Reminder: join ${companyName}`,
+      intro: `You've been invited to join <strong>${companyName}</strong> on Hommy as <strong>${inv.role}</strong>.`,
+      cta: { label: 'Accept the invitation', url: link },
+      note: `This invitation expires in ${INVITE_TTL_DAYS} days. If the button doesn't work, paste this link into your browser: ${link}`,
+    }),
   ).catch(() => undefined)
 
   revalidatePath('/contractor/settings/team')

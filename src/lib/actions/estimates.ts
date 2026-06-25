@@ -22,6 +22,7 @@ import { computeTotals, lineItemAmount } from '@/lib/estimates/compute'
 import { getProjectConversationId, markQuoteMessageStatus, postQuoteMessage } from '@/lib/messaging/system'
 import { formatCurrency } from '@/lib/format'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
+import { captureServerEvent } from '@/lib/analytics/posthog-server'
 import { contractors } from '@/lib/db/schema'
 import type { Tx } from '@/lib/credits/ledger'
 
@@ -151,6 +152,15 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
     console.error('[sendEstimate] inngest send failed (non-fatal)', err)
   }
 
+  // Funnel: contractor sent a quote. Grouped by company; `total` lets you weight
+  // the funnel by job value later.
+  captureServerEvent(
+    ctx.userId,
+    'quote_sent',
+    { estimateId, projectId: ctx.input.projectId, total: parseFloat(total) },
+    { company: ctx.contractorId },
+  )
+
   revalidatePath('/contractor/jobs')
   revalidatePath('/contractor/messages')
   revalidatePath('/homeowner')
@@ -160,7 +170,7 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
 
 // ── internals ──
 
-type AuthOk = { ok: true; contractorId: string; input: EstimateInput }
+type AuthOk = { ok: true; contractorId: string; userId: string; input: EstimateInput }
 type AuthFail = { ok: false; fail: Fail }
 
 async function authorize(rawInput: unknown): Promise<AuthOk | AuthFail> {
@@ -171,7 +181,7 @@ async function authorize(rawInput: unknown): Promise<AuthOk | AuthFail> {
   const contractor = await getContractorForUser(user.id)
   if (!contractor) return { ok: false, fail: fail('NO_COMPANY') }
 
-  return { ok: true, contractorId: contractor.id, input: parsed.data }
+  return { ok: true, contractorId: contractor.id, userId: user.id, input: parsed.data }
 }
 
 /** Create or update a DRAFT estimate for the project. Verifies ownership. */

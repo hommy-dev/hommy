@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { showToast } from "@/components/ui/toast";
 import { signOutFormAction } from "@/lib/actions/auth";
 import { switchWorkspace } from "@/lib/actions/workspace";
+import { resetAnalytics } from "@/lib/analytics/client";
 
 type UserMenuUser = {
   email: string;
@@ -283,6 +284,7 @@ export function UserMenu({
           <DropdownMenuItem asChild>
             <button
               type="submit"
+              onClick={() => resetAnalytics()}
               className="flex w-full items-center gap-2 lg:gap-[0.556vw] text-destructive focus:text-destructive"
             >
               <Icon name="logout" className="size-4 lg:size-[1.111vw]" />

@@ -51,7 +51,7 @@ import {
   states,
   cities,
 } from '../src/lib/db/schema'
-import { OPERATING_STATES, OPERATING_STATE_NAMES } from '../src/lib/config/service-areas'
+import { OPERATING_STATES, US_STATES } from '../src/lib/config/service-areas'
 
 type ProjectStage = (typeof projects.stage.enumValues)[number]
 type CreditKind = (typeof creditTransactions.kind.enumValues)[number]
@@ -73,9 +73,9 @@ const ROOFING = {
   subtypes: ['Repair', 'Replacement', 'Inspection', 'Storm Damage'],
 }
 
-/** Canonical TX/FL cities for SEO location pages — see scripts/data/build-cities.mjs. */
+/** Canonical US cities (50 states + DC) for SEO location pages — see scripts/data/build-cities.mjs. */
 const CITY_DATA = JSON.parse(
-  readFileSync(new URL('./data/us-cities.tx-fl.json', import.meta.url), 'utf8'),
+  readFileSync(new URL('./data/us-cities.json', import.meta.url), 'utf8'),
 ) as { name: string; stateCode: string; lat: number; lng: number; population: number }[]
 
 /** URL-safe slug from a place name (e.g. "Fort Worth" → "fort-worth"). */
@@ -508,13 +508,17 @@ async function seedReference(): Promise<{ serviceId: string; growthPlanId: strin
     if (p.slug === 'growth') growthPlanId = row.id
   }
 
-  // Canonical geography for SEO location pages: operating states + their cities.
-  for (const code of OPERATING_STATES) {
-    const name = OPERATING_STATE_NAMES[code]
+  // Canonical geography for SEO location pages: ALL US states + their cities.
+  // We seed the whole country so any market is ready the moment a roofer covers
+  // it; `isOperating` (marketed / shown on the /roofing hub) stays limited to
+  // OPERATING_STATES. Lead matching is geo-generic either way.
+  const operating = new Set<string>(OPERATING_STATES)
+  for (const [code, name] of Object.entries(US_STATES)) {
+    const isOperating = operating.has(code)
     await db
       .insert(states)
-      .values({ code, name, slug: slugify(name), isOperating: true })
-      .onConflictDoUpdate({ target: states.code, set: { name, slug: slugify(name), isOperating: true } })
+      .values({ code, name, slug: slugify(name), isOperating })
+      .onConflictDoUpdate({ target: states.code, set: { name, slug: slugify(name), isOperating } })
   }
 
   // Dedupe within (stateCode, slug); CITY_DATA is sorted by population desc, so
@@ -537,7 +541,7 @@ async function seedReference(): Promise<{ serviceId: string; growthPlanId: strin
       })
   }
 
-  console.log(`✓ reference: roofing service + ${PLANS.length} plans + ${OPERATING_STATES.length} states + ${cityRows.length} cities`)
+  console.log(`✓ reference: roofing service + ${PLANS.length} plans + ${Object.keys(US_STATES).length} states + ${cityRows.length} cities`)
   return { serviceId: svc.id, growthPlanId }
 }
 

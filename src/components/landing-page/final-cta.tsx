@@ -19,8 +19,8 @@ export function FinalCta({
 }) {
   return (
     <section className="px-4 lg:px-[1.111vw] pt-24 lg:pt-[8.889vw] pb-4 lg:pb-[6vw] sm:px-5 bg-background">
-      <div className="bg-[url('/bg/cta.jpg')] bg-cover relative lg:max-w-[95vw] mx-auto overflow-hidden rounded-2xl lg:rounded-[1.111vw] px-6 lg:px-[1.667vw] py-20 text-center text-foreground lg:py-[7vw]">
-        <h2 className="mx-auto max-w-2xl lg:max-w-[46.662vw] font-sebenta text-4xl font-bold leading-[1.05] tracking-tight sm:text-2xl lg:text-[3vw]">
+      <div className="bg-[url('/bg/cta.jpg')] bg-cover relative lg:max-w-[80vw] mx-auto overflow-hidden rounded-2xl lg:rounded-[1.111vw] px-6 lg:px-[1.667vw] py-20 text-center text-foreground lg:py-[7vw]">
+        <h2 className="mx-auto max-w-2xl lg:max-w-[50vw] text-balance font-sebenta text-4xl font-bold leading-[1.05] tracking-tight sm:text-2xl lg:text-[3vw]">
           {title}
         </h2>
         <p className="mx-auto mt-5 lg:mt-[1.389vw] max-w-md lg:max-w-[31.108vw] text-[17px] lg:text-[1.3vw] font-semibold leading-relaxed text-foreground">

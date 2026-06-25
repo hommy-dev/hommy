@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { resetAnalytics } from "@/lib/analytics/client";
 import { MenuToggleIcon } from "@/components/ui/menu-icon";
 import { Icon, type IconName } from "../ui/icon";
 
@@ -31,7 +32,7 @@ type NavItem =
 const NAV: NavItem[] = [
   { kind: "menu", name: "Services" },
   { kind: "link", name: "Blog", href: "/blog" },
-  { kind: "link", name: "For roofers", href: "/auth/signup/contractor" },
+  { kind: "link", name: "For roofers", href: "/contractors" },
 ];
 
 // Role → dashboard home. Mirrors ROLE_DEFAULT_PATH in src/lib/actions/auth.ts
@@ -106,6 +107,7 @@ export function SiteHeader() {
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+    resetAnalytics(); // drop the PostHog identity so the next user starts fresh
     setIsOpen(false);
     router.refresh();
   };

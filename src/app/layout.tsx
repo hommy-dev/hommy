@@ -5,6 +5,7 @@ import { SITE_INDEXABLE, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { ogImageUrl } from "@/lib/og";
 import { inter, sebenta } from "@/style/font";
 import { ThemeProvider } from "@/components/theme-provider";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
 import { SanityLive } from "@/sanity/live";
 import { Suspense } from "react";
@@ -77,6 +78,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased " suppressHydrationWarning>
+        <PostHogProvider>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -94,6 +96,7 @@ export default function RootLayout({
             </AnchoredToastProvider>
           </ToastProvider>
         </ThemeProvider>
+        </PostHogProvider>
         {/* Sanity Live Content API — enables real-time content updates */}
         <SanityLive />
       </body>

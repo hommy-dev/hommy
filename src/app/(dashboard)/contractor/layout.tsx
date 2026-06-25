@@ -18,6 +18,7 @@ import { CONTRACTOR_NAV } from "@/components/dashboard/dashboard-nav"
 import { HeaderActionsSkeleton, UserMenuSkeleton } from "@/components/dashboard/skeletons"
 import { RealtimeUserEventsMount } from "@/components/realtime/realtime-user-events-mount"
 import { PushNotificationsManager } from "@/components/notifications/push-notifications-manager"
+import { AnalyticsIdentify } from "@/components/analytics/analytics-identify"
 
 // The shell paints as soon as auth + the active company + the message-badge count
 // resolve (all fast). The slower chrome — sidebar notice (new-lead count), the
@@ -70,6 +71,12 @@ export default async function DashboardLayout({
       </DashboardShell>
       <RealtimeUserEventsMount userId={user.id} role="contractor" />
       <PushNotificationsManager />
+      <AnalyticsIdentify
+        userId={user.id}
+        email={user.email}
+        role="contractor"
+        company={{ id: contractor.id, name: contractor.companyName ?? "Unnamed company" }}
+      />
     </>
   )
 }

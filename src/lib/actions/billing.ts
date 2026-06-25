@@ -25,6 +25,8 @@ import {
 } from '@/lib/billing/packs'
 import { sendNotification } from '@/lib/notifications'
 import { sendEmail } from '@/lib/notifications/email'
+import { renderEmail } from '@/lib/notifications/email/template'
+import { captureServerEvent } from '@/lib/analytics/posthog-server'
 
 export type PurchaseRequestResult =
   | { ok: true; credits: number; amountCents: number }
@@ -80,6 +82,15 @@ export async function requestCreditPurchase(creditsInput: number): Promise<Purch
     console.error('[requestCreditPurchase] admin notify failed (non-fatal)', err)
   }
 
+  // Funnel: contractor wants to buy credits (warm upsell intent — payments aren't
+  // live yet, so this is the closest "purchase" signal we have).
+  captureServerEvent(
+    user.id,
+    'credits_purchase_intent',
+    { credits, amountCents, balanceAtRequest: balance },
+    { company: contractor.id },
+  )
+
   return { ok: true, credits, amountCents }
 }
 
@@ -93,11 +104,23 @@ async function notifyAdminsOfPurchaseIntent(args: {
   const { intentId, companyName, credits, amountCents, balance } = args
   const title = 'Credit purchase request'
   const body = `${companyName} wants to buy ${credits} credits (${formatCents(amountCents)}). Current balance: ${balance}.`
-  const html = `
-    <h2>💳 Credit purchase request</h2>
-    <p><strong>${companyName}</strong> tried to buy <strong>${credits} credits</strong> (${formatCents(amountCents)}).</p>
-    <p>Their balance is <strong>${balance}</strong>. Payments aren't live yet — reach out, take payment, then grant the credits from the admin panel.</p>
-  `
+  const html = renderEmail({
+    preheader: body,
+    heading: 'Credit purchase request',
+    intro: `<strong>${companyName}</strong> wants to buy <strong>${credits} credits</strong>.`,
+    highlight: {
+      rows: [
+        { label: 'Company', value: companyName },
+        { label: 'Credits', value: `${credits}` },
+        { label: 'Amount', value: formatCents(amountCents) },
+        { label: 'Current balance', value: `${balance}` },
+      ],
+    },
+    paragraphs: [
+      "Payments aren't live yet — reach out, take payment, then grant the credits from the admin panel.",
+    ],
+    cta: { label: 'Open admin panel', url: '/admin' },
+  })
 
   const admins = await db.select({ id: users.id }).from(users).where(eq(users.role, 'admin'))
 
