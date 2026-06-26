@@ -18,5 +18,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - LEAD ECONOMY (Phase 1, see §4): leads fan out BROADLY (ranked by score, no engage cap, no lock) and NEVER expire on a contractor — a lead ends only when the homeowner hires/closes it (or a 30-day abandoned-post auto-close). Urgency drives only a fast-responder bonus + a gentle post-engage quote reminder (config in src/lib/config/tunables.ts) — never a deadline/penalty. Scoring is carrots-over-sticks (don't punish honest declines or slow deals). Quotes are accepted INLINE in chat/detail — there is no /homeowner/quotes page; the contractor board is the unified /contractor/jobs.
 
 # Documentation (read before building any feature):
-- docs/HOMMY_PLATFORM.md — single source of truth: WHAT to build (business rules, every page & flow, all features), the Drizzle schema, file structure, Inngest jobs, lead-assignment logic, pricing, and env vars
-- CODING_GUIDE.md — Next.js 16 patterns, auth, caching, common bugs
+- docs/HOMMY_PLATFORM.md — single source of truth for WHAT to build: business rules, every page & flow, the credit economy, lead lifecycle, schema map (§8; full schema is code at src/lib/db/schema.ts), Inngest jobs, pricing, env vars
+- CODING_GUIDE.md — HOW to build: Next.js 16 patterns, auth, caching, common bugs
+- docs/ROADMAP.md — WHERE we are: current status, what's next, and the decision log (the living tracker; update it when a decision is made or a feature ships)

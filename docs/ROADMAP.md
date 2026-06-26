@@ -1,10 +1,20 @@
-# Hommy — Launch Readiness & Roadmap
+# Hommy — Roadmap, Status & Decisions
 
-> Consolidated pre-launch audit, June 2026. Synthesized from four independent reviews — senior engineer (code/security/ledger), product designer (UX/flows), market researcher (competitors/pricing/regulatory), and founder/CPO strategist (model/GTM/vision). Items flagged by **2+ reviewers independently** are the highest-confidence and are marked ⭐.
+> **This is the living tracker for the platform.** It answers three questions:
+> **what we've built**, **what we're building next**, and **why we decided things**.
+> It started as a pre-launch audit (June 2026, from four reviews — engineering,
+> UX, market, and founder/CPO) and now carries forward as the running log.
 >
-> Status legend: 🔴 pre-launch (must fix) · 🟠 first 90 days · 🟢 vision bet. Effort: S / M / L. Type: Eng / Design / Ops / Legal / **Decision** (needs the founder's call, not just execution). Item status: ✅ done · ◐ partial · ⬜ to do.
+> **How to use it:**
+> - **Where we are / what's next** → the 🔴 pre-launch / 🟠 first-90-days / 🟢 later sections below.
+> - **Why we did X** → the **Progress log** (dated decisions + what shipped). Add a dated bullet whenever a real decision is made or a feature ships.
+> - **What to build & the rules** → `HOMMY_PLATFORM.md`. **How to build it** → `CODING_GUIDE.md` + `AGENTS.md`.
+>
+> Status legend: 🔴 pre-launch · 🟠 first 90 days · 🟢 later/vision. Item status: ✅ done · ◐ partial · ⬜ to do · ↪ deferred/decided. ⭐ = flagged by 2+ reviewers (highest confidence).
 
 ## Progress log
+
+**2026-06-26 — docs reorganized.** Renamed `LAUNCH_READINESS.md` → `ROADMAP.md` (this living tracker). Slimmed `HOMMY_PLATFORM.md` §8 to a schema *map* (full schema is code: `src/lib/db/schema.ts`). Fixed a stale "homeowners are unauthenticated" note in `CODING_GUIDE.md` (v2: homeowners have a dashboard). Cleaned `README.md` into a docs index. Archived the superseded `MODULE_ENGAGE_TO_REVIEW.md` → `docs/archive/`. Doc model now: **WHAT** = `HOMMY_PLATFORM.md`, **HOW** = `CODING_GUIDE.md`/`AGENTS.md`, **WHERE/why** = this file.
 
 **2026-06-26 — first no-decision batch shipped** (all applied to the **production** Supabase DB via `pnpm db:migrate`; migrations `0024`, `0025` committed):
 - ✅ **RLS lockdown** — enabled Row Level Security on all 13 exposed app/reference tables (`0024_rls_lockdown.sql`). Verified flipped on; app reads fine via service-role bypass. Only PostGIS-owned `spatial_ref_sys` remains off (can't take ownership — handle via Supabase dashboard if desired).

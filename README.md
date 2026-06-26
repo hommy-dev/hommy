@@ -1,74 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hommy
 
-## Getting Started
+A two-sided **home-services** platform: lead generation for homeowners, and a
+purpose-built CRM + credit economy for contractors. It **launches with roofing**
+as the first vertical, but the core is multi-vertical — more services (cleaning,
+gutters, etc.) come later on the same foundation. Read **`docs/HOMMY_PLATFORM.md` §0
+first** for the multi-vertical naming/schema rules.
 
-First, run the development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev                 # Next.js dev server (http://localhost:3000)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Hommy
-
-Hommy is a two-sided **home-services** platform: exclusive lead generation on the
-homeowner side, and a purpose-built CRM on the contractor side. It **launches with
-roofing** as the first vertical, but the architecture is multi-vertical — more home
-services (cleaning, gutters, etc.) come later on the same core. See
-**`docs/HOMMY_PLATFORM.md`** for the full product & technical brief (the single
-source of truth) — read §0 first for the multi-vertical naming/schema rules.
-
-### Run the background-jobs dev server (Inngest)
+Background jobs (Inngest) run in a separate dev server:
 
 ```bash
 pnpm dlx inngest-cli@latest dev -u http://localhost:3000/api/inngest
 ```
 
-### Documentation
+## Documentation map
+
+Three living docs, each with one job:
 
 ```
-Root:
-├── AGENTS.md         — Next.js 16 rules + docs index
-├── CLAUDE.md         — points to AGENTS.md
-├── CODING_GUIDE.md   — Next.js 16 patterns, auth, caching, common bugs
-└── .impeccable.md    — design context (voice, aesthetic, principles)
-
-docs/
-└── HOMMY_PLATFORM.md — single source of truth: pages, flows, schema,
-                          Inngest jobs, lead-assignment logic, pricing, env
+WHAT we're building  →  docs/HOMMY_PLATFORM.md   (vision, business model, flows, rules — source of truth)
+HOW we build it      →  CODING_GUIDE.md          (Next.js 16 patterns, auth, caching, common bugs)
+                        AGENTS.md                (project rules + guardrails; CLAUDE.md → AGENTS.md)
+WHERE we are / why   →  docs/ROADMAP.md          (status, what's next, and the decision log)
 ```
 
-### Useful scripts
+Supporting:
+
+```
+.impeccable.md            — design context (voice, aesthetic, principles)
+docs/launch-campaign.md   — cold-outreach marketing copy
+docs/archive/             — superseded early build notes (kept for history only)
+tests/README.md           — test setup + fixtures
+```
+
+The database schema is **code, not docs** — the source of truth is
+`src/lib/db/schema.ts` (`HOMMY_PLATFORM.md` §8 gives the high-level map).
+
+## Useful scripts
 
 ```bash
 pnpm db:generate         # generate Drizzle migrations from src/lib/db/schema.ts
-pnpm db:migrate          # apply migrations
+pnpm db:migrate          # apply migrations (DATABASE_URL = production)
 pnpm admin:create        # create an admin user
+pnpm test                # unit + integration tests (vitest)
 pnpm email:test -- --to=you@example.com   # Resend smoke test
 ```

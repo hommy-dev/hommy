@@ -151,9 +151,11 @@ src/
 │   └── admin/
 └── proxy.ts                # Auth + routing — NOT middleware.ts
 
-# NOTE: Homeowners are UNAUTHENTICATED. There is no /homeowner app and no
-# HOMEOWNER role. Homeowners submit public forms and act via tokenized links
-# (estimate acceptance, reviews); all homeowner comms are SMS + email.
+# NOTE (v2): Homeowners ARE authenticated and have their own /homeowner dashboard
+# (post jobs, compare quotes, message, accept quotes inline). Roles: contractor |
+# homeowner | admin. A guest who posts a job gets an account auto-created
+# (createGuestHomeowner). Tokenized public links (e.g. /review/[token], estimate
+# accept by token) still work for one-off, logged-out actions.
 ```
 
 ---
@@ -168,7 +170,7 @@ src/
 // src/proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 
-// Hommy public surface (homeowners are unauthenticated). The real
+// Hommy public surface (marketing, /get-a-quote, /roofers, tokenized links). The real
 // implementation lives in src/lib/supabase/middleware.ts (handleProxyAuth);
 // proxy.ts just delegates to it. Everything NOT public requires a session.
 const PUBLIC_PATHS = [
@@ -821,7 +823,7 @@ export async function updateJobStatus(
   // Rule 6: Invalidate exactly the caches this mutation affects
   updateTag(`project-${jobId}`);
   updateTag(`contractor-projects-${user.id}`); // contractor pipeline view
-  // (No homeowner portal — homeowners are unauthenticated; notify them via SMS/email instead.)
+  // Homeowners have a dashboard too (v2) — invalidate their view as well, and notify via SMS/email.
 
   return { success: true };
 }

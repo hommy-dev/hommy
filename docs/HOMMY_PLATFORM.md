@@ -214,335 +214,30 @@ Use this stack exactly. (Reconciled with the installed codebase.)
 
 ## 8. Database Schema (Drizzle ORM)
 
-Service-neutral. Money/credits/plans are platform-level. Roofing-specific fields live only in `service_details` jsonb and the roofing-only `storm_events` module.
+**Source of truth: `src/lib/db/schema.ts`** (and `drizzle/` for migrations). Don't
+duplicate column-level detail here — it drifts. This is the high-level map; read
+the code for exact columns, types, and indexes.
 
-```typescript
-// ───────────── IDENTITY ─────────────
+Service-neutral by design: money, credits, and plans are platform-level; anything
+roofing-specific lives in `service_details` jsonb or the roofing-only
+`storm_events` module (see §0). Money = decimal strings (parse for display only);
+credits = integers; the credit ledger is append-only. RLS is enabled on every app
+table — the app role bypasses it via the service role (see
+`drizzle/0001_rls_and_realtime.sql` + `0024_rls_lockdown.sql`).
 
-users {
-  id: uuid (PK = auth.users.id)
-  email: text
-  full_name: text
-  phone: text
-  role: enum('contractor','homeowner','admin')
-  password_set: boolean   // false for auto-created homeowners until they set one
-  created_at: timestamp
-}
+**Tables by domain:**
 
-// contractors = THE COMPANY (no user_id — membership is separate)
-contractors {
-  id: uuid
-  company_name: text
-  bio: text
-  logo_url: text
-  license_number: text
-  license_doc_url: text
-  insurance_provider: text
-  insurance_policy: text
-  insurance_doc_url: text
-  years_in_business: integer
-  verification_status: enum('pending','verified','rejected')
-  stripe_customer_id: text
-  credit_balance: integer        // CACHED projection of credit_transactions
-  profile_score: integer         // CACHED projection of score_events
-  avg_response_time_minutes: integer
-  avg_rating: decimal
-  total_reviews: integer
-  created_at: timestamp
-}
+- **Identity:** `users`, `homeowners`, `contractors`, `contractor_members`, `contractor_invitations`
+- **Service config:** `services`, `contractor_services`, `service_areas`, `states`, `cities`
+- **Credits & billing:** `credit_transactions` (append-only ledger), `plans`, `subscriptions`, `purchase_intents`
+- **Leads & jobs:** `leads`, `lead_recipients`, `contacts`, `projects`, `estimates`
+- **Messaging:** `conversations`, `conversation_participants`, `messages`
+- **Reputation:** `reviews`, `score_events`, `external_reviews`, `external_media`
+- **Portfolio:** `portfolio_projects`, `portfolio_images`
+- **Comms & ops:** `notifications`, `push_subscriptions`, `sms_opt_outs`, `integration_connections`, `activity_log`
+- **Roofing-only:** `storm_events`
+- **Support & growth:** `support_tickets`, `waitlist`, `feature_interest`, `guest_signup_attempts`
 
-// many users per company + role + status
-contractor_members {
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  user_id: uuid (FK users)
-  role: enum('owner','admin','member')
-  status: enum('invited','active','removed')
-  invited_by: uuid (nullable FK users)
-  created_at: timestamp
-  // unique(contractor_id, user_id)
-}
-
-contractor_invitations {            // Phase 1/2
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  email: text
-  role: enum('owner','admin','member')
-  token: text (unique)
-  invited_by: uuid (FK users)
-  expires_at: timestamp
-  accepted_at: timestamp (nullable)
-  created_at: timestamp
-}
-
-// homeowner = an individual user's profile (1:1 with a homeowner-role user)
-homeowners {
-  id: uuid
-  user_id: uuid (FK users, unique)
-  created_at: timestamp
-  // contact (name/email/phone) lives on users; job/property location lives on leads
-}
-
-// ───────────── MONEY: PLANS, SUBSCRIPTIONS, CREDITS ─────────────
-
-plans {                            // DATA, not an enum — free + 3 paid
-  id: uuid
-  slug: text (unique)              // 'free','starter','growth','pro'
-  name: text
-  price_cents: integer             // 0 for free
-  billing_interval: enum('month','year')
-  stripe_price_id: text (nullable)
-  monthly_credits: integer         // granted each cycle, expire at cycle end
-  max_members: integer
-  features: jsonb                  // { storm_alerts, ai_agent, marketing, analytics, ... }
-  is_active: boolean
-  sort_order: integer
-}
-
-subscriptions {
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  plan_id: uuid (FK plans)
-  stripe_subscription_id: text (nullable)   // null for free
-  status: enum('active','past_due','canceled','trialing')
-  current_period_start: timestamp
-  current_period_end: timestamp
-  cancel_at_period_end: boolean
-  created_at: timestamp
-}
-
-// append-only ledger — the SOURCE OF TRUTH for credits
-credit_transactions {
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  kind: enum('signup_bonus','purchase','plan_grant','lead_engagement',
-             'lead_won','ai_agent','marketing','refund','promo','expiry','adjustment')
-  amount: integer                  // signed: + grants/purchases, - spends
-  balance_after: integer
-  expires_at: timestamp (nullable) // set on plan_grant; null = never expires (FIFO by this)
-  source_type: text (nullable)     // 'lead','stripe_payment','subscription',...
-  source_id: text (nullable)
-  created_by: uuid (nullable FK users)
-  created_at: timestamp
-}
-
-// ───────────── SUPPLY-SIDE (company-scoped) ─────────────
-
-service_areas {                    // GEOGRAPHIC coverage — circle or drawn polygon
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  label: text (nullable)
-  zip_code: text (nullable)        // display-only now (matching is geographic)
-  area_type: text                  // 'circle' | 'polygon'  (default 'circle')
-  lat: double (nullable)  lng: double (nullable)  radius_km: double (nullable)   // circle
-  polygon: jsonb (nullable)        // [{lat,lng}, ...] for drawn areas
-  geom: geography (nullable)       // canonical matchable shape (PostGIS), GiST-indexed;
-                                   //   maintained by trigger from the fields above.
-                                   //   Matching = ST_Covers(geom, lead_point).
-  created_at: timestamp
-}
-
-contractor_services {              // which verticals (+ subtypes) a company handles
-  contractor_id: uuid (FK contractors)
-  service_id: uuid (FK services)
-  subtypes: text[]
-  // PK(contractor_id, service_id)
-}
-
-services {                         // the verticals (roofing = seed row)
-  id: uuid
-  slug: text (unique)
-  name: text
-  is_active: boolean
-  subtypes: jsonb
-  created_at: timestamp
-}
-
-// ───────────── LEADS → ENGAGEMENT → PROJECTS → QUOTES ─────────────
-
-leads {
-  id: uuid
-  homeowner_id: uuid (FK homeowners)
-  service_id: uuid (FK services)
-  service_details: jsonb           // roofing: { subtype: 'storm_damage', ... }
-  urgency: enum('emergency','within_week','within_month','planning')
-  // property/job location (lives on the job, not the homeowner)
-  address: text  zip_code: text  city: text  state: text  lat: double  lng: double
-  photo_url: text
-  notes: text
-  storm_event_id: uuid (nullable FK storm_events)   // ROOFING-ONLY, fenced
-  status: enum('open','awarded','closed','expired')  // no 'filled' (no engage cap)
-  engage_slots: integer            // VESTIGIAL (Phase 1 has no cap/lock); column kept, unused
-  engagement_credit_cost: integer  // small, snapshot at creation
-  award_credit_cost: integer       // full job cost, snapshot at creation
-  awarded_to: uuid (nullable FK contractors)
-  awarded_at: timestamp (nullable)
-  closed_at: timestamp (nullable)
-  created_at: timestamp
-}
-
-// the fan-out + cascade + per-contractor lead state
-lead_recipients {
-  id: uuid
-  lead_id: uuid (FK leads)
-  contractor_id: uuid (FK contractors)
-  status: enum('offered','viewed','engaged','declined','expired','lost','won')
-  offered_at: timestamp
-  viewed_at: timestamp (nullable)  // telemetry only — does NOT start a deadline
-  engaged_at: timestamp (nullable)
-  responded_at: timestamp (nullable)
-  decline_reason: text (nullable)
-  sla_deadline: timestamp (nullable) // Phase 1: null while offered (no expiry);
-                                     //   set on engage to the quote-REMINDER time, cleared after the nudge
-  created_at: timestamp
-  // unique(lead_id, contractor_id)
-}
-
-contacts {                         // company's long-term homeowner record
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  homeowner_id: uuid (FK homeowners)
-  tags: text[]
-  notes: text
-  created_at: timestamp
-  // unique(contractor_id, homeowner_id)
-}
-
-projects {                         // one contractor's job workspace for a lead
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  contact_id: uuid (FK contacts)
-  lead_id: uuid (nullable FK leads)
-  service_id: uuid (FK services)
-  stage: enum('new_lead','contacted','estimate_sent','in_progress','completed','lost')
-  estimate_value: decimal
-  notes: text
-  follow_up_at: timestamp
-  stage_updated_at: timestamp
-  created_at: timestamp
-}
-
-estimates {                        // = QUOTES. Acceptance is the "job won" signal.
-  id: uuid
-  project_id: uuid (FK projects)
-  service_details: jsonb           // roofing: { roof_size_sqft, measurement_source, materials }
-  labor_cost: decimal  materials_cost: decimal  line_items: jsonb
-  tax_rate: decimal  subtotal: decimal  tax_amount: decimal  total: decimal
-  scope_notes: text  valid_until: timestamp  pdf_url: text
-  status: enum('draft','sent','accepted','rejected')
-  accept_token: text (unique, nullable)
-  accepted_at: timestamp  accepted_ip: text  accepted_user_agent: text
-  accepted_snapshot: jsonb
-  sent_at: timestamp  created_at: timestamp
-}
-
-// ───────────── MESSAGING (universal, polymorphic) ─────────────
-
-conversations {
-  id: uuid
-  type: enum('direct','lead','engagement','support')
-  context_type: text (nullable)    // 'lead' | 'project' | 'engagement'
-  context_id: uuid (nullable)
-  created_at: timestamp
-}
-
-conversation_participants {
-  id: uuid
-  conversation_id: uuid (FK conversations)
-  participant_type: enum('user','contractor')   // user = homeowner/admin/person; contractor = whole company
-  participant_id: uuid
-  last_read_at: timestamp (nullable)
-  joined_at: timestamp
-  // unique(conversation_id, participant_type, participant_id)
-}
-
-messages {
-  id: uuid
-  conversation_id: uuid (FK conversations)
-  sender_type: enum('user','contractor','system')
-  sender_id: uuid (nullable)
-  body: text                       // fallback / non-thread surfaces
-  channel: enum('platform','sms','email')
-  external_id: text (nullable)     // Twilio/Resend id
-  meta: jsonb (nullable)           // MessageMeta union → rich card:
-                                   //   { kind:'quote', estimateId, total, status }
-                                   //   { kind:'event', event, actorType, actorId }   (personalized, sided)
-                                   //   { kind:'review', projectId, contractorId, status, rating? }
-  created_at: timestamp
-}
-
-// ───────────── REPUTATION, REVIEWS, ACTIVITY, NOTIFS ─────────────
-
-score_events {                     // append-only; profile_score is the cached projection
-  id: uuid
-  contractor_id: uuid (FK contractors)
-  kind: enum('lead_ignored_no_reason','lead_ignored_with_reason','slow_response',
-             'fast_engagement','quote_accepted','review_received','off_platform_flag','pattern_no_quotes')
-  delta: integer
-  source_type: text (nullable)  source_id: text (nullable)
-  note: text (nullable)
-  created_at: timestamp
-}
-
-reviews {
-  id: uuid
-  project_id: uuid (FK projects)
-  contractor_id: uuid (FK contractors)        // the reviewed company
-  reviewer_type: enum('homeowner','contractor')  // contractor reviewer = c2c (future)
-  reviewer_id: uuid                            // homeowner_id or contractor_id
-  rating: integer (1-5)
-  comment: text
-  token: text (unique)
-  submitted_at: timestamp
-  created_at: timestamp
-}
-
-activity_log {
-  id: uuid
-  project_id: uuid (FK projects)
-  actor: enum('system','contractor','homeowner')
-  actor_user_id: uuid (nullable FK users)      // which member/homeowner acted
-  action: text  metadata: jsonb  created_at: timestamp
-}
-
-notifications {                    // per USER (members get their own)
-  id: uuid
-  user_id: uuid (FK users)
-  type: text                       // cross-cutting, grows per feature
-  title: text  body: text  action_url: text
-  entity_type: text  entity_id: text
-  metadata: jsonb  dedup_key: text
-  is_read: boolean  sent_in_app: boolean  sent_email: boolean
-  created_at: timestamp
-}
-
-// ───────────── ROOFING-ONLY MODULE (fenced) ─────────────
-
-storm_events {
-  id: uuid
-  event_type: enum('hail','high_wind','storm')
-  severity: text
-  affected_zip_codes: text[]
-  detected_at: timestamp  alerts_sent: integer  leads_generated: integer
-  created_at: timestamp
-}
-
-// ───────────── CONTRACTOR-TO-CONTRACTOR HIRING (Phase 3, planned) ─────────────
-// A company hires another company. Reuses `contractors` for both sides.
-// Decision needed before building: does money flow through the platform
-// (reintroduces Stripe Connect/escrow) or is it facilitation-only?
-engagements {                      // do NOT build yet — shape for forward-compat
-  id: uuid
-  hiring_contractor_id: uuid (FK contractors)
-  hired_contractor_id: uuid (FK contractors)
-  project_id: uuid (nullable FK projects)   // subcontract of a real job
-  service_id: uuid (FK services)
-  status: enum('invited','accepted','declined','in_progress','completed','cancelled')
-  scope: text  agreed_amount: decimal
-  starts_at: timestamp  ends_at: timestamp
-  created_by: uuid (FK users)  created_at: timestamp
-}
-```
 
 ---
 
@@ -645,8 +340,11 @@ All spend **credits** (same ledger) and attribute to **companies/members** (same
 
 ## 16. Build Sequence (where we are)
 
-**Done (v2 foundation + core loop — BUILT):** the v2 schema (identity split, credits/plans/subscriptions, lead economy, universal messaging, scoring, reviews) + RLS/realtime; homeowner post-a-job + auto-signup; geographic matching + broad fan-out; the **lead loop** — offer → engage (credit charge, project + conversation) → quote (inline quote card) → accept (full charge, win) → complete → review; the unified contractor **Jobs** board (Leads + Projects merged); homeowner **Jobs** board + per-job detail (interested contractors with ratings/profile, "what's next" guidance, close-job); universal **messaging** with optimistic sends, personalized lifecycle event cards, inline quote + review cards, and live panel/timeline updates; **notifications** (in-app + email) across the lifecycle for both sides; contractor **public-profile dialog** (rating, reviews, verified, experience). Phase-1 lead-economy stance applied (broad fan-out, no engage cap, no expiry, urgency-based bonus/reminder, carrot scoring — see the header note + §4).
+Live status — what's shipped, what's next, and the decision log — lives in the
+running tracker: **`docs/ROADMAP.md`**. In short: the v2 foundation and the full
+lead loop (offer → engage → quote → accept → complete → review), unified job
+boards, universal messaging, and notifications are **built**; what's next and why
+is tracked in the roadmap.
 
-**Test fixtures:** `pnpm test:reset` (wipe activity) + `pnpm test:seed` (one job per scenario across both dashboards) — see `scripts/test-*.ts`. Email pipeline check: `pnpm notifications:test`.
-
-**Next:** credits/billing UI (Stripe checkout + portal + webhooks), team/members management, storm alerts, then the §15 growth features. See `CODING_GUIDE.md` for Next.js 16 patterns.
+**Test fixtures:** `pnpm test:reset` (wipe activity) + `pnpm test:seed` (one job per
+scenario across both dashboards) — see `scripts/test-*.ts`.
