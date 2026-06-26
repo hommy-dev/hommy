@@ -54,7 +54,7 @@ async function JobsData() {
             </div>
           </div>
           <Link
-            href="/contractor/profile"
+            href="/contractor/settings/verification"
             className="shrink-0 rounded-full bg-primary px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.972vw] font-semibold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Get verified

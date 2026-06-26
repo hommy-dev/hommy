@@ -1,6 +1,7 @@
 "use client"
 
 import { Textarea } from "@/components/ui/textarea"
+import { Icon } from "@/components/ui/icon"
 import { OptionCard } from "@/components/ui/option-card"
 import { LocalFilePicker, type StagedFile } from "@/components/ui/local-file-picker"
 import { MAX_LEAD_PHOTOS, NOT_SURE_SUBTYPE } from "@/lib/leads/subtype"
@@ -88,8 +89,8 @@ export function WhatStep({
       </WizardField>
 
       <WizardField
-        label="Add photos (optional)"
-        hint="A few shots of the problem help roofers size up the job and quote faster. You can add up to 8. They upload when you post."
+        label="Add photos — optional, but recommended"
+        hint="Roofers can quote faster and more accurately when they can see the problem. Add up to 8 (they upload when you post)."
       >
         <LocalFilePicker
           accept="image/*"
@@ -100,6 +101,12 @@ export function WhatStep({
           label="Add photos"
           description="JPG, PNG or WebP."
         />
+        {photos.length === 0 && (
+          <p className="mt-2 lg:mt-[0.556vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-[11px] lg:text-[0.764vw] text-primary">
+            <Icon name="image" className="size-3.5 lg:size-[0.95vw] shrink-0" />
+            Even one photo helps roofers give you a faster, more accurate quote.
+          </p>
+        )}
       </WizardField>
     </WizardStep>
   )

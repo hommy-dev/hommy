@@ -18,6 +18,7 @@ import type { ProCard } from "@/lib/data/locations";
 import type { RoofersSort } from "@/lib/data/roofers";
 import { searchRoofers } from "@/lib/actions/roofers";
 import { RooferCard } from "./roofer-card";
+import { HeroAdaptiveGrid } from "./hero-adaptive-grid";
 
 type Opt = { label: string; value: string };
 const SERVICE_OPTS: Opt[] = [
@@ -63,8 +64,8 @@ function FilterDropdown({
         <button className="flex w-full items-center justify-between gap-2 rounded-md bg-card px-3.5 py-2.5 text-sm ring-1 ring-foreground/15 transition-colors hover:ring-foreground/30">
           <span className="text-muted-foreground">{label}</span>
           <span className="inline-flex min-w-0 items-center gap-1 font-medium text-foreground">
-            <span className="truncate">{current}</span>
-            <Icon name="down" className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate text-sm lg:text-[0.9vw]">{current}</span>
+            <Icon name="down" className="size-4 lg:size-[1vw] shrink-0 text-muted-foreground" />
           </span>
         </button>
       </DropdownMenuTrigger>
@@ -87,6 +88,8 @@ export function RoofersDirectory({
   initialHasMore,
   scope = null,
   initialSubtype = null,
+  initialNear = null,
+  richSingleColumn = false,
   quoteHref = "/get-a-quote",
 }: {
   initialItems: ProCard[];
@@ -94,16 +97,27 @@ export function RoofersDirectory({
   initialHasMore: boolean;
   scope?: DirectoryScope;
   initialSubtype?: string | null;
+  /** Seed the "near" filter (e.g. the homeowner's last job) — editable/clearable,
+   *  unlike `scope` which is fixed and hides the location search. */
+  initialNear?: Near;
+  /** Homeowner dashboard only: when the cards area is narrow on desktop (the
+   *  dashboard sidebar is open), show one wide "hero" card per company instead of
+   *  cramped 2-up cards, with a smooth crossfade on toggle. */
+  richSingleColumn?: boolean;
   quoteHref?: string;
 }) {
   const scoped = !!(scope && (scope.stateSlug || scope.near));
+  // The dashboard content scrolls in its own pane just below a 3.889vw header, so
+  // the filter sidebar should stick high; the public site has a taller fixed
+  // header, so it needs more offset.
+  const asideStickyTop = richSingleColumn ? "top-[0vw]" : "top-[2vw]";
 
   const [items, setItems] = useState(initialItems);
   const [total, setTotal] = useState(initialTotal);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [q, setQ] = useState("");
   const [subtype, setSubtype] = useState<string | null>(initialSubtype);
-  const [near, setNear] = useState<Near>(null);
+  const [near, setNear] = useState<Near>(initialNear);
   const [sort, setSort] = useState<RoofersSort>("best");
   const [page, setPage] = useState(0);
   const [pending, startTransition] = useTransition();
@@ -176,7 +190,7 @@ export function RoofersDirectory({
     <div className="space-y-3">
       {scoped ? (
         <div className="flex items-center gap-2 rounded-md bg-card px-3.5 ring-1 ring-foreground/15 focus-within:ring-foreground/30">
-          <Icon name="search" className="size-4 shrink-0 text-muted-foreground" />
+          <Icon name="search" className="size-4 lg:size-[1vw] shrink-0 text-muted-foreground" />
           <input
             value={q}
             onChange={(e) => onQ(e.target.value)}
@@ -187,7 +201,7 @@ export function RoofersDirectory({
       ) : near ? (
         <div className="flex items-center justify-between gap-2 rounded-md bg-card px-3.5 py-2.5 ring-1 ring-foreground/15">
           <span className="flex min-w-0 items-center gap-2 text-sm">
-            <Icon name="location" className="size-4 shrink-0 text-primary" />
+            <Icon name="location" className="size-4 lg:size-[1vw] shrink-0 text-primary" />
             <span className="truncate">Near {near.label}</span>
           </span>
           <button
@@ -195,7 +209,7 @@ export function RoofersDirectory({
             aria-label="Clear location"
             className="grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
           >
-            <Icon name="close" className="size-4" />
+            <Icon name="close" className="size-4 lg:size-[1vw]" />
           </button>
         </div>
       ) : (
@@ -226,8 +240,12 @@ export function RoofersDirectory({
           you with local pros.
         </p>
       </div>
+    ) : richSingleColumn ? (
+      <div className={cn("transition-opacity", pending && "opacity-60")}>
+        <HeroAdaptiveGrid items={items} quoteHref={quoteHref} />
+      </div>
     ) : (
-      <div className={cn("grid grid-cols-1 gap-4 transition-opacity lg:grid-cols-2 lg:gap-[1.111vw]", pending && "opacity-60")}>
+      <div className={cn("grid grid-cols-1 gap-4 transition-opacity @4xl:grid-cols-2 lg:gap-[1.111vw]", pending && "opacity-60")}>
         {items.map((p) => (
           <RooferCard key={p.id} pro={p} quoteHref={quoteHref} />
         ))}
@@ -238,18 +256,18 @@ export function RoofersDirectory({
     <div className="lg:flex lg:gap-[2vw]">
       {/* Desktop sidebar */}
       <aside className="hidden shrink-0 lg:block lg:w-[20vw]">
-        <div className="sticky top-[7vw] space-y-4 lg:space-y-[1.2vw]">
+        <div className={cn("sticky space-y-4 lg:space-y-[1.2vw]", asideStickyTop)}>
           {controls}
-          <div className="rounded-lg bg-foreground p-5 text-background lg:rounded-[0.556vw] lg:p-[1.2vw]">
+          <div className="rounded-lg border bg-card p-5 lg:rounded-[0.556vw] lg:p-[1.2vw]">
             <p className="font-sebenta text-lg font-bold leading-snug lg:text-[1.15vw]">
               Want roofers to come to you?
             </p>
-            <p className="mt-1.5 text-sm text-background/70 lg:mt-[0.4vw] lg:text-[0.82vw]">
+            <p className="mt-1.5 text-sm lg:mt-[0.4vw] lg:text-[0.82vw]">
               Post your job free and a few vetted local pros reach out. You choose who you talk to.
             </p>
             <Link
               href={quoteHref}
-              className="mt-4 flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 lg:mt-[1vw] lg:gap-[0.4vw] lg:rounded-[0.4vw] lg:py-[0.6vw] lg:text-[0.85vw]"
+              className="mt-4 flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 lg:mt-[1vw] lg:gap-[0.4vw] lg:rounded-[0.4vw] lg:py-[0.6vw] lg:text-[0.85vw]"
             >
               Get free quotes
               <Icon name="arrow-right" className="size-4 lg:size-[1vw]" />
@@ -258,8 +276,10 @@ export function RoofersDirectory({
         </div>
       </aside>
 
-      {/* Main */}
-      <div className="min-w-0 flex-1">
+      {/* Main — a query container so the card grid reacts to the ACTUAL space it
+          has (which shrinks when an outer dashboard sidebar is also open), not the
+          raw viewport. Two columns only when the cards area is genuinely wide. */}
+      <div className="@container min-w-0 flex-1">
         {/* Mobile control bar */}
         <div className="mb-5 flex items-center justify-between gap-3 lg:hidden">
           <p className="text-sm text-muted-foreground">
@@ -276,10 +296,10 @@ export function RoofersDirectory({
         </div>
 
         {/* Desktop count */}
-        <p className="mb-4 hidden text-sm text-muted-foreground lg:block lg:text-[0.9vw]">
+        {/* <p className="mb-4 hidden text-sm text-muted-foreground lg:block lg:text-[0.9vw]">
           {total} {total === 1 ? "company" : "companies"}
           {placeSuffix}
-        </p>
+        </p> */}
 
         {grid}
 

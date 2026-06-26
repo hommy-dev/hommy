@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
 import { Skeleton } from "@/components/ui/skeleton"
 
-// Below this, a company can't even engage a lead (engage costs 5), so nudge them.
+// A gentle "running low" nudge. Engaging a lead costs just 1 credit; the bigger
+// charge is the win fee on a won job, which can run the balance negative.
 const LOW_CREDIT_BALANCE = 5
 
 export default function OverviewPage() {
@@ -146,7 +147,7 @@ async function OverviewContent({
       icon: "wallet",
       tone: "warning",
       title: "Low credit balance",
-      subtitle: `Just ${balance} credit${balance === 1 ? "" : "s"} left, not enough to engage a new lead.`,
+      subtitle: `Just ${balance} credit${balance === 1 ? "" : "s"} left. A won job's fee comes out of your balance, so top up to avoid going negative.`,
       href: "/contractor/settings/billing",
       cta: "Add credits",
     })

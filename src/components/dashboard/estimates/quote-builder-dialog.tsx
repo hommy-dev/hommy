@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { showToast } from "@/components/ui/toast";
 import { computeTotals } from "@/lib/estimates/compute";
+import { computeAwardCost } from "@/lib/leads/pricing";
 import { formatCurrency } from "@/lib/format";
 import { saveEstimateDraft, sendEstimate } from "@/lib/actions/estimates";
 
@@ -69,6 +70,9 @@ export function QuoteBuilderDialog({
     .filter((r) => r.label.length > 0);
   const totals = computeTotals(items, parseFloat(taxRate) || 0);
   const canSubmit = items.length > 0 && parseFloat(totals.total) > 0;
+  // What this contractor pays IF the homeowner accepts — shown up front so the
+  // win fee is never a surprise. The 1 engage credit already paid is credited back.
+  const winFee = computeAwardCost(parseFloat(totals.total) || 0, 1);
 
   function input() {
     return {
@@ -226,7 +230,18 @@ export function QuoteBuilderDialog({
               <dt>Total</dt>
               <dd className="tabular-nums">{formatCurrency(totals.total)}</dd>
             </div>
+            {parseFloat(totals.total) > 0 && (
+              <div className="flex items-center justify-between border-t border-border pt-1.5 lg:pt-[0.417vw] text-xs lg:text-[0.78vw] text-muted-foreground">
+                <dt>Win fee if accepted</dt>
+                <dd className="tabular-nums">~{winFee} credit{winFee === 1 ? "" : "s"}</dd>
+              </div>
+            )}
           </dl>
+          {parseFloat(totals.total) > 0 && (
+            <p className="text-xs lg:text-[0.78vw] text-muted-foreground">
+              You only pay the win fee if the homeowner accepts. Nothing is charged now.
+            </p>
+          )}
         </div>
 
         <DialogFooter>

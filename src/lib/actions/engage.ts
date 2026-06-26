@@ -22,7 +22,6 @@ import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import {
-  contacts,
   conversationParticipants,
   conversations,
   homeowners,
@@ -33,11 +32,11 @@ import {
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser } from '@/lib/data/dashboard'
 import { canEngageLeads } from '@/lib/contractor/verification'
+import { upsertContact } from '@/lib/leads/contact'
 import {
   InsufficientCreditsError,
   lockBalance,
   spendCredits,
-  type Tx,
 } from '@/lib/credits/ledger'
 import { recordScoreEvent } from '@/lib/reputation/score'
 import { broadcastCreditsChanged } from '@/lib/credits/notify'
@@ -278,29 +277,4 @@ export async function markLeadViewed(leadId: string): Promise<void> {
   } catch (err) {
     console.error('[markLeadViewed] failed (non-fatal)', err)
   }
-}
-
-/** Get-or-create the company's contact record for this homeowner. */
-async function upsertContact(tx: Tx, contractorId: string, homeownerId: string): Promise<string> {
-  const [existing] = await tx
-    .select({ id: contacts.id })
-    .from(contacts)
-    .where(and(eq(contacts.contractorId, contractorId), eq(contacts.homeownerId, homeownerId)))
-    .limit(1)
-  if (existing) return existing.id
-
-  const [created] = await tx
-    .insert(contacts)
-    .values({ contractorId, homeownerId })
-    .onConflictDoNothing()
-    .returning({ id: contacts.id })
-  if (created) return created.id
-
-  // Lost an insert race — the row now exists, re-read it.
-  const [row] = await tx
-    .select({ id: contacts.id })
-    .from(contacts)
-    .where(and(eq(contacts.contractorId, contractorId), eq(contacts.homeownerId, homeownerId)))
-    .limit(1)
-  return row.id
 }

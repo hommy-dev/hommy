@@ -77,6 +77,8 @@ export type JobCard = {
   state: string | null
   zipCode: string | null
   urgency: LeadUrgency
+  /** Direct hire: the homeowner picked this company specifically (no broadcast). */
+  isDirect: boolean
   /** Cost to open the chat with this homeowner, in credits. */
   engagementCreditCost: number
   latestQuoteTotal: string | null
@@ -103,6 +105,7 @@ export async function getContractorJobs(contractorId: string, userId: string): P
       city: leads.city,
       state: leads.state,
       zipCode: leads.zipCode,
+      targetContractorId: leads.targetContractorId,
       engagementCreditCost: leads.engagementCreditCost,
       slaDeadline: leadRecipients.slaDeadline,
       offeredAt: leadRecipients.offeredAt,
@@ -171,6 +174,7 @@ export async function getContractorJobs(contractorId: string, userId: string): P
       state: r.state,
       zipCode: r.zipCode,
       urgency: r.urgency,
+      isDirect: r.targetContractorId != null,
       engagementCreditCost: r.engagementCreditCost,
       latestQuoteTotal: est?.total ?? null,
       latestQuoteStatus: est?.status ?? null,

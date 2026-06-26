@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { services } from "@/lib/db/schema"
+import { contractors, services } from "@/lib/db/schema"
 import { getOptionalUser } from "@/lib/auth/session"
 import { GetAQuoteWizard } from "@/components/public/get-a-quote-wizard"
 
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default async function GetAQuotePage({
   searchParams,
 }: {
-  searchParams: Promise<{ subtype?: string; where?: string }>
+  searchParams: Promise<{ subtype?: string; where?: string; for?: string }>
 }) {
   const sp = await searchParams
 
@@ -35,6 +35,22 @@ export default async function GetAQuotePage({
   const initialSubtype =
     sp.subtype && subtypes.includes(sp.subtype) ? sp.subtype : ""
 
+  // Direct hire: `?for=<slug>` targets one verified contractor. Unknown/unverified
+  // slugs are ignored silently — the wizard falls back to the broadcast flow.
+  let target: { slug: string; name: string; logoUrl: string | null } | null = null
+  if (sp.for) {
+    const [c] = await db
+      .select({
+        slug: contractors.slug,
+        companyName: contractors.companyName,
+        logoUrl: contractors.logoUrl,
+      })
+      .from(contractors)
+      .where(and(eq(contractors.slug, sp.for), eq(contractors.verificationStatus, "verified")))
+      .limit(1)
+    if (c?.slug) target = { slug: c.slug, name: c.companyName ?? "this roofer", logoUrl: c.logoUrl }
+  }
+
   return (
     <GetAQuoteWizard
       subtypes={subtypes}
@@ -42,6 +58,7 @@ export default async function GetAQuotePage({
       initialWhere={sp.where ?? ""}
       isLoggedInHomeowner={isHomeowner}
       loggedInName={isHomeowner ? user?.fullName ?? null : null}
+      target={target}
     />
   )
 }

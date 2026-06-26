@@ -8,6 +8,7 @@
 // ============================================================
 
 import { leadCreated } from './lead-created'
+import { directRequestCreated } from './direct-request-created'
 import { leadEngaged } from './lead-engaged'
 import { leadSlaCascade } from './lead-sla-cascade'
 import { quoteSubmitted } from './quote-submitted'
@@ -19,6 +20,7 @@ import { creditsExpire } from './credits-expire'
 // Registered with serve() in src/app/api/inngest/route.ts
 export const functions = [
   leadCreated,
+  directRequestCreated,
   leadEngaged,
   leadSlaCascade,
   quoteSubmitted,

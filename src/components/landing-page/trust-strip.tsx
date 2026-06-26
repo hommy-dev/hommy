@@ -1,13 +1,13 @@
 const STATS = [
   {
-    label: "Hear back in",
-    value: "24h",
-    desc: "Most homeowners hear from a roofer within the hour of posting.",
+    label: "Roofers notified",
+    value: "Instant",
+    desc: "The moment you post, matched local roofers are notified. You choose who to talk to.",
   },
   {
     label: "Always",
     value: "100%",
-    desc: "Every roofer is licensed and insured, and we check it before they can quote.",
+    desc: "Every roofer provides a license and proof of insurance, which we review before they can quote.",
   },
   {
     label: "You pay",

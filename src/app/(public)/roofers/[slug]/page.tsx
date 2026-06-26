@@ -140,13 +140,21 @@ export default async function RooferProfilePage({
         canManage={false}
         editHref=""
         primaryCta={
-          <Link
-            href={quoteHref}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 lg:gap-[0.4vw] lg:rounded-[0.694vw] lg:px-[1.667vw] lg:py-[0.8vw] lg:text-[1.05vw]"
-          >
-            Get a free quote
-            <Icon name="arrow-right" className="size-5 lg:size-[1.2vw]" />
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:gap-[0.833vw]">
+            <Link
+              href={`/get-a-quote?for=${slug}`}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 lg:gap-[0.4vw] lg:rounded-[0.694vw] lg:px-[1.667vw] lg:py-[0.8vw] lg:text-[1.05vw]"
+            >
+              Request a quote from {name}
+              <Icon name="arrow-right" className="size-5 lg:size-[1.2vw]" />
+            </Link>
+            <Link
+              href={quoteHref}
+              className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-foreground ring-1 ring-foreground/15 transition-colors hover:ring-foreground/30 lg:gap-[0.4vw] lg:rounded-[0.694vw] lg:px-[1.667vw] lg:py-[0.8vw] lg:text-[1.05vw]"
+            >
+              Or post to all pros
+            </Link>
+          </div>
         }
       />
     </div>

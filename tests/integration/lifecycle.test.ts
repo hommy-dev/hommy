@@ -151,7 +151,7 @@ describe('lead lifecycle (golden path)', () => {
     expect(accepted.ok).toBe(true)
     if (!accepted.ok) return
 
-    // computeAwardCost(9000, 5): 2.5% = 225, clamp [40,250] → 225, less 5 engage = 220.
+    // computeAwardCost(9000, 5): 2.5% = 225, clamp [30,290] → 225, less 5 engage = 220.
     const [winnerCo] = await db.select().from(contractors).where(eq(contractors.id, winner.contractorId))
     expect(winnerCo.creditBalance).toBe(95 - 220) // -125 (allowNegative)
 

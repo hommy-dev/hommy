@@ -32,6 +32,25 @@ export const getHomeownerForUser = cache(async (
   return row ?? null
 })
 
+/**
+ * The homeowner's most recent job location (coordinates + place label). Used to
+ * default the "Find a pro" directory to roofers near them — no home address is
+ * stored on the homeowner, so we derive it from where they last posted. Returns
+ * null if they've never posted a job with coordinates.
+ */
+export async function getHomeownerLatestLocation(
+  homeownerId: string,
+): Promise<{ lat: number; lng: number; city: string | null; state: string | null } | null> {
+  const [row] = await db
+    .select({ lat: leads.lat, lng: leads.lng, city: leads.city, state: leads.state })
+    .from(leads)
+    .where(and(eq(leads.homeownerId, homeownerId), isNotNull(leads.lat), isNotNull(leads.lng)))
+    .orderBy(desc(leads.createdAt))
+    .limit(1)
+  if (!row || row.lat == null || row.lng == null) return null
+  return { lat: row.lat, lng: row.lng, city: row.city, state: row.state }
+}
+
 export type HomeownerLead = {
   id: string
   serviceName: string

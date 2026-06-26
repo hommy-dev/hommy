@@ -1,20 +1,58 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useState } from "react";
+
+import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/icon";
+import { MediaLightbox, type LightboxSlide } from "@/components/ui/media-lightbox";
 import type { ProCard } from "@/lib/data/locations";
-import { RooferCardWork } from "./roofer-card-work";
 
 const subtypeText = (s: string) => (s === "Storm Damage" ? "Storm damage" : s);
 
+// Both actions share the same outline style (no filled "primary" button).
+const BTN_CLS =
+  "flex-1 inline-flex items-center justify-center rounded-md bg-card px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-foreground/15 transition-colors hover:ring-foreground/30 lg:rounded-[0.4vw] lg:py-[0.6vw] lg:text-[0.9vw]";
+
+function Photo({
+  src,
+  onClick,
+  className,
+  children,
+}: {
+  src: string;
+  onClick: () => void;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn("group relative overflow-hidden bg-muted", className)}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary contractor work-photo URL */}
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="size-full object-cover transition-transform group-hover:scale-105"
+      />
+      {children}
+    </button>
+  );
+}
+
 /**
- * Verified-roofer tile (vertical): identity + rating + service chips, a compact
- * row of small work-photo thumbnails (opens the lightbox), and two equal actions.
- * Sized to read well in the 2-col grid beside the directory sidebar.
+ * Wide "hero" roofer card for the 1-column homeowner directory (variants B + D
+ * combined): info + actions on the left, work photos on the right. The right
+ * panel is a 2×2 grid when the company has 4+ photos (variant B), otherwise a
+ * single image with a gradient overlay (variant D). Falls back to info-only when
+ * there are no photos. Quote button starts a DIRECT request (?for=slug).
  */
-export function RooferCard({ pro, quoteHref }: { pro: ProCard; quoteHref: string }) {
+export function RooferCardHero({ pro, quoteHref }: { pro: ProCard; quoteHref: string }) {
+  const [open, setOpen] = useState<number | null>(null);
   const profileHref = pro.slug ? `/roofers/${pro.slug}` : null;
-  // Direct hire: a slug lets us target this one pro (keeping any subtype/where
-  // context already on quoteHref). No slug → fall back to the broadcast post.
   const quoteTargetHref = pro.slug
     ? `${quoteHref}${quoteHref.includes("?") ? "&" : "?"}for=${pro.slug}`
     : quoteHref;
@@ -22,12 +60,16 @@ export function RooferCard({ pro, quoteHref }: { pro: ProCard; quoteHref: string
   const hasRating = pro.avgRating != null && pro.totalReviews > 0;
   const subtypes = pro.subtypes ?? [];
   const shown = subtypes.slice(0, 3);
-  const extra = subtypes.length - shown.length;
+  const extraChips = subtypes.length - shown.length;
   const images = pro.images ?? [];
+  const shownImages = images.slice(0, 2); // a single row of at most two photos
+  const extra = images.length - shownImages.length; // >0 → "+N" on the last one
+  const slides: LightboxSlide[] = images.map((u, i) => ({ id: String(i), url: u }));
 
   return (
-    <article className="flex flex-col rounded-lg bg-card p-5 ring-1 ring-foreground/10 transition-shadow hover:ring-foreground/25 lg:rounded-[0.556vw] lg:p-[1.389vw]">
-      <div className="flex min-w-0 flex-1 flex-col">
+    <article className="flex overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10 lg:rounded-[0.556vw]">
+      {/* Left — identity + actions */}
+      <div className="flex min-w-0 flex-1 flex-col p-5 lg:p-[1.389vw]">
         <div className="flex items-start gap-3 lg:gap-[0.833vw]">
           {pro.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- arbitrary contractor logo URL
@@ -87,36 +129,52 @@ export function RooferCard({ pro, quoteHref }: { pro: ProCard; quoteHref: string
                 {subtypeText(s)}
               </span>
             ))}
-            {extra > 0 && (
+            {extraChips > 0 && (
               <span className="rounded-sm bg-muted px-2 py-0.5 text-xs font-medium text-foreground/70 lg:px-[0.5vw] lg:text-[0.78vw]">
-                +{extra}
+                +{extraChips}
               </span>
             )}
           </div>
         )}
 
-        {/* Work photos — a compact thumbnail strip */}
-        {images.length > 0 && (
-          <RooferCardWork images={images} alt={name} className="mt-3 lg:mt-[0.833vw]" />
-        )}
-
         <div className="mt-auto flex gap-2 pt-4 lg:gap-[0.556vw] lg:pt-[1.111vw]">
-          <Link
-            href={quoteTargetHref}
-            className="flex-1 inline-flex items-center justify-center rounded-md bg-card px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-foreground/15 transition-colors hover:ring-foreground/30 lg:rounded-[0.4vw] lg:py-[0.6vw] lg:text-[0.9vw]"
-          >
+          <Link href={quoteTargetHref} className={BTN_CLS}>
             Get a quote
           </Link>
           {profileHref && (
-            <Link
-              href={profileHref}
-              className="flex-1 inline-flex items-center justify-center rounded-md bg-card px-4 py-2.5 text-sm font-semibold text-foreground ring-1 ring-foreground/15 transition-colors hover:ring-foreground/30 lg:rounded-[0.4vw] lg:py-[0.6vw] lg:text-[0.9vw]"
-            >
+            <Link href={profileHref} className={BTN_CLS}>
               View profile
             </Link>
           )}
         </div>
       </div>
+
+      {/* Right — up to two work photos in a SINGLE row (a 2×2 grid made the card
+          too tall). One photo fills the panel; two split it; 3+ shows "+N" on the
+          second. Clicking any opens the full lightbox. */}
+      {shownImages.length > 0 && (
+        <div className="flex w-[42%] shrink-0 gap-0.5">
+          {shownImages.map((u, i) => (
+            <Photo key={i} src={u} onClick={() => setOpen(i)} className="min-w-0 flex-1">
+              {i === shownImages.length - 1 && extra > 0 && (
+                <span className="absolute inset-0 grid place-items-center bg-foreground/55 text-base font-semibold text-background lg:text-[1.111vw]">
+                  +{extra}
+                </span>
+              )}
+            </Photo>
+          ))}
+        </div>
+      )}
+
+      {open !== null && (
+        <MediaLightbox
+          slides={slides}
+          index={open}
+          onIndexChange={setOpen}
+          onClose={() => setOpen(null)}
+          title={name}
+        />
+      )}
     </article>
   );
 }

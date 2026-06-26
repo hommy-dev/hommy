@@ -162,6 +162,14 @@ export function JobCardItem({
         </div>
       </div>
 
+      {/* Direct hire — the homeowner picked this company specifically. */}
+      {job.isDirect ? (
+        <span className="mt-3 lg:mt-[0.833vw] inline-flex w-fit items-center gap-1.5 lg:gap-[0.417vw] rounded-full bg-primary/10 px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.764vw] font-semibold text-primary">
+          <Icon name="badge-check" className="size-3.5 lg:size-[0.95vw]" />
+          Direct request
+        </span>
+      ) : null}
+
       {/* Title = the work */}
       <h3 className="mt-3 lg:mt-[0.833vw] line-clamp-2 text-base lg:text-[1.181vw] font-bold leading-snug tracking-tight text-foreground">
         {job.subtype ?? job.serviceName}

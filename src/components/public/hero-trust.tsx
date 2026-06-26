@@ -9,7 +9,7 @@ import { Icon, type IconName } from "@/components/ui/icon"
 
 const TRUST: { icon: IconName; label: string }[] = [
   { icon: "shield-done", label: "Licensed & insured" },
-  { icon: "badge-check", label: "Background-checked" },
+  { icon: "badge-check", label: "Verified" },
   { icon: "discount", label: "Free quotes" },
   { icon: "location", label: "Local roofers" },
 ]

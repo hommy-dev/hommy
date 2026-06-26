@@ -16,6 +16,7 @@ export const INNGEST_EVENTS = {
 
   // Lead events (v2 — credit economy, see docs/HOMMY_PLATFORM.md §10)
   LEAD_CREATED: "lead/created",            // fan-out done inline; this drives async comms
+  DIRECT_REQUEST_CREATED: "lead/direct-request.created", // direct hire — notify the one chosen company
   LEAD_ENGAGED: "lead/engaged",            // contractor engaged — charge + project (future module)
   LEAD_RECIPIENT_SLA: "lead/recipient.sla", // offer passed SLA — cascade (future module)
   LEAD_EXPIRY_SCHEDULED: "lead/expiry.scheduled",

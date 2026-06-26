@@ -5,10 +5,10 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { db } from '@/lib/db'
-import { contractorMembers, contractors, homeowners, leadRecipients, leads, users } from '@/lib/db/schema'
+import { contractorMembers, contractors, homeowners, leadRecipients, leads, projects, users } from '@/lib/db/schema'
 import { sendNotification } from '@/lib/notifications'
 import { broadcastUserEventToMany } from '@/lib/realtime/user-events'
-import { getProjectConversationId } from '@/lib/messaging/system'
+import { getProjectConversationId, postSystemMessage } from '@/lib/messaging/system'
 
 async function activeMemberIds(contractorIds: string[]): Promise<string[]> {
   if (contractorIds.length === 0) return []
@@ -115,6 +115,26 @@ export const quoteAccepted = inngest.createFunction(
             dedupKey: `lead_lost:${leadId}:${userId}`,
           }).catch((err) => console.error('[quote-accepted] loser notify', { userId, err })),
         ),
+      )
+    })
+
+    // Post the "another contractor was selected" notice into each losing project's
+    // chat. Unbounded fan-out (no engage cap), so it lives here off the homeowner's
+    // accept click. Loser projects were set to stage='lost' inline by acceptEstimate.
+    await step.run('post-loser-chat-messages', async () => {
+      const loserProjects = await db
+        .select({ id: projects.id })
+        .from(projects)
+        .where(and(eq(projects.leadId, leadId), eq(projects.stage, 'lost')))
+      await Promise.all(
+        loserProjects.map(async (p) => {
+          const convo = await getProjectConversationId(p.id)
+          if (convo) {
+            await postSystemMessage(convo, 'The homeowner accepted another contractor’s quote.').catch(
+              (err) => console.error('[quote-accepted] loser chat msg', { projectId: p.id, err }),
+            )
+          }
+        }),
       )
     })
 

@@ -86,8 +86,8 @@ Credits are the **universal currency** of Hommy. Today they pay for lead engagem
 
 **1 credit = $1.** Pricing lives in config (`src/lib/leads/pricing.ts`), tunable without a migration:
 
-- **Engagement (unlock chat) — flat.** A small `engagementCreditCost` (roofing: **5**), SNAPSHOT onto the lead at creation. Engaging gates ONLY on this — see §4.1.
-- **Win fee — a percentage of the accepted quote, computed AT ACCEPTANCE** (not a snapshot, so it scales with the real job value). `computeAwardCost()` = `clamp(round(pct × acceptedQuoteTotal), minCredits, maxCredits) − engagementCreditCost`. Current policy (`AWARD_PRICING`): **pct 2.5%**, **floor 40**, **cap 250**. The engagement credits the winner already paid are credited toward the fee, so the winner's TOTAL cost to win equals the clamped fee (e.g. a $9,000 roof → fee 225 cr, 5 already paid → 220 cr charged on accept). A losing engager only ever paid the 5.
+- **Engagement (unlock chat) — flat.** A small `engagementCreditCost` (roofing: **1**), SNAPSHOT onto the lead at creation. Engaging gates ONLY on this — see §4.1.
+- **Win fee — a percentage of the accepted quote, computed AT ACCEPTANCE** (not a snapshot, so it scales with the real job value). `computeAwardCost()` = `clamp(round(pct × acceptedQuoteTotal), minCredits, maxCredits) − engagementCreditCost`. Current policy (`AWARD_PRICING`): **pct 2.5%**, **floor 30**, **cap 290**. The engagement credits the winner already paid are credited toward the fee, so the winner's TOTAL cost to win equals the clamped fee (e.g. a $9,000 roof → fee 225 cr, 1 already paid → 224 cr charged on accept). A losing engager only ever paid the 1.
 - `leads.award_credit_cost` is **deprecated** (kept at its 0 default); the win charge no longer reads it.
 
 ---

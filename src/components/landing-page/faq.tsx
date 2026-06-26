@@ -18,11 +18,11 @@ const FAQS: FaqItem[] = [
   },
   {
     q: "How fast will I hear back?",
-    a: "Usually within an hour. Matched roofers see your job the moment you post it, and most reach out the same day with a first estimate.",
+    a: "Matched roofers are notified the moment you post, so they can reach out as soon as they see it. You're always the one who chooses who to talk to.",
   },
   {
     q: "Are the roofers actually licensed and insured?",
-    a: "Yes. Every roofer shows us a valid license and proof of insurance before they can quote a single job, and we re-check it so you never have to chase paperwork.",
+    a: "Yes. Every roofer provides a license and proof of insurance, and our team reviews both before they can quote a single job. We keep them on file so you never have to chase paperwork.",
   },
   {
     q: "How many quotes will I get?",

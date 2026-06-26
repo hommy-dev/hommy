@@ -18,11 +18,19 @@ export async function offerToNextContractor(
   leadId: string,
 ): Promise<string | null> {
   const [lead] = await executor
-    .select({ status: leads.status, serviceId: leads.serviceId, lat: leads.lat, lng: leads.lng })
+    .select({
+      status: leads.status,
+      serviceId: leads.serviceId,
+      lat: leads.lat,
+      lng: leads.lng,
+      targetContractorId: leads.targetContractorId,
+    })
     .from(leads)
     .where(eq(leads.id, leadId))
     .limit(1)
   if (!lead || lead.status !== 'open' || lead.lat == null || lead.lng == null) return null
+  // Direct hire — a single-target request never cascades to other companies.
+  if (lead.targetContractorId) return null
 
   const existing = await executor
     .select({ contractorId: leadRecipients.contractorId })

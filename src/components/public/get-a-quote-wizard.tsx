@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { createLead } from "@/lib/actions/leads"
+import { createLead, requestDirectQuote } from "@/lib/actions/leads"
 import {
   checkEmailRegistered,
   startHomeownerGoogleSignup,
@@ -34,12 +34,15 @@ export function GetAQuoteWizard({
   initialWhere,
   isLoggedInHomeowner,
   loggedInName,
+  target = null,
 }: {
   subtypes: string[]
   initialSubtype: string
   initialWhere: string
   isLoggedInHomeowner: boolean
   loggedInName: string | null
+  /** Direct hire: when set, the request goes to this one contractor (not broadcast). */
+  target?: { slug: string; name: string; logoUrl: string | null } | null
 }) {
   const router = useRouter()
   const [pending, startSubmit] = useTransition()
@@ -202,7 +205,7 @@ export function GetAQuoteWizard({
         }
       }
 
-      const res = await createLead({
+      const base = {
         subtypes: selectedSubtypes,
         urgency,
         notes: notes.trim(),
@@ -214,7 +217,13 @@ export function GetAQuoteWizard({
         lat: place?.lat ?? null,
         lng: place?.lng ?? null,
         ...(isLoggedInHomeowner || signedIn ? {} : { fullName, email, phone }),
-      })
+      }
+
+      // Direct hire goes to one chosen contractor and lands in a 1:1 chat;
+      // otherwise it broadcasts. Both return the same ActionResult shape.
+      const res = target
+        ? await requestDirectQuote({ ...base, targetContractorSlug: target.slug })
+        : await createLead(base)
 
       if (!res.success) {
         // Email already belongs to an account — don't dead-end. Drop the user on
@@ -315,6 +324,23 @@ export function GetAQuoteWizard({
       </header>
 
       <main className="mx-auto bg-background flex w-full max-w-2xl lg:max-w-[45vw] flex-1 flex-col text-center px-6 lg:px-[1.667vw] py-10 lg:py-[2.778vw] rounded-lg lg:rounded-[1vw]">
+        {target ? (
+          <div className="mb-6 lg:mb-[1.667vw] flex items-center justify-center gap-2.5 lg:gap-[0.694vw] rounded-lg lg:rounded-[0.7vw] bg-muted/60 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
+            {target.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- arbitrary contractor logo URL
+              <img
+                src={target.logoUrl}
+                alt={target.name}
+                className="size-8 lg:size-[2.222vw] shrink-0 rounded-md object-cover ring-1 ring-foreground/10"
+              />
+            ) : null}
+            <span className="text-sm lg:text-[0.972vw] text-muted-foreground">
+              Requesting a quote from{" "}
+              <span className="font-semibold text-foreground">{target.name}</span>
+            </span>
+          </div>
+        ) : null}
+
         {current === "what" && (
           <WhatStep
             subtypes={subtypes}
@@ -398,7 +424,15 @@ export function GetAQuoteWizard({
           disabled={!canAdvance || pending}
           className="px-7 lg:px-[2.5vw] font-semibold"
         >
-          {!lastStep ? "Next" : pending ? "Posting…" : "Post & see matches"}
+          {!lastStep
+            ? "Next"
+            : pending
+              ? target
+                ? "Sending…"
+                : "Posting…"
+              : target
+                ? `Send to ${target.name}`
+                : "Post & see matches"}
         </Button>
       </footer>
 

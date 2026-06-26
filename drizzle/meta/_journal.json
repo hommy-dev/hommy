@@ -162,6 +162,27 @@
       "when": 1782380926905,
       "tag": "0022_support_platform_user",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1782387534202,
+      "tag": "0023_exotic_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1782450808841,
+      "tag": "0024_rls_lockdown",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1782451092588,
+      "tag": "0025_guest_signup_attempts",
+      "breakpoints": true
     }
   ]
 }

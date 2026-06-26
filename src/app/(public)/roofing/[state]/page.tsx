@@ -79,7 +79,7 @@ export default async function StateHubPage({
 
       <RoofingHero
         title={`Roofing contractors in ${data.state.name}`}
-        intro={`Licensed, insured, background-checked roofers serving ${data.state.name}. Free to post, no spam calls, and you only hear from the pros you choose.`}
+        intro={`Licensed and insured roofers serving ${data.state.name}. Free to post, no spam calls, and you only hear from the pros you choose.`}
         ctaHref={quoteHref}
       />
 

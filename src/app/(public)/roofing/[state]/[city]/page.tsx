@@ -110,7 +110,7 @@ export default async function CityPage({
         title={`Roofers in ${cityRow.name}, ${cityRow.stateCode}`}
         intro={
           cityRow.intro ??
-          `Compare licensed, insured, background-checked roofers serving ${cityRow.name}. Free to post, no spam calls, and you only hear from the pros you choose.`
+          `Compare licensed and insured roofers serving ${cityRow.name}. Free to post, no spam calls, and you only hear from the pros you choose.`
         }
         ctaHref={quoteHref}
         demand={

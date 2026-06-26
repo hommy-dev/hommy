@@ -27,7 +27,7 @@ export function OrganizationJsonLd() {
         url: SITE_URL,
         logo: absoluteUrl("/logo/logo.png"),
         description:
-          "Hommy connects homeowners with licensed, insured, background-checked local roofers.",
+          "Hommy connects homeowners with licensed and insured local roofers.",
       }}
     />
   )

@@ -31,9 +31,9 @@ export const AWARD_PRICING = {
   /** Fraction of the accepted quote total charged as the win fee. */
   pct: 0.025,
   /** Floor — the smallest possible win fee, in credits. */
-  minCredits: 40,
+  minCredits: 30,
   /** Cap — the largest possible win fee, in credits. */
-  maxCredits: 250,
+  maxCredits: 290,
 } as const
 
 // Keyed by `services.slug`. Roofing values match scripts/seed.ts so seeded and

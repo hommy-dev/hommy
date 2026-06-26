@@ -247,12 +247,9 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
       await postSystemMessage(winnerConvo, 'Quote accepted — you won the job! 🎉').catch(() => {})
     }
   }
-  await Promise.all(
-    outcome.loserProjectIds.map(async (pid) => {
-      const convo = await getProjectConversationId(pid)
-      if (convo) await postSystemMessage(convo, 'The homeowner accepted another contractor’s quote.').catch(() => {})
-    }),
-  )
+  // The "another contractor was selected" in-chat notice to EVERY losing project
+  // is an unbounded fan-out (no engage cap), so it runs in the quote-accepted
+  // Inngest job, not on the homeowner's accept click. See quote-accepted.ts.
 
   // Funnel: quote accepted = job won — the bottom of the money funnel. Attributed
   // to the accepting homeowner, grouped by the winning company so it closes that

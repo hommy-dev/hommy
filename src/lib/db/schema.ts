@@ -400,12 +400,17 @@ export const leads = pgTable('leads', {
   awardedTo: uuid('awarded_to').references(() => contractors.id, { onDelete: 'set null' }),
   awardedAt: timestamp('awarded_at', { withTimezone: true }),
   closedAt: timestamp('closed_at', { withTimezone: true }),
+  // Direct hire: when set, this lead was sent to exactly ONE chosen contractor
+  // (no broadcast fan-out, no cascade) — see requestDirectQuote. Null = the
+  // normal broadcast flow.
+  targetContractorId: uuid('target_contractor_id').references(() => contractors.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('leads_status_idx').on(t.status),
   index('leads_service_idx').on(t.serviceId),
   index('leads_homeowner_idx').on(t.homeownerId),
   index('leads_awarded_to_idx').on(t.awardedTo),
+  index('leads_target_contractor_idx').on(t.targetContractorId),
   index('leads_storm_event_idx').on(t.stormEventId),
   // Per-city demand aggregate for SEO city pages (filters on state/city/createdAt).
   index('leads_state_city_idx').on(t.state, t.city),
@@ -803,6 +808,19 @@ export const waitlist = pgTable('waitlist', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('waitlist_email_uq').on(t.email),
+])
+
+// guest_signup_attempts — a lightweight per-IP throttle for the frictionless
+// guest-homeowner auto-signup (post-a-job / direct-request without an account).
+// One row per attempt; count within a rolling window guards against mass
+// account-squatting/spam without changing the legit one-click flow. Best-effort
+// (fail-open): a throttle hiccup must never block a real homeowner.
+export const guestSignupAttempts = pgTable('guest_signup_attempts', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  ip: text('ip').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('guest_signup_attempts_ip_idx').on(t.ip, t.createdAt),
 ])
 
 // feature_interest — a logged-in user's "notify me / upvote" on a roadmap

@@ -10,13 +10,47 @@
 // verifyOtp) but write the v2 schema via provisionHomeowner().
 
 import { randomUUID } from 'node:crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq, gte, count } from 'drizzle-orm'
+import { headers } from 'next/headers'
 import { createClient as createSsrClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { provisionHomeowner } from '@/lib/auth/provisioning'
 import { normalizeToE164 } from '@/lib/phone/e164'
 import { db } from '@/lib/db'
-import { users } from '@/lib/db/schema'
+import { guestSignupAttempts, users } from '@/lib/db/schema'
+
+// Per-IP throttle for guest auto-signup: generous enough to never block a real
+// homeowner (even several behind one office/carrier NAT in an hour), tight enough
+// to stop scripted mass account-squatting.
+const GUEST_SIGNUP_MAX_PER_HOUR = 10
+const GUEST_SIGNUP_WINDOW_MS = 60 * 60 * 1000
+
+/**
+ * Records this attempt and returns true if the caller's IP is over the hourly
+ * limit. Best-effort: any failure fails OPEN (returns false) so a throttle
+ * hiccup never blocks a legitimate signup.
+ */
+async function isGuestSignupRateLimited(): Promise<boolean> {
+  try {
+    const h = await headers()
+    const ip = (h.get('x-forwarded-for')?.split(',')[0] ?? h.get('x-real-ip') ?? 'unknown').trim()
+    if (!ip || ip === 'unknown') return false // can't identify the client — don't block
+    await db.insert(guestSignupAttempts).values({ ip })
+    const [row] = await db
+      .select({ n: count() })
+      .from(guestSignupAttempts)
+      .where(
+        and(
+          eq(guestSignupAttempts.ip, ip),
+          gte(guestSignupAttempts.createdAt, new Date(Date.now() - GUEST_SIGNUP_WINDOW_MS)),
+        ),
+      )
+    return (row?.n ?? 0) > GUEST_SIGNUP_MAX_PER_HOUR
+  } catch (err) {
+    console.error('[guestHomeowner] rate-limit check failed (failing open)', err)
+    return false
+  }
+}
 
 export type GuestHomeownerInput = {
   fullName: string
@@ -28,7 +62,7 @@ export type GuestHomeownerResult =
   | { ok: true; userId: string }
   | {
       ok: false
-      error: 'EMAIL_IN_USE' | 'AUTH_CREATE_FAILED' | 'PROFILE_FAILED' | 'SESSION_FAILED'
+      error: 'RATE_LIMITED' | 'EMAIL_IN_USE' | 'AUTH_CREATE_FAILED' | 'PROFILE_FAILED' | 'SESSION_FAILED'
     }
 
 /**
@@ -43,6 +77,11 @@ export async function createGuestHomeowner(
   const fullName = input.fullName.trim()
   // Store E.164 so SMS works; fall back to the raw input if it won't parse.
   const phone = normalizeToE164(input.phone) ?? input.phone.trim()
+
+  // Abuse guard: stop scripted mass creation of confirmed accounts from one IP.
+  if (await isGuestSignupRateLimited()) {
+    return { ok: false, error: 'RATE_LIMITED' }
+  }
 
   const admin = createAdminClient()
 
