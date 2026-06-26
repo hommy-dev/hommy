@@ -23,6 +23,7 @@ export function CompareQuotesScene() {
 
   useEffect(() => {
     if (reduce) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- seed final state (also covers reduced-motion resolving after mount)
       setPicked(true)
       return
     }

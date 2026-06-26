@@ -43,10 +43,11 @@ const CARD_DELAY = 0.55
 
 export function MatchProsScene() {
   const reduce = useReducedMotion()
-  const [matched, setMatched] = useState(false)
+  const [, setMatched] = useState(false)
 
   useEffect(() => {
     if (reduce) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- seed final state (also covers reduced-motion resolving after mount)
       setMatched(true)
       return
     }

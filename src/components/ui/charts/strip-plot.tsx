@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils"
-
 export type StripPoint = { score: number; isSelf: boolean }
 
 /**

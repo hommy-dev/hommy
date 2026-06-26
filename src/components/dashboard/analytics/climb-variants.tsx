@@ -176,8 +176,10 @@ export function HowToClimbCards() {
         <p className="mt-1 lg:mt-[0.278vw] max-w-2xl text-sm lg:text-[0.903vw] text-muted-foreground">{INTRO}</p>
       </div>
       <div className="grid gap-4 lg:gap-[1.111vw] md:grid-cols-2">
+        {/* eslint-disable react-hooks/static-components -- Card is presentational (props only); the inline definition is intentional here */}
         <Card label="Grow your score" sub={`Up to ${signed(possible)} per job`} icon="arrow-up" tone="earn" items={EARN} />
         <Card label="Protect your score" sub="Avoid these" icon="shield-done" tone="lose" items={LOSE} />
+        {/* eslint-enable react-hooks/static-components */}
       </div>
     </section>
   )

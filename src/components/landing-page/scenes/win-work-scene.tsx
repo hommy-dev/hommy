@@ -14,6 +14,7 @@ export function WinWorkScene() {
 
   useEffect(() => {
     if (reduce) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- seed final state (also covers reduced-motion resolving after mount)
       setStars(5)
       return
     }

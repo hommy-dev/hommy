@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated test-coverage report — build output, never lint it.
+    "coverage/**",
     // Standalone Sanity Studio — has its own toolchain/config.
     "studio-hommy/**",
   ]),

@@ -37,7 +37,7 @@
 
 import 'dotenv/config'
 import { createHash } from 'node:crypto'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { eq, inArray, sql } from 'drizzle-orm'
 import { db } from '../src/lib/db'
 import {
   services,

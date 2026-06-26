@@ -58,7 +58,9 @@ export async function GET(request: Request): Promise<Response> {
         }}
       >
         {/* Full-bleed hero photo */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse (satori) requires a raw <img>, not next/image */}
         <img
+          alt=""
           src={HERO_DATA_URI}
           width={1200}
           height={630}

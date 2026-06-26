@@ -80,6 +80,7 @@ export function JobsTable({ jobs }: { jobs: Job[] }) {
   // Remember the chosen layout across visits.
   useEffect(() => {
     const v = localStorage.getItem("jobs-view");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restore the persisted layout choice on mount
     if (v === "table" || v === "cards" || v === "kanban") setView(v);
   }, []);
   function changeView(next: ViewMode) {

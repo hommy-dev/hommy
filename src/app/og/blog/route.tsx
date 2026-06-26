@@ -18,7 +18,6 @@ import { sebentaFonts, LOGO_PATHS, HERO_DATA_URI } from "@/lib/og-assets";
 // hard at the CDN (headers below).
 
 const WHITE = "#ffffff"; // headline + brand wordmark
-const SOFT = "#eef0ff"; // secondary text (faint lavender-white)
 const ACCENT = "#cdbcff"; // light indigo for the eyebrow + dot
 
 const PAD_X = 70; // horizontal content inset
@@ -47,7 +46,9 @@ export async function GET(request: Request): Promise<Response> {
         }}
       >
         {/* Full-bleed hero photo */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- ImageResponse (satori) requires a raw <img>, not next/image */}
         <img
+          alt=""
           src={HERO_DATA_URI}
           width={1200}
           height={630}

@@ -14,6 +14,7 @@ export function QuoteChatScene() {
 
   useEffect(() => {
     if (reduce) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- seed final state (also covers reduced-motion resolving after mount)
       setAccepted(true)
       return
     }
@@ -49,7 +50,7 @@ export function QuoteChatScene() {
             className="max-w-[78%] rounded-md rounded-br-sm px-3 py-2 text-[11px] text-primary-foreground lg:rounded-[0.45vw] lg:px-[0.8vw] lg:py-[0.55vw] lg:text-[0.8vw]"
             style={{ backgroundColor: "#1f00ce" }}
           >
-            Absolutely — here's my quote 👇
+            Absolutely — here&apos;s my quote 👇
           </span>
         </motion.div>
 

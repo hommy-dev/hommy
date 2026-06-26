@@ -104,10 +104,10 @@ function ContractorDetailDialog({
 
   useEffect(() => {
     if (!open || !contractor) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset panel state when the opened contractor changes
     setDetail(null);
     setGrantAmount("");
     reload(contractor.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, contractor]);
 
   function verify(decision: "verified" | "rejected") {

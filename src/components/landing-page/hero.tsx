@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { HeroTrust } from "@/components/public/hero-trust";
 import { Icon } from "@/components/ui/icon";
 
 // ⬇ SWAP THIS for your real home/roof photo: drop it in public/bg/ and change
@@ -31,8 +30,6 @@ export function Hero() {
           Get free quotes from licensed and insured local roofers and only
           hear from the pros you choose.
         </p>
-
-        {/* <HeroTrust className="mt-7 lg:mt-[2vw] w-full max-w-2xl lg:max-w-[46.662vw]" /> */}
 
         <Link
           href="/get-a-quote"
