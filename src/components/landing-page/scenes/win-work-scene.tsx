@@ -93,7 +93,7 @@ export function WinWorkScene() {
           {...fade(0.8)}
         >
           <Icon name="wallet" className="size-4 lg:size-[1.1vw]" />
-          Full fee charged only now — when you won the job
+          Full fee charged only now, when you won the job
         </motion.div>
       </div>
     </SceneStage>

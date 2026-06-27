@@ -62,7 +62,7 @@ async function VerificationBody() {
   return (
     <SettingsSection
       title="Verification"
-      description="License and insurance — required before you can engage leads."
+      description="License and insurance. Required before you can engage leads."
       action={
         canManage && state !== "verified" ? (
           <EditVerificationDialog
@@ -89,7 +89,7 @@ async function VerificationBody() {
 
         {state === "verified" ? (
           <div className="rounded-md lg:rounded-[0.556vw] border border-secondary/40 bg-secondary/15 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-foreground/75">
-            You’re verified — set to engage leads and send quotes.
+            You’re verified. Set to engage leads and send quotes.
           </div>
         ) : state === "rejected" ? (
           <div className="rounded-md lg:rounded-[0.556vw] border border-destructive/30 bg-destructive/5 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-destructive">

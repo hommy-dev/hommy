@@ -13,7 +13,7 @@ const SAMPLE_LEAD: EmailContent = {
   preheader: 'A new roofing job near Plano just matched your coverage area.',
   heading: 'New roofing job near you',
   intro:
-    'A homeowner in <strong>Plano, TX</strong> just posted a job that matches your coverage area. Receiving it is free — start the conversation when it looks like a fit.',
+    'A homeowner in <strong>Plano, TX</strong> just posted a job that matches your coverage area. Receiving it is free, so start the conversation when it looks like a fit.',
   highlight: {
     label: 'Job details',
     rows: [
@@ -31,7 +31,7 @@ const SAMPLE_WELCOME: EmailContent = {
   preheader: "Your account is ready and we've added 300 credits to get you started.",
   heading: 'Welcome to Hommy',
   intro:
-    "Your account is ready — and we've added <strong>300 credits</strong> to your wallet to get you started.",
+    "Your account is ready, and we've added <strong>300 credits</strong> to your wallet to get you started.",
   highlight: {
     label: 'Your starting credits',
     rows: [
@@ -52,10 +52,10 @@ const SAMPLE_WELCOME: EmailContent = {
 }
 
 const SAMPLE_QUOTE: EmailContent = {
-  preheader: 'Sarah M. approved your quote — the job is yours.',
+  preheader: 'Sarah M. approved your quote. The job is yours.',
   heading: 'Your quote was accepted',
   intro:
-    '<strong>Sarah M.</strong> just accepted your quote for the roof replacement in Plano. Nice work — the job is yours.',
+    '<strong>Sarah M.</strong> just accepted your quote for the roof replacement in Plano. Nice work, the job is yours.',
   highlight: {
     rows: [
       { label: 'Job', value: 'Roof replacement' },

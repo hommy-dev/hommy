@@ -8,7 +8,7 @@ import { GetAQuoteWizard } from "@/components/public/get-a-quote-wizard"
 export const metadata: Metadata = {
   title: "Get a Free Roofing Quote",
   description:
-    "Tell us about your roof and get matched with licensed, insured local roofers. Free to post, no obligation, no spam calls — you choose who you talk to.",
+    "Tell us about your roof and get matched with licensed, insured local roofers. Free to post, no obligation, no spam calls. You choose who you talk to.",
   alternates: { canonical: "/get-a-quote" },
 }
 

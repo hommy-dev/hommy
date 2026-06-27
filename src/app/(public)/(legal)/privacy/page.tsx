@@ -133,7 +133,7 @@ export default function PrivacyPolicyPage() {
 
       <h2>5. Cookies and Similar Technologies</h2>
       <p>
-        We use <strong>essential</strong> cookies to run the Platform — sign-in, security, and
+        We use <strong>essential</strong> cookies to run the Platform: sign-in, security, and
         remembering your session and preferences. These are always active because the Platform cannot
         function without them.
       </p>

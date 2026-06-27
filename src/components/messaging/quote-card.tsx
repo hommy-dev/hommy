@@ -49,7 +49,7 @@ export function QuoteCard({
     start(async () => {
       const res = await acceptEstimate(meta.estimateId);
       if (res.ok) {
-        showToast("Quote accepted — you're hired!", { type: "success" });
+        showToast("Quote accepted. You're hired!", { type: "success" });
         router.refresh();
       } else {
         showToast(res.message, { type: "error" });

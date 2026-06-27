@@ -582,7 +582,7 @@ export async function signupAndAcceptInvitation(input: unknown): Promise<Result>
   if (createErr || !created.user) {
     const msg = (createErr?.message ?? '').toLowerCase()
     if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
-      return { success: false, error: 'You already have an account — sign in to accept.' }
+      return { success: false, error: 'You already have an account. Sign in to accept.' }
     }
     console.error('[signupAndAcceptInvitation] create-user failed', createErr)
     return { success: false, error: 'Could not create your account. Please try again.' }
@@ -605,7 +605,7 @@ export async function signupAndAcceptInvitation(input: unknown): Promise<Result>
   const ssr = await createClient()
   const { error: signInErr } = await ssr.auth.signInWithPassword({ email, password })
   if (signInErr) {
-    return { success: false, error: 'Account created — please sign in to continue.' }
+    return { success: false, error: 'Account created. Please sign in to continue.' }
   }
 
   return { success: true }

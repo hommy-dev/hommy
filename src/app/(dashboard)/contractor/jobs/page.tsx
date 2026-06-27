@@ -15,7 +15,7 @@ export default function JobsPage() {
           Jobs
         </h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Every lead in one place — from a new request to a finished job. Start a
+          Every lead in one place, from a new request to a finished job. Start a
           chat to win it.
         </p>
       </header>

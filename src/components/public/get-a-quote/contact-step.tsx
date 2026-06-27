@@ -44,7 +44,7 @@ export function ContactStep({
     return (
       <WizardStep
         title="You're all set"
-        sub="You're signed in — review your details and post your job."
+        sub="You're signed in. Review your details and post your job."
       >
         <IdentityCard
           eyebrow="Signed in"
@@ -106,7 +106,7 @@ export function ContactStep({
               className="mt-0.5"
             />
             <span>
-              Text me updates about my request. Optional — reply STOP anytime. Standard
+              Text me updates about my request. Optional: reply STOP anytime. Standard
               message &amp; data rates may apply.
             </span>
           </label>

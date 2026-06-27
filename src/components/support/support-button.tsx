@@ -65,7 +65,7 @@ export function SupportButton({ basePath }: { basePath: string }) {
         showToast(res.error, { type: "error" })
         return
       }
-      showToast("Sent — we'll reply in your inbox.", { type: "success" })
+      showToast("Sent. We'll reply in your inbox.", { type: "success" })
       setOpen(false)
       reset()
       router.push(`${basePath}/${res.data.conversationId}`)

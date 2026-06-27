@@ -63,7 +63,7 @@ const MESSAGES: Record<EngageError, string> = {
   NO_COMPANY: 'Set up your company before engaging leads.',
   NOT_VERIFIED: 'Verify your business to engage leads.',
   NOT_OFFERED: 'This lead is no longer available to you.',
-  LEAD_LOCKED: 'This lead is no longer open — it has already been awarded.',
+  LEAD_LOCKED: 'This lead is no longer open. It has already been awarded.',
   ALREADY_ENGAGED: 'You have already engaged this lead.',
   INSUFFICIENT_CREDITS: 'Not enough credits. Top up to engage this lead.',
   DB_ERROR: 'Could not engage this lead. Please try again.',

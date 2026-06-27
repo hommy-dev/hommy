@@ -43,8 +43,8 @@ export const ROOFING_SUBTYPE_PAGES: RoofingSubtypePage[] = [
       `Planning a full re-roof in ${city}? Compare licensed roofers for a tear-off and replacement. See their ratings, ask about materials like asphalt, metal, and tile, and get free quotes before you commit.`,
     faq: [
       { q: "How much does a new roof cost?", a: "It depends on size, pitch, and material. Asphalt shingle is the most affordable; metal and tile cost more but last longer. Compare a few quotes to gauge a fair price for your home." },
-      { q: "How long does a roof replacement take?", a: "Most residential re-roofs take 1–3 days, weather permitting." },
-      { q: "When do I need a full replacement?", a: "Widespread granule loss, sagging, repeated leaks, or a roof past ~20–25 years usually point to replacement over repeated repairs." },
+      { q: "How long does a roof replacement take?", a: "Most residential re-roofs take 1 to 3 days, weather permitting." },
+      { q: "When do I need a full replacement?", a: "Widespread granule loss, sagging, repeated leaks, or a roof past ~20 to 25 years usually point to replacement over repeated repairs." },
     ],
   },
   {

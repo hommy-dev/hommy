@@ -91,7 +91,7 @@ function SettingsForm({
       <div className="space-y-3 lg:space-y-[0.833vw]">
         <Row
           title="Necessary"
-          desc="Required to run the site — sign-in, security, your session. Always on."
+          desc="Required to run the site: sign-in, security, your session. Always on."
         >
           <Switch checked disabled aria-label="Necessary cookies (always on)" />
         </Row>

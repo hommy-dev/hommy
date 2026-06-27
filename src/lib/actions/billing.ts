@@ -117,7 +117,7 @@ async function notifyAdminsOfPurchaseIntent(args: {
       ],
     },
     paragraphs: [
-      "Payments aren't live yet — reach out, take payment, then grant the credits from the admin panel.",
+      "Payments aren't live yet. Reach out, take payment, then grant the credits from the admin panel.",
     ],
     cta: { label: 'Open admin panel', url: '/admin' },
   })

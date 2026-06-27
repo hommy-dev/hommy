@@ -12,7 +12,7 @@ import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
 import { SanityLive } from "@/sanity/live";
 import { Suspense } from "react";
 
-const DEFAULT_TITLE = "Hommy — Find a roofer you can actually trust";
+const DEFAULT_TITLE = "Hommy: Find a roofer you can actually trust";
 const DEFAULT_DESCRIPTION =
   "Hommy connects homeowners with licensed and insured local roofers. Free to post a job, no spam calls, and you choose the roofers you talk to.";
 

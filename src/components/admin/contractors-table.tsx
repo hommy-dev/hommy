@@ -217,7 +217,7 @@ function ContractorDetailDialog({
               </Button>
             </div>
             <p className="text-xs lg:text-[0.764vw] text-muted-foreground">
-              Recorded as an admin adjustment in the ledger — used to settle offline payments.
+              Recorded as an admin adjustment in the ledger, used to settle offline payments.
             </p>
           </section>
 

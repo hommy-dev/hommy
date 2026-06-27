@@ -24,14 +24,14 @@ export function ReferralCard({
       showToast("Referral link copied", { type: "success" })
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      showToast("Couldn't copy — select and copy manually", { type: "error" })
+      showToast("Couldn't copy. Select and copy manually", { type: "error" })
     }
   }
 
   return (
     <section className="rounded-2xl border border-border bg-card p-6">
       <h2 className="font-sebenta text-xl font-bold text-foreground">
-        Refer a roofer — you both get 25 credits
+        Refer a roofer. You both get 25 credits
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Share your link. When a roofer you refer signs up and gets verified, you each get

@@ -141,9 +141,9 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
     year: 'numeric',
   }).format(expiresAt)
   const html = renderEmail({
-    preheader: `Your account is ready — we've added ${total} credits to get you started.`,
+    preheader: `Your account is ready. We've added ${total} credits to get you started.`,
     heading: 'Welcome to Hommy',
-    intro: `Your account is ready — and we've added <strong>${total} credits</strong> to your wallet to get you started.`,
+    intro: `Your account is ready, and we've added <strong>${total} credits</strong> to your wallet to get you started.`,
     highlight: {
       label: 'Your starting credits',
       rows: [
@@ -166,7 +166,7 @@ async function sendContractorWelcome({ userId, expiresAt }: { userId: string; ex
     userId,
     type: 'SYSTEM',
     title: 'Welcome to Hommy 👋',
-    body: `You've got ${total} credits to start. Receiving leads is free — you only pay 1 credit to start a chat, and the win fee when a homeowner accepts your quote.`,
+    body: `You've got ${total} credits to start. Receiving leads is free. You only pay 1 credit to start a chat, and the win fee when a homeowner accepts your quote.`,
     actionUrl: '/contractor',
     emailHtml: html,
     dedupKey: `welcome:${userId}`,

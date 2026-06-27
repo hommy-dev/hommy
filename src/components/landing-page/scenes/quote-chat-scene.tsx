@@ -50,7 +50,7 @@ export function QuoteChatScene() {
             className="max-w-[78%] rounded-md rounded-br-sm px-3 py-2 text-[11px] text-primary-foreground lg:rounded-[0.45vw] lg:px-[0.8vw] lg:py-[0.55vw] lg:text-[0.8vw]"
             style={{ backgroundColor: "#1f00ce" }}
           >
-            Absolutely — here&apos;s my quote 👇
+            Absolutely. Here&apos;s my quote 👇
           </span>
         </motion.div>
 
@@ -71,7 +71,7 @@ export function QuoteChatScene() {
           </div>
           <div className="px-3 py-2 lg:px-[0.8vw] lg:py-[0.55vw]">
             <span className="text-[10px] text-muted-foreground lg:text-[0.74vw]">
-              Full roof replacement · Asphalt · 3–4 days
+              Full roof replacement · Asphalt · 3-4 days
             </span>
             <motion.div
               className="mt-2 flex items-center justify-center gap-1.5 rounded-sm py-1.5 text-[11px] font-semibold lg:mt-[0.6vw] lg:py-[0.5vw] lg:text-[0.8vw]"

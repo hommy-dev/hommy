@@ -67,7 +67,7 @@ export function AnnouncementBar() {
         return;
       }
       setJoined(true);
-      showToast("You're on the list — we'll email you at launch.", { type: "success" });
+      showToast("You're on the list. We'll email you at launch.", { type: "success" });
     });
   }
 
@@ -79,7 +79,7 @@ export function AnnouncementBar() {
             <Icon name="logo" className="hidden shrink-0 text-primary sm:block size-4 lg:size-[1.3vw]" />
             <p className="min-w-0 flex-1 text-[13px] leading-snug lg:text-[1vw]">
               <span className="font-semibold">Hommy is in early access.</span>{" "}
-              <span className="">Still building — full launch in about a month.</span>
+              <span className="">Still building. Full launch in about a month.</span>
             </p>
             <button
               type="button"
@@ -118,7 +118,7 @@ export function AnnouncementBar() {
           {joined ? (
             <div className="flex items-center gap-2 rounded-md bg-success/10 p-3 text-sm text-success lg:gap-[0.556vw] lg:p-[0.833vw] lg:text-[0.9vw]">
               <Icon name="tick-square" className="size-5 shrink-0 lg:size-[1.2vw]" />
-              You&apos;re on the list — we&apos;ll email you at launch.
+              You&apos;re on the list. We&apos;ll email you at launch.
             </div>
           ) : (
             <div className="space-y-1.5 lg:space-y-[0.417vw]">

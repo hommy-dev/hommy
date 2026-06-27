@@ -151,7 +151,7 @@ export function BlogIndex({
       <div className="mt-12 lg:mt-[4vw]">
         {filtered.length === 0 ? (
           <p className="py-20 text-center text-muted-foreground lg:py-[5.556vw]">
-            {query ? `No articles match “${query}”.` : "No posts here yet — check back soon."}
+            {query ? `No articles match “${query}”.` : "No posts here yet. Check back soon."}
           </p>
         ) : (
           <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-[1.667vw] lg:gap-y-[3.333vw]">

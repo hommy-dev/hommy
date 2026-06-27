@@ -18,7 +18,7 @@ const STORIES: Record<Audience, Step[]> = {
     {
       icon: "edit",
       title: "Tell us about your project",
-      detail: "A few quick details — about two minutes.",
+      detail: "A few quick details, about two minutes.",
     },
     {
       icon: "search",

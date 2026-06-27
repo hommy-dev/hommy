@@ -22,7 +22,7 @@ const EVENT_COPY: Record<ScoreEventKind, EventCopy> = {
   },
   lead_ignored_with_reason: {
     title: 'Declined a lead',
-    blurb: "You passed and told us why — that's fine, it keeps the pipeline honest.",
+    blurb: "You passed and told us why. That's fine, it keeps the pipeline honest.",
   },
   lead_ignored_no_reason: {
     title: 'Declined without a reason',

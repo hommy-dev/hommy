@@ -15,7 +15,7 @@ export default async function AdminCreditsPage() {
           Credit requests
         </h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Card payments aren&apos;t live yet — settle these by hand. Take payment offline, then grant the
+          Card payments aren&apos;t live yet. Settle these by hand. Take payment offline, then grant the
           credits to fulfill the request.{" "}
           {pending > 0
             ? `${pending} request${pending === 1 ? "" : "s"} waiting.`

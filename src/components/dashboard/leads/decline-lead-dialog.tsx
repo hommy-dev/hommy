@@ -70,7 +70,7 @@ export function DeclineLeadDialog({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={3}
-          placeholder="Reason (optional) — e.g. outside our area, too busy…"
+          placeholder="Reason (optional): e.g. outside our area, too busy…"
           className="w-full resize-none rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
         />
         <DialogFooter>

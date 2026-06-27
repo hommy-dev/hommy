@@ -22,7 +22,7 @@ export default async function ReviewPage({
         ) : view.submitted ? (
           <Notice
             title="Thanks for your review"
-            body="Your feedback has been recorded — it helps other homeowners choose with confidence."
+            body="Your feedback has been recorded. It helps other homeowners choose with confidence."
           />
         ) : (
           <>

@@ -34,7 +34,7 @@ export function WhatStep({
   return (
     <WizardStep
       title="What's going on with your roof?"
-      sub="Pick all that apply — or choose “Not sure” and a roofer will take a look."
+      sub="Pick all that apply, or choose “Not sure” and a roofer will take a look."
     >
       <WizardField label="Type of work">
         <div className="grid gap-3 lg:gap-[0.833vw] sm:grid-cols-2">
@@ -89,7 +89,7 @@ export function WhatStep({
       </WizardField>
 
       <WizardField
-        label="Add photos — optional, but recommended"
+        label="Add photos (optional, but recommended)"
         hint="Roofers can quote faster and more accurately when they can see the problem. Add up to 8 (they upload when you post)."
       >
         <LocalFilePicker

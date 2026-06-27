@@ -46,7 +46,7 @@ export const quoteAccepted = inngest.createFunction(
       await sendNotification({
         userId: row.homeownerUserId,
         type: 'ESTIMATE',
-        title: 'You’re hired — quote accepted',
+        title: 'You’re hired. Quote accepted',
         body: `You accepted ${row.companyName ?? 'your contractor'}’s quote. They’ll be in touch to schedule the work.`,
         actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner',
         entityType: 'ESTIMATE',
@@ -71,7 +71,7 @@ export const quoteAccepted = inngest.createFunction(
         const wallet =
           typeof winnerBalanceAfter === 'number'
             ? winnerBalanceAfter < 0
-              ? ` · you owe ${Math.abs(winnerBalanceAfter)} — top up to take new leads`
+              ? ` · you owe ${Math.abs(winnerBalanceAfter)}. Top up to take new leads`
               : ` · ${winnerBalanceAfter} left`
             : ''
         body = `The homeowner accepted your quote. ${fee}${wallet}. Open the job to get started.`

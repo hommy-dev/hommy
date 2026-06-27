@@ -244,7 +244,7 @@ async function performAccept(estimateId: string, expectedHomeownerId: string | n
         actorId: hoRow.userId,
       }).catch(() => {})
     } else {
-      await postSystemMessage(winnerConvo, 'Quote accepted — you won the job! 🎉').catch(() => {})
+      await postSystemMessage(winnerConvo, 'Quote accepted. You won the job! 🎉').catch(() => {})
     }
   }
   // The "another contractor was selected" in-chat notice to EVERY losing project

@@ -12,7 +12,7 @@ export default async function AdminContractorsPage() {
       <header>
         <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">Contractors</h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          All companies — verification, members, and credits. Open one to verify it or grant credits.
+          All companies: verification, members, and credits. Open one to verify it or grant credits.
         </p>
       </header>
 

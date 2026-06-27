@@ -14,7 +14,7 @@ export default function ContactsPage() {
           Contacts
         </h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Homeowners you&apos;ve connected with — their jobs, your tags, and private notes.
+          Homeowners you&apos;ve connected with: their jobs, your tags, and private notes.
         </p>
       </header>
 

@@ -107,7 +107,7 @@ export function PushNotificationsManager() {
             Enable browser notifications
           </p>
           <p className="text-xs lg:text-[0.833vw] leading-snug text-muted-foreground">
-            Get a desktop alert when a new lead, quote, or message arrives — even
+            Get a desktop alert when a new lead, quote, or message arrives, even
             when this tab is closed.
           </p>
           <p className="text-[11px] lg:text-[0.764vw] leading-snug text-muted-foreground/80">

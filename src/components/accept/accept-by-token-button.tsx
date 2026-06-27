@@ -15,7 +15,7 @@ export function AcceptByTokenButton({ token }: { token: string }) {
     start(async () => {
       const res = await acceptEstimateByToken(token);
       if (res.ok) {
-        showToast("Quote accepted — you're all set!", { type: "success" });
+        showToast("Quote accepted. You're all set!", { type: "success" });
         router.refresh();
       } else {
         showToast(res.message, { type: "error" });

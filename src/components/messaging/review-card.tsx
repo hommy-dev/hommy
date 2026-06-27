@@ -44,7 +44,7 @@ export function ReviewCard({
           <div className="mt-3 lg:mt-[0.833vw] space-y-1 lg:space-y-[0.278vw]">
             {rating > 0 ? <Stars rating={rating} starClassName="lg:size-[1.111vw]" /> : null}
             <p className="text-xs lg:text-[0.833vw] text-muted-foreground">
-              Thanks for your feedback — it helps other homeowners choose.
+              Thanks for your feedback. It helps other homeowners choose.
             </p>
           </div>
         ) : isHomeowner ? (

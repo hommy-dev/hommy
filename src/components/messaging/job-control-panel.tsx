@@ -33,7 +33,7 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
     start(async () => {
       const res = await acceptEstimate(quote.estimateId);
       if (res.ok) {
-        showToast("Quote accepted — you're hired!", { type: "success" });
+        showToast("Quote accepted. You're hired!", { type: "success" });
         router.refresh();
       } else {
         showToast(res.message, { type: "error" });
@@ -46,7 +46,7 @@ export function JobControlPanel({ panel }: { panel: JobPanel }) {
     start(async () => {
       const res = await advanceProjectStage(detail.projectId!, "completed");
       if (res.ok) {
-        showToast("Marked completed — we’ll ask the homeowner for a review.", { type: "success" });
+        showToast("Marked completed. We’ll ask the homeowner for a review.", { type: "success" });
         router.refresh();
       } else {
         showToast(res.message, { type: "error" });

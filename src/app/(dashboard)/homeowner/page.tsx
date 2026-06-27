@@ -24,7 +24,7 @@ function summary(r: HomeownerLead): string {
   if (r.quoteCount > 0)
     return `${r.quoteCount} quote${
       r.quoteCount === 1 ? "" : "s"
-    } in — review and choose.`;
+    } in. Review and choose.`;
   if (r.interestedCount > 0)
     return `${r.interestedCount} roofer${
       r.interestedCount === 1 ? " is" : "s are"

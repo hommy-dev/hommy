@@ -89,7 +89,7 @@ export function ContractorSignupForm({ referralCode }: { referralCode?: string }
       </p>
       {referralCode && (
         <p className="mt-3 lg:mt-[0.833vw] rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-[13px] lg:text-[0.903vw] text-primary">
-          🎁 You were referred — you both get <strong>25 bonus credits</strong> once you&apos;re verified.
+          🎁 You were referred. You both get <strong>25 bonus credits</strong> once you&apos;re verified.
         </p>
       )}
 

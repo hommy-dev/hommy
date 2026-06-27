@@ -29,7 +29,7 @@ export function PortfolioManager({
         </p>
         {atCap ? (
           <span className="text-xs lg:text-[0.833vw] text-muted-foreground">
-            Plan limit reached — upgrade to add more.
+            Plan limit reached. Upgrade to add more.
           </span>
         ) : (
           <AddCaseStudyDialog subtypes={subtypes} />

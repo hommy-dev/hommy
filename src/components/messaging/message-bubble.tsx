@@ -29,8 +29,8 @@ function eventText(
   switch (meta.event) {
     case 'quote_accepted':
       return mine
-        ? 'You accepted this quote — you’re hired! 🎉'
-        : `${otherName} accepted your quote — you won the job! 🎉`
+        ? 'You accepted this quote. You’re hired! 🎉'
+        : `${otherName} accepted your quote. You won the job! 🎉`
     case 'job_completed':
       return mine ? 'You marked the job as completed.' : `${otherName} marked the job as completed.`
     case 'quote_superseded':

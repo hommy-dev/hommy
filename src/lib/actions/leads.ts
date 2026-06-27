@@ -161,8 +161,8 @@ export async function createLead(
       if (guest.error === 'EMAIL_IN_USE') {
         return {
           success: false,
-          error: 'You already have an account — please sign in to post this job.',
-          fieldErrors: { email: 'Already registered — sign in instead' },
+          error: 'You already have an account. Please sign in to post this job.',
+          fieldErrors: { email: 'Already registered. Sign in instead' },
         }
       }
       if (guest.error === 'RATE_LIMITED') {
@@ -423,8 +423,8 @@ export async function requestDirectQuote(
       if (guest.error === 'EMAIL_IN_USE') {
         return {
           success: false,
-          error: 'You already have an account — please sign in to send this request.',
-          fieldErrors: { email: 'Already registered — sign in instead' },
+          error: 'You already have an account. Please sign in to send this request.',
+          fieldErrors: { email: 'Already registered. Sign in instead' },
         }
       }
       if (guest.error === 'RATE_LIMITED') {

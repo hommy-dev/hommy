@@ -74,7 +74,7 @@ export function BuyCreditsDialog({ triggerClassName }: { triggerClassName?: stri
               </DialogTitle>
               <DialogDescription>
                 Card payments aren&apos;t live on Hommy just yet. We&apos;ve logged your request for{" "}
-                <strong>{credits} credits</strong> ({formatCents(amountCents)}) and pinged the team — we&apos;ll
+                <strong>{credits} credits</strong> ({formatCents(amountCents)}) and pinged the team. We&apos;ll
                 reach out shortly to get you topped up.
               </DialogDescription>
             </DialogHeader>
@@ -140,7 +140,7 @@ export function BuyCreditsDialog({ triggerClassName }: { triggerClassName?: stri
                   max={MAX_CUSTOM_CREDITS}
                   value={Number.isFinite(credits) ? credits : ""}
                   onChange={(e) => setCredits(Math.floor(Number(e.target.value)))}
-                  placeholder={`${MIN_CUSTOM_CREDITS}–${MAX_CUSTOM_CREDITS} credits`}
+                  placeholder={`${MIN_CUSTOM_CREDITS}-${MAX_CUSTOM_CREDITS} credits`}
                   className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
                 />
               ) : null}

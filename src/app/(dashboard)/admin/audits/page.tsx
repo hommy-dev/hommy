@@ -12,7 +12,7 @@ export default async function AdminAuditsPage() {
       <header>
         <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">Audit log</h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Every credit movement across the platform — grants, spends, refunds, and expiries.
+          Every credit movement across the platform: grants, spends, refunds, and expiries.
         </p>
       </header>
 

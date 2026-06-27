@@ -18,7 +18,7 @@ import {
 } from "@/lib/support/constants"
 
 const WELCOME =
-  "👋 Welcome to Hommy Support. Ask us anything, report a problem, or suggest a feature — we usually reply within a day."
+  "👋 Welcome to Hommy Support. Ask us anything, report a problem, or suggest a feature. We usually reply within a day."
 
 // 'HOM-' + 6 uppercase base36 chars; the unique index is the real guard.
 function genRef(): string {

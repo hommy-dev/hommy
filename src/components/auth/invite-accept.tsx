@@ -97,7 +97,7 @@ export function InviteAccept({
       <Wrap companyName={companyName} role={role}>
         {mismatch ? (
           <p className="mb-4 lg:mb-[1.111vw] text-[13px] lg:text-[0.903vw] text-muted-foreground">
-            Sent to {inviteEmail} — you’ll join as{" "}
+            Sent to {inviteEmail}. You’ll join as{" "}
             <span className="font-medium text-foreground">{viewerEmail}</span>.
           </p>
         ) : null}

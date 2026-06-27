@@ -70,7 +70,7 @@ export const reviewRequest = inngest.createFunction(
         userId: homeowner.userId,
         type: 'REVIEW',
         title: `How was ${companyName}?`,
-        body: 'Leave a quick review of the work — it helps other homeowners choose.',
+        body: 'Leave a quick review of the work. It helps other homeowners choose.',
         actionUrl: `/review/${token}`,
         entityType: 'REVIEW',
         entityId: projectId,

@@ -137,7 +137,7 @@ export function LoginForm() {
           <p className="text-sm lg:text-[0.972vw] leading-relaxed text-muted-foreground">
             We couldn&rsquo;t find a Hommy account for{" "}
             <span className="font-medium text-foreground">{email.trim()}</span>.
-            Pick what fits you to create one — it takes about two minutes.
+            Pick what fits you to create one. It takes about two minutes.
           </p>
         </div>
 

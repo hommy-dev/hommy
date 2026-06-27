@@ -93,7 +93,7 @@ export default async function AdminSettingsPage() {
       <header>
         <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">Settings</h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Platform configuration. These values live in code (version-controlled) — change them there, deploy, and they update here.
+          Platform configuration. These values live in code (version-controlled). Change them there, deploy, and they update here.
         </p>
       </header>
 

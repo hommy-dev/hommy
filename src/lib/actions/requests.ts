@@ -69,7 +69,7 @@ export async function closeRequest(leadId: string): Promise<CloseRequestResult> 
     })
 
     if (result === 'NOT_FOUND') return { ok: false, message: 'That job no longer exists.' }
-    if (result === 'AWARDED') return { ok: false, message: 'You’ve already hired for this job — it can’t be closed.' }
+    if (result === 'AWARDED') return { ok: false, message: 'You’ve already hired for this job. It can’t be closed.' }
     if (result === 'ALREADY') return { ok: false, message: 'This job is already closed.' }
   } catch (err) {
     console.error('[closeRequest] failed', err)

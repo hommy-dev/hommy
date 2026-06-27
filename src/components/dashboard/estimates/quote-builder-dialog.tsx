@@ -211,7 +211,7 @@ export function QuoteBuilderDialog({
           <input
             value={warranty}
             onChange={(e) => setWarranty(e.target.value)}
-            placeholder="Warranty (optional) — e.g. 10-year workmanship warranty"
+            placeholder="Warranty (optional): e.g. 10-year workmanship warranty"
             className="h-9 lg:h-[2.5vw] w-full rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
           />
 
@@ -219,7 +219,7 @@ export function QuoteBuilderDialog({
             value={scopeNotes}
             onChange={(e) => setScopeNotes(e.target.value)}
             rows={3}
-            placeholder="Scope notes (optional) — what's included, materials, timeline…"
+            placeholder="Scope notes (optional): what's included, materials, timeline…"
             className="w-full resize-none rounded-md lg:rounded-[0.556vw] border border-input bg-card px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] outline-none focus-visible:border-ring"
           />
 

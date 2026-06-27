@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 const REVIEWS = [
   {
     quote:
-      "I had three roofers out by the next afternoon. I went with the one who actually explained things instead of talking over my head — new roof in a week.",
+      "I had three roofers out by the next afternoon. I went with the one who actually explained things instead of talking over my head. New roof in a week.",
     name: "Maria A.",
     image: "/bg/roof-replacement.jpg",
   },

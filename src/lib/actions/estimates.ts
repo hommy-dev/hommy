@@ -57,7 +57,7 @@ const MESSAGES: Record<Fail['error'], string> = {
   NO_COMPANY: 'Set up your company first.',
   NOT_FOUND: 'That quote no longer exists.',
   NOT_AUTHORIZED: 'This project belongs to another company.',
-  NOT_EDITABLE: 'A sent quote can’t be edited — start a new one.',
+  NOT_EDITABLE: 'A sent quote can’t be edited. Start a new one.',
   DB_ERROR: 'Could not save the quote. Please try again.',
 }
 
@@ -136,7 +136,7 @@ export async function sendEstimate(rawInput: unknown): Promise<SendEstimateResul
   }
   const conversationId = await getProjectConversationId(ctx.input.projectId)
   if (conversationId) {
-    await postQuoteMessage(conversationId, `Quote sent — ${formatCurrency(total)}`, {
+    await postQuoteMessage(conversationId, `Quote sent: ${formatCurrency(total)}`, {
       kind: 'quote',
       estimateId,
       total,

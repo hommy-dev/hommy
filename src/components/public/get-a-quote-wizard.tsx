@@ -284,7 +284,7 @@ export function GetAQuoteWizard({
     setEmail(contact.email)
     setPhone(contact.phone)
     setErrors({})
-    showToast("You're signed in — review and post your job.", { type: "success" })
+    showToast("You're signed in. Review and post your job.", { type: "success" })
   }
 
   // Google sign-in leaves the page, so stash the in-progress job first; the

@@ -5,9 +5,9 @@ import { BlogIndex } from "@/components/blog/blog-index";
 
 export const metadata: Metadata = {
   // `absolute` opts out of the "%s | Hommy" template — the brand is already in the title.
-  title: { absolute: "The Hommy Journal — Roofing tips, costs & guides for homeowners" },
+  title: { absolute: "The Hommy Journal: Roofing tips, costs & guides for homeowners" },
   description:
-    "Practical advice on roofing, maintenance, storm damage, costs, and hiring a contractor you can trust — from the Hommy team.",
+    "Practical advice on roofing, maintenance, storm damage, costs, and hiring a contractor you can trust, from the Hommy team.",
   // Consolidate the ?category= filtered views onto the canonical /blog.
   alternates: { canonical: "/blog" },
 };

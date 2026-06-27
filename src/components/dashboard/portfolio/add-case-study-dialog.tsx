@@ -62,7 +62,7 @@ export function AddCaseStudyDialog({ subtypes }: { subtypes: string[] }) {
     }
 
     showToast(
-      photos.length ? "Case study created." : "Case study created — add photos next.",
+      photos.length ? "Case study created." : "Case study created. Add photos next.",
       { type: "success" },
     )
     router.refresh()

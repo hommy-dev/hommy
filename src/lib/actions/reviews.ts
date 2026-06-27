@@ -30,7 +30,7 @@ export type SubmitReviewResult = { ok: true } | { ok: false; error: ReviewError;
 const MESSAGES: Record<ReviewError, string> = {
   INVALID_INPUT: 'Please choose a rating from 1 to 5.',
   NOT_FOUND: 'This review link is invalid or has expired.',
-  ALREADY_SUBMITTED: 'Thanks — this review was already submitted.',
+  ALREADY_SUBMITTED: 'Thanks. This review was already submitted.',
   DB_ERROR: 'Could not submit your review. Please try again.',
 }
 
