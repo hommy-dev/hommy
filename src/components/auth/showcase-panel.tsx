@@ -12,7 +12,7 @@ import { AuthStory } from "./auth-story";
 function headlineFor(
   mode: AuthPanelMode,
   variant: AuthVariant,
-  audience: Audience,
+  audience: Audience
 ) {
   if (mode === "welcome") return "Welcome back";
   if (mode === "new-here") return "New here? Here's how it works.";
@@ -35,21 +35,21 @@ export function ShowcasePanel() {
     <aside
       aria-hidden
       className={cn(
-        "relative hidden overflow-hidden bg-foreground text-background",
-        "lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-2/5 lg:shrink-0 lg:flex-col lg:self-start",
+        "relative hidden overflow-hidden bg-[url('/bg/gradient-1.jpg')] bg-cover bg-center text-background",
+        "lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-2/5 lg:shrink-0 lg:flex-col lg:self-start"
       )}
     >
       {/* Brand glow */}
-      <div
+      {/* <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(110% 80% at 100% 0%, color-mix(in oklab, var(--primary) 45%, transparent) 0%, transparent 55%)",
         }}
-      />
+      /> */}
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-[3vw] p-[3.333vw]">
-        <h2 className="max-w-[26vw] text-center font-sebenta text-[2.333vw] font-bold leading-[112%] tracking-normal transition-opacity duration-300">
+      <div className="relative z-10 flex h-full flex-col justify-center gap-[3vw] p-[3.5vw]">
+        <h2 className="w-full text-balance bg-linear-to-r from-background to-background bg-clip-text text-transparent text-[2vw] font-bold leading-[112%] tracking-normal transition-opacity duration-300">
           {headline}
         </h2>
 

@@ -10,7 +10,7 @@
 // Company name, license, services, and service areas are collected later in the
 // onboarding wizard.
 
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import {
   users,
@@ -38,6 +38,7 @@ export async function provisionContractor({
   fullName,
   passwordSet = true,
   referredByCode,
+  avatarUrl,
 }: {
   userId: string
   email: string
@@ -45,12 +46,18 @@ export async function provisionContractor({
   passwordSet?: boolean
   /** Referral code from ?ref=… — records who referred this company (credited on verify). */
   referredByCode?: string
+  /** Profile photo from an OAuth provider (Google), saved on first provision. */
+  avatarUrl?: string | null
 }): Promise<void> {
   // Ensure the public.users row exists (upsert — the user may already exist).
   await db
     .insert(users)
-    .values({ id: userId, email, fullName, role: 'contractor', passwordSet })
-    .onConflictDoUpdate({ target: users.id, set: { email } })
+    .values({ id: userId, email, fullName, role: 'contractor', passwordSet, avatarUrl: avatarUrl ?? null })
+    .onConflictDoUpdate({
+      target: users.id,
+      // Backfill the avatar if we have one and none is set; never overwrite.
+      set: { email, avatarUrl: sql`coalesce(${users.avatarUrl}, ${avatarUrl ?? null})` },
+    })
 
   // Already provisioned (belongs to a company)? Nothing more to do.
   const existing = await db
@@ -182,16 +189,23 @@ export async function provisionHomeowner({
   email,
   fullName,
   passwordSet = true,
+  avatarUrl,
 }: {
   userId: string
   email: string
   fullName: string | null
   passwordSet?: boolean
+  /** Profile photo from an OAuth provider (Google), saved on first provision. */
+  avatarUrl?: string | null
 }): Promise<void> {
   await db
     .insert(users)
-    .values({ id: userId, email, fullName, role: 'homeowner', passwordSet })
-    .onConflictDoUpdate({ target: users.id, set: { email } })
+    .values({ id: userId, email, fullName, role: 'homeowner', passwordSet, avatarUrl: avatarUrl ?? null })
+    .onConflictDoUpdate({
+      target: users.id,
+      // Backfill the avatar if we have one and none is set; never overwrite.
+      set: { email, avatarUrl: sql`coalesce(${users.avatarUrl}, ${avatarUrl ?? null})` },
+    })
 
   // Already has a profile? Nothing more to do.
   const existing = await db

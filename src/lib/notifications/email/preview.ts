@@ -69,7 +69,7 @@ const SAMPLE_QUOTE: EmailContent = {
 
 // A generic notification with no custom HTML — i.e. the fallback path.
 const SAMPLE_SYSTEM: EmailContent = {
-  preheader: 'Your verification is approved — you can now receive leads.',
+  preheader: 'Your verification is approved. You can now receive leads.',
   heading: "You're verified",
   intro:
     'Your license and insurance checked out. Your profile is live and you’ll start receiving matching roofing jobs in your area.',
@@ -102,7 +102,7 @@ export const EMAIL_SAMPLES: EmailSample[] = [
           conversationId: '2',
           actionUrl: '/contractor/messages/2',
           peerName: 'David R.',
-          latestPreview: 'Thanks for the quote — a couple questions on the warranty.',
+          latestPreview: 'Thanks for the quote, a couple questions on the warranty.',
           unreadCount: 1,
         },
         {

@@ -55,7 +55,7 @@ export default async function HomeownerLayout({
             user={{
               email: user.email,
               fullName: user.fullName || user.email,
-              avatarUrl: null,
+              avatarUrl: user.avatarUrl,
             }}
             settingsHref="/homeowner/settings"
           />

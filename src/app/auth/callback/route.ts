@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { provisionContractor, provisionHomeowner } from '@/lib/auth/provisioning'
@@ -60,6 +60,12 @@ export async function GET(request: NextRequest) {
 
   let destination = next
 
+  // Google profile photo, if the provider shared one.
+  const avatarUrl =
+    (data.user.user_metadata?.avatar_url as string | undefined) ??
+    (data.user.user_metadata?.picture as string | undefined) ??
+    null
+
   if (intent === 'contractor' || intent === 'homeowner') {
     // Signup-with-Google: no pre-signup step ran, so provision here. Both
     // provisioning functions are idempotent, so existing users pass through.
@@ -73,6 +79,7 @@ export async function GET(request: NextRequest) {
           fullName,
           passwordSet: false,
           referredByCode: url.searchParams.get('ref') ?? undefined,
+          avatarUrl,
         })
       } else {
         await provisionHomeowner({
@@ -80,6 +87,7 @@ export async function GET(request: NextRequest) {
           email: data.user.email ?? '',
           fullName,
           passwordSet: false,
+          avatarUrl,
         })
       }
     } catch (err) {
@@ -95,6 +103,15 @@ export async function GET(request: NextRequest) {
         .where(eq(users.id, data.user.id))
         .limit(1)
       destination = profile ? ROLE_HOMES[profile.role] ?? '/' : '/auth/choose-role'
+
+      // Backfill the avatar for existing accounts that never captured one
+      // (e.g. signed up before we saved it). coalesce never overwrites a set value.
+      if (profile && avatarUrl) {
+        await db
+          .update(users)
+          .set({ avatarUrl: sql`coalesce(${users.avatarUrl}, ${avatarUrl})` })
+          .where(eq(users.id, data.user.id))
+      }
     } catch (err) {
       console.error('[auth/callback] profile lookup failed', err)
       destination = '/auth/choose-role'

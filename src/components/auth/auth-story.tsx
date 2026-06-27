@@ -43,7 +43,7 @@ const STORIES: Record<Audience, Step[]> = {
       detail: "Start a chat and send your price.",
     },
     {
-      icon: "wallet",
+      icon: "win",
       title: "Win the work",
       detail: "Pay the full fee only when you win.",
     },
@@ -65,7 +65,7 @@ export function AuthStory({ audience }: { audience: Audience }) {
   const active = reduce ? steps.length - 1 : tick % steps.length;
 
   return (
-    <ol className="w-full max-w-[28vw]">
+    <ol className="w-full">
       {steps.map((s, i) => {
         const done = i < active;
         const current = i === active;
@@ -78,7 +78,7 @@ export function AuthStory({ audience }: { audience: Audience }) {
           >
             {/* Connector that fills as the step completes */}
             {!isLast ? (
-              <span className="absolute left-[1.25vw] top-[2.5vw] bottom-0 w-px -translate-x-1/2 overflow-hidden bg-white/12">
+              <span className="absolute left-[1.25vw] top-[2.5vw] bottom-0 w-px -translate-x-1/2 overflow-hidden bg-background/20">
                 <span
                   className={cn(
                     "block w-full bg-primary transition-[height] duration-500 ease-out",
@@ -93,9 +93,8 @@ export function AuthStory({ audience }: { audience: Audience }) {
               className={cn(
                 "relative z-10 flex size-[2.5vw] shrink-0 items-center justify-center rounded-full border transition-all duration-300",
                 lit
-                  ? "border-primary bg-primary text-white"
-                  : "border-white/20 bg-white/5 text-white/40",
-                current && "shadow-[0_0_0_0.35vw_color-mix(in_oklab,var(--primary)_30%,transparent)]",
+                  ? "border-background/50 bg-primary text-background"
+                  : "border-background/20 bg-primary/5 text-background/40",
               )}
             >
               <Icon
@@ -112,8 +111,8 @@ export function AuthStory({ audience }: { audience: Audience }) {
                   current
                     ? "text-background"
                     : done
-                      ? "text-background/75"
-                      : "text-background/45",
+                      ? "text-background"
+                      : "text-background/50",
                 )}
               >
                 {s.title}
@@ -121,7 +120,7 @@ export function AuthStory({ audience }: { audience: Audience }) {
               <p
                 className={cn(
                   "mt-[0.139vw] text-[0.903vw] leading-snug transition-colors duration-300",
-                  lit ? "text-background/55" : "text-background/30",
+                  lit ? "text-background" : "text-background/50",
                 )}
               >
                 {s.detail}

@@ -318,6 +318,10 @@ export async function chooseGoogleRole(
   }
 
   const fullName = (user.user_metadata?.full_name as string | undefined) ?? null
+  const avatarUrl =
+    (user.user_metadata?.avatar_url as string | undefined) ??
+    (user.user_metadata?.picture as string | undefined) ??
+    null
   try {
     if (role === 'contractor') {
       await provisionContractor({
@@ -325,6 +329,7 @@ export async function chooseGoogleRole(
         email: user.email ?? '',
         fullName,
         passwordSet: false,
+        avatarUrl,
       })
     } else {
       await provisionHomeowner({
@@ -332,6 +337,7 @@ export async function chooseGoogleRole(
         email: user.email ?? '',
         fullName,
         passwordSet: false,
+        avatarUrl,
       })
     }
   } catch (err) {

@@ -90,6 +90,7 @@ export type IconName =
   | "show"
   | "star"
   | "star-filled"
+  | "win"
   | "swap"
   | "tick"
   | "tick-square"
