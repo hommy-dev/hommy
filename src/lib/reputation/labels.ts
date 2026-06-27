@@ -64,7 +64,7 @@ export function scoreStanding(score: number): { label: string; blurb: string } {
   if (score < 50)
     return {
       label: 'Established',
-      blurb: "Solid standing. Homeowners' jobs are reaching you ahead of newer pros.",
+      blurb: "Solid standing. Homeowners' jobs are reaching you ahead of newer roofers.",
     }
   return {
     label: 'Strong',

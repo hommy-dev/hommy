@@ -118,7 +118,7 @@ export function RoofIntakeScene() {
             {sent ? (
               <>
                 <Icon name="tick" className="size-4 lg:size-[1.1vw]" />
-                Sent to 6 local pros
+                Sent to 6 local roofers
               </>
             ) : (
               <>

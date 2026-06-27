@@ -61,7 +61,7 @@ function signed(n: number): string {
 }
 
 const INTRO =
-  "Your score decides how high you rank when a new job goes out. Every lead reaches the top pros by score first, so climbing means more work, sooner."
+  "Your score decides how high you rank when a new job goes out. Every lead reaches the top roofers by score first, so climbing means more work, sooner."
 
 // ══════════════════════════════════════════════════════════════════════════════
 // Variant 1 — Impact bars: teach relative weight at a glance

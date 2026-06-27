@@ -79,7 +79,7 @@ export default async function StateHubPage({
 
       <RoofingHero
         title={`Roofing contractors in ${data.state.name}`}
-        intro={`Licensed and insured roofers serving ${data.state.name}. Free to post, no spam calls, and you only hear from the pros you choose.`}
+        intro={`Licensed and insured roofers serving ${data.state.name}. Free to post, no spam calls, and you only hear from the roofers you choose.`}
         ctaHref={quoteHref}
       />
 
@@ -119,7 +119,7 @@ export default async function StateHubPage({
       {dir.total === 0 && data.cities.length === 0 && (
         <div className="mt-10 lg:mt-[3vw]">
           <RoofingEmpty
-            message={`We're adding roofers across ${data.state.name} now. Post your job for free and we'll match you with local pros as they join.`}
+            message={`We're adding roofers across ${data.state.name} now. Post your job for free and we'll match you with local roofers as they join.`}
             href="/get-a-quote"
           />
         </div>

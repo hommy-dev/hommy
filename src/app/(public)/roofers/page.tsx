@@ -10,7 +10,7 @@ import { RoofingPageSections } from "@/components/roofing/roofing-page-sections"
 
 const TITLE = "Roofing companies near you";
 const DESCRIPTION =
-  "Browse verified, licensed and insured roofing companies. Search by name or area, filter by the work you need, and get free quotes from the pros you choose.";
+  "Browse verified, licensed and insured roofing companies. Search by name or area, filter by the work you need, and get free quotes from the roofers you choose.";
 
 export const metadata: Metadata = {
   title: TITLE,

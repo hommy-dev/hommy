@@ -60,7 +60,7 @@ export const SUBTYPE_META: Record<string, { icon: IconType; desc: string }> = {
   },
   Inspection: {
     icon: "search",
-    desc: "Have a pro assess the roof's condition.",
+    desc: "Have a roofer assess the roof's condition.",
   },
   "Storm Damage": {
     icon: "storm",

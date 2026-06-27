@@ -31,7 +31,7 @@ export const HOMEOWNER_NAV: DashboardNavItem[] = [
   // "Jobs" table). Quotes live inside each job's chat + detail, so there's no
   // separate Quotes page, and no separate dashboard landing page.
   { href: "/homeowner", label: "Jobs", icon: "work" },
-  { href: "/homeowner/contractors", label: "Find a pro", icon: "search" },
+  { href: "/homeowner/contractors", label: "Find a roofer", icon: "search" },
   { href: "/homeowner/messages", label: "Messages", icon: "chat" },
   { href: "/homeowner/settings", label: "Settings", icon: "setting" },
 ]

@@ -283,6 +283,71 @@ export async function startContractorGoogleSignup(referralCode?: string): Promis
   return { success: true, data: { url: data.url } }
 }
 
+/**
+ * Finishes a Google sign-in that came through the LOGIN page (no role intent).
+ * Such a sign-in creates a Supabase auth user but no app profile, so the callback
+ * routes brand-new users to /auth/choose-role, which calls this. Idempotent: if a
+ * profile already exists we just return its home. Provisions with passwordSet=false
+ * (Google identity, no password).
+ */
+export async function chooseGoogleRole(
+  role: 'homeowner' | 'contractor',
+): Promise<ActionResult<{ redirectTo: string }>> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: 'Your session expired. Please sign in again.' }
+  }
+
+  // Already provisioned (e.g. double submit / refresh) — send them home.
+  const [existing] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1)
+  if (existing) {
+    return {
+      success: true,
+      data: {
+        redirectTo:
+          ROLE_DEFAULT_PATH[existing.role as keyof typeof ROLE_DEFAULT_PATH] ?? '/',
+      },
+    }
+  }
+
+  const fullName = (user.user_metadata?.full_name as string | undefined) ?? null
+  try {
+    if (role === 'contractor') {
+      await provisionContractor({
+        userId: user.id,
+        email: user.email ?? '',
+        fullName,
+        passwordSet: false,
+      })
+    } else {
+      await provisionHomeowner({
+        userId: user.id,
+        email: user.email ?? '',
+        fullName,
+        passwordSet: false,
+      })
+    }
+  } catch (err) {
+    console.error('[chooseGoogleRole] provisioning failed', err)
+    return {
+      success: false,
+      error: 'Something went wrong setting up your account. Please try again.',
+    }
+  }
+
+  return {
+    success: true,
+    data: { redirectTo: role === 'contractor' ? '/onboarding' : '/homeowner' },
+  }
+}
+
 const HomeownerSignupSchema = z.object({
   fullName: z.string().trim().min(2, 'Enter your name'),
   email: z.string().trim().email('Enter a valid email'),

@@ -19,7 +19,7 @@ export function PortfolioGallery({ items }: { items: PortfolioProject[] }) {
         size="sm"
         icon="image-3"
         title="No work to show yet"
-        description="This pro hasn't shared photos of past jobs yet."
+        description="This roofer hasn't shared photos of past jobs yet."
       />
     )
   }

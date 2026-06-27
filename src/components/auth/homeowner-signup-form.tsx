@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Icon } from "@/components/ui/icon"
 
 type FieldErrors = Record<string, string>
 
@@ -83,7 +84,7 @@ export function HomeownerSignupForm() {
       <h1 className="font-sebenta text-[1.9rem] lg:text-[2.111vw] font-bold leading-tight tracking-tight">
         Create your account
       </h1>
-      <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
+      <p className="mt-2 lg:mt-[0.3vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
         Get matched with vetted local roofers. Free, with no obligation.
       </p>
 
@@ -95,7 +96,7 @@ export function HomeownerSignupForm() {
         disabled={googlePending || pending}
          className="mt-7 lg:mt-[1.944vw] h-11 lg:h-[3.056vw] w-full gap-2.5 lg:gap-[0.694vw] bg-card hover:bg-background hover:border-foreground/40 text-sm lg:text-[0.972vw] font-semibold"
       >
-        <GoogleIcon />
+        <Icon name="google" preserveColors className="size-[18px] lg:size-[1.25vw]" />
         {googlePending ? "Opening Google..." : "Continue with Google"}
       </Button>
 
@@ -147,10 +148,11 @@ export function HomeownerSignupForm() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute inset-y-0 right-3 lg:right-[0.833vw] my-auto h-fit text-xs lg:text-[0.833vw] font-medium text-foreground/50 hover:text-foreground"
+              aria-label={showPw ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-3 lg:right-[0.833vw] my-auto flex h-fit items-center text-foreground/45 transition-colors hover:text-foreground"
               tabIndex={-1}
             >
-              {showPw ? "Hide" : "Show"}
+              <Icon name={showPw ? "hide" : "show"} className="size-5 lg:size-[1.25vw]" />
             </button>
           </div>
         </Field>
@@ -228,29 +230,6 @@ function Field({
       {children}
       {error && <p className="text-xs lg:text-[0.833vw] text-destructive">{error}</p>}
     </div>
-  )
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 18 18" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"
-      />
-      <path
-        fill="#34A853"
-        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.81.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M3.95 10.7a5.4 5.4 0 0 1 0-3.4V4.96H.96a9 9 0 0 0 0 8.08l2.99-2.33z"
-      />
-      <path
-        fill="#EA4335"
-        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.96L3.95 7.3C4.66 5.17 6.65 3.58 9 3.58z"
-      />
-    </svg>
   )
 }
 

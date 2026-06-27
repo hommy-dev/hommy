@@ -31,7 +31,7 @@ export function RoofingHero({
         {intro}
       </p>
       <p className="mt-3 max-w-2xl text-sm text-background/70 lg:mt-[0.7vw] lg:max-w-[46vw] lg:text-[0.92vw]">
-        The fast, safe way: post your job and a few vetted local pros reach out — you choose who you
+        The fast, safe way: post your job and a few vetted local roofers reach out, and you choose who you
         talk to. Or browse roofers below and reach out yourself.
       </p>
 

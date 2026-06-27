@@ -19,7 +19,7 @@ const HOMEOWNER_STEPS = [
   },
   {
     step: "Step two",
-    title: "We match local pros",
+    title: "We match local roofers",
     content:
       "Your job goes straight to a handful of licensed, insured roofers who actually work in your neighborhood.",
     scene: <MatchProsScene />,

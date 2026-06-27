@@ -42,7 +42,7 @@ export async function generateMetadata({
   const title = `${sub.heading} in ${cityRow.name}, ${cityRow.stateCode}`;
   return {
     title,
-    description: `Compare local, vetted roofers for ${sub.noun} in ${cityRow.name}, ${cityRow.stateName}. Free quotes, no spam calls, and you only hear from the pros you choose.`,
+    description: `Compare local, vetted roofers for ${sub.noun} in ${cityRow.name}, ${cityRow.stateName}. Free quotes, no spam calls, and you only hear from the roofers you choose.`,
     alternates: { canonical: `/roofing/${state}/${city}/${subtype}` },
     robots: indexable ? undefined : { index: false, follow: true },
     ...ogImageMeta({
@@ -50,7 +50,7 @@ export async function generateMetadata({
       kicker: `${sub.heading} · ${cityRow.stateName}`,
       stats: [
         ...(subSupply.proCount > 0
-          ? [{ value: String(subSupply.proCount), label: "Vetted pros" }]
+          ? [{ value: String(subSupply.proCount), label: "Vetted roofers" }]
           : []),
         { value: "Free", label: "To get quotes" },
         { value: "0", label: "Spam calls" },
@@ -155,7 +155,7 @@ export default async function CitySubtypePage({
           />
         ) : (
           <RoofingEmpty
-            message={`We're adding roofers for ${sub.noun} in ${cityRow.name} now. Post your job for free and we'll match you with local pros as they join.`}
+            message={`We're adding roofers for ${sub.noun} in ${cityRow.name} now. Post your job for free and we'll match you with local roofers as they join.`}
             href={quoteHref}
           />
         )}

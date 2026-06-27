@@ -26,18 +26,18 @@ function summary(r: HomeownerLead): string {
       r.quoteCount === 1 ? "" : "s"
     } in — review and choose.`;
   if (r.interestedCount > 0)
-    return `${r.interestedCount} pro${
+    return `${r.interestedCount} roofer${
       r.interestedCount === 1 ? " is" : "s are"
-    } interested — quotes coming.`;
+    } interested. Quotes coming.`;
   if (r.viewedCount > 0)
-    return `${r.viewedCount} pro${
+    return `${r.viewedCount} roofer${
       r.viewedCount === 1 ? "" : "s"
-    } viewed your job — messages coming soon.`;
+    } viewed your job. Messages coming soon.`;
   if (r.matchedCount > 0)
-    return `${r.matchedCount} pro${
+    return `${r.matchedCount} roofer${
       r.matchedCount === 1 ? "" : "s"
-    } matched — waiting for them to respond.`;
-  return "No pros cover your area yet — we'll alert you the moment one joins.";
+    } matched. Waiting for them to respond.`;
+  return "No roofers cover your area yet. We'll alert you the moment one joins.";
 }
 
 export default function HomeownerJobsPage() {
@@ -98,7 +98,7 @@ async function HomeownerJobsData() {
       <EmptyState
         icon="paper"
         title="No jobs yet"
-        description="Post your first project and start receiving quotes from vetted local pros."
+        description="Post your first project and start receiving quotes from vetted local roofers."
         action={
           <Button asChild size="lg">
             <Link href="/get-a-quote">

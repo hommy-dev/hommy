@@ -5,7 +5,7 @@ import { ActivityResetKey } from '@/components/auth/activity-reset-key'
 
 export default function LoginPage() {
   return (
-    <AuthPageShell variant="contractor">
+    <AuthPageShell variant="default">
       <ActivityResetKey>
         <Suspense fallback={<LoginFormFallback />}>
           <LoginForm />

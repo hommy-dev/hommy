@@ -333,7 +333,7 @@ function InboxEmptyPanel({ emptyInbox }: { emptyInbox: InboxEmptyKind | null }) 
           bordered={false}
           icon="paper"
           title="No messages yet"
-          description="You haven't posted a job yet. Post one and local pros can reach out to you right here."
+          description="You haven't posted a job yet. Post one and local roofers can reach out to you right here."
           action={
             <Button asChild size="lg">
               <Link href="/get-a-quote">
@@ -348,7 +348,7 @@ function InboxEmptyPanel({ emptyInbox }: { emptyInbox: InboxEmptyKind | null }) 
           bordered={false}
           icon="time-circle"
           title="Hang tight, your job is live"
-          description="Pros are looking at your job now. The moment one reaches out, your chat opens right here."
+          description="Roofers are looking at your job now. The moment one reaches out, your chat opens right here."
           action={
             <Button asChild variant="outline" size="lg">
               <Link href="/homeowner">View your jobs</Link>

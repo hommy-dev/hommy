@@ -11,7 +11,7 @@ import { RoofingPageSections } from "@/components/roofing/roofing-page-sections"
 
 const TITLE = "Roofing contractors near you";
 const DESCRIPTION =
-  "Find licensed and insured roofers in your city. Compare local pros, get free quotes, and only hear from the ones you choose.";
+  "Find licensed and insured roofers in your city. Compare local roofers, get free quotes, and only hear from the ones you choose.";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Find a roofer you can actually trust",
       kicker: "Roofing",
       stats: [
-        { value: "Licensed", label: "& insured pros" },
+        { value: "Licensed", label: "& insured roofers" },
         { value: "Free", label: "To get quotes" },
         { value: "0", label: "Spam calls" },
       ],

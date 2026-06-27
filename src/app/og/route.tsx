@@ -185,7 +185,7 @@ export async function GET(request: Request): Promise<Response> {
               color: SOFT,
             }}
           >
-            Licensed · Insured · Verified pros
+            Licensed · Insured · Verified roofers
           </div>
 
           {/* Stats */}

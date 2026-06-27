@@ -108,7 +108,7 @@ export default async function AdminSettingsPage() {
         <h2 className="text-lg lg:text-[1.25vw] font-semibold tracking-tight">Reputation &amp; scoring</h2>
         <ConfigRows rows={reputation} />
         <p className="text-xs lg:text-[0.764vw] text-muted-foreground">
-          Score floors at 0. A higher score ranks a company higher in lead fan-out (each lead reaches the top {LEAD_FANOUT.maxRecipients} eligible pros). Speed is rewarded through ranking, never enforced with a penalty.
+          Score floors at 0. A higher score ranks a company higher in lead fan-out (each lead reaches the top {LEAD_FANOUT.maxRecipients} eligible roofers). Speed is rewarded through ranking, never enforced with a penalty.
         </p>
       </section>
 

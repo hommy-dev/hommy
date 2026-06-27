@@ -237,7 +237,7 @@ export function RoofersDirectory({
       <div className="rounded-lg bg-card p-8 text-center ring-1 ring-foreground/10 lg:rounded-[0.556vw] lg:p-[2vw]">
         <p className="text-muted-foreground lg:text-[1.05vw]">
           No roofing companies match your search yet. Try a wider area or post your job and we&apos;ll match
-          you with local pros.
+          you with local roofers.
         </p>
       </div>
     ) : richSingleColumn ? (
@@ -263,7 +263,7 @@ export function RoofersDirectory({
               Want roofers to come to you?
             </p>
             <p className="mt-1.5 text-sm lg:mt-[0.4vw] lg:text-[0.82vw]">
-              Post your job free and a few vetted local pros reach out. You choose who you talk to.
+              Post your job free and a few vetted local roofers reach out. You choose who you talk to.
             </p>
             <Link
               href={quoteHref}

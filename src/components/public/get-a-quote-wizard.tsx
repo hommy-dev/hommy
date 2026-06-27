@@ -414,7 +414,7 @@ export function GetAQuoteWizard({
           <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground">
             Privacy Policy
           </Link>
-          . Your job details are shared with the local pros you&apos;re matched with so they can quote.
+          . Your job details are shared with the local roofers you&apos;re matched with so they can quote.
         </p>
       ) : null}
 

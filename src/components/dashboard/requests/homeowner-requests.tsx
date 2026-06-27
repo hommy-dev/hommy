@@ -36,12 +36,12 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
     description: "Your posted jobs will show up here as they come in.",
   },
   posted: {
-    title: "Nothing waiting on pros",
-    description: "Jobs you've just posted sit here until a pro reacts.",
+    title: "Nothing waiting on roofers",
+    description: "Jobs you've just posted sit here until a roofer reacts.",
   },
   interested: {
-    title: "No pros interested yet",
-    description: "When a pro says they're interested, the job moves here.",
+    title: "No roofers interested yet",
+    description: "When a roofer says they're interested, the job moves here.",
   },
   quotes: {
     title: "No quotes to review",
@@ -49,7 +49,7 @@ const TAB_EMPTY: Record<Tab, { title: string; description: string }> = {
   },
   hired: {
     title: "You haven't hired anyone yet",
-    description: "Once you pick a pro for a job, it shows up here.",
+    description: "Once you pick a roofer for a job, it shows up here.",
   },
   done: {
     title: "Nothing wrapped up yet",

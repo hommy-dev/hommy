@@ -227,7 +227,7 @@ function buildNotice(
         eyebrow="New leads"
         urgent
         title={`${newLeads} new lead${newLeads === 1 ? "" : "s"} near you 🔥`}
-        body="Pros who reply first win most. Jump in."
+        body="Roofers who reply first win most. Jump in."
         cta={{ label: "View leads", href: "/contractor/jobs" }}
       />
     )

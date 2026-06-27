@@ -5,7 +5,7 @@ import { getHomeownerForUser, getHomeownerLatestLocation } from "@/lib/data/home
 import { getRoofersDirectory } from "@/lib/data/roofers"
 import { RoofersDirectory } from "@/components/roofing/roofers-directory"
 
-export const metadata: Metadata = { title: "Find a pro" }
+export const metadata: Metadata = { title: "Find a roofer" }
 
 // Homeowner-facing contractor directory. Defaults the "near me" filter to where
 // the homeowner last posted a job (we don't store a home address — see
@@ -28,7 +28,7 @@ export default async function HomeownerContractorsPage() {
     <div className="space-y-6 lg:space-y-[1.667vw]">
       <header>
         <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
-          Find a pro
+          Find a roofer
         </h1>
         <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
           {placeLabel

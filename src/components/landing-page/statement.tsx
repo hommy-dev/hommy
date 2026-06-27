@@ -7,7 +7,7 @@ export function Statement() {
       <div className="lg:max-w-[70vw] mx-auto text-center">
         <p className="mt-8 lg:mt-[2.222vw] mx-auto font-sebenta text-center text-[1.9rem] lg:text-[3vw] font-bold leading-[1.22] tracking-tight sm:text-[2.6rem] sm:leading-[1.2]">
           Hiring a roofer shouldn&rsquo;t feel like a gamble. We line up a few{" "}
-          <span className="text-primary">licensed, insured</span> local pros,
+          <span className="text-primary">licensed, insured</span> local roofers,
           you compare real quotes, and you only ever deal with people who{" "}
           <span className="bg-secondary px-1.5 lg:px-[0.417vw] text-secondary-foreground">
             actually show up.

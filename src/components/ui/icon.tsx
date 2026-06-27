@@ -35,6 +35,7 @@ export type IconName =
   | "left"
   | "right"
   | "globe"
+  | "google"
   | "lightbulb"
   | "storm"
   | "wrench"

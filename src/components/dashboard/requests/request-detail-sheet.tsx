@@ -49,20 +49,20 @@ const PROGRESS_LABEL: Record<string, string> = {
 // Plain-language "what's happening + what to do next" line, personalized from the
 // request's counts + stage. Includes the anti-leakage nudge at the quote stage.
 function whatsNext(d: HomeownerRequestDetail): string {
-  const pro = (n: number) => `${n} pro${n === 1 ? "" : "s"}`;
+  const pro = (n: number) => `${n} roofer${n === 1 ? "" : "s"}`;
   switch (d.requestStatus) {
     case "posted":
       if (d.viewedCount > 0)
         return `${pro(d.viewedCount)} viewed your job and are deciding. Expect the first messages soon.`;
       return d.matchedCount > 0
         ? `We've shared your job with ${pro(d.matchedCount)}. They'll review it and reach out — usually within a day.`
-        : "We're still finding pros in your area — we'll alert you the moment one's available.";
+        : "We're still finding roofers in your area. We'll alert you the moment one's available.";
     case "interested":
       return `${pro(d.interestedCount)} reached out to discuss your job. Chat about the details and timing, then ask them to send a quote through Hommy.`;
     case "quotes":
       return `You've received ${d.quoteCount} quote${d.quoteCount === 1 ? "" : "s"}. Compare them and accept the one you want right here — accepting hires them and confirms the job on Hommy. (Never pay or agree off-platform.)`;
     case "hired":
-      return "You hired your pro. They'll reach out to schedule — message them anytime.";
+      return "You hired your roofer. They'll reach out to schedule, message them anytime.";
     case "done":
       return "Job complete 🎉 Leave a review to help other homeowners.";
   }
@@ -212,7 +212,7 @@ export function RequestDetailSheet({
                   <EmptyState
                     size="sm"
                     icon="time-circle"
-                    title="No pros yet"
+                    title="No roofers yet"
                     description="No contractors have reached out about this job so far. We'll let you know the moment one does."
                   />
                 ) : (
@@ -288,8 +288,8 @@ export function RequestDetailSheet({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Close this job?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This stops new pros from being matched and ends any open
-                          conversations for this job. You can’t undo it — post a new
+                          This stops new roofers from being matched and ends any open
+                          conversations for this job. You can’t undo it. Post a new
                           job if you change your mind.
                         </AlertDialogDescription>
                       </AlertDialogHeader>

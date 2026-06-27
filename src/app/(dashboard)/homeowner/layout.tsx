@@ -102,7 +102,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         icon="paper"
         eyebrow="Get started"
         title={`Get started, ${firstName}`}
-        body="Post a job and local pros come to you with quotes."
+        body="Post a job and local roofers come to you with quotes."
         cta={{ label: "Post a job", href: "/get-a-quote" }}
       />
     );
@@ -118,7 +118,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         title={
           d.quotes === 1 ? "Quotes are in" : `Quotes in on ${d.quotes} jobs`
         }
-        body="Compare them and pick the pro you want."
+        body="Compare them and pick the roofer you want."
         cta={{ label: "Review quotes", href: "/homeowner" }}
       />
     );
@@ -130,7 +130,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         tone="success"
         icon="star"
         eyebrow="Review"
-        title={`How was ${d.reviewPending.contractorName ?? "your pro"}?`}
+        title={`How was ${d.reviewPending.contractorName ?? "your roofer"}?`}
         body="A quick review helps other homeowners choose."
         cta={{ label: "Leave a review", href: "/homeowner" }}
       />
@@ -146,8 +146,8 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         urgent
         title={
           d.interested === 1
-            ? "A pro is talking to you"
-            : `${d.interested} pros are talking to you`
+            ? "A roofer is talking to you"
+            : `${d.interested} roofers are talking to you`
         }
         body="Reply to get quotes rolling."
         cta={{ label: "Open messages", href: "/homeowner/messages" }}
@@ -162,7 +162,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         icon="time-circle"
         eyebrow="Posted"
         title="Your job is out there"
-        body="Local pros are looking. First messages usually land within a day."
+        body="Local roofers are looking. First messages usually land within a day."
         cta={{ label: "View jobs", href: "/homeowner" }}
       />
     );
@@ -174,7 +174,7 @@ function buildHomeownerNotice(d: HomeownerNoticeData, firstName: string) {
         tone="success"
         icon="tick-square"
         eyebrow="Hired"
-        title={`You hired ${d.hired.contractorName ?? "your pro"}`}
+        title={`You hired ${d.hired.contractorName ?? "your roofer"}`}
         body="They’ll reach out to schedule. Message them anytime."
         cta={{ label: "Open chat", href: "/homeowner/messages" }}
       />

@@ -37,7 +37,7 @@ export async function generateMetadata({
   const title = `Roofers in ${cityRow.name}, ${cityRow.stateCode}`;
   return {
     title,
-    description: `Find licensed, insured roofers serving ${cityRow.name}, ${cityRow.stateName}. Compare local pros, ratings, and get free, no-obligation quotes on Hommy.`,
+    description: `Find licensed, insured roofers serving ${cityRow.name}, ${cityRow.stateName}. Compare local roofers, ratings, and get free, no-obligation quotes on Hommy.`,
     alternates: { canonical: `/roofing/${state}/${city}` },
     // The thin-content gate: noindex (but still followable) until supply clears the bar.
     robots: indexable ? undefined : { index: false, follow: true },
@@ -46,7 +46,7 @@ export async function generateMetadata({
       kicker: `Roofing · ${cityRow.stateName}`,
       stats: [
         ...(proCount > 0
-          ? [{ value: String(proCount), label: "Vetted pros" }]
+          ? [{ value: String(proCount), label: "Vetted roofers" }]
           : []),
         { value: "Free", label: "To get quotes" },
         { value: "0", label: "Spam calls" },
@@ -110,7 +110,7 @@ export default async function CityPage({
         title={`Roofers in ${cityRow.name}, ${cityRow.stateCode}`}
         intro={
           cityRow.intro ??
-          `Compare licensed and insured roofers serving ${cityRow.name}. Free to post, no spam calls, and you only hear from the pros you choose.`
+          `Compare licensed and insured roofers serving ${cityRow.name}. Free to post, no spam calls, and you only hear from the roofers you choose.`
         }
         ctaHref={quoteHref}
         demand={
@@ -132,7 +132,7 @@ export default async function CityPage({
           />
         ) : (
           <RoofingEmpty
-            message={`We're adding roofers in ${cityRow.name} now. Post your job for free and we'll match you with local pros as they join.`}
+            message={`We're adding roofers in ${cityRow.name} now. Post your job for free and we'll match you with local roofers as they join.`}
             href={quoteHref}
           />
         )}

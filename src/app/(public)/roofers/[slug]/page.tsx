@@ -152,7 +152,7 @@ export default async function RooferProfilePage({
               href={quoteHref}
               className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold text-foreground ring-1 ring-foreground/15 transition-colors hover:ring-foreground/30 lg:gap-[0.4vw] lg:rounded-[0.694vw] lg:px-[1.667vw] lg:py-[0.8vw] lg:text-[1.05vw]"
             >
-              Or post to all pros
+              Or post to all roofers
             </Link>
           </div>
         }

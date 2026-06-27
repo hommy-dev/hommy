@@ -14,7 +14,7 @@ export function BlogCta() {
         Need a roofer you can trust?
       </p>
       <p className="mt-1.5 text-sm lg:mt-[0.4vw] lg:text-[0.85vw]">
-        Get free quotes from licensed local pros — no spam calls, no pressure.
+        Get free quotes from licensed local roofers. No spam calls, no pressure.
       </p>
       <Link
         href="/get-a-quote"

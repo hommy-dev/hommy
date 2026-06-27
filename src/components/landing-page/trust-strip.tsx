@@ -25,7 +25,7 @@ export function TrustStrip() {
             A better way to hire a roofer.
           </h2>
           <p className="mt-2 lg:mt-[0.556vw] font-medium text-base lg:text-[1.2vw] leading-relaxed text-muted-foreground">
-            A handful of vetted local pros. Real quotes. Zero pressure.
+            A handful of vetted local roofers. Real quotes. Zero pressure.
           </p>
         </div>
 

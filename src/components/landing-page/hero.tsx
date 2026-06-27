@@ -28,7 +28,7 @@ export function Hero() {
 
         <p className="mt-5 lg:mt-[1.5vw] max-w-xl lg:max-w-[34vw] text-base leading-relaxed text-background lg:text-[1.25vw]">
           Get free quotes from licensed and insured local roofers and only
-          hear from the pros you choose.
+          hear from the roofers you choose.
         </p>
 
         <Link
