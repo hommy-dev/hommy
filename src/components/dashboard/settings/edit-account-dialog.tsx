@@ -52,7 +52,7 @@ export function EditAccountDialog({
             setErrors((p) => ({ ...p, fullName: "" }))
           }}
           placeholder="Jordan Smith"
-          className="h-11 lg:h-[3.056vw]"
+          className="h-11 lg:h-[3.056vw] bg-card"
           aria-invalid={!!errors.fullName}
         />
       </Field>

@@ -133,7 +133,7 @@ export function CoverageAreasForm({
             </div>
           </div>
 
-          {place && center ? (
+          {place && center && (
             <div className="space-y-1.5 lg:space-y-[0.417vw]">
               <CoverageAreaEditor
                 center={center}
@@ -149,10 +149,6 @@ export function CoverageAreasForm({
                 . Drag the circle to fine-tune, then add it.
               </p>
             </div>
-          ) : (
-            <p className="text-xs lg:text-[0.833vw] text-muted-foreground">
-              Search a place or area to set the region you want leads from.
-            </p>
           )}
 
           <Button

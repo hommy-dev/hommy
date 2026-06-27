@@ -1,121 +1,85 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { submitVerification } from "@/lib/actions/profile"
-import { showToast } from "@/components/ui/toast"
-import { ImageUpload } from "@/components/ui/image-upload"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { EditDialog, Field } from "./edit-dialog"
-import { cn } from "@/lib/utils"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { ContractorSetupForm } from "@/components/contractor-setup/contractor-setup-form";
+import type { SetupInitial } from "@/lib/contractor/setup";
 
+/**
+ * Verification documents dialog. Uses the shared ContractorSetupForm in
+ * documents mode so the upload UI is identical to the dashboard's setup gate.
+ */
 export function EditVerificationDialog({
   initial,
+  availableSubtypes,
   resubmit,
+  prominent = false,
 }: {
-  initial: { licenseDocUrl: string | null; insuranceDocUrl: string | null }
-  resubmit: boolean
+  initial: SetupInitial;
+  availableSubtypes: string[];
+  resubmit: boolean;
+  /** Render a large primary trigger (for empty states) vs a compact one. */
+  prominent?: boolean;
 }) {
-  const router = useRouter()
-  const [licenseDocUrl, setLicenseDocUrl] = useState(initial.licenseDocUrl)
-  const [insuranceDocUrl, setInsuranceDocUrl] = useState(initial.insuranceDocUrl)
-
-  function reset() {
-    setLicenseDocUrl(initial.licenseDocUrl)
-    setInsuranceDocUrl(initial.insuranceDocUrl)
-  }
-
-  async function save(): Promise<boolean> {
-    if (!licenseDocUrl || !insuranceDocUrl) {
-      showToast("Upload both documents to submit", { type: "error" })
-      return false
-    }
-    const res = await submitVerification({ licenseDocUrl, insuranceDocUrl })
-    if (!res.success) {
-      showToast(res.error, { type: "error" })
-      return false
-    }
-    showToast("Submitted for verification", { type: "success" })
-    router.refresh()
-    return true
-  }
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   return (
-    <EditDialog
-      title={resubmit ? "Update documents" : "Get verified"}
-      description="We verify every roofer before they can engage leads."
-      triggerLabel={resubmit ? "Update" : "Get verified"}
-      triggerIcon="shield-done"
-      onOpen={reset}
-      onSave={save}
-      canSave={!!licenseDocUrl && !!insuranceDocUrl}
-      saveLabel="Submit for review"
-      wide
-    >
-      <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
-        <Field label="License document">
-          <DocUpload url={licenseDocUrl} onChange={setLicenseDocUrl} />
-        </Field>
-        <Field label="Insurance certificate">
-          <DocUpload url={insuranceDocUrl} onChange={setInsuranceDocUrl} />
-        </Field>
-      </div>
-    </EditDialog>
-  )
-}
-
-function urlKind(u: string): "image" | "pdf" | "file" {
-  const path = u.split("?")[0]
-  if (/\.(png|jpe?g|webp|gif|avif)$/i.test(path)) return "image"
-  if (/\.pdf$/i.test(path)) return "pdf"
-  return "file"
-}
-
-function DocUpload({
-  url,
-  onChange,
-}: {
-  url: string | null
-  onChange: (u: string | null) => void
-}) {
-  if (!url) {
-    return (
-      <ImageUpload
-        folder="documents"
-        accept="image+pdf"
-        onUpload={(r) => onChange(r.secureUrl)}
-        className="w-full [&>button]:w-full"
-      >
-        <span className="flex w-full cursor-pointer flex-col items-center justify-center gap-1.5 lg:gap-[0.417vw] rounded-md lg:rounded-[0.556vw] border border-dashed border-border px-4 lg:px-[1.111vw] py-6 lg:py-[1.667vw] text-center transition-colors hover:border-foreground/30 hover:bg-muted/40">
-          <span className="text-sm lg:text-[0.972vw] font-semibold">Click to upload</span>
-          <span className="text-xs lg:text-[0.833vw] text-muted-foreground">
-            PDF or image
-          </span>
-        </span>
-      </ImageUpload>
-    )
-  }
-
-  return (
-    <div className="space-y-2 lg:space-y-[0.556vw]">
-      <div className="overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border bg-muted/30">
-        {urlKind(url) === "image" ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt="" className="mx-auto max-h-32 lg:max-h-[8.889vw] w-full object-contain" />
-        ) : (
-          <iframe src={url} title="Document" className="h-32 lg:h-[8.889vw] w-full" />
-        )}
-      </div>
-      <div className="flex items-center gap-1.5 lg:gap-[0.417vw]">
-        <ImageUpload folder="documents" accept="image+pdf" onUpload={(r) => onChange(r.secureUrl)}>
-          <span className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-            Replace
-          </span>
-        </ImageUpload>
-        <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
-          Remove
+    <>
+      {prominent ? (
+        <Button
+          type="button"
+          size="lg"
+          onClick={() => setOpen(true)}
+          className="gap-2 lg:gap-[0.556vw] font-semibold"
+        >
+          <Icon name="shield-done" className="size-4 lg:size-[1.111vw]" />
+          {resubmit ? "Update documents" : "Get verified"}
         </Button>
-      </div>
-    </div>
-  )
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setOpen(true)}
+          className="gap-2 lg:gap-[0.556vw] font-semibold"
+        >
+          <Icon name="shield-done" className="size-4 lg:size-[1.111vw]" />
+          {resubmit ? "Update" : "Get verified"}
+        </Button>
+      )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-y-auto sm:max-w-[560px] lg:max-w-[38vw]">
+          <DialogHeader className="pb-5 lg:pb-[1.389vw]">
+            <DialogTitle>
+              {resubmit ? "Update your documents" : "Verify your business"}
+            </DialogTitle>
+            <DialogDescription>
+              Upload your license and insurance. We review them within a day.
+            </DialogDescription>
+          </DialogHeader>
+          <ContractorSetupForm
+            mode="documents"
+            availableSubtypes={availableSubtypes}
+            initial={initial}
+            rejected={resubmit}
+            onComplete={() => {
+              setOpen(false);
+              router.refresh();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

@@ -54,7 +54,7 @@ export function AuthPageShell({
           </header>
 
           <div className="flex flex-1 items-center justify-center px-6 pb-16 pt-2 lg:px-[1.667vw] lg:pb-[3.333vw] lg:pt-[3vw]">
-            <div className="w-full max-w-lg lg:max-w-[31vw]">{children}</div>
+            <div className="w-full max-w-lg lg:max-w-[32vw]">{children}</div>
           </div>
         </main>
 

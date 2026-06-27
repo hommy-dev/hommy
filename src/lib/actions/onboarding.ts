@@ -22,7 +22,9 @@ type ActionResult = { success: true } | { success: false; error: string }
 const OnboardingSchema = z.object({
   companyName: z.string().trim().min(2, 'Enter your company name'),
   phone: z.string().trim().max(30).optional().default(''),
-  yearsInBusiness: z.number().int().min(0).max(100).nullable().optional(),
+  yearsInBusiness: z.number().int().min(0).max(100),
+  bio: z.string().trim().min(40, 'Tell homeowners a little about your company').max(600),
+  logoUrl: z.string().url().nullable().optional(),
   subtypes: z.array(z.string().trim().min(1)).min(1, 'Pick at least one type of work'),
   // Coverage = center point + radius (km). Geographic matching, worldwide.
   areas: z
@@ -70,7 +72,13 @@ export async function completeOnboarding(input: unknown): Promise<ActionResult> 
     await db.transaction(async (tx) => {
       await tx
         .update(contractors)
-        .set({ companyName: d.companyName, yearsInBusiness: d.yearsInBusiness ?? null })
+        .set({
+          companyName: d.companyName,
+          yearsInBusiness: d.yearsInBusiness ?? null,
+          // Only touch logo/bio when supplied, so a later re-run never wipes them.
+          ...(d.bio ? { bio: d.bio } : {}),
+          ...(d.logoUrl !== undefined ? { logoUrl: d.logoUrl } : {}),
+        })
         .where(eq(contractors.id, contractor.id))
 
       // First time the company is named → mint its stable /roofers/[slug] URL.

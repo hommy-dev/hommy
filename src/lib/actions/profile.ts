@@ -17,10 +17,10 @@ const ProfileSchema = z.object({
   companyName: z.string().trim().min(2, 'Enter your company name'),
   // Optional with NO default — when omitted the phone is left untouched.
   phone: z.string().trim().max(30).optional(),
-  bio: z.string().trim().max(600).optional().default(''),
+  bio: z.string().trim().min(40, 'Tell homeowners a little about your company').max(600),
   logoUrl: z.string().url().nullable().optional(),
   bannerUrl: z.string().url().nullable().optional(),
-  yearsInBusiness: z.coerce.number().int().min(0).max(200).nullable().optional(),
+  yearsInBusiness: z.coerce.number().int().min(0).max(200),
 })
 
 export async function updateBusinessProfile(input: unknown): Promise<Result> {

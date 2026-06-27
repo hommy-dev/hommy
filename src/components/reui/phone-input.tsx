@@ -73,9 +73,11 @@ function PhoneInput({
       <PhonePortalContext.Provider value={portalRef}>
         <BasePhoneInput.default
           className={cn(
-            "flex",
+            // One seamless input: the border lives on this wrapper, both segments
+            // inside are borderless so there's no divider between flag and number.
+            "flex items-stretch overflow-hidden rounded-md lg:rounded-[0.556vw] border border-input bg-card transition-colors focus-within:border-ring",
             props["aria-invalid"] &&
-              "[&_*[data-slot=combobox-trigger]]:border-destructive [&_*[data-slot=combobox-trigger]]:ring-destructive/50",
+              "border-destructive focus-within:border-destructive",
             className
           )}
           flagComponent={FlagComponent}
@@ -98,9 +100,10 @@ function InputComponent({ className, ...props }: ComponentProps<typeof Input>) {
   return (
     <Input
       className={cn(
-        "rounded-s-none focus:z-1",
+        "rounded-none border-0 bg-transparent focus-visible:border-0 focus-visible:ring-0",
         variant === "sm" && "h-8 lg:h-[2.222vw]",
         variant === "lg" && "h-10 lg:h-[2.778vw]",
+        variant === "default" && "h-11 lg:h-[3.056vw]",
         className
       )}
       {...props}
@@ -161,7 +164,10 @@ function CountrySelect({
             variant="outline"
             size={variant}
             className={cn(
-              "rounded-s-md rounded-e-none flex gap-1 lg:gap-[0.278vw] border-e-0 px-2.5 lg:px-[0.694vw] py-0 leading-none hover:bg-transparent focus:z-10 data-pressed:bg-transparent",
+              "flex items-center gap-1.5 lg:gap-[0.417vw] rounded-none border-0 bg-transparent px-2.5 lg:px-[0.694vw] py-0 leading-none hover:bg-accent focus-visible:ring-0 data-pressed:bg-accent",
+              variant === "sm" && "h-8 lg:h-[2.222vw]",
+              variant === "lg" && "h-10 lg:h-[2.778vw]",
+              variant === "default" && "h-11 lg:h-[3.056vw]",
               disabled && "opacity-50"
             )}
             disabled={disabled}
@@ -172,6 +178,10 @@ function CountrySelect({
             <FlagComponent
               country={selectedCountry}
               countryName={selectedCountry}
+            />
+            <Icon
+              name="down"
+              className="size-4 lg:size-[1vw] shrink-0 text-muted-foreground"
             />
           </Button>
         }

@@ -13,14 +13,14 @@ export function WizardStep({
   children: React.ReactNode
 }) {
   return (
-    <div>
-      <h1 className="font-sebenta text-[2rem] lg:text-[2.222vw] font-bold leading-tight tracking-tight">
+    <div> 
+      <h1 className="font-sebenta text-[2rem] lg:text-[1.8vw] font-bold leading-tight tracking-tight">
         {title}
       </h1>
-      <p className="mt-2 lg:mt-[0.556vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
+      <p className="mt-2 lg:mt-[0.3vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
         {sub}
       </p>
-      <div className="mt-8 lg:mt-[3vw] space-y-5 lg:space-y-[2vw]">
+      <div className="mt-6 lg:mt-[2vw] space-y-5 lg:space-y-[2vw]">
         {children}
       </div>
     </div>

@@ -168,14 +168,14 @@ export function HomeownerSignupForm() {
             <span className="text-[13px] lg:text-[0.903vw] leading-relaxed text-foreground/60">
               I agree to the{" "}
               <Link
-                href="#"
+                href="/terms"
                 className="text-foreground underline underline-offset-2"
               >
                 Terms
               </Link>{" "}
               and{" "}
               <Link
-                href="#"
+                href="/privacy"
                 className="text-foreground underline underline-offset-2"
               >
                 Privacy Policy

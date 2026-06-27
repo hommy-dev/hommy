@@ -4,7 +4,7 @@ import { getRequiredUser } from "@/lib/auth/session"
 import { getContractorForUser, type Contractor } from "@/lib/data/dashboard"
 import { getContractorOverview } from "@/lib/data/overview"
 import { creditStatView } from "@/lib/credits/stat"
-import { getVerificationState } from "@/lib/contractor/verification"
+import { getContractorSetupState, getContractorSetupData } from "@/lib/contractor/setup"
 import { scoreStanding } from "@/lib/reputation/labels"
 import { SetupGate } from "@/components/dashboard/setup-gate"
 import { OverviewStat } from "@/components/dashboard/overview/overview-stat"
@@ -83,21 +83,22 @@ async function OverviewSection() {
   }
 
   const firstName = user.fullName?.trim().split(/\s+/)[0] ?? "there"
-  const verification = getVerificationState(contractor)
-  const needsSetup = verification === "not_started" || verification === "rejected"
+  const setupState = await getContractorSetupState(contractor)
+  const showGate =
+    setupState === "needs_info" ||
+    setupState === "needs_docs" ||
+    setupState === "rejected"
+  const setupData = showGate
+    ? await getContractorSetupData(contractor, user.phone ?? null)
+    : null
 
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
-      {needsSetup && (
+      {showGate && setupData && (
         <SetupGate
-          initial={{
-            logoUrl: contractor.logoUrl,
-            companyName: contractor.companyName ?? "",
-            phone: user.phone ?? "",
-            bio: contractor.bio ?? "",
-            licenseDocUrl: contractor.licenseDocUrl,
-            insuranceDocUrl: contractor.insuranceDocUrl,
-          }}
+          state={setupState}
+          availableSubtypes={setupData.availableSubtypes}
+          initial={setupData.initial}
         />
       )}
       <OverviewContent contractor={contractor} userId={user.id} firstName={firstName} />
@@ -196,7 +197,7 @@ async function OverviewContent({
   return (
     <div className="space-y-8 lg:space-y-[2.222vw]">
       {/* Headline KPIs */}
-      <div className="grid gap-4 lg:gap-[1.111vw] grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 lg:gap-[1.111vw] grid-cols-1  md:grid-cols-2 lg:grid-cols-4">
         <OverviewStat
           label="Open offers"
           value={o.openOffers}

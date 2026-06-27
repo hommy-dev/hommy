@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Icon } from "@/components/ui/icon";
+import { showToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { useAuthExperience } from "./auth-experience";
 
@@ -58,13 +59,22 @@ export function LoginForm() {
             : null
         );
       } else {
-        setEmailStatus("new");
-        experience?.set("new-here");
+        showNoAccount();
       }
     } catch {
       setEmailStatus("idle");
       experience?.reset();
     }
+  }
+
+  // Switch to the "create account" view and tell the user why, so the change
+  // reads as intentional rather than feeling like a glitch.
+  function showNoAccount() {
+    setEmailStatus("new");
+    experience?.set("new-here");
+    showToast("No account found for that email. Pick an option below to create one.", {
+      type: "info",
+    });
   }
 
   function backToSignIn() {
@@ -105,8 +115,7 @@ export function LoginForm() {
           notFound = false;
         }
         if (notFound) {
-          setEmailStatus("new");
-          experience?.set("new-here");
+          showNoAccount();
           return;
         }
         setFormError(
@@ -132,7 +141,7 @@ export function LoginForm() {
       <div className="space-y-7 lg:space-y-[1.944vw]">
         <div className="space-y-2.5 lg:space-y-[0.694vw]">
           <h1 className="font-sebenta text-3xl lg:text-[2.111vw] font-bold leading-tight tracking-tight text-foreground">
-            Let&rsquo;s get you started
+            Let&rsquo;s get you signed up first 🎗️
           </h1>
           <p className="text-sm lg:text-[0.972vw] leading-relaxed text-muted-foreground">
             We couldn&rsquo;t find a Hommy account for{" "}

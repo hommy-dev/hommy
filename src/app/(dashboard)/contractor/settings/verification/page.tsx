@@ -5,9 +5,11 @@ import {
   getVerificationState,
   type VerificationState,
 } from "@/lib/contractor/verification"
+import { getContractorSetupData } from "@/lib/contractor/setup"
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
 import { DataRow, Empty } from "@/components/dashboard/settings/edit-dialog"
 import { EditVerificationDialog } from "@/components/dashboard/settings/edit-verification-dialog"
+import { EmptyState } from "@/components/ui/empty-state"
 import { SettingsSectionSkeleton } from "@/components/dashboard/skeletons"
 import { cn } from "@/lib/utils"
 
@@ -58,59 +60,98 @@ async function VerificationBody() {
   const canManage = role === "owner" || role === "admin"
   const state = getVerificationState(c)
   const badge = STATUS[state]
+  const { availableSubtypes, initial } = await getContractorSetupData(
+    c,
+    user.phone ?? null,
+  )
+
+  // No documents yet: show the empty state as its own full-width surface (it
+  // brings its own dashed card) instead of nesting it inside a bordered section.
+  if (state === "not_started") {
+    return (
+      <section className="space-y-4 lg:space-y-[1.111vw]">
+        <div>
+          <h2 className="text-lg lg:text-[1.25vw] font-semibold tracking-tight">
+            Verification
+          </h2>
+          <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+            License and insurance. Required before you can engage leads.
+          </p>
+        </div>
+        <EmptyState
+          icon="shield-done"
+          title="Get verified to win jobs"
+          description="Upload your license and insurance. We review them within a day, and verified roofers can engage leads and win work."
+          action={
+            canManage ? (
+              <EditVerificationDialog
+                initial={initial}
+                availableSubtypes={availableSubtypes}
+                resubmit={false}
+                prominent
+              />
+            ) : undefined
+          }
+        />
+      </section>
+    )
+  }
 
   return (
     <SettingsSection
       title="Verification"
       description="License and insurance. Required before you can engage leads."
       action={
-        canManage && state !== "verified" ? (
+        canManage && (state === "in_review" || state === "rejected") ? (
           <EditVerificationDialog
-            initial={{ licenseDocUrl: c.licenseDocUrl, insuranceDocUrl: c.insuranceDocUrl }}
-            resubmit={state !== "not_started"}
+            initial={initial}
+            availableSubtypes={availableSubtypes}
+            resubmit
           />
         ) : undefined
       }
     >
-      <div className="space-y-5 lg:space-y-[1.389vw]">
-        <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
-          <span className="text-sm lg:text-[0.972vw] text-muted-foreground">
-            Status
-          </span>
-          <span
-            className={cn(
-              "rounded-full px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-semibold",
-              badge.cls,
-            )}
-          >
-            {badge.label}
-          </span>
+      {
+        <div className="space-y-5 lg:space-y-[1.389vw]">
+          <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw]">
+            <span className="text-sm lg:text-[0.972vw] text-muted-foreground">
+              Status
+            </span>
+            <span
+              className={cn(
+                "rounded-full px-2.5 lg:px-[0.694vw] py-1 lg:py-[0.278vw] text-xs lg:text-[0.833vw] font-semibold",
+                badge.cls,
+              )}
+            >
+              {badge.label}
+            </span>
+          </div>
+
+          {state === "verified" ? (
+            <div className="rounded-md lg:rounded-[0.556vw] border border-secondary/40 bg-secondary/15 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-foreground/75">
+              You’re verified. Set to engage leads and send quotes.
+            </div>
+          ) : state === "rejected" ? (
+            <div className="rounded-md lg:rounded-[0.556vw] border border-destructive/30 bg-destructive/5 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-destructive">
+              Your last submission needs attention. Update your documents and
+              resubmit.
+            </div>
+          ) : state === "in_review" ? (
+            <div className="rounded-md lg:rounded-[0.556vw] border border-amber-300/50 bg-amber-50 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+              We’re reviewing your documents.
+            </div>
+          ) : null}
+
+          <dl className="divide-y divide-border">
+            <DataRow label="License document">
+              <DocValue url={c.licenseDocUrl} />
+            </DataRow>
+            <DataRow label="Insurance certificate">
+              <DocValue url={c.insuranceDocUrl} />
+            </DataRow>
+          </dl>
         </div>
-
-        {state === "verified" ? (
-          <div className="rounded-md lg:rounded-[0.556vw] border border-secondary/40 bg-secondary/15 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-foreground/75">
-            You’re verified. Set to engage leads and send quotes.
-          </div>
-        ) : state === "rejected" ? (
-          <div className="rounded-md lg:rounded-[0.556vw] border border-destructive/30 bg-destructive/5 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-destructive">
-            Your last submission needs attention. Update your documents and
-            resubmit.
-          </div>
-        ) : state === "in_review" ? (
-          <div className="rounded-md lg:rounded-[0.556vw] border border-amber-300/50 bg-amber-50 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-sm lg:text-[0.972vw] text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-            We’re reviewing your documents.
-          </div>
-        ) : null}
-
-        <dl className="divide-y divide-border">
-          <DataRow label="License document">
-            <DocValue url={c.licenseDocUrl} />
-          </DataRow>
-          <DataRow label="Insurance certificate">
-            <DocValue url={c.insuranceDocUrl} />
-          </DataRow>
-        </dl>
-      </div>
+      }
     </SettingsSection>
   )
 }

@@ -57,7 +57,11 @@ export function EditCompanyDialog({ initial }: { initial: Initial }) {
       title="Edit company profile"
       onOpen={reset}
       onSave={save}
-      canSave={companyName.trim().length >= 2}
+      canSave={
+        companyName.trim().length >= 2 &&
+        years.trim() !== "" &&
+        bio.trim().length >= 40
+      }
       wide
     >
       <Field label="Cover banner" hint="A wide image shown across the top of your profile. ~1600×400 looks best.">
@@ -116,13 +120,16 @@ export function EditCompanyDialog({ initial }: { initial: Initial }) {
         />
       </Field>
 
-      <Field label="About" hint="A line or two homeowners see on your profile.">
+      <Field
+        label="About"
+        hint="Share your expertise, proudest work, and why customers should choose you."
+      >
         <Textarea
           value={bio}
           onChange={(e) => setBio(e.target.value.slice(0, 600))}
-          rows={3}
-          placeholder="What your company takes pride in."
-          className="min-h-24 lg:min-h-[6.667vw]"
+          rows={5}
+          placeholder="e.g. Family-run since 2009, we specialize in storm-damage repairs and full roof replacements across the metro. Licensed and insured, with a 10-year workmanship warranty on every job. We show up on time and leave your property cleaner than we found it."
+          className="min-h-32 lg:min-h-[9vw]"
         />
       </Field>
 
