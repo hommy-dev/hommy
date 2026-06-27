@@ -70,12 +70,12 @@ export function Services() {
               </div>
               <Link
                 href="/get-a-quote"
-                className="w-full mt-4 lg:mt-[1vw] inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 lg:border-[0.2vw] border-primary/40 group-hover:border-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.8vw] text-base lg:text-[1.111vw] text-primary transition-colors"
+                className="w-full mt-4 lg:mt-[1vw] inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 lg:border-[0.2vw] border-foreground/40 group-hover:border-foreground px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.8vw] text-base lg:text-[1.111vw] font-semibold text-foreground/70 group-hover:text-foreground transition-colors"
               >
                 Post a job
                 <Icon
                   name="arrow-right"
-                  className="size-6 lg:size-[1.667vw] text-primary transition-transform group-hover:translate-x-0.5"
+                  className="size-6 lg:size-[1.3vw] transition-transform group-hover:translate-x-0.5"
                 />
               </Link>
             </div>

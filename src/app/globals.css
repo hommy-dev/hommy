@@ -449,3 +449,41 @@
       )
       border-box;
 }
+
+/* ── Moving gradient frame ──────────────────────────────────────────────────
+   Same border-box technique as .gradient-frame, but the ring is a rotating
+   conic gradient (brand indigo ↔ lime) for a lively "in progress" accent.
+   Keep the element's own radius (rounded-*). Override width/fill with
+   [--gf-width:1.5px] / [--gf-fill:var(--background)]. Reduced-motion safe. */
+@property --hommy-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes hommy-border-spin {
+  to {
+    --hommy-angle: 360deg;
+  }
+}
+.gradient-frame-animated {
+  --gf-fill: var(--card);
+  --gf-width: 2px;
+  border: var(--gf-width) solid transparent;
+  background:
+    linear-gradient(var(--gf-fill), var(--gf-fill)) padding-box,
+    conic-gradient(
+        from var(--hommy-angle),
+        var(--primary),
+        var(--secondary),
+        var(--primary),
+        var(--secondary),
+        var(--primary)
+      )
+      border-box;
+  animation: hommy-border-spin 5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gradient-frame-animated {
+    animation: none;
+  }
+}
