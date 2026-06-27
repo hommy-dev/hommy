@@ -823,6 +823,27 @@ export const guestSignupAttempts = pgTable('guest_signup_attempts', {
   index('guest_signup_attempts_ip_idx').on(t.ip, t.createdAt),
 ])
 
+// consent_records — append-only proof of consent (cookies are handled client-side;
+// this captures the legally-relevant grants: agreeing to Terms/Privacy, data
+// sharing with matched pros, and the optional SMS opt-in). One row per granted/
+// denied consent, stamped with the exact policy version + IP/UA so we can prove
+// who agreed to what, when. Global/strictest standard (GDPR + TCPA).
+export const consentRecords = pgTable('consent_records', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  email: text('email'), // who, when there's no user row yet
+  kind: text('kind').notNull(), // 'terms' | 'data_sharing' | 'sms' | 'marketing'
+  granted: boolean('granted').notNull().default(true),
+  policyVersion: text('policy_version'), // the wording/version they agreed to
+  source: text('source'), // 'post_a_job' | 'direct_request' | 'contractor_signup' | ...
+  ip: text('ip'),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('consent_records_user_idx').on(t.userId),
+  index('consent_records_email_idx').on(t.email),
+])
+
 // feature_interest — a logged-in user's "notify me / upvote" on a roadmap
 // feature shown on /contractor/coming-next. One row per (user, feature_key);
 // count(*) per feature_key is the demand signal we use to prioritize the build

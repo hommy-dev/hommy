@@ -133,9 +133,17 @@ export default function PrivacyPolicyPage() {
 
       <h2>5. Cookies and Similar Technologies</h2>
       <p>
-        We use cookies and similar technologies for authentication, to remember your preferences, to
-        keep the Platform secure, and to understand how the Platform is used. You can control cookies
-        through your browser settings; disabling some cookies may affect how the Platform functions.
+        We use <strong>essential</strong> cookies to run the Platform — sign-in, security, and
+        remembering your session and preferences. These are always active because the Platform cannot
+        function without them.
+      </p>
+      <p>
+        We also use optional <strong>analytics</strong> cookies (via PostHog) to understand how the
+        Platform is used so we can improve it. These stay <strong>off until you allow them</strong>: on
+        your first visit we ask for your choice, and you can change it anytime through the{" "}
+        <strong>&ldquo;Cookie settings&rdquo;</strong> link in the site footer. You can also control
+        cookies through your browser settings; disabling some cookies may affect how the Platform
+        functions.
       </p>
 
       <h2>6. Data Retention</h2>
@@ -159,9 +167,14 @@ export default function PrivacyPolicyPage() {
           settings, or by contacting us.
         </li>
         <li>
-          <strong>Communications.</strong> You can opt out of SMS by replying STOP, and unsubscribe from
-          marketing emails using the link in those emails. We may still send you transactional or
-          service messages.
+          <strong>Communications.</strong> Providing a phone number and SMS consent is optional. You can
+          opt out of SMS by replying STOP, and unsubscribe from marketing emails using the link in those
+          emails. We may still send you transactional or service messages.
+        </li>
+        <li>
+          <strong>Cookies &amp; analytics.</strong> You can accept or reject analytics cookies, or change
+          your choice anytime, via &ldquo;Cookie settings&rdquo; in the footer. Essential cookies cannot
+          be turned off, as the Platform needs them to run.
         </li>
         <li>
           <strong>State privacy rights.</strong> Depending on where you live (for example, California

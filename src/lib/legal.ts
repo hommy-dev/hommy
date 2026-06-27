@@ -24,5 +24,5 @@ export const LEGAL = {
   /** TODO: set your real business mailing address. */
   address: '[Business mailing address]',
   /** TODO: set the publication date. */
-  effectiveDate: 'June 23, 2026',
+  effectiveDate: 'June 27, 2026',
 } as const

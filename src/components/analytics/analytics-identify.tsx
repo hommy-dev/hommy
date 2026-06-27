@@ -31,7 +31,9 @@ export function AnalyticsIdentify({
   const posthog = usePostHog();
 
   useEffect(() => {
-    if (!posthog || !userId) return;
+    // Only identify once PostHog is actually initialized — it stays unloaded
+    // until the visitor consents to analytics (see posthog-provider.tsx).
+    if (!posthog || !posthog.__loaded || !userId) return;
     posthog.identify(userId, { email, role });
     if (company?.id) {
       posthog.group("company", company.id, { name: company.name });

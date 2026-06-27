@@ -71,6 +71,7 @@ export function GetAQuoteWizard({
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [smsOptIn, setSmsOptIn] = useState(false)
   const [errors, setErrors] = useState<FieldErrors>({})
 
   // Inline existing-account flow. A single account is one role (see
@@ -120,7 +121,6 @@ export function GetAQuoteWizard({
   }, [])
 
   const emailValid = EMAIL_RE.test(email.trim())
-  const phoneValid = phone.replace(/\D/g, "").length >= 7
   const emailChecking = emailStatus === "checking"
   const emailIsHomeowner = emailStatus === "homeowner"
   const emailIsOther = emailStatus === "other"
@@ -159,10 +159,7 @@ export function GetAQuoteWizard({
     (current === "where" && place !== null) ||
     (current === "you" &&
       (signedIn ||
-        (fullName.trim().length >= 2 &&
-          emailValid &&
-          phoneValid &&
-          emailStatus === "free")))
+        (fullName.trim().length >= 2 && emailValid && emailStatus === "free")))
 
   function clearError(key: string) {
     setErrors((e) => (e[key] ? { ...e, [key]: "" } : e))
@@ -216,6 +213,7 @@ export function GetAQuoteWizard({
         zipCode: place?.zipCode ?? "",
         lat: place?.lat ?? null,
         lng: place?.lng ?? null,
+        smsOptIn,
         ...(isLoggedInHomeowner || signedIn ? {} : { fullName, email, phone }),
       }
 
@@ -395,6 +393,8 @@ export function GetAQuoteWizard({
               setPhone(v)
               clearError("phone")
             }}
+            smsOptIn={smsOptIn}
+            onSmsOptInChange={setSmsOptIn}
             errors={errors}
             emailChecking={emailChecking}
             emailIsHomeowner={emailIsHomeowner}
@@ -403,6 +403,20 @@ export function GetAQuoteWizard({
           />
         )}
       </main>
+
+      {lastStep ? (
+        <p className="mx-auto w-full max-w-2xl lg:max-w-[46.662vw] px-6 lg:px-[1.667vw] pt-2 lg:pt-[0.556vw] text-center text-[12px] leading-relaxed text-muted-foreground lg:text-[0.78vw]">
+          By posting, you agree to Hommy&apos;s{" "}
+          <Link href="/terms" target="_blank" className="underline underline-offset-2 hover:text-foreground">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" target="_blank" className="underline underline-offset-2 hover:text-foreground">
+            Privacy Policy
+          </Link>
+          . Your job details are shared with the local pros you&apos;re matched with so they can quote.
+        </p>
+      ) : null}
 
       <footer className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] items-center justify-between gap-3 lg:gap-[0.833vw] px-6 lg:px-[1.667vw] py-6 lg:py-[1.667vw]">
         <Button

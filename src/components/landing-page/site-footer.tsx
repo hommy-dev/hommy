@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon } from "../ui/icon";
+import { CookieSettingsLink } from "@/components/consent/cookie-settings-link";
 
 const FOOTER = [
   {
@@ -74,10 +75,10 @@ export function SiteFooter() {
         </div>
 
         {/* big wordmark */}
-        <div className="mt-8 lg:mt-[2vw] border-t pt-4 lg:pt-[2vw]">
-          <p className="text-center text-xs lg:text-[0.833vw]">
-            © 2026 Hommy. Licensed and insured roofers only.
-          </p>
+        <div className="mt-8 flex flex-col items-center justify-center gap-2 border-t pt-4 text-xs lg:mt-[2vw] lg:gap-[0.556vw] lg:pt-[2vw] lg:text-[0.833vw] sm:flex-row">
+          <p className="text-center">© 2026 Hommy. Licensed and insured roofers only.</p>
+          <span aria-hidden className="hidden text-foreground/30 sm:inline">·</span>
+          <CookieSettingsLink className="underline-offset-2 transition-colors hover:underline" />
         </div>
       </div>
     </footer>

@@ -15,7 +15,7 @@ export function Hero() {
         fill
         priority
         sizes="100vw"
-        className="object-bottom-left object-cover lg:object-bottom"
+        className="object-bottom-left object-cover lg:object-bottom select-none"
       />
 
       <div

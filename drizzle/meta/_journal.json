@@ -183,6 +183,13 @@
       "when": 1782451092588,
       "tag": "0025_guest_signup_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1782529444928,
+      "tag": "0026_consent_records",
+      "breakpoints": true
     }
   ]
 }

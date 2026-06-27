@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/reui/phone-input";
 import { IdentityCard } from "@/components/ui/identity-card";
 import { WizardField, WizardStep } from "./wizard-parts";
@@ -16,6 +17,8 @@ export function ContactStep({
   onFullNameChange,
   onEmailChange,
   onPhoneChange,
+  smsOptIn,
+  onSmsOptInChange,
   errors,
   emailChecking,
   emailIsHomeowner,
@@ -29,6 +32,8 @@ export function ContactStep({
   onFullNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
+  smsOptIn: boolean;
+  onSmsOptInChange: (value: boolean) => void;
   errors: FieldErrors;
   emailChecking: boolean;
   emailIsHomeowner: boolean;
@@ -86,13 +91,26 @@ export function ContactStep({
         )}
       </WizardField>
 
-      <WizardField label="Phone" error={errors.phone}>
+      <WizardField label="Phone (optional)" error={errors.phone}>
         <PhoneInput
           value={phone}
           onChange={(v) => onPhoneChange(v ?? "")}
           defaultCountry="US"
           placeholder="(214) 555-0100"
         />
+        {phone.trim() ? (
+          <label className="mt-2 lg:mt-[0.556vw] flex cursor-pointer items-start gap-2 lg:gap-[0.556vw] text-left text-[13px] lg:text-[0.85vw] text-muted-foreground">
+            <Checkbox
+              checked={smsOptIn}
+              onCheckedChange={(v) => onSmsOptInChange(v === true)}
+              className="mt-0.5"
+            />
+            <span>
+              Text me updates about my request. Optional — reply STOP anytime. Standard
+              message &amp; data rates may apply.
+            </span>
+          </label>
+        ) : null}
       </WizardField>
 
       {emailIsHomeowner && (

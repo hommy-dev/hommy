@@ -16,6 +16,7 @@ import { createGuestHomeowner } from '@/lib/auth/guest-homeowner'
 import { findEligibleContractors } from '@/lib/leads/matching'
 import { getLeadPricing } from '@/lib/leads/pricing'
 import { upsertContact } from '@/lib/leads/contact'
+import { recordConsents } from '@/lib/consent/record'
 import { normalizePostalCode } from '@/lib/geo/postal'
 import { MAX_LEAD_PHOTOS, NOT_SURE_SUBTYPE } from '@/lib/leads/subtype'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
@@ -71,6 +72,9 @@ const CreateLeadSchema = z.object({
   fullName: z.string().trim().optional().default(''),
   email: z.string().trim().toLowerCase().optional().default(''),
   phone: z.string().trim().optional().default(''),
+  // Optional SMS opt-in — only meaningful when a phone is provided. Logged as a
+  // consent record; texting itself stays off until A2P 10DLC is live.
+  smsOptIn: z.boolean().optional().default(false),
 })
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -144,7 +148,6 @@ export async function createLead(
     const contactErrors: FieldErrors = {}
     if (d.fullName.length < 2) contactErrors.fullName = 'Enter your name'
     if (!EMAIL_RE.test(d.email)) contactErrors.email = 'Enter a valid email'
-    if (d.phone.replace(/\D/g, '').length < 7) contactErrors.phone = 'Enter your phone number'
     if (Object.keys(contactErrors).length > 0) {
       return { success: false, error: 'Please add your contact details.', fieldErrors: contactErrors }
     }
@@ -178,6 +181,19 @@ export async function createLead(
   if (!ho) {
     return { success: false, error: 'Your homeowner profile is missing. Please contact support.' }
   }
+
+  // Log consent (best-effort): by posting they agree to Terms/Privacy + that their
+  // details are shared with matched pros; SMS only if they opted in with a phone.
+  await recordConsents({
+    userId: homeownerUserId,
+    email: (user?.email ?? d.email) || null,
+    source: 'post_a_job',
+    consents: [
+      { kind: 'terms', granted: true },
+      { kind: 'data_sharing', granted: true },
+      ...(d.smsOptIn && d.phone.trim() ? [{ kind: 'sms' as const, granted: true }] : []),
+    ],
+  })
 
   // Dedupe: a fresh open lead from the same homeowner for the same service +
   // address is almost always a double-submit (back button, impatience, a guest
@@ -398,7 +414,6 @@ export async function requestDirectQuote(
     const contactErrors: FieldErrors = {}
     if (d.fullName.length < 2) contactErrors.fullName = 'Enter your name'
     if (!EMAIL_RE.test(d.email)) contactErrors.email = 'Enter a valid email'
-    if (d.phone.replace(/\D/g, '').length < 7) contactErrors.phone = 'Enter your phone number'
     if (Object.keys(contactErrors).length > 0) {
       return { success: false, error: 'Please add your contact details.', fieldErrors: contactErrors }
     }
@@ -428,6 +443,18 @@ export async function requestDirectQuote(
   if (!ho) {
     return { success: false, error: 'Your homeowner profile is missing. Please contact support.' }
   }
+
+  // Log consent (best-effort): same as a broadcast post, but from the directory.
+  await recordConsents({
+    userId: homeownerUserId,
+    email: (user?.email ?? d.email) || null,
+    source: 'direct_request',
+    consents: [
+      { kind: 'terms', granted: true },
+      { kind: 'data_sharing', granted: true },
+      ...(d.smsOptIn && d.phone.trim() ? [{ kind: 'sms' as const, granted: true }] : []),
+    ],
+  })
 
   const companyName = target.companyName ?? 'this roofer'
   const where = [d.city, d.state].filter(Boolean).join(', ')

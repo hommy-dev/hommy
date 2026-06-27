@@ -6,6 +6,8 @@ import { ogImageUrl } from "@/lib/og";
 import { inter, sebenta } from "@/style/font";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { ConsentProvider } from "@/components/consent/consent-context";
+import { CookieConsent } from "@/components/consent/cookie-consent";
 import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast";
 import { SanityLive } from "@/sanity/live";
 import { Suspense } from "react";
@@ -78,6 +80,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased " suppressHydrationWarning>
+        <ConsentProvider>
         <PostHogProvider>
         <ThemeProvider
           attribute="class"
@@ -97,6 +100,8 @@ export default function RootLayout({
           </ToastProvider>
         </ThemeProvider>
         </PostHogProvider>
+        <CookieConsent />
+        </ConsentProvider>
         {/* Sanity Live Content API — enables real-time content updates */}
         <SanityLive />
       </body>

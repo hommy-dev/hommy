@@ -76,7 +76,7 @@ export function AnnouncementBar() {
       {show ? (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-3 lg:pb-[0.833vw]">
           <div className="gradient-frame-animated [--gf-fill:var(--background)] [--gf-width:1.5px] pointer-events-auto flex w-full max-w-2xl lg:max-w-[50vw] items-center gap-3 lg:gap-[0.833vw] rounded-xl lg:rounded-[0.833vw] px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw] shadow-2xl">
-            <Icon name="star" className="hidden shrink-0  sm:block size-4 lg:size-[1.111vw]" />
+            <Icon name="logo" className="hidden shrink-0 text-primary sm:block size-4 lg:size-[1.3vw]" />
             <p className="min-w-0 flex-1 text-[13px] leading-snug lg:text-[1vw]">
               <span className="font-semibold">Hommy is in early access.</span>{" "}
               <span className="">Still building — full launch in about a month.</span>
@@ -84,7 +84,7 @@ export function AnnouncementBar() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="shrink-0 rounded-md bg-foreground px-3 py-1.5 text-[13px] font-semibold text-background transition-colors hover:bg-background/90 lg:rounded-[0.4vw] lg:px-[0.833vw] lg:py-[0.417vw] lg:text-[0.85vw]"
+              className="shrink-0 rounded-md bg-foreground px-3 py-1.5 text-[13px] font-semibold text-background transition-colors hover:bg-foreground/90 lg:rounded-[0.4vw] lg:px-[0.833vw] lg:py-[0.417vw] lg:text-[0.85vw]"
             >
               Join waitlist
             </button>
