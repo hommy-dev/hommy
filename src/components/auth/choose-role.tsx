@@ -44,7 +44,7 @@ export function ChooseRole() {
       <div className="space-y-3 lg:space-y-[0.833vw]">
         <RoleCard
           icon="home"
-          title="I want to hire a roofer"
+          title="I'm a homeowner"
           subtitle="Get quotes from trusted local roofers. Free, no obligation."
           loading={pending && selected === "homeowner"}
           dimmed={pending && selected !== "homeowner"}

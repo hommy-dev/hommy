@@ -6,6 +6,8 @@ import {
   getRoofingSubtypes,
 } from "@/lib/data/dashboard"
 import { getPortfolio, getPortfolioCap } from "@/lib/data/portfolio"
+import { getExternalMedia } from "@/lib/data/integrations"
+import { ExternalGallery } from "@/components/integrations/external-gallery"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Icon } from "@/components/ui/icon"
 import { SettingsSection } from "@/components/dashboard/settings/settings-section"
@@ -51,11 +53,12 @@ async function CompanyBody() {
     )
   }
 
-  const [role, portfolio, cap, subtypes] = await Promise.all([
+  const [role, portfolio, cap, subtypes, googleMedia] = await Promise.all([
     getMembershipRole(user.id, c.id),
     getPortfolio(c.id),
     getPortfolioCap(c.id),
     getRoofingSubtypes(),
+    getExternalMedia(c.id),
   ])
   const canManage = role === "owner" || role === "admin"
   const name = c.companyName ?? "Your company"
@@ -129,6 +132,28 @@ async function CompanyBody() {
         ) : (
           <PortfolioGallery items={portfolio.filter((p) => p.isPublished)} />
         )}
+
+        {googleMedia.length > 0 ? (
+          <div className="mt-6 lg:mt-[1.667vw] space-y-3 lg:space-y-[0.833vw] border-t border-border pt-6 lg:pt-[1.667vw]">
+            <div>
+              <p className="text-xs lg:text-[0.833vw] font-medium uppercase tracking-wider text-muted-foreground">
+                From Google
+              </p>
+              <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+                Photos from your linked Google profile. They also show on your
+                public profile. Manage the connection in{" "}
+                <Link
+                  href="/contractor/integrations"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Integrations
+                </Link>
+                .
+              </p>
+            </div>
+            <ExternalGallery items={googleMedia} />
+          </div>
+        ) : null}
       </SettingsSection>
     </div>
   )

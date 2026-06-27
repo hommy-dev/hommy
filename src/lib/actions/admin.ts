@@ -1,11 +1,13 @@
 'use server'
 
 import { z } from 'zod'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
-import { contractors, purchaseIntents } from '@/lib/db/schema'
+import { contractors, contractorMembers, purchaseIntents } from '@/lib/db/schema'
+import { sendNotification } from '@/lib/notifications'
+import { renderEmail } from '@/lib/notifications/email/template'
 import { grantCredits } from '@/lib/credits/ledger'
 import { broadcastCreditsChanged } from '@/lib/credits/notify'
 import { getAdminContractorDetail, type AdminContractorDetail } from '@/lib/data/admin'
@@ -89,6 +91,78 @@ export async function decideVerification(input: unknown): Promise<Result> {
     const p: { referrerId: string; refereeBalance: number; referrerBalance: number } = payout
     void broadcastCreditsChanged(contractorId, p.refereeBalance)
     void broadcastCreditsChanged(p.referrerId, p.referrerBalance)
+  }
+
+  // Let the company know the outcome (in-app + email to every active member).
+  // Best-effort: a notification failure must not fail the admin's decision.
+  try {
+    const members = await db
+      .select({ userId: contractorMembers.userId })
+      .from(contractorMembers)
+      .where(
+        and(
+          eq(contractorMembers.contractorId, contractorId),
+          eq(contractorMembers.status, 'active'),
+        ),
+      )
+    const userIds = [...new Set(members.map((m) => m.userId))]
+
+    if (decision === 'verified') {
+      // Rich email: tell them their next move (import work + reviews via Google).
+      const emailHtml = renderEmail({
+        preheader:
+          "You're verified on Hommy. You can now engage leads and win work.",
+        heading: "You're verified",
+        intro:
+          'Your documents checked out, so your company is now verified. You can engage leads, send quotes, and win work right away.',
+        paragraphs: [
+          'Next, make your profile stand out. Connect your Google Business profile and Hommy will pull in your past work photos and customer reviews automatically, so homeowners can see your track record before they even message you.',
+        ],
+        cta: {
+          label: 'Connect Google and add your work',
+          url: '/contractor/integrations',
+        },
+        note: 'You can also add photos and details anytime from your dashboard.',
+      })
+
+      await Promise.all(
+        userIds.map((userId) =>
+          sendNotification({
+            userId,
+            type: 'SYSTEM',
+            title: "You're verified on Hommy",
+            body: 'You can now engage leads and win work. Connect your Google profile to import your past work and reviews.',
+            actionUrl: '/contractor/integrations',
+            emailHtml,
+            dedupKey: `verification_verified:${contractorId}`,
+          }).catch((err) =>
+            console.error('[decideVerification] verified notify failed', {
+              userId,
+              err,
+            }),
+          ),
+        ),
+      )
+    } else {
+      await Promise.all(
+        userIds.map((userId) =>
+          sendNotification({
+            userId,
+            type: 'SYSTEM',
+            title: 'Your verification needs another look',
+            body: 'Please update your license and insurance documents and resubmit for review.',
+            actionUrl: '/contractor/settings/verification',
+          }).catch((err) =>
+            console.error('[decideVerification] rejected notify failed', {
+              userId,
+              err,
+            }),
+          ),
+        ),
+      )
+    }
+  } catch (err) {
+    console.error('[decideVerification] notify failed', err)
   }
 
   revalidatePath('/admin/verification')

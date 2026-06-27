@@ -14,6 +14,8 @@
 
 ## Progress log
 
+**2026-06-27 — integrations: dropped the duplicate Google card.** The integrations grid showed two Google entries: `google_places` ("Google", live, public Places API for reviews + photos) and `google_business` ("Google Business Profile", coming-soon placeholder for the OAuth Business Profile API with two-way sync + replies). They read as a confusing duplicate, so we removed `google_business` and renamed the live `google_places` card to **"Google Business"** (what contractors recognise). Decision: when the OAuth Business Profile API (reply to reviews, two-way sync) is actually built, it **upgrades the same `google_places` slug** rather than re-adding a second card. See `src/lib/integrations/providers.ts`.
+
 **2026-06-26 — docs reorganized.** Renamed `LAUNCH_READINESS.md` → `ROADMAP.md` (this living tracker). Slimmed `HOMMY_PLATFORM.md` §8 to a schema *map* (full schema is code: `src/lib/db/schema.ts`). Fixed a stale "homeowners are unauthenticated" note in `CODING_GUIDE.md` (v2: homeowners have a dashboard). Cleaned `README.md` into a docs index. Archived the superseded `MODULE_ENGAGE_TO_REVIEW.md` → `docs/archive/`. Doc model now: **WHAT** = `HOMMY_PLATFORM.md`, **HOW** = `CODING_GUIDE.md`/`AGENTS.md`, **WHERE/why** = this file.
 
 **2026-06-26 — first no-decision batch shipped** (all applied to the **production** Supabase DB via `pnpm db:migrate`; migrations `0024`, `0025` committed):

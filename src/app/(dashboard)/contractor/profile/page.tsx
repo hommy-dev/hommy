@@ -79,12 +79,17 @@ async function ProfileBody() {
     { label: standing.label, value: String(c.profileScore), accent: true, href: "/contractor/analytics" },
   ]
 
+  // Work photos shown on the profile = curated portfolio images + imported
+  // Google photos (both feed the same gallery), so linking Google counts here.
+  const workPhotoCount =
+    portfolio.reduce((n, p) => n + p.images.length, 0) + googleMedia.length
+
   const completeness: CompletenessItem[] = [
     { label: "Add a logo", done: !!c.logoUrl, href: COMPANY_SETTINGS },
     { label: "Write a bio", done: !!c.bio, href: COMPANY_SETTINGS },
     { label: "List your services", done: subtypes.length > 0, href: COMPANY_SETTINGS },
     { label: "Set coverage areas", done: areas.length > 0, href: COVERAGE_SETTINGS },
-    { label: "Add 3 work photos", done: portfolio.length >= 3, href: COMPANY_SETTINGS },
+    { label: "Add 3 work photos", done: workPhotoCount >= 3, href: COMPANY_SETTINGS },
   ]
 
   return (

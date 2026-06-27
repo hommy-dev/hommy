@@ -93,8 +93,8 @@ export function AuthStory({ audience }: { audience: Audience }) {
               className={cn(
                 "relative z-10 flex size-[2.5vw] shrink-0 items-center justify-center rounded-full border transition-all duration-300",
                 lit
-                  ? "border-background/50 bg-primary text-background"
-                  : "border-background/20 bg-primary/5 text-background/40",
+                  ? "border-background/50 bg-primary text-white"
+                  : "border-background/20 bg-primary/5 text-white/40",
               )}
             >
               <Icon
@@ -109,10 +109,10 @@ export function AuthStory({ audience }: { audience: Audience }) {
                 className={cn(
                   "text-[1.111vw] font-semibold leading-tight transition-colors duration-300",
                   current
-                    ? "text-background"
+                    ? "text-white"
                     : done
-                      ? "text-background"
-                      : "text-background/50",
+                      ? "text-white"
+                      : "text-white/50",
                 )}
               >
                 {s.title}
@@ -120,7 +120,7 @@ export function AuthStory({ audience }: { audience: Audience }) {
               <p
                 className={cn(
                   "mt-[0.139vw] text-[0.903vw] leading-snug transition-colors duration-300",
-                  lit ? "text-background" : "text-background/50",
+                  lit ? "text-white" : "text-white/50",
                 )}
               >
                 {s.detail}

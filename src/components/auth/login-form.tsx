@@ -154,7 +154,7 @@ export function LoginForm() {
           <AccountCard
             href="/auth/signup/homeowner"
             icon="home"
-            title="I want to hire a roofer"
+            title="I'm a homeowner"
             subtitle="Find vetted roofers & compare quotes"
             highlight
           />
@@ -320,7 +320,7 @@ export function LoginForm() {
         <AccountCard
           href="/auth/signup/homeowner"
           icon="home"
-          title="I want to hire a roofer"
+          title="I'm a homeowner"
           subtitle="Find vetted roofers & compare quotes"
         />
         <AccountCard

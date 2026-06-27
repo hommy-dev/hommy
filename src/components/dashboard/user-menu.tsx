@@ -95,7 +95,7 @@ export function UserMenu({
   }
 
   const avatar = (
-    <Avatar className="size-8 lg:size-[2.222vw] shrink-0">
+    <Avatar className="size-8 lg:size-[2.5vw] shrink-0 border border-background">
       {user.avatarUrl ? <AvatarImage src={user.avatarUrl} alt="" /> : null}
       <AvatarFallback className="bg-muted text-xs lg:text-[0.833vw] font-medium text-foreground/70">
         {initials(user.fullName)}

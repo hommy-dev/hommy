@@ -36,8 +36,12 @@ export type IntegrationProvider = {
 
 export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
   {
+    // Live via the Google Places API (public listing: reviews + photos, read-only).
+    // Labeled "Google Business" since that's what contractors recognise. A future
+    // OAuth Business Profile API (two-way sync + replies) will upgrade this same
+    // slug rather than adding a second card. See docs/ROADMAP.md.
     slug: 'google_places',
-    displayName: 'Google',
+    displayName: 'Google Business',
     domain: 'google.com',
     tagline: 'Pull your Google reviews and work photos onto your profile.',
     logo: '/logo/google-my-business.svg',
@@ -45,17 +49,6 @@ export const INTEGRATION_PROVIDERS: IntegrationProvider[] = [
     category: 'reviews_media',
     capabilities: ['import_reviews', 'import_media'],
     status: 'available',
-  },
-  {
-    slug: 'google_business',
-    displayName: 'Google Business Profile',
-    domain: 'business.google.com',
-    tagline: 'Connect your verified listing to sync every review and reply.',
-    logo: '/logo/google-my-business.svg',
-    icon: 'badge-check',
-    category: 'reviews_media',
-    capabilities: ['import_reviews', 'import_media'],
-    status: 'coming_soon',
   },
   {
     slug: 'instagram',

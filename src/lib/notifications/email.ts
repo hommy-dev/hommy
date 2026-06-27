@@ -1,7 +1,14 @@
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@hommy.online'
+
+// The inbox display name (what Gmail etc. show as the sender). Without it, mail
+// clients fall back to the address's local part (e.g. "notifications").
+const FROM_NAME = process.env.NEXT_PUBLIC_FROM_NAME ?? 'Hommy'
+const FROM_EMAIL = process.env.NEXT_PUBLIC_FROM_EMAIL ?? 'notifications@hommy.online'
+// If the env value already carries a display name (contains "<"), use it as-is;
+// otherwise prepend the brand name so it reads "Hommy <address>".
+const FROM = FROM_EMAIL.includes('<') ? FROM_EMAIL : `${FROM_NAME} <${FROM_EMAIL}>`
 
 /**
  * A file to attach. Provide EITHER `path` (a hosted URL Resend fetches — e.g. a

@@ -14,7 +14,7 @@ export function ProfileCompleteness({ items }: { items: CompletenessItem[] }) {
   const todo = items.filter((i) => !i.done);
 
   return (
-    <div className="rounded-xl lg:rounded-[1vw] border border-primary/20 bg-primary/5 p-5 lg:p-[1.389vw]">
+    <div className="rounded-md lg:rounded-[0.61vw] border border-primary/20 bg-primary/5 p-5 lg:p-[1.389vw]">
       <div className="flex items-start justify-between gap-4 lg:gap-[1.111vw]">
         <div>
           <h2 className="text-sm lg:text-[0.972vw] font-semibold text-foreground">
@@ -41,7 +41,7 @@ export function ProfileCompleteness({ items }: { items: CompletenessItem[] }) {
           <Link
             key={i.label}
             href={i.href}
-            className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded-full border border-primary/30 bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.833vw] font-medium text-foreground transition-colors hover:border-primary/60 hover:bg-primary/5"
+            className="inline-flex items-center gap-1.5 lg:gap-[0.417vw] rounded lg:rounded-[0.4vw] border border-primary/30 bg-card px-3 lg:px-[0.833vw] py-1.5 lg:py-[0.417vw] text-sm lg:text-[0.833vw] font-medium text-foreground transition-colors hover:border-primary/60 hover:bg-primary/5"
           >
             <Icon name="plus" className="size-3.5 lg:size-[0.972vw] text-primary" />
             {i.label}

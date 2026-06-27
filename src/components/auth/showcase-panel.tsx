@@ -49,7 +49,7 @@ export function ShowcasePanel() {
       /> */}
 
       <div className="relative z-10 flex h-full flex-col justify-center gap-[3vw] p-[3.5vw]">
-        <h2 className="w-full text-balance bg-linear-to-r from-background to-background bg-clip-text text-transparent text-[2vw] font-bold leading-[112%] tracking-normal transition-opacity duration-300">
+        <h2 className="w-full text-white text-[2vw] font-bold leading-[112%] tracking-normal transition-opacity duration-300">
           {headline}
         </h2>
 
