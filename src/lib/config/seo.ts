@@ -9,8 +9,9 @@
  * Min verified roofers whose service area covers a city before its page is
  * INDEXABLE (listed in the sitemap, no `noindex`). Below this the page still
  * renders for users but is kept out of search — the thin-content guardrail.
+ * Set to 1: a city starts ranking as soon as a single covering roofer exists.
  */
-export const INDEX_MIN_PROS = 3
+export const INDEX_MIN_PROS = 1
 
 /** Max roofer cards rendered on a single city page. */
 export const CITY_PRO_LIMIT = 12
