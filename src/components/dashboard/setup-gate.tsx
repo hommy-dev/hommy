@@ -77,7 +77,7 @@ export function SetupGate({
               <Icon name="shield-done" className="size-5 lg:size-[1.389vw]" />
             </span>
             <div>
-              <h2 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">
+              <h2 className="text-lg lg:text-[1.25vw] font-semibold">
                 {rejected ? "Verification needs another look" : "Get verified to win jobs"}
               </h2>
               <p className="mt-0.5 lg:mt-[0.139vw] text-sm lg:text-[0.972vw] text-foreground/60">

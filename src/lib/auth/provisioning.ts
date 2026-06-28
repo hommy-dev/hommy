@@ -22,8 +22,7 @@ import {
 } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
 import { assignReferralCodeIfMissing, resolveReferrer } from '@/lib/contractor/referral'
-import { sendNotification } from '@/lib/notifications'
-import { renderEmail } from '@/lib/notifications/email/template'
+import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
 /** Free credits every new company gets, no strings, never expires. */
 export const SIGNUP_BONUS_CREDITS = 50
@@ -73,7 +72,7 @@ export async function provisionContractor({
     .where(eq(plans.slug, 'free'))
     .limit(1)
 
-  // Computed before the txn so the welcome message can quote the same date.
+  // Launch-promo expiry (the welcome email reads this back from the ledger later).
   const promoExpiresAt = new Date()
   promoExpiresAt.setMonth(promoExpiresAt.getMonth() + LAUNCH_PROMO_EXPIRES_MONTHS)
 
@@ -131,53 +130,27 @@ export async function provisionContractor({
     }
   })
 
-  // Welcome — what they got + how credits work. Best-effort (never block signup).
-  await sendContractorWelcome({ userId, expiresAt: promoExpiresAt }).catch((err) =>
-    console.error('[provisionContractor] welcome send failed (non-fatal)', err),
-  )
+  // NOTE: the welcome email is NOT sent here. Signup can happen before the email
+  // is confirmed, and we don't want to welcome an unconfirmed account. It fires
+  // from `requestContractorWelcome()` at the first CONFIRMED session (auth
+  // callback / choose-role / immediate-session signup), via Inngest (retries).
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_SITE_URL ?? ''
-
-/** First-run welcome: explains the starting credits + how the economy works. */
-async function sendContractorWelcome({ userId, expiresAt }: { userId: string; expiresAt: Date }): Promise<void> {
-  const total = SIGNUP_BONUS_CREDITS + LAUNCH_PROMO_CREDITS
-  const expiresStr = new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(expiresAt)
-  const html = renderEmail({
-    preheader: `Your account is ready. We've added ${total} credits to get you started.`,
-    heading: 'Welcome to Hommy',
-    intro: `Your account is ready, and we've added <strong>${total} credits</strong> to your wallet to get you started.`,
-    highlight: {
-      label: 'Your starting credits',
-      rows: [
-        { label: 'Signup credits (never expire)', value: `${SIGNUP_BONUS_CREDITS}` },
-        { label: `Launch bonus (use by ${expiresStr})`, value: `${LAUNCH_PROMO_CREDITS}` },
-      ],
-    },
-    paragraphs: ['Here’s how credits work:'],
-    bullets: [
-      { strong: 'Getting leads is free.', text: 'Every matching job shows up at no cost.' },
-      { strong: '1 credit to start a chat,', text: "which unlocks the homeowner's contact details." },
-      {
-        strong: 'You only pay the win fee when you win',
-        text: 'a small % of the job, charged when the homeowner accepts your quote. No win, no fee.',
-      },
-    ],
-    cta: { label: 'Open your dashboard', url: `${APP_URL}/contractor` },
-  })
-  await sendNotification({
-    userId,
-    type: 'SYSTEM',
-    title: 'Welcome to Hommy 👋',
-    body: `You've got ${total} credits to start. Receiving leads is free. You only pay 1 credit to start a chat, and the win fee when a homeowner accepts your quote.`,
-    actionUrl: '/contractor',
-    emailHtml: html,
-    dedupKey: `welcome:${userId}`,
-  })
+/**
+ * Ask the Inngest welcome job to send a new company its welcome. Safe to call
+ * from every confirmed-session entry point: the per-user event `id` + the job's
+ * dedupKey guarantee exactly one welcome. Best-effort — never blocks the request.
+ */
+export async function requestContractorWelcome(userId: string): Promise<void> {
+  try {
+    await inngest.send({
+      name: INNGEST_EVENTS.CONTRACTOR_WELCOME,
+      data: { userId },
+      id: `welcome-${userId}`,
+    })
+  } catch (err) {
+    console.error('[requestContractorWelcome] inngest send failed (non-fatal)', err)
+  }
 }
 
 // Provisions a brand-new homeowner. Like provisionContractor, this runs from

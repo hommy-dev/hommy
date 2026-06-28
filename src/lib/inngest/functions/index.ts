@@ -17,6 +17,7 @@ import { reviewRequest } from './review-request'
 import { reviewSubmitted } from './review-submitted'
 import { creditsExpire } from './credits-expire'
 import { verificationReminders } from './verification-reminders'
+import { contractorWelcome } from './contractor-welcome'
 
 // Registered with serve() in src/app/api/inngest/route.ts
 export const functions = [
@@ -30,4 +31,5 @@ export const functions = [
   reviewSubmitted,
   creditsExpire,
   verificationReminders,
+  contractorWelcome,
 ]

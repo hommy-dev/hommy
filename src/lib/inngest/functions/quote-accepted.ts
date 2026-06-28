@@ -46,7 +46,7 @@ export const quoteAccepted = inngest.createFunction(
       await sendNotification({
         userId: row.homeownerUserId,
         type: 'ESTIMATE',
-        title: 'You’re hired. Quote accepted',
+        title: `You hired ${row.companyName ?? 'your roofer'}`,
         body: `You accepted ${row.companyName ?? 'your contractor'}’s quote. They’ll be in touch to schedule the work.`,
         actionUrl: conversationId ? `/homeowner/messages/${conversationId}` : '/homeowner',
         entityType: 'ESTIMATE',

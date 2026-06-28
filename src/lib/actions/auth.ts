@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
-import { provisionContractor, provisionHomeowner } from '@/lib/auth/provisioning'
+import { provisionContractor, provisionHomeowner, requestContractorWelcome } from '@/lib/auth/provisioning'
 
 // ============================================================
 // SCHEMAS
@@ -258,6 +258,10 @@ export async function signupContractor(
   }
 
   if (data.session) {
+    // Email confirmation is disabled, so this signup is already a confirmed
+    // session — safe to welcome now. When confirmation IS required there's no
+    // session yet; the welcome fires from /auth/callback after they confirm.
+    await requestContractorWelcome(data.user.id)
     return { success: true, data: { redirectTo: '/onboarding' } }
   }
   return { success: true, data: { needsConfirmation: true } }
@@ -331,6 +335,8 @@ export async function chooseGoogleRole(
         passwordSet: false,
         avatarUrl,
       })
+      // Google identities arrive pre-confirmed — send the welcome (idempotent).
+      await requestContractorWelcome(user.id)
     } else {
       await provisionHomeowner({
         userId: user.id,

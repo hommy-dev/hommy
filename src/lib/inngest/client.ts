@@ -48,6 +48,7 @@ export const INNGEST_EVENTS = {
 
   // Contractor events
   CONTRACTOR_FIRST_LEAD_SCHEDULED: "contractor/first-lead.scheduled",
+  CONTRACTOR_WELCOME: "contractor/welcome.requested", // first confirmed session — send the welcome (credits + how it works)
 
   // Notification events
   NOTIFICATION_LEAD_EXPIRY_WARNING: "notification/lead-expiry-warning",

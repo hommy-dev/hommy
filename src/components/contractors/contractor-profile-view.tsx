@@ -1,15 +1,21 @@
 import type { ReactNode } from "react"
+import Link from "next/link"
 
 import type { PortfolioProject } from "@/lib/data/portfolio"
 import type { ExternalMediaItem, CombinedReviews } from "@/lib/data/integrations"
 import type { ServiceArea } from "@/lib/data/dashboard"
 import { Icon } from "@/components/ui/icon"
+import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import { ServiceTag } from "@/components/ui/service-tag"
 import { WorkGallery } from "@/components/dashboard/profile/work-gallery"
 import { ReviewsBlock } from "@/components/dashboard/reviews/reviews-block"
 import { ProfileHeader, type ProfileStat } from "@/components/dashboard/profile/profile-header"
 import { ProfileCompleteness, type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
 import { CoverageCard } from "@/components/dashboard/profile/coverage-card"
+
+// Where the owner manages the Google connection (imports work photos + reviews).
+const INTEGRATIONS_HREF = "/contractor/integrations"
 
 /**
  * The single, shared contractor profile body — rendered identically by the
@@ -91,6 +97,31 @@ export function ContractorProfileView({
             <SectionCard title="Recent work">
               <WorkGallery portfolio={portfolio} google={googleMedia} />
             </SectionCard>
+          ) : canManage ? (
+            <SectionCard title="Recent work">
+              <EmptyState
+                size="sm"
+                icon="image-3"
+                title="Add your work"
+                description="Upload photos of completed jobs, or connect your Google profile to import them automatically. Homeowners hire roofers who show their work."
+                action={
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-2 lg:gap-[0.556vw]">
+                    <Button asChild>
+                      <Link href={editHref}>
+                        <Icon name="image-3" />
+                        Add photos
+                      </Link>
+                    </Button>
+                    <Button asChild variant="surface">
+                      <Link href={INTEGRATIONS_HREF}>
+                        <Icon name="google" preserveColors />
+                        Connect Google
+                      </Link>
+                    </Button>
+                  </div>
+                }
+              />
+            </SectionCard>
           ) : null}
 
           {reviews.total > 0 ? (
@@ -100,6 +131,23 @@ export function ContractorProfileView({
                 reviews={reviews.reviews}
                 hommyCount={reviews.hommyCount}
                 googleCount={reviews.googleCount}
+              />
+            </SectionCard>
+          ) : canManage ? (
+            <SectionCard title="Reviews">
+              <EmptyState
+                size="sm"
+                icon="star"
+                title="No reviews yet"
+                description="Connect your Google profile to import your existing customer reviews. Reviews from completed Hommy jobs show up here automatically."
+                action={
+                  <Button asChild variant="surface">
+                    <Link href={INTEGRATIONS_HREF}>
+                      <Icon name="google" preserveColors />
+                      Connect Google
+                    </Link>
+                  </Button>
+                }
               />
             </SectionCard>
           ) : null}

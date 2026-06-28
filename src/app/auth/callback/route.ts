@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
-import { provisionContractor, provisionHomeowner } from '@/lib/auth/provisioning'
+import { provisionContractor, provisionHomeowner, requestContractorWelcome } from '@/lib/auth/provisioning'
 
 const ROLE_HOMES: Record<string, string> = {
   contractor: '/contractor',
@@ -81,6 +81,8 @@ export async function GET(request: NextRequest) {
           referredByCode: url.searchParams.get('ref') ?? undefined,
           avatarUrl,
         })
+        // Confirmed session now established — send the welcome (idempotent).
+        await requestContractorWelcome(data.user.id)
       } else {
         await provisionHomeowner({
           userId: data.user.id,

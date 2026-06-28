@@ -81,26 +81,32 @@ export default function RootLayout({
     >
       <body className="antialiased " suppressHydrationWarning>
         <ConsentProvider>
-        <PostHogProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          // enableSystem
-          disableTransitionOnChange
-        >
-          <ToastProvider>
-            <AnchoredToastProvider>
-              {/* Boundary for async layouts (auth) under Cache Components — see blocking-route.
-                  Plain <div> (not <main>): each route group's own layout owns the single
-                  <main> landmark, so this wrapper must not add a second one. */}
-              <Suspense fallback={null}>
-                <div>{children}</div>
-              </Suspense>
-            </AnchoredToastProvider>
-          </ToastProvider>
-        </ThemeProvider>
-        </PostHogProvider>
-        <CookieConsent />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            // enableSystem
+            disableTransitionOnChange
+          >
+            {/* PostHog (posthog-js) and the toast providers (base-ui) read
+                `new Date()` / `Math.random()` at module init, which trips Cache
+                Components when they're in the prerendered static shell. Keeping
+                them inside this Suspense boundary marks the subtree dynamic so
+                those calls are allowed. ThemeProvider stays ABOVE the boundary
+                so its theme script is in the initial HTML (no flash). This same
+                boundary also covers async layouts (auth) — see blocking-route.
+                Plain <div> (not <main>): each route group's layout owns the
+                single <main> landmark, so this wrapper must not add a second. */}
+            <Suspense fallback={null}>
+              <PostHogProvider>
+                <ToastProvider>
+                  <AnchoredToastProvider>
+                    <div>{children}</div>
+                  </AnchoredToastProvider>
+                </ToastProvider>
+              </PostHogProvider>
+            </Suspense>
+          </ThemeProvider>
+          <CookieConsent />
         </ConsentProvider>
         {/* Sanity Live Content API — enables real-time content updates */}
         <SanityLive />
