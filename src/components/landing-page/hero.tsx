@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/icon";
 
 // ⬇ SWAP THIS for your real home/roof photo: drop it in public/bg/ and change
 // this one path. A warm, slightly aspirational shot of a nice home/roof works best.
-const HERO_IMAGE = "/bg/landing-page-hero.jpeg";
+const HERO_IMAGE = "/bg/landing-page-hero.webp";
 
 export function Hero() {
   return (

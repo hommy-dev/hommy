@@ -26,7 +26,7 @@ const FEATURES: Feature[] = [
     title: "Every lead in one inbox",
     body: "New requests, the jobs you're chasing, and the ones you've won, all in one place instead of scattered across calls, texts, and sticky notes.",
     points: ["Filter by service & area", "See status at a glance"],
-    background: "/bg/gradient-0.jpg",
+    background: "/bg/gradient-0.webp",
   },
   {
     icon: "/icons/activity.svg",
@@ -34,7 +34,7 @@ const FEATURES: Feature[] = [
     title: "Track every job in real time",
     body: "Stages, schedules, and updates that move as the work does, and keep the homeowner in the loop without you lifting a finger.",
     points: ["Live job stages", "Automatic homeowner updates"],
-    background: "/bg/gradient-0.jpg",
+    background: "/bg/gradient-0.webp",
   },
   {
     icon: "/icons/chat.svg",
@@ -42,7 +42,7 @@ const FEATURES: Feature[] = [
     title: "One thread per job",
     body: "Chat, share photos, and send quotes without losing the conversation in a pile of texts and emails.",
     points: ["Photos & files inline", "Quotes in the same thread"],
-    background: "/bg/gradient-0.jpg",
+    background: "/bg/gradient-0.webp",
   },
   {
     icon: "/icons/danger-triangle.svg",
@@ -50,7 +50,7 @@ const FEATURES: Feature[] = [
     title: "Be first after the storm",
     body: "Get notified the moment severe weather rolls through your area, and reach the homeowners who need a roofer most.",
     points: ["Severe-weather watch", "Instant local alerts"],
-    background: "/bg/gradient-0.jpg",
+    background: "/bg/gradient-0.webp",
   },
   {
     icon: "/icons/wallet.svg",
@@ -58,7 +58,7 @@ const FEATURES: Feature[] = [
     title: "Pay only for what you win",
     body: "No lead packs, no monthly waste. Just a simple credit balance you top up and control, charged only when a quote gets accepted.",
     points: ["Transparent per-lead cost", "Top up, never locked in"],
-    background: "/bg/gradient-0.jpg",
+    background: "/bg/gradient-0.webp",
   },
 ];
 

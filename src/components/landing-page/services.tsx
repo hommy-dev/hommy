@@ -2,28 +2,52 @@ import Link from "next/link";
 import Image from "next/image";
 import { Icon } from "../ui/icon";
 
+// Each card shows `rest` by default and crossfades to `hover` on mouse-over.
+// For repair/replacement/storm that's a satisfying after→before reveal (we lead
+// with the finished result so the grid looks great and mobile, which has no
+// hover, still shows the good outcome). Inspection isn't a transformation, so it
+// leads with the roofer on the roof and reveals the up-close find.
 const SERVICES = [
   {
     title: "Roof repair",
     body: "Leaks, missing shingles, or that spot you keep eyeing. Get it looked at before it turns into a bigger bill.",
-    src: "/bg/roof-repair.jpg",
+    rest: "/services/repair-after.webp",
+    hover: "/services/repair-before.webp",
+    restLabel: "After",
+    hoverLabel: "Before",
   },
   {
     title: "Full replacement",
     body: "Honest numbers from roofers who stand behind both the work and the warranty.",
-    src: "/bg/roof-replacement.jpg",
+    rest: "/services/replacement-after.webp",
+    hover: "/services/replacement-before.webp",
+    restLabel: "After",
+    hoverLabel: "Before",
   },
   {
     title: "Storm damage",
     body: "Hail or high wind? Fast inspection, plus help with the insurance side.",
-    src: "/bg/storm-damage.jpg",
+    rest: "/services/storm-after.webp",
+    hover: "/services/storm-before.webp",
+    restLabel: "After",
+    hoverLabel: "Before",
   },
   {
     title: "Roof inspection",
     body: "Buying, selling, or just not sure? Find out exactly what shape your roof is in, no guesswork.",
-    src: "/bg/roof-inspection.jpg",
+    rest: "/services/inspection-before.webp",
+    hover: "/services/inspection-after.webp",
+    restLabel: "On the roof",
+    hoverLabel: "Up close",
   },
-];
+] satisfies ReadonlyArray<{
+  title: string;
+  body: string;
+  rest: string;
+  hover: string;
+  restLabel: string;
+  hoverLabel: string;
+}>;
 
 export function Services() {
   return (
@@ -48,18 +72,33 @@ export function Services() {
             <div key={s.title} className="group flex flex-col justify-between">
               <div>
                 <div className="relative aspect-[4/4] w-full overflow-hidden rounded-md lg:rounded-[0.5vw] bg-muted">
+                  {/* Resting image — fades out on hover. */}
                   <Image
-                    src={s.src}
+                    src={s.rest}
                     alt={s.title}
                     fill
                     quality={90}
-                    // Images are landscape but the card is portrait (4/5), so
-                    // object-cover renders them ~2x wider than the column. The
-                    // sizes hint is inflated to match, otherwise the browser
-                    // under-fetches and the photo looks soft/upscaled.
-                    sizes="(min-width: 1024px) 48vw, 100vw"
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    sizes="(min-width: 1024px) 24vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover transition-opacity duration-500 ease-out group-hover:opacity-0"
                   />
+                  {/* Hover image — fades in on top (crossfade). */}
+                  <Image
+                    src={s.hover}
+                    alt=""
+                    aria-hidden
+                    fill
+                    quality={90}
+                    sizes="(min-width: 1024px) 24vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                  />
+                  {/* State pill — swaps with the image. Toggled via display (not
+                      opacity) so the two labels never overlap mid-crossfade. */}
+                  <span className="pointer-events-none absolute bottom-2 left-2 lg:bottom-[0.556vw] lg:left-[0.556vw] rounded-full bg-foreground/75 px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-[11px] lg:text-[0.764vw] font-medium text-background backdrop-blur-sm group-hover:hidden">
+                    {s.restLabel}
+                  </span>
+                  <span className="pointer-events-none absolute bottom-2 left-2 lg:bottom-[0.556vw] lg:left-[0.556vw] hidden rounded-full bg-foreground/75 px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-[11px] lg:text-[0.764vw] font-medium text-background backdrop-blur-sm group-hover:block">
+                    {s.hoverLabel}
+                  </span>
                 </div>
                 <h3 className="mt-4 lg:mt-[1.111vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-lg lg:text-[1.389vw] font-bold tracking-tight">
                   {s.title}

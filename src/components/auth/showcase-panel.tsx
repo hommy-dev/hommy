@@ -35,7 +35,7 @@ export function ShowcasePanel() {
     <aside
       aria-hidden
       className={cn(
-        "relative hidden overflow-hidden bg-[url('/bg/gradient-1.jpg')] bg-cover bg-center text-background",
+        "relative hidden overflow-hidden bg-[url('/bg/gradient-1.webp')] bg-cover bg-center text-background",
         "lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-2/5 lg:shrink-0 lg:flex-col lg:self-start"
       )}
     >

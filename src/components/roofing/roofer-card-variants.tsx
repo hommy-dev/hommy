@@ -14,11 +14,11 @@ const SAMPLE = {
   yearsInBusiness: 12,
   subtypes: ["Repair", "Replacement", "Storm damage"],
   images: [
-    "/bg/roof-replacement.jpg",
-    "/bg/roof-repair.jpg",
-    "/bg/storm-damage.jpg",
-    "/bg/roof-inspection.jpg",
-    "/bg/worker-0.jpeg",
+    "/bg/roof-replacement.webp",
+    "/bg/roof-repair.webp",
+    "/bg/storm-damage.webp",
+    "/bg/roof-inspection.webp",
+    "/bg/worker-0.webp",
   ],
 };
 

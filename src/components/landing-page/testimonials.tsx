@@ -10,19 +10,19 @@ const REVIEWS = [
     quote:
       "I had three roofers out by the next afternoon. I went with the one who actually explained things instead of talking over my head. New roof in a week.",
     name: "Maria A.",
-    image: "/bg/roof-replacement.jpg",
+    image: "/bg/roof-replacement.webp",
   },
   {
     quote:
       "We had a leak in the middle of a storm and no clue who to call. Hommy had someone at the house the next morning. No drama.",
     name: "James C.",
-    image: "/bg/storm-damage.jpg",
+    image: "/bg/storm-damage.webp",
   },
   {
     quote:
       "I dreaded the spam, so I kept putting off quotes. This was just two local roofers, both solid, both upfront.",
     name: "Priya N.",
-    image: "/bg/roof-repair.jpg",
+    image: "/bg/roof-repair.webp",
   },
 ];
 

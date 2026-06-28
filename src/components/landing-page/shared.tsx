@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 // Image slot for the landing page. Pass `src` to drop in the relevant photo —
 // just update the path anywhere it's used. Falls back to a generic shot.
 export function LandingImage({
-  src = "/bg/worker-1.jpeg",
+  src = "/bg/worker-1.webp",
   alt = "Roofer at work",
   className,
 }: {

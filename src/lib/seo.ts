@@ -19,7 +19,7 @@ export const SITE_NAME = "Hommy"
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
 
 /** Default social share image (1200x630), resolved against SITE_URL. */
-export const OG_IMAGE = "/bg/landing-page-hero.jpeg"
+export const OG_IMAGE = "/bg/seo-background.jpg"
 
 /** Build an absolute URL for a path against SITE_URL. */
 export function absoluteUrl(path = "/"): string {
