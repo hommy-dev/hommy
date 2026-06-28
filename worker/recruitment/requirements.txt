@@ -1,0 +1,8 @@
+# Recruitment enrichment worker
+psycopg[binary]>=3.2
+requests>=2.32
+python-dotenv>=1.0
+
+# LLM-powered website crawl (optional — the worker falls back to a basic
+# requests+regex crawl if these aren't installed/configured).
+scrapegraphai>=1.27

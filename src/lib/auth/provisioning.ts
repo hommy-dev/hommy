@@ -76,11 +76,13 @@ export async function provisionContractor({
   const promoExpiresAt = new Date()
   promoExpiresAt.setMonth(promoExpiresAt.getMonth() + LAUNCH_PROMO_EXPIRES_MONTHS)
 
+  let newCompanyId = ''
   await db.transaction(async (tx) => {
     const [company] = await tx
       .insert(contractors)
       .values({ creditBalance: 0 })
       .returning({ id: contractors.id })
+    newCompanyId = company.id
 
     await tx.insert(contractorMembers).values({
       contractorId: company.id,
@@ -130,10 +132,30 @@ export async function provisionContractor({
     }
   })
 
+  // Recruitment attribution: if this signup came from a prospect's claim link
+  // (cookie set by /claim/<token>), link the new company back to that prospect so
+  // we mark it converted and stop emailing it. Best-effort, never blocks signup.
+  await linkRecruitProspect(newCompanyId)
+
   // NOTE: the welcome email is NOT sent here. Signup can happen before the email
   // is confirmed, and we don't want to welcome an unconfirmed account. It fires
   // from `requestContractorWelcome()` at the first CONFIRMED session (auth
   // callback / choose-role / immediate-session signup), via Inngest (retries).
+}
+
+/** Read the recruit-prospect cookie (if any) and link it to the new company. */
+async function linkRecruitProspect(contractorId: string): Promise<void> {
+  if (!contractorId) return
+  try {
+    const { cookies } = await import('next/headers')
+    const jar = await cookies()
+    const prospectId = jar.get('recruit_prospect')?.value
+    if (!prospectId) return
+    const { linkProspectConversion } = await import('@/lib/recruitment/convert')
+    await linkProspectConversion(prospectId, contractorId)
+  } catch (err) {
+    console.error('[provisionContractor] recruit attribution failed (non-fatal)', err)
+  }
 }
 
 /**

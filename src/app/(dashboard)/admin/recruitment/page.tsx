@@ -1,6 +1,7 @@
 import { getRequiredUser } from "@/lib/auth/session"
 import { getUncoveredDemand } from "@/lib/data/admin-recruitment"
 import { EmptyState } from "@/components/ui/empty-state"
+import { FindRoofersButton, ExportProspectsButton } from "@/components/admin/recruitment-actions"
 
 const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" })
 
@@ -11,14 +12,17 @@ export default async function AdminRecruitmentPage() {
 
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
-      <header>
-        <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
-          Recruitment
-        </h1>
-        <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
-          Where homeowners posted jobs but no verified contractor covers the area. Recruit roofers
-          here, the waiting jobs auto-match the moment one verifies.
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4 lg:gap-[1.111vw]">
+        <div>
+          <h1 className="font-sebenta text-2xl lg:text-[1.667vw] font-bold tracking-tight">
+            Recruitment
+          </h1>
+          <p className="mt-1 lg:mt-[0.278vw] text-sm lg:text-[0.972vw] text-muted-foreground">
+            Where homeowners posted jobs but no verified contractor covers the area. Recruit roofers
+            here, the waiting jobs auto-match the moment one verifies.
+          </p>
+        </div>
+        <ExportProspectsButton />
       </header>
 
       {demand.length === 0 ? (
@@ -45,6 +49,7 @@ export default async function AdminRecruitmentPage() {
                     Waiting jobs
                   </th>
                   <th className="px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] font-medium">Oldest</th>
+                  <th className="px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -61,6 +66,9 @@ export default async function AdminRecruitmentPage() {
                     </td>
                     <td className="px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-muted-foreground">
                       {dateFmt.format(d.oldest)}
+                    </td>
+                    <td className="px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-right">
+                      <FindRoofersButton lat={d.lat} lng={d.lng} city={d.city} state={d.state} />
                     </td>
                   </tr>
                 ))}

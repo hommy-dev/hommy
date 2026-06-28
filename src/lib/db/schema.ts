@@ -1010,6 +1010,24 @@ export const contractorProspects = pgTable('contractor_prospects', {
   index('contractor_prospects_outreach_idx').on(t.outreachStatus),
 ])
 
+// prospect_enrichment_jobs — the queue the external Python worker drains to find
+// a prospect's email (ScrapeGraphAI crawl → Hunter fill → verify). One live job
+// per prospect; the worker claims rows with `FOR UPDATE SKIP LOCKED`.
+export const prospectEnrichmentJobs = pgTable('prospect_enrichment_jobs', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  prospectId: uuid('prospect_id').notNull().references(() => contractorProspects.id, { onDelete: 'cascade' }),
+  status: text('status').notNull().default('queued'), // queued | claimed | done | error
+  attempts: integer('attempts').notNull().default(0),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }),
+  lockedBy: text('locked_by'),
+  lastError: text('last_error'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('prospect_enrichment_jobs_prospect_uq').on(t.prospectId),
+  index('prospect_enrichment_jobs_status_idx').on(t.status),
+])
+
 // ============================================================
 // RELATIONS (query-builder only — no DB constraints here)
 // ============================================================

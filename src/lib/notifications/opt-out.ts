@@ -4,7 +4,7 @@
 
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { smsOptOuts } from '@/lib/db/schema'
+import { emailOptOuts, smsOptOuts } from '@/lib/db/schema'
 
 /** Has this E.164 phone opted out of SMS? */
 export async function isSmsOptedOut(phoneE164: string): Promise<boolean> {
@@ -28,4 +28,35 @@ export async function setSmsOptOut(phoneE164: string, optedOut: boolean): Promis
   } else {
     await db.delete(smsOptOuts).where(eq(smsOptOuts.phone, phoneE164))
   }
+}
+
+// ── Email suppression (recruitment outreach) ────────────────────────────────
+// An unsubscribe/bounce/complaint records the address here so the recruitment
+// engine never re-exports it to the cold-email tool. Always pass a lowercased
+// address (use `normalizeEmail`).
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
+
+/** Has this email opted out of (recruitment) email? */
+export async function isEmailOptedOut(email: string): Promise<boolean> {
+  const e = normalizeEmail(email)
+  if (!e) return false
+  const [row] = await db
+    .select({ id: emailOptOuts.id })
+    .from(emailOptOuts)
+    .where(eq(emailOptOuts.email, e))
+    .limit(1)
+  return !!row
+}
+
+/** Record an email opt-out (idempotent). `source`: 'unsubscribe' | 'bounce' | 'complaint'. */
+export async function setEmailOptOut(email: string, source: string): Promise<void> {
+  const e = normalizeEmail(email)
+  if (!e) return
+  await db
+    .insert(emailOptOuts)
+    .values({ email: e, source })
+    .onConflictDoNothing({ target: emailOptOuts.email })
 }

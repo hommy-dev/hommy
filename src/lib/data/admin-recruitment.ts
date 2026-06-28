@@ -15,6 +15,9 @@ export type UncoveredDemandRow = {
   count: number
   oldest: Date
   newest: Date
+  /** Demand centroid (avg of the leads' coords) — drives "find roofers" here. */
+  lat: number | null
+  lng: number | null
 }
 
 /**
@@ -30,6 +33,8 @@ export async function getUncoveredDemand(): Promise<UncoveredDemandRow[]> {
       count: sql<number>`count(*)::int`,
       oldest: sql<Date>`min(${leads.createdAt})`,
       newest: sql<Date>`max(${leads.createdAt})`,
+      lat: sql<number | null>`avg(${leads.lat})::float8`,
+      lng: sql<number | null>`avg(${leads.lng})::float8`,
     })
     .from(leads)
     .where(and(eq(leads.awaitingCoverage, true), eq(leads.status, 'open')))
@@ -43,5 +48,7 @@ export async function getUncoveredDemand(): Promise<UncoveredDemandRow[]> {
     count: r.count,
     oldest: r.oldest,
     newest: r.newest,
+    lat: r.lat,
+    lng: r.lng,
   }))
 }
