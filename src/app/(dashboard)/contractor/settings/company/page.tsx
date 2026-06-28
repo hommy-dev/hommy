@@ -73,6 +73,8 @@ async function CompanyBody() {
           logoUrl: c.logoUrl,
           bannerUrl: c.bannerUrl,
           yearsInBusiness: c.yearsInBusiness,
+          introVideoUrl: c.introVideoUrl,
+          introVideoPosterUrl: c.introVideoPosterUrl,
         }}
       />
     ) : (

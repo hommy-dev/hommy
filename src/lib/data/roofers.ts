@@ -47,6 +47,9 @@ export type RooferProfile = {
   yearsInBusiness: number | null
   verified: boolean
   createdAt: Date
+  /** Optional company intro video (upload or YouTube/Vimeo) + poster. */
+  introVideoUrl: string | null
+  introVideoPosterUrl: string | null
   /** Cached Hommy-native rating — for the AggregateRating schema only. */
   nativeAvgRating: number | null
   nativeTotalReviews: number
@@ -88,6 +91,8 @@ export async function getRooferBySlug(slug: string): Promise<RooferProfile | nul
       bio: contractors.bio,
       yearsInBusiness: contractors.yearsInBusiness,
       createdAt: contractors.createdAt,
+      introVideoUrl: contractors.introVideoUrl,
+      introVideoPosterUrl: contractors.introVideoPosterUrl,
       avgRating: contractors.avgRating,
       totalReviews: contractors.totalReviews,
     })
@@ -141,6 +146,8 @@ export async function getRooferBySlug(slug: string): Promise<RooferProfile | nul
     yearsInBusiness: c.yearsInBusiness,
     verified: true,
     createdAt: c.createdAt,
+    introVideoUrl: c.introVideoUrl,
+    introVideoPosterUrl: c.introVideoPosterUrl,
     nativeAvgRating: c.avgRating != null ? parseFloat(c.avgRating) : null,
     nativeTotalReviews: c.totalReviews,
     subtypes,

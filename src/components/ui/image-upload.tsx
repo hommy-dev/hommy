@@ -8,13 +8,14 @@ import { uploadToCloudinary } from '@/lib/cloudinary/upload'
 import { type CloudinaryFolder, type UploadResult } from '@/lib/cloudinary/config'
 import { cn } from '@/lib/utils'
 
-type ImageUploadAccept = 'image' | 'image+pdf'
+type ImageUploadAccept = 'image' | 'image+pdf' | 'video'
 
 // Native file-picker accept lists — opening the OS picker directly (and on
 // mobile, the camera) rather than the Cloudinary widget UI.
 const ACCEPT_ATTR: Record<ImageUploadAccept, string> = {
   image: 'image/png,image/jpeg,image/webp',
   'image+pdf': 'image/png,image/jpeg,image/webp,application/pdf',
+  video: 'video/mp4,video/webm,video/quicktime',
 }
 
 interface ImageUploadProps {

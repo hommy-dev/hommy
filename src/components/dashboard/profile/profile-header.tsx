@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
+import { ShareButton } from "@/components/dashboard/profile/share-button";
 import { cn } from "@/lib/utils";
+
+// Shared bordered-card button style for the header actions (Share, Edit).
+const HEADER_ACTION =
+  "inline-flex shrink-0 cursor-pointer items-center gap-1.5 lg:gap-[0.417vw] rounded lg:rounded-[0.5vw] border border-border bg-card px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-medium text-foreground transition-colors hover:bg-muted/60";
 
 export type ProfileStat = {
   label: string;
@@ -29,6 +34,7 @@ export function ProfileHeader({
   stats,
   canManage,
   editHref,
+  shareUrl,
 }: {
   name: string;
   verified: boolean;
@@ -37,6 +43,8 @@ export function ProfileHeader({
   stats: ProfileStat[];
   canManage: boolean;
   editHref: string;
+  /** Public profile URL — when set, a Share button appears. */
+  shareUrl?: string;
 }) {
   return (
     <div className="gradient-frame rounded-xl lg:rounded-[0.8vw]">
@@ -84,14 +92,18 @@ export function ProfileHeader({
             </div>
           </div>
 
-          {canManage ? (
-            <Link
-              href={editHref}
-              className="inline-flex shrink-0 items-center gap-1.5 lg:gap-[0.417vw] rounded lg:rounded-[0.5vw] border border-border bg-card px-4 lg:px-[1.111vw] py-2 lg:py-[0.556vw] text-sm lg:text-[0.903vw] font-medium text-foreground transition-colors hover:bg-muted/60"
-            >
-              <Icon name="edit" className="size-4 lg:size-[1.111vw]" />
-              Edit profile
-            </Link>
+          {shareUrl || canManage ? (
+            <div className="flex shrink-0 items-center gap-2 lg:gap-[0.556vw]">
+              {shareUrl ? (
+                <ShareButton url={shareUrl} title={name} className={HEADER_ACTION} />
+              ) : null}
+              {canManage ? (
+                <Link href={editHref} className={HEADER_ACTION}>
+                  <Icon name="edit" className="size-4 lg:size-[1.111vw]" />
+                  Edit profile
+                </Link>
+              ) : null}
+            </div>
           ) : null}
         </div>
 

@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload, UploadedImagePreview } from "@/components/ui/image-upload"
+import { IntroVideoField } from "./intro-video-field"
 import { SettingsSection } from "./settings-section"
 import { Field } from "./edit-dialog"
 
@@ -28,6 +29,8 @@ type Initial = {
   /** Preserved untouched — not editable here anymore, just passed back on save. */
   bannerUrl: string | null
   yearsInBusiness: number | null
+  introVideoUrl: string | null
+  introVideoPosterUrl: string | null
 }
 
 type Values = {
@@ -35,6 +38,8 @@ type Values = {
   bio: string
   logoUrl: string | null
   years: string
+  introVideoUrl: string | null
+  introVideoPosterUrl: string | null
 }
 
 function toValues(i: Initial): Values {
@@ -43,6 +48,8 @@ function toValues(i: Initial): Values {
     bio: i.bio,
     logoUrl: i.logoUrl,
     years: i.yearsInBusiness != null ? String(i.yearsInBusiness) : "",
+    introVideoUrl: i.introVideoUrl,
+    introVideoPosterUrl: i.introVideoPosterUrl,
   }
 }
 
@@ -61,7 +68,8 @@ export function CompanyProfileForm({ initial }: { initial: Initial }) {
     v.companyName !== saved.companyName ||
     v.bio !== saved.bio ||
     v.logoUrl !== saved.logoUrl ||
-    v.years !== saved.years
+    v.years !== saved.years ||
+    v.introVideoUrl !== saved.introVideoUrl
 
   const nameError =
     v.companyName.trim().length > 0 && v.companyName.trim().length < 2
@@ -91,6 +99,8 @@ export function CompanyProfileForm({ initial }: { initial: Initial }) {
         bio: v.bio.trim(),
         logoUrl: v.logoUrl,
         bannerUrl: initial.bannerUrl,
+        introVideoUrl: v.introVideoUrl,
+        introVideoPosterUrl: v.introVideoPosterUrl,
         yearsInBusiness: v.years.trim() === "" ? null : Number(v.years),
       })
       if (!res.success) {
@@ -182,6 +192,24 @@ export function CompanyProfileForm({ initial }: { initial: Initial }) {
             placeholder="e.g. Family-run since 2009, we specialize in storm-damage repairs and full roof replacements across the metro. Licensed and insured, with a 10-year workmanship warranty on every job. We show up on time and leave your property cleaner than we found it."
             className="min-h-32 lg:min-h-[9vw]"
             aria-invalid={!!bioError}
+          />
+        </Field>
+
+        <Field
+          label="Intro video"
+          hint="A short clip (about 30 to 60 seconds) introducing your company. Shows at the top of your profile. Upload one or paste a YouTube or Vimeo link."
+        >
+          <IntroVideoField
+            url={v.introVideoUrl}
+            posterUrl={v.introVideoPosterUrl}
+            companyName={v.companyName || "your company"}
+            onChange={(url, posterUrl) =>
+              setV((prev) => ({
+                ...prev,
+                introVideoUrl: url,
+                introVideoPosterUrl: posterUrl,
+              }))
+            }
           />
         </Field>
       </div>

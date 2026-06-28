@@ -10,6 +10,7 @@ import {
 import { getPortfolio } from "@/lib/data/portfolio"
 import { getCombinedReviews, getExternalMedia } from "@/lib/data/integrations"
 import { getVerificationState } from "@/lib/contractor/verification"
+import { absoluteUrl } from "@/lib/seo"
 import { scoreStanding } from "@/lib/reputation/labels"
 import { type ProfileStat } from "@/components/dashboard/profile/profile-header"
 import { type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
@@ -109,6 +110,8 @@ async function ProfileBody() {
       canManage={canManage}
       editHref={COMPANY_SETTINGS}
       completeness={completeness}
+      introVideo={c.introVideoUrl ? { url: c.introVideoUrl, posterUrl: c.introVideoPosterUrl } : null}
+      shareUrl={verified && c.slug ? absoluteUrl(`/roofers/${c.slug}`) : undefined}
     />
   )
 }

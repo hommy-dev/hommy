@@ -1,6 +1,7 @@
 export const CLOUDINARY_FOLDERS = {
   avatars: 'hommy/avatars',
   banners: 'hommy/banners',
+  videos: 'hommy/videos',
   portfolio: 'hommy/portfolio',
   projects: 'hommy/projects',
   documents: 'hommy/documents',

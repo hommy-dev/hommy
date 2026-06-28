@@ -144,6 +144,12 @@ export const contractors = pgTable('contractors', {
   bio: text('bio'),
   logoUrl: text('logo_url'),
   bannerUrl: text('banner_url'),
+  // Optional company intro video (NOT a work case study): a short "who we are /
+  // what we do" clip. Either a hosted upload (Cloudinary mp4) or a YouTube/Vimeo
+  // link — both stored as a URL; the player detects which. Poster is the still
+  // shown before play (derived for uploads; YouTube derives its own at render).
+  introVideoUrl: text('intro_video_url'),
+  introVideoPosterUrl: text('intro_video_poster_url'),
   licenseNumber: text('license_number'),
   licenseDocUrl: text('license_doc_url'),
   insuranceProvider: text('insurance_provider'),
@@ -404,6 +410,12 @@ export const leads = pgTable('leads', {
   // (no broadcast fan-out, no cascade) — see requestDirectQuote. Null = the
   // normal broadcast flow.
   targetContractorId: uuid('target_contractor_id').references(() => contractors.id, { onDelete: 'set null' }),
+  // Recruitment engine: true when this open lead matched ZERO verified contractors
+  // at post time (no coverage in the area). Stays a normal open lead; this is an
+  // orthogonal flag (NOT a status value) so all `status='open'` flows are unchanged.
+  // Flipped back to false the moment a covering contractor becomes eligible
+  // (see contractor-eligible Inngest fn). The SLA cron must not auto-expire these.
+  awaitingCoverage: boolean('awaiting_coverage').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('leads_status_idx').on(t.status),
@@ -412,6 +424,8 @@ export const leads = pgTable('leads', {
   index('leads_awarded_to_idx').on(t.awardedTo),
   index('leads_target_contractor_idx').on(t.targetContractorId),
   index('leads_storm_event_idx').on(t.stormEventId),
+  // Partial index: the recruitment engine repeatedly scans only awaiting leads.
+  index('leads_awaiting_idx').on(t.awaitingCoverage).where(sql`awaiting_coverage = true`),
   // Per-city demand aggregate for SEO city pages (filters on state/city/createdAt).
   index('leads_state_city_idx').on(t.state, t.city),
 ])
@@ -933,6 +947,67 @@ export const smsOptOuts = pgTable('sms_opt_outs', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('sms_opt_outs_phone_uq').on(t.phone),
+])
+
+// ============================================================
+// EMAIL OPT-OUTS — addresses that unsubscribed / bounced / complained.
+// Mirrors sms_opt_outs. The recruitment engine checks this before exporting any
+// prospect to the cold-email tool, so we never re-contact a suppressed address.
+// ============================================================
+
+export const emailOptOuts = pgTable('email_opt_outs', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  email: text('email').notNull(), // always stored lowercased
+  source: text('source'), // 'unsubscribe' | 'bounce' | 'complaint'
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex('email_opt_outs_email_uq').on(t.email),
+])
+
+// ============================================================
+// CONTRACTOR PROSPECTS — the recruitment pipeline (service-neutral).
+// Roofing companies we discovered (Google Places) and want to onboard into a
+// service area with no supply. NOT contractors yet — no user/company row until
+// they sign up via a claim link. The Python enrichment worker fills `email` +
+// `email_confidence`; the cold-email tool sends; status syncs back here.
+// See docs/launch-campaign.md and the recruitment-engine plan.
+// ============================================================
+
+export const contractorProspects = pgTable('contractor_prospects', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  serviceId: uuid('service_id').references(() => services.id, { onDelete: 'set null' }),
+  companyName: text('company_name'),
+  email: text('email'), // null until the enrichment worker finds one (lowercased)
+  emailConfidence: integer('email_confidence'), // 0-100 from the verifier
+  phone: text('phone'),
+  website: text('website'),
+  domain: text('domain'), // normalized host of `website` — Hunter lookup + dedupe
+  city: text('city'),
+  state: text('state'),
+  lat: doublePrecision('lat'),
+  lng: doublePrecision('lng'),
+  source: text('source').notNull().default('google_places'), // google_places | admin_csv | manual
+  sourceRef: text('source_ref'), // Places place_id (dedupe key)
+  rating: decimal('rating', { precision: 3, scale: 2 }),
+  reviewCount: integer('review_count'),
+  // discovered | enriching | email_found | email_verified | no_email | failed
+  enrichmentStatus: text('enrichment_status').notNull().default('discovered'),
+  // pending | exported | sent | opened | clicked | replied | bounced | suppressed | converted | skipped
+  outreachStatus: text('outreach_status').notNull().default('pending'),
+  lastOutreachAt: timestamp('last_outreach_at', { withTimezone: true }),
+  inviteToken: text('invite_token'), // signed token used by the /claim link
+  convertedToContractorId: uuid('converted_to_contractor_id').references((): AnyPgColumn => contractors.id, { onDelete: 'set null' }),
+  convertedAt: timestamp('converted_at', { withTimezone: true }),
+  meta: jsonb('meta').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  // One prospect per email (when found) and per Places listing.
+  uniqueIndex('contractor_prospects_email_uq').on(t.email).where(sql`email is not null`),
+  uniqueIndex('contractor_prospects_source_ref_uq').on(t.serviceId, t.sourceRef).where(sql`source_ref is not null`),
+  index('contractor_prospects_domain_idx').on(t.domain),
+  index('contractor_prospects_enrichment_idx').on(t.enrichmentStatus),
+  index('contractor_prospects_outreach_idx').on(t.outreachStatus),
 ])
 
 // ============================================================

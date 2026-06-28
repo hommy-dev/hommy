@@ -139,6 +139,8 @@ export default async function RooferProfilePage({
         memberSince={monthYear(roofer.createdAt)}
         canManage={false}
         editHref=""
+        introVideo={roofer.introVideoUrl ? { url: roofer.introVideoUrl, posterUrl: roofer.introVideoPosterUrl } : null}
+        shareUrl={absoluteUrl(`/roofers/${slug}`)}
         primaryCta={
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:gap-[0.833vw]">
             <Link

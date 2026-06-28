@@ -20,6 +20,9 @@ const ProfileSchema = z.object({
   bio: z.string().trim().min(40, 'Tell homeowners a little about your company').max(600),
   logoUrl: z.string().url().nullable().optional(),
   bannerUrl: z.string().url().nullable().optional(),
+  // Company intro video (upload URL or YouTube/Vimeo link) + its poster still.
+  introVideoUrl: z.string().url().nullable().optional(),
+  introVideoPosterUrl: z.string().url().nullable().optional(),
   yearsInBusiness: z.coerce.number().int().min(0).max(200),
 })
 
@@ -42,6 +45,11 @@ export async function updateBusinessProfile(input: unknown): Promise<Result> {
         bio: d.bio || null,
         logoUrl: d.logoUrl ?? null,
         bannerUrl: d.bannerUrl ?? null,
+        // Only touch the video when the caller sends the key (avoids wiping it).
+        ...(d.introVideoUrl !== undefined ? { introVideoUrl: d.introVideoUrl ?? null } : {}),
+        ...(d.introVideoPosterUrl !== undefined
+          ? { introVideoPosterUrl: d.introVideoPosterUrl ?? null }
+          : {}),
         ...(d.yearsInBusiness !== undefined
           ? { yearsInBusiness: d.yearsInBusiness }
           : {}),

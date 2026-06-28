@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { ServiceTag } from "@/components/ui/service-tag"
 import { WorkGallery } from "@/components/dashboard/profile/work-gallery"
+import { IntroVideo } from "@/components/dashboard/profile/intro-video"
 import { ReviewsBlock } from "@/components/dashboard/reviews/reviews-block"
 import { ProfileHeader, type ProfileStat } from "@/components/dashboard/profile/profile-header"
 import { ProfileCompleteness, type CompletenessItem } from "@/components/dashboard/profile/profile-completeness"
@@ -40,6 +41,8 @@ export function ContractorProfileView({
   editHref,
   completeness,
   primaryCta,
+  introVideo,
+  shareUrl,
 }: {
   name: string
   verified: boolean
@@ -59,6 +62,10 @@ export function ContractorProfileView({
   completeness?: CompletenessItem[]
   /** Public-only primary action (e.g. "Get a free quote"), shown under the header. */
   primaryCta?: ReactNode
+  /** Optional company intro video, shown at the top of the main column. */
+  introVideo?: { url: string; posterUrl: string | null } | null
+  /** Public profile URL — enables the Share button in the header. */
+  shareUrl?: string
 }) {
   return (
     <div className="mx-auto w-full space-y-6 lg:space-y-[1.667vw]">
@@ -70,6 +77,7 @@ export function ContractorProfileView({
         stats={stats}
         canManage={canManage}
         editHref={editHref}
+        shareUrl={shareUrl}
       />
 
       {primaryCta ? <div>{primaryCta}</div> : null}
@@ -79,6 +87,33 @@ export function ContractorProfileView({
       {/* Body — main column + sidebar of clean section cards */}
       <div className="grid gap-6 lg:gap-[1.667vw] lg:grid-cols-[1.7fr_1fr] lg:items-start">
         <div className="min-w-0 space-y-8 lg:space-y-[2.222vw]">
+          {introVideo ? (
+            <SectionCard title={`Meet ${name}`}>
+              <IntroVideo
+                url={introVideo.url}
+                posterUrl={introVideo.posterUrl}
+                companyName={name}
+              />
+            </SectionCard>
+          ) : canManage ? (
+            <SectionCard title="Intro video">
+              <EmptyState
+                size="sm"
+                icon="video"
+                title="Add an intro video"
+                description="A short clip introducing your company builds trust fast. Optional, but homeowners love seeing who they're hiring."
+                action={
+                  <Button asChild>
+                    <Link href={editHref}>
+                      <Icon name="video" />
+                      Add a video
+                    </Link>
+                  </Button>
+                }
+              />
+            </SectionCard>
+          ) : null}
+
           <SectionCard title="About">
             {bio ? (
               <p className="max-w-prose text-[15px] lg:text-[1.042vw] leading-relaxed text-foreground/80">
