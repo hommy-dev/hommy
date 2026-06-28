@@ -9,9 +9,7 @@ import {
 import type { PortfolioProject } from "@/lib/data/portfolio"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -19,13 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { WorkTypeSelect } from "./work-type-select"
 import { GooglePlacesInput } from "@/components/ui/google-places-input"
 import { showToast } from "@/components/ui/toast"
 import { Field } from "@/components/dashboard/settings/edit-dialog"
@@ -109,12 +101,14 @@ export function ManageCaseStudyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl lg:max-w-[52vw] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[95vh] flex-col gap-0 lg:gap-0 overflow-hidden p-0 lg:p-0 sm:max-w-2xl lg:max-w-[52vw]">
+        {/* Fixed header */}
+        <DialogHeader className="shrink-0 border-b border-border px-6 py-4 lg:px-[1.7vw] lg:pt-[1.5vw]">
           <DialogTitle>Case study</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 lg:space-y-[1.667vw]">
+        {/* Scrollable body */}
+        <div className="scrollbar-thin flex-1 space-y-6 lg:space-y-[1.667vw] overflow-y-auto px-6 py-6 lg:px-[1.7vw] lg:py-[1.667vw]">
           {/* Details */}
           <div className="space-y-4 lg:space-y-[1.111vw]">
             <Field label="Title">
@@ -134,18 +128,11 @@ export function ManageCaseStudyDialog({
             </Field>
             <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
               <Field label="Type of work">
-                <Select value={subtype} onValueChange={setSubtype}>
-                  <SelectTrigger className="h-11 lg:h-[3.056vw] w-full rounded-md lg:rounded-[0.556vw] border-input bg-card">
-                    <SelectValue placeholder="Select work type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subtypeOptions.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <WorkTypeSelect
+                  value={subtype}
+                  onValueChange={setSubtype}
+                  options={subtypeOptions}
+                />
               </Field>
               <Field label="Location">
                 <GooglePlacesInput
@@ -179,26 +166,25 @@ export function ManageCaseStudyDialog({
             <h3 className="mb-3 lg:mb-[0.833vw] text-sm lg:text-[0.972vw] font-semibold">
               Photos
             </h3>
-            <PortfolioMedia projectId={project.id} initial={project.images} />
+            <PortfolioMedia
+              projectId={project.id}
+              initial={project.images}
+              cover={project.coverImageUrl}
+            />
           </div>
 
-          {/* Publish + delete */}
-          <div className="flex items-center justify-between gap-3 lg:gap-[0.833vw] border-t border-border pt-5 lg:pt-[1.389vw]">
-            <label className="flex items-center gap-2.5 lg:gap-[0.694vw] text-sm lg:text-[0.972vw] font-medium">
-              <Switch checked={published} onCheckedChange={togglePublish} disabled={pending} />
-              {published ? "Published" : "Draft"}
-            </label>
-            <Button variant="destructive" size="sm" onClick={remove} disabled={pending}>
-              Delete case study
-            </Button>
-          </div>
         </div>
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="ghost">Done</Button>
-          </DialogClose>
-        </DialogFooter>
+        {/* Fixed footer: publish + delete */}
+        <div className="flex shrink-0 items-center justify-between gap-3 lg:gap-[0.833vw] border-t border-border px-6 py-4 lg:px-[1.7vw] lg:py-[1.111vw]">
+          <label className="flex items-center gap-2.5 lg:gap-[0.694vw] text-sm lg:text-[0.972vw] font-medium">
+            <Switch checked={published} onCheckedChange={togglePublish} disabled={pending} />
+            {published ? "Published" : "Draft"}
+          </label>
+          <Button variant="destructive" size="sm" onClick={remove} disabled={pending}>
+            Delete case study
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

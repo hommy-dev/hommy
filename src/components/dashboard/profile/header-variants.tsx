@@ -106,13 +106,13 @@ export function HeaderVariantCard({ data }: { data: HeaderData }) {
   return (
     <div>
       <Banner url={data.bannerUrl} className="h-28 lg:h-[9vw] w-full rounded-xl lg:rounded-[1vw]" />
-      <div className="relative mx-3 lg:mx-[0.833vw] -mt-10 lg:-mt-[3vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_3px_rgb(0_0_0/0.04)]">
+      <div className="relative mx-3 lg:mx-[0.833vw] -mt-10 lg:-mt-[3vw] rounded-md lg:rounded-[0.8vw] border border-border bg-card p-5 lg:p-[1.389vw] shadow-[0_1px_3px_rgb(0_0_0/0.04)]">
         <div className="flex flex-col gap-4 lg:gap-[1.111vw] sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4 lg:gap-[1.111vw]">
-            <span className="relative -mt-12 lg:-mt-[5vw] flex size-20 lg:size-[5.5vw] shrink-0 items-center justify-center rounded-2xl lg:rounded-[1.111vw] bg-muted text-xl lg:text-[1.667vw] font-semibold text-foreground/70 ring-4 lg:ring-[0.278vw] ring-card">
+            <span className="relative -mt-12 lg:-mt-[5vw] flex size-20 lg:size-[5.5vw] shrink-0 items-center justify-center rounded-md lg:rounded-[0.8vw] bg-muted text-xl lg:text-[1.667vw] font-semibold text-foreground/70 ring-4 lg:ring-[0.278vw] ring-card">
               {data.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={data.logoUrl} alt="" className="size-full rounded-2xl lg:rounded-[1.111vw] object-cover" />
+                <img src={data.logoUrl} alt="" className="size-full rounded-md lg:rounded-[0.8vw] object-cover" />
               ) : (
                 initials(data.name)
               )}
@@ -153,7 +153,7 @@ export function HeaderVariantCard({ data }: { data: HeaderData }) {
 
 export function HeaderVariantCompact({ data }: { data: HeaderData }) {
   return (
-    <div className="overflow-hidden rounded-2xl lg:rounded-[1.111vw] border border-border bg-card">
+    <div className="overflow-hidden rounded-md lg:rounded-[0.8vw] border border-border bg-card">
       <div className="h-1.5 lg:h-[0.417vw] w-full bg-gradient-to-r from-primary via-primary/60 to-secondary" />
       <div className="p-5 lg:p-[1.389vw]">
         <div className="flex flex-col gap-4 lg:gap-[1.111vw] sm:flex-row sm:items-center sm:justify-between">
@@ -198,17 +198,17 @@ export function HeaderVariantCompact({ data }: { data: HeaderData }) {
 
 export function HeaderVariantImmersive({ data }: { data: HeaderData }) {
   return (
-    <div className="relative h-60 lg:h-[20vw] w-full overflow-hidden rounded-2xl lg:rounded-[1.111vw]">
+    <div className="relative h-60 lg:h-[20vw] w-full overflow-hidden rounded-md lg:rounded-[0.8vw]">
       <Banner url={data.bannerUrl} className="absolute inset-0 size-full" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/35" />
 
       {/* Top row: identity + edit */}
       <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-4 lg:gap-[1.111vw] p-5 lg:p-[1.389vw]">
         <div className="flex items-center gap-4 lg:gap-[1.111vw]">
-          <span className="relative flex size-16 lg:size-[4.5vw] shrink-0 items-center justify-center rounded-2xl lg:rounded-[1.111vw] bg-white text-lg lg:text-[1.5vw] font-semibold text-foreground ring-1 ring-white/40">
+          <span className="relative flex size-16 lg:size-[4.5vw] shrink-0 items-center justify-center rounded-md lg:rounded-[0.8vw] bg-white text-lg lg:text-[1.5vw] font-semibold text-foreground ring-1 ring-white/40">
             {data.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={data.logoUrl} alt="" className="size-full rounded-2xl lg:rounded-[1.111vw] object-cover" />
+              <img src={data.logoUrl} alt="" className="size-full rounded-md lg:rounded-[0.8vw] object-cover" />
             ) : (
               initials(data.name)
             )}

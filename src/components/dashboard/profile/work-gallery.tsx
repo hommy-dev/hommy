@@ -84,15 +84,41 @@ export function WorkGallery({
             onClick={() => setIndex(i)}
             className="group overflow-hidden rounded-xl lg:rounded-[0.833vw] border border-border bg-card text-left transition-colors hover:border-foreground/30"
           >
-            <div className="aspect-4/3 overflow-hidden bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element -- mix of portfolio + remote Google photos */}
-              <img
-                src={s.thumb}
-                alt=""
-                referrerPolicy="no-referrer"
-                loading="lazy"
-                className="size-full object-cover transition-transform group-hover:scale-105"
-              />
+            <div className="relative aspect-4/3 overflow-hidden bg-muted">
+              {s.kind === "before_after" && s.beforeUrl ? (
+                <>
+                  <div className="flex size-full transition-transform group-hover:scale-105">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- mix of portfolio + remote Google photos */}
+                    <img
+                      src={s.beforeUrl}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      className="h-full w-1/2 object-cover"
+                    />
+                    {/* eslint-disable-next-line @next/next/no-img-element -- mix of portfolio + remote Google photos */}
+                    <img
+                      src={s.thumb}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      loading="lazy"
+                      className="h-full w-1/2 border-l-2 border-background object-cover"
+                    />
+                  </div>
+                  <span className="pointer-events-none absolute bottom-1.5 left-1.5 lg:bottom-[0.417vw] lg:left-[0.417vw] rounded-full bg-foreground/80 px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-[11px] lg:text-[0.764vw] font-medium text-background">
+                    Before / after
+                  </span>
+                </>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element -- mix of portfolio + remote Google photos
+                <img
+                  src={s.thumb}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                  className="size-full object-cover transition-transform group-hover:scale-105"
+                />
+              )}
             </div>
             {s.smallLine ? (
               <p className="truncate px-2.5 py-2 lg:px-[0.694vw] lg:py-[0.556vw] text-xs lg:text-[0.764vw] text-muted-foreground">

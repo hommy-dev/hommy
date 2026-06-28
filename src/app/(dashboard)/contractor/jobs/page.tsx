@@ -38,7 +38,7 @@ async function JobsData() {
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
       {!canEngage && (
-        <div className="flex flex-wrap items-center justify-between gap-4 lg:gap-[1.111vw] rounded-2xl lg:rounded-[1.111vw] border border-primary/20 bg-accent/60 p-4 lg:p-[1.111vw]">
+        <div className="flex flex-wrap items-center justify-between gap-4 lg:gap-[1.111vw] rounded-md lg:rounded-[0.8vw] border border-primary/20 bg-accent/60 p-4 lg:p-[1.111vw]">
           <div className="flex items-start gap-3 lg:gap-[0.833vw]">
             <span className="mt-0.5 lg:mt-[0.139vw] flex size-8 lg:size-[2.222vw] shrink-0 items-center justify-center rounded-lg lg:rounded-[0.694vw] bg-primary/10 text-primary">
               <LockIcon />

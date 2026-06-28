@@ -104,7 +104,7 @@ export function MediaLightbox({
           <BeforeAfter
             before={slide.beforeUrl}
             after={slide.url}
-            mode="drag"
+            mode="hover"
             className="w-[80vw] max-w-2xl lg:w-[52vw] lg:max-w-[52vw] max-h-[72vh] overflow-hidden rounded-lg lg:rounded-[0.694vw]"
           />
         ) : (

@@ -54,7 +54,7 @@ export function ComingSoon({ regionLabel }: { regionLabel: string | null }) {
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl lg:max-w-[46.662vw] flex-1 flex-col justify-center px-6 lg:px-[1.667vw] pb-16 lg:pb-[4.444vw]">
-        <div className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-background p-7 lg:p-[2.222vw] text-center shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+        <div className="rounded-md lg:rounded-[0.8vw] border border-border bg-background p-7 lg:p-[2.222vw] text-center shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
           {done ? (
             <SuccessState email={email.trim()} fullName={fullName.trim()} place={place} />
           ) : (
@@ -128,7 +128,7 @@ export function ComingSoon({ regionLabel }: { regionLabel: string | null }) {
         </div>
 
         {/* Contractor path — companies can join from anywhere. */}
-        <div className="mt-4 lg:mt-[1.111vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-background p-5 lg:p-[1.389vw]">
+        <div className="mt-4 lg:mt-[1.111vw] rounded-md lg:rounded-[0.8vw] border border-border bg-background p-5 lg:p-[1.389vw]">
           <div className="flex flex-wrap items-center justify-between gap-3 lg:gap-[0.833vw]">
             <div className="flex items-start gap-3 lg:gap-[0.833vw] text-left">
               <span className="mt-0.5 lg:mt-[0.139vw] flex size-9 lg:size-[2.5vw] shrink-0 items-center justify-center rounded-lg lg:rounded-[0.694vw] bg-accent text-foreground/70">

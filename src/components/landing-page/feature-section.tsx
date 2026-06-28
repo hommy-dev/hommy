@@ -66,7 +66,7 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
   return (
     <div
       className={cn(
-        "relative flex h-full w-full flex-col justify-between gap-8 lg:gap-[2.222vw] overflow-hidden rounded-2xl lg:rounded-[1.111vw] bg-cover bg-center p-8 sm:p-10 lg:flex-row lg:items-center lg:p-[3vw] bg-[#ccc3ff]",
+        "relative flex h-full w-full flex-col justify-between gap-8 lg:gap-[2.222vw] overflow-hidden rounded-md lg:rounded-[0.8vw] bg-cover bg-center p-8 sm:p-10 lg:flex-row lg:items-center lg:p-[3vw] bg-[#ccc3ff]",
       )}
       // style={{ backgroundImage: `url(${feature.background})` }}
     >

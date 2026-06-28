@@ -41,7 +41,7 @@ async function StatsRow() {
   const stats = await getAdminStats()
   return (
     <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-3">
-      <Link href="/admin/verification" className="rounded-2xl lg:rounded-[1.111vw] outline-none focus-visible:ring-1 focus-visible:ring-ring">
+      <Link href="/admin/verification" className="rounded-md lg:rounded-[0.8vw] outline-none focus-visible:ring-1 focus-visible:ring-ring">
         <StatCard
           label="Pending verification"
           value={stats.pendingVerifications}
@@ -72,7 +72,7 @@ async function RecentContractors() {
   const rows = await getRecentContractors()
 
   return (
-    <section className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+    <section className="rounded-md lg:rounded-[0.8vw] border border-border bg-card p-5 lg:p-[1.389vw]">
       <div className="flex items-center justify-between">
         <h2 className="text-sm lg:text-[0.972vw] font-semibold">Recent companies</h2>
         <Link
@@ -142,7 +142,7 @@ function StatsSkeleton() {
   return (
     <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-3">
       {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} className="h-[108px] lg:h-[7.5vw] rounded-2xl lg:rounded-[1.111vw]" />
+        <Skeleton key={i} className="h-[108px] lg:h-[7.5vw] rounded-md lg:rounded-[0.8vw]" />
       ))}
     </div>
   )
@@ -150,7 +150,7 @@ function StatsSkeleton() {
 
 function ListSkeleton() {
   return (
-    <div className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+    <div className="rounded-md lg:rounded-[0.8vw] border border-border bg-card p-5 lg:p-[1.389vw]">
       <Skeleton className="h-5 lg:h-[1.389vw] w-40 lg:w-[11.111vw]" />
       <div className="mt-4 lg:mt-[1.111vw] space-y-3 lg:space-y-[0.833vw]">
         {Array.from({ length: 5 }).map((_, i) => (

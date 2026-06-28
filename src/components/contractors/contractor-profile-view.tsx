@@ -154,7 +154,7 @@ export function ContractorProfileView({
         </div>
 
         <aside className="lg:sticky lg:top-6 lg:self-start">
-          <div className="divide-y divide-border rounded-2xl lg:rounded-[1.111vw] border border-border bg-card">
+          <div className="divide-y divide-border rounded-md lg:rounded-[0.8vw] border border-border bg-card">
             <SubSection title="Details">
               <ul className="space-y-3 lg:space-y-[0.833vw] text-sm lg:text-[0.972vw]">
                 <li className="flex items-center gap-2.5 lg:gap-[0.694vw]">

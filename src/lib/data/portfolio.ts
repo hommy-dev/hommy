@@ -9,6 +9,11 @@ import {
   subscriptions,
 } from '@/lib/db/schema'
 
+// Re-export so server consumers can keep importing it from here. The source of
+// truth lives in a DB-free module (`@/lib/portfolio/constants`) that client
+// components import directly.
+export { MAX_IMAGES_PER_PROJECT } from '@/lib/portfolio/constants'
+
 export type PortfolioImageKind = (typeof portfolioImages.kind.enumValues)[number]
 
 export type PortfolioImage = {
@@ -31,9 +36,6 @@ export type PortfolioProject = {
   sortOrder: number
   images: PortfolioImage[]
 }
-
-/** Max images allowed inside a single case study (all plans). */
-export const MAX_IMAGES_PER_PROJECT = 12
 
 export async function getPortfolio(
   contractorId: string,

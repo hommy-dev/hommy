@@ -61,7 +61,7 @@ export function VerificationReviewCard({ item }: { item: VerificationQueueItem }
   }
 
   return (
-    <section className="rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+    <section className="rounded-md lg:rounded-[0.8vw] border border-border bg-card p-5 lg:p-[1.389vw]">
       <div className="flex flex-wrap items-start justify-between gap-3 lg:gap-[0.833vw]">
         <div className="min-w-0">
           <h3 className="font-sebenta text-lg lg:text-[1.25vw] font-bold tracking-tight">

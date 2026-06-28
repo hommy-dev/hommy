@@ -84,7 +84,7 @@ function StateView({
       className={cn(
         "flex flex-col items-center justify-center text-center",
         bordered &&
-          "rounded-2xl lg:rounded-[1.111vw] border border-dashed border-border",
+          "rounded-md lg:rounded-[0.8vw] border border-dashed border-border",
         s.wrap,
         className
       )}

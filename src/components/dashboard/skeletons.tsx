@@ -156,8 +156,8 @@ export function ProfileSkeleton() {
   return (
     <div className="space-y-6 lg:space-y-[1.667vw]">
       {/* Header band */}
-      <div className="flex flex-wrap items-center gap-4 lg:gap-[1.111vw] rounded-2xl lg:rounded-[1.111vw] border border-border bg-card p-5 lg:p-[1.389vw]">
-        <Skeleton className="size-16 lg:size-[4.444vw] rounded-2xl lg:rounded-[1.111vw]" />
+      <div className="flex flex-wrap items-center gap-4 lg:gap-[1.111vw] rounded-md lg:rounded-[0.8vw] border border-border bg-card p-5 lg:p-[1.389vw]">
+        <Skeleton className="size-16 lg:size-[4.444vw] rounded-md lg:rounded-[0.8vw]" />
         <div className="space-y-2 lg:space-y-[0.556vw]">
           <Skeleton className="h-6 lg:h-[1.667vw] w-48 lg:w-[16vw]" />
           <Skeleton className="h-4 lg:h-[1.111vw] w-64 lg:w-[20vw]" />
@@ -183,7 +183,7 @@ export function ProfileSkeleton() {
             </div>
           ))}
         </div>
-        <Skeleton className="h-64 lg:h-[22vw] rounded-2xl lg:rounded-[1.111vw]" />
+        <Skeleton className="h-64 lg:h-[22vw] rounded-md lg:rounded-[0.8vw]" />
       </div>
     </div>
   )

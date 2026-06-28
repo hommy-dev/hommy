@@ -9,16 +9,10 @@ import {
 import { showToast } from "@/components/ui/toast"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { WorkTypeSelect } from "./work-type-select"
 import { GooglePlacesInput } from "@/components/ui/google-places-input"
-import { ImageUpload } from "@/components/ui/image-upload"
-import { Icon } from "@/components/ui/icon"
+import { CaseStudyPhotos, type CasePhoto } from "./case-study-photos"
+import { MAX_IMAGES_PER_PROJECT } from "@/lib/portfolio/constants"
 import { EditDialog, Field } from "@/components/dashboard/settings/edit-dialog"
 
 export function AddCaseStudyDialog({ subtypes }: { subtypes: string[] }) {
@@ -27,7 +21,7 @@ export function AddCaseStudyDialog({ subtypes }: { subtypes: string[] }) {
   const [description, setDescription] = useState("")
   const [subtype, setSubtype] = useState("")
   const [location, setLocation] = useState("")
-  const [photos, setPhotos] = useState<string[]>([])
+  const [photos, setPhotos] = useState<CasePhoto[]>([])
   const [pickerKey, setPickerKey] = useState(0)
   const [error, setError] = useState("")
 
@@ -54,10 +48,15 @@ export function AddCaseStudyDialog({ subtypes }: { subtypes: string[] }) {
       return false
     }
 
-    // Attach the uploaded photos in order — the first becomes the cover.
+    // Attach the staged photos in order — the first becomes the cover.
     const projectId = res.data.id
-    for (const url of photos) {
-      const r = await addPortfolioImage({ projectId, kind: "single", imageUrl: url })
+    for (const p of photos) {
+      const r = await addPortfolioImage({
+        projectId,
+        kind: p.kind,
+        imageUrl: p.imageUrl,
+        beforeUrl: p.beforeUrl ?? null,
+      })
       if (!r.success) showToast(r.error, { type: "error" })
     }
 
@@ -105,18 +104,11 @@ export function AddCaseStudyDialog({ subtypes }: { subtypes: string[] }) {
 
       <div className="grid gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
         <Field label="Type of work">
-          <Select value={subtype} onValueChange={setSubtype}>
-            <SelectTrigger className="h-11 lg:h-[3.056vw] w-full rounded-md lg:rounded-[0.556vw] border-input bg-card">
-              <SelectValue placeholder="Select work type" />
-            </SelectTrigger>
-            <SelectContent>
-              {subtypes.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <WorkTypeSelect
+            value={subtype}
+            onValueChange={setSubtype}
+            options={subtypes}
+          />
         </Field>
 
         <Field label="Location">
@@ -134,48 +126,30 @@ export function AddCaseStudyDialog({ subtypes }: { subtypes: string[] }) {
         </Field>
       </div>
 
-      <Field label="Photos" hint="The first photo becomes the cover. Add more later, including before/after pairs.">
-        <div className="space-y-2.5 lg:space-y-[0.694vw]">
-          {photos.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 lg:gap-[0.556vw]">
-              {photos.map((url, i) => (
-                <div
-                  key={url}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-md lg:rounded-[0.556vw] border border-border"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="size-full object-cover" />
-                  {i === 0 && (
-                    <span className="absolute bottom-1.5 left-1.5 lg:bottom-[0.417vw] lg:left-[0.417vw] rounded-full bg-foreground/75 px-2 lg:px-[0.556vw] py-0.5 lg:py-[0.139vw] text-[11px] lg:text-[0.764vw] font-medium text-background">
-                      Cover
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setPhotos((p) => p.filter((_, x) => x !== i))}
-                    aria-label="Remove photo"
-                    className="absolute right-1.5 top-1.5 lg:right-[0.417vw] lg:top-[0.417vw] grid size-7 lg:size-[1.944vw] place-items-center rounded-full bg-foreground/70 text-background opacity-0 transition-opacity hover:bg-foreground group-hover:opacity-100"
-                  >
-                    <Icon name="delete" className="size-4 lg:size-[1.111vw]" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <ImageUpload
-            folder="portfolio"
-            accept="image"
-            maxFiles={10}
-            className="w-full"
-            onUpload={(r) => setPhotos((p) => [...p, r.secureUrl])}
-          >
-            <span className="flex w-full cursor-pointer items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] border border-dashed border-border px-4 lg:px-[1.111vw] py-4 lg:py-[1.111vw] text-sm lg:text-[0.972vw] font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
-              <Icon name="plus" className="size-4 lg:size-[1.111vw]" />
-              {photos.length ? "Add more photos" : "Add photos"}
-            </span>
-          </ImageUpload>
-        </div>
+      <Field label="Photos" hint="Add photos or before/after pairs. The cover is what homeowners see first.">
+        <CaseStudyPhotos
+          items={photos}
+          coverUrl={photos[0]?.imageUrl ?? null}
+          max={MAX_IMAGES_PER_PROJECT}
+          onAddSingle={(url) =>
+            setPhotos((p) => [...p, { key: url, kind: "single", imageUrl: url }])
+          }
+          onAddPair={(beforeUrl, afterUrl) =>
+            setPhotos((p) => [
+              ...p,
+              {
+                key: `ba:${beforeUrl}|${afterUrl}`,
+                kind: "before_after",
+                imageUrl: afterUrl,
+                beforeUrl,
+              },
+            ])
+          }
+          onRemove={(item) => setPhotos((p) => p.filter((x) => x.key !== item.key))}
+          onSetCover={(item) =>
+            setPhotos((p) => [item, ...p.filter((x) => x.key !== item.key)])
+          }
+        />
       </Field>
     </EditDialog>
   )
