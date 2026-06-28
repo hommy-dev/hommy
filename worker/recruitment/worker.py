@@ -20,20 +20,32 @@ import requests
 import psycopg
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load THIS folder's .env regardless of the working directory (missing file is a
+# no-op — e.g. on GitHub Actions, where env comes from the workflow instead).
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("recruitment-worker")
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 HUNTER_API_KEY = os.environ.get("HUNTER_API_KEY", "")
-SCRAPEGRAPH_API_KEY = os.environ.get("SCRAPEGRAPH_API_KEY", "")
+
+# LLM for the website crawl. OpenRouter is OpenAI-compatible and is the preferred
+# option here; OpenAI and the ScrapeGraphAI managed key are fallbacks. Without any
+# of them the worker uses a plain requests+regex crawl.
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+SCRAPEGRAPH_API_KEY = os.environ.get("SCRAPEGRAPH_API_KEY", "")
 
 MIN_CONFIDENCE = int(os.environ.get("MIN_EMAIL_CONFIDENCE", "70"))
 BATCH_SIZE = int(os.environ.get("BATCH_SIZE", "10"))
 POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "30"))
 MAX_ATTEMPTS = int(os.environ.get("MAX_ATTEMPTS", "3"))
+# When true, drain the queue once and exit (for a cron/GitHub Action). Otherwise
+# loop forever (for an always-on host).
+RUN_ONCE = os.environ.get("RUN_ONCE", "").lower() in ("1", "true", "yes")
 
 WORKER_ID = f"{socket.gethostname()}:{os.getpid()}"
 EMAIL_RE = re.compile(r"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")
@@ -43,19 +55,32 @@ BAD_LOCALPARTS = ("noreply", "no-reply", "example", "sentry", "wixpress")
 
 # ── Email finding ────────────────────────────────────────────────────────────
 
+def _llm_config() -> dict | None:
+    """LLM config for ScrapeGraphAI. OpenRouter (OpenAI-compatible) preferred.
+    The model is the OpenRouter id, e.g. 'openai/gpt-4o-mini' or
+    'anthropic/claude-3.5-haiku'. Returns None if no LLM is configured."""
+    if OPENROUTER_API_KEY:
+        return {
+            "api_key": OPENROUTER_API_KEY,
+            "model": OPENROUTER_MODEL,
+            "base_url": OPENROUTER_BASE_URL,
+        }
+    if OPENAI_API_KEY:
+        return {"api_key": OPENAI_API_KEY, "model": "openai/gpt-4o-mini"}
+    if SCRAPEGRAPH_API_KEY:
+        return {"api_key": SCRAPEGRAPH_API_KEY, "model": "scrapegraphai/smart"}
+    return None
+
+
 def crawl_email_scrapegraph(url: str) -> str | None:
     """LLM-powered extraction via ScrapeGraphAI. Returns the best email or None.
     Falls back to None (caller tries the basic crawl) if not installed/configured."""
-    if not (SCRAPEGRAPH_API_KEY or OPENAI_API_KEY):
+    llm = _llm_config()
+    if llm is None:
         return None
     try:
         from scrapegraphai.graphs import SmartScraperGraph  # type: ignore
 
-        llm = (
-            {"api_key": SCRAPEGRAPH_API_KEY, "model": "scrapegraphai/smart"}
-            if SCRAPEGRAPH_API_KEY
-            else {"api_key": OPENAI_API_KEY, "model": "openai/gpt-4o-mini"}
-        )
         graph = SmartScraperGraph(
             prompt="Return the primary business contact email address, or null.",
             source=url,
@@ -280,6 +305,9 @@ def main() -> None:
                     pass
                 n = 0
             if n == 0:
+                if RUN_ONCE:
+                    log.info("queue empty — exiting (RUN_ONCE)")
+                    return
                 time.sleep(POLL_SECONDS)
 
 

@@ -8,10 +8,12 @@ accurate offer, CAN-SPAM compliant footers.
 - `[signup link]`, `[unsubscribe link]`, `[your business mailing address]`
 - `[Your name]` (founder), and the merge fields `[First name]` / `[City]`
 
-> Deliverability note: keep `hommy.online` (Resend) for transactional only. Run
-> this campaign on a separate domain (e.g. `gethommy.online`) via a cold-email tool
-> (Instantly/Smartlead/Apollo) with 2–3 weeks of inbox warmup. Don't blast — ramp
-> ~300–400/day.
+> Deliverability note: keep `hommy.online` (Resend) for transactional only. The
+> recruitment engine sends from a separate subdomain (`outreach.hommy.online`,
+> `team@outreach.hommy.online`) on the same Resend account, so cold volume never
+> touches the transactional domain's reputation. Free at low volume; ramp slowly
+> and keep volume modest rather than blasting. (At large scale, move to a
+> dedicated cold-email tool with multi-week inbox warmup.)
 
 ---
 

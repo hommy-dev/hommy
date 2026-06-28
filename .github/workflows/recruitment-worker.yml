@@ -1,0 +1,33 @@
+name: Recruitment enrichment worker
+
+# Free, low-volume deploy: hourly, drain the prospect_enrichment_jobs queue
+# (find + verify emails) and exit. No always-on server needed. Hourly stays well
+# within GitHub's free minutes on a private repo; bump to "*/30 * * * *" or more
+# on a public repo (unlimited) or if volume grows.
+# Add repo secrets: WORKER_DATABASE_URL, HUNTER_API_KEY, OPENROUTER_API_KEY.
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+# Don't pile up overlapping runs.
+concurrency:
+  group: recruitment-worker
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r worker/recruitment/requirements.txt
+      - run: python worker/recruitment/worker.py
+        env:
+          RUN_ONCE: "true"
+          DATABASE_URL: ${{ secrets.WORKER_DATABASE_URL }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          # No LLM configured — the worker uses its free built-in crawl.

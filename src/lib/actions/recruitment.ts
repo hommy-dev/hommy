@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { getRequiredUser } from '@/lib/auth/session'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { roofingServiceId } from '@/lib/data/locations'
-import { exportPendingProspects } from '@/lib/recruitment/outreach-sync'
+import { sendPendingOutreach } from '@/lib/recruitment/outreach-sync'
 
 type Result<T = undefined> =
   | { success: true; data?: T }
@@ -49,10 +49,10 @@ export async function startCampaign(input: unknown): Promise<Result> {
   return { success: true }
 }
 
-/** Push the next batch of verified prospects to the cold-email tool. */
-export async function runExport(): Promise<Result<{ exported: number; selected: number }>> {
+/** Send the next batch of recruitment emails to verified prospects (via Resend). */
+export async function runOutreach(): Promise<Result<{ sent: number; selected: number }>> {
   await getRequiredUser('admin')
-  const res = await exportPendingProspects()
-  if (!res.ok) return { success: false, error: res.reason ?? 'Export failed.' }
-  return { success: true, data: { exported: res.exported, selected: res.selected } }
+  const res = await sendPendingOutreach()
+  if (!res.ok) return { success: false, error: res.reason ?? 'Sending failed.' }
+  return { success: true, data: { sent: res.sent, selected: res.selected } }
 }

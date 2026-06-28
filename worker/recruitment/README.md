@@ -40,13 +40,31 @@ python worker.py
 - `DATABASE_URL` — same Supabase Postgres as the app. Use the **session** port
   (5432) or keep prepared statements off (the app uses the Supavisor pooler on
   6543 with `prepare:false`); psycopg here disables server-side prepares.
-- `SCRAPEGRAPH_API_KEY` / `OPENAI_API_KEY` — for the LLM crawl (optional; falls
-  back to a basic crawl without it).
-- `HUNTER_API_KEY` — domain-search + verifier.
+- `OPENROUTER_API_KEY` (+ `OPENROUTER_MODEL`, default `openai/gpt-4o-mini`) — the
+  LLM for the crawl. OpenRouter is OpenAI-compatible. `OPENAI_API_KEY` /
+  `SCRAPEGRAPH_API_KEY` are fallbacks. Without any, a basic requests+regex crawl
+  is used (still works, just less robust).
+- `HUNTER_API_KEY` — domain-search + verifier (free tier fine at low volume).
 - `MIN_EMAIL_CONFIDENCE` (default 70), `BATCH_SIZE` (default 10),
   `POLL_SECONDS` (default 30), `MAX_ATTEMPTS` (default 3).
+- `RUN_ONCE` — `true` = drain the queue once and exit (for cron); blank = loop
+  forever (for an always-on host).
 
-## Deploy
-Any always-on Python host (Railway/Render/Fly/a small VM/cron). It only needs
-outbound HTTPS + the `DATABASE_URL`. Scale by running more instances (SKIP LOCKED
-makes that safe).
+## Deploy — pick one
+
+### A) Free cron (recommended at low volume) — GitHub Actions
+A ready workflow is at `.github/workflows/recruitment-worker.yml`: hourly it
+installs deps, runs the worker with `RUN_ONCE=true`, and exits. No server to host.
+(Hourly stays within GitHub's free Action minutes on a private repo; bump the cron
+on a public repo or when volume grows.)
+Add these **repo secrets** (Settings → Secrets and variables → Actions):
+`WORKER_DATABASE_URL`, `HUNTER_API_KEY`, `OPENROUTER_API_KEY`. (Scheduled runs
+fire only on the default branch and can be a few minutes late on the free tier —
+fine for this.)
+
+### B) Always-on host — Railway / Render / Fly / a small VM
+Set the env (leave `RUN_ONCE` blank so it loops), run `python worker.py`. Railway
+is the easiest (cheap hobby plan). Scale by running more instances — `FOR UPDATE
+SKIP LOCKED` makes concurrent workers safe.
+
+It only needs outbound HTTPS + `DATABASE_URL`.

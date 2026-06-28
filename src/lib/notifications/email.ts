@@ -32,16 +32,23 @@ export async function sendEmail(
     return { success: true }
   }
   try {
-    await resend.emails.send({
+    // Resend does NOT throw on API errors (unverified domain, invalid recipient,
+    // test-mode restriction, …) — it returns them in `error`. We must check it,
+    // or every caller falsely believes the email was sent.
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject,
       html,
       ...(attachments?.length ? { attachments } : {}),
     })
+    if (error) {
+      console.error('[sendEmail] Resend error', error)
+      return { success: false, error: error.message ?? JSON.stringify(error) }
+    }
     return { success: true }
   } catch (err) {
-    console.error('[sendEmail] Resend error', err)
+    console.error('[sendEmail] Resend threw', err)
     return { success: false, error: String(err) }
   }
 }

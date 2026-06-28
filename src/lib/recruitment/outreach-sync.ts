@@ -1,25 +1,27 @@
-// Export verified prospects to the cold-email tool. Selects prospects that have
-// a verified email, aren't suppressed, and haven't been exported, mints a signed
-// claim link for each, pushes them to the tool, and marks them `exported`.
-// Hard gates here are the compliance backbone — we never send to an unverified
-// or opted-out address.
+// Send recruitment outreach to verified prospects via Resend (separate domain).
+// Selects prospects with a verified, non-suppressed email that haven't been
+// emailed, mints a signed claim link + unsubscribe link for each, sends, and
+// marks them `sent`. The hard gates here are the compliance backbone — we never
+// email an unverified or opted-out address.
 
 import { and, asc, eq, gte, inArray, isNotNull, ne } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { contractorProspects } from '@/lib/db/schema'
 import { isEmailOptedOut } from '@/lib/notifications/opt-out'
-import { mintInviteToken } from '@/lib/recruitment/invite'
-import { addOutreachLead, outreachConfigured } from '@/lib/recruitment/outreach-adapter'
+import { mintInviteToken, mintUnsubscribeToken } from '@/lib/recruitment/invite'
+import {
+  sendRecruitmentEmail,
+  recruitmentEmailConfigured,
+  appUrl,
+} from '@/lib/notifications/recruitment-email'
 import { MIN_EMAIL_CONFIDENCE, OUTREACH_EXPORT_BATCH } from '@/lib/config/recruitment'
 
-const APP_URL = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+export type SendResult = { ok: boolean; selected: number; sent: number; reason?: string }
 
-export type ExportResult = { ok: boolean; selected: number; exported: number; reason?: string }
-
-/** Export the next batch of eligible prospects to the cold-email tool. */
-export async function exportPendingProspects(): Promise<ExportResult> {
-  if (!outreachConfigured()) {
-    return { ok: false, selected: 0, exported: 0, reason: 'outreach tool not configured' }
+/** Send the next batch of recruitment emails. */
+export async function sendPendingOutreach(): Promise<SendResult> {
+  if (!recruitmentEmailConfigured()) {
+    return { ok: false, selected: 0, sent: 0, reason: 'recruitment email not configured' }
   }
 
   const candidates = await db
@@ -28,7 +30,6 @@ export async function exportPendingProspects(): Promise<ExportResult> {
       email: contractorProspects.email,
       companyName: contractorProspects.companyName,
       city: contractorProspects.city,
-      state: contractorProspects.state,
     })
     .from(contractorProspects)
     .where(
@@ -42,10 +43,9 @@ export async function exportPendingProspects(): Promise<ExportResult> {
     .orderBy(asc(contractorProspects.createdAt))
     .limit(OUTREACH_EXPORT_BATCH)
 
-  let exported = 0
+  let sent = 0
   for (const c of candidates) {
     if (!c.email) continue
-    // Final suppression check (belt + suspenders vs the DB filter).
     if (await isEmailOptedOut(c.email)) {
       await db
         .update(contractorProspects)
@@ -53,29 +53,36 @@ export async function exportPendingProspects(): Promise<ExportResult> {
         .where(eq(contractorProspects.id, c.id))
       continue
     }
-    const token = mintInviteToken(c.id)
-    if (!token) return { ok: false, selected: candidates.length, exported, reason: 'UNSUBSCRIBE_SECRET not set' }
-    const claimUrl = `${APP_URL}/claim/${token}`
+    const inviteToken = mintInviteToken(c.id)
+    const unsubToken = mintUnsubscribeToken(c.email)
+    if (!inviteToken || !unsubToken) {
+      return { ok: false, selected: candidates.length, sent, reason: 'UNSUBSCRIBE_SECRET not set' }
+    }
 
-    const res = await addOutreachLead({
-      email: c.email,
+    const res = await sendRecruitmentEmail({
+      to: c.email,
       companyName: c.companyName,
       city: c.city,
-      state: c.state,
-      claimUrl,
+      claimUrl: `${appUrl()}/claim/${inviteToken}`,
+      unsubscribeUrl: `${appUrl()}/unsubscribe/${unsubToken}`,
     })
     if (!res.ok) {
-      console.error('[outreach-sync] push failed', { id: c.id, err: res.error })
+      console.error('[outreach-sync] send failed', { id: c.id, err: res.error })
       continue // leave pending → retried next run
     }
     await db
       .update(contractorProspects)
-      .set({ outreachStatus: 'exported', inviteToken: token, lastOutreachAt: new Date(), updatedAt: new Date() })
+      .set({
+        outreachStatus: 'sent',
+        inviteToken,
+        lastOutreachAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(eq(contractorProspects.id, c.id))
-    exported++
+    sent++
   }
 
-  return { ok: true, selected: candidates.length, exported }
+  return { ok: true, selected: candidates.length, sent }
 }
 
 /** Skip prospects we'll never email (no findable email) — housekeeping. */

@@ -2,7 +2,7 @@
 
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { startCampaign, runExport } from "@/lib/actions/recruitment"
+import { startCampaign, runOutreach } from "@/lib/actions/recruitment"
 import { showToast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
@@ -44,19 +44,19 @@ export function FindRoofersButton({
   )
 }
 
-/** Push the next batch of verified prospects to the cold-email tool. */
+/** Send the next batch of recruitment emails to verified prospects (via Resend). */
 export function ExportProspectsButton() {
   const router = useRouter()
   const [pending, start] = useTransition()
 
   function run() {
     start(async () => {
-      const res = await runExport()
+      const res = await runOutreach()
       if (!res.success) {
         showToast(res.error, { type: "error" })
         return
       }
-      showToast(`Exported ${res.data?.exported ?? 0} of ${res.data?.selected ?? 0} prospects.`, {
+      showToast(`Sent ${res.data?.sent ?? 0} of ${res.data?.selected ?? 0} emails.`, {
         type: "success",
       })
       router.refresh()
@@ -66,7 +66,7 @@ export function ExportProspectsButton() {
   return (
     <Button size="sm" onClick={run} disabled={pending} className="font-semibold">
       <Icon name="send" className="size-4 lg:size-[1.111vw]" />
-      {pending ? "Exporting…" : "Export verified to outreach"}
+      {pending ? "Sending…" : "Send to verified prospects"}
     </Button>
   )
 }

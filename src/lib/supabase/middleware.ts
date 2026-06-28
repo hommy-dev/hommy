@@ -18,6 +18,8 @@ const PUBLIC_PATHS = [
   "/roofers", // SEO contractor profile pages: /roofers/[slug]
   "/review", // tokenized public review submission flow
   "/accept", // tokenized public quote-acceptance flow
+  "/claim", // tokenized recruitment claim links (prospect → signup, no session yet)
+  "/unsubscribe", // tokenized recruitment email unsubscribe (no session)
   "/auth/login",
   "/auth/signup",
   "/auth/callback",
