@@ -9,8 +9,9 @@ import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { getRequiredUser } from '@/lib/auth/session'
 import { getContractorForUser, getMembershipRole } from '@/lib/data/dashboard'
-import { contractorServices, serviceAreas, services } from '@/lib/db/schema'
+import { contractors, contractorServices, serviceAreas, services } from '@/lib/db/schema'
 import { revalidateCityPages } from '@/lib/data/locations'
+import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
 type Result<T = undefined> =
   | { success: true; data?: T }
@@ -147,6 +148,25 @@ export async function addServiceArea(
 
   // New coverage may push a city across the indexability threshold — refresh SEO caches.
   revalidateCityPages()
+
+  // If this (already verified) company just expanded coverage, it may now serve
+  // awaiting-coverage leads — auto-match them. Off the request path; the geom is
+  // trigger-populated after insert so the matching runs async in the Inngest fn.
+  try {
+    const [c] = await db
+      .select({ status: contractors.verificationStatus })
+      .from(contractors)
+      .where(eq(contractors.id, ctx.contractorId))
+      .limit(1)
+    if (c?.status === 'verified') {
+      await inngest.send({
+        name: INNGEST_EVENTS.CONTRACTOR_ELIGIBLE,
+        data: { contractorId: ctx.contractorId },
+      })
+    }
+  } catch (err) {
+    console.error('[addServiceArea] eligible emit failed (non-fatal)', err)
+  }
 
   return {
     success: true,

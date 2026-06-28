@@ -259,6 +259,14 @@ export function GetAQuoteWizard({
       try {
         sessionStorage.removeItem(DRAFT_KEY)
       } catch {}
+      // Honest no-coverage signal: a broadcast that matched zero roofers. The
+      // job is saved and the recruitment engine will work the area; tell them now.
+      if (!target && "matchedCount" in res.data && res.data.matchedCount === 0) {
+        showToast(
+          "Your job is posted. No roofers cover your area yet — we'll email you the moment one's available.",
+          { type: "info", duration: 7000 },
+        )
+      }
       router.push(res.data.redirectTo)
       router.refresh()
     })

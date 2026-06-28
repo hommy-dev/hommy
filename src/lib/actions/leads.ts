@@ -265,6 +265,12 @@ export async function createLead(
             status: 'offered' as const,
           })),
         )
+      } else {
+        // No verified contractor covers this area. Keep the lead open + visible,
+        // but flag it so the homeowner sees an honest "we're finding roofers"
+        // state, the SLA cron won't auto-expire it, and the recruitment engine
+        // can target this area. Cleared the moment a covering pro becomes eligible.
+        await tx.update(leads).set({ awaitingCoverage: true }).where(eq(leads.id, lead.id))
       }
     })
   } catch (err) {
@@ -275,7 +281,12 @@ export async function createLead(
   // Async comms — best-effort. The lead is already posted and visible, so a
   // failure here must never fail the post.
   try {
-    await inngest.send({ name: INNGEST_EVENTS.LEAD_CREATED, data: { leadId } })
+    if (matchedCount === 0) {
+      // No coverage — recruit contractors for this area instead of fanning out.
+      await inngest.send({ name: INNGEST_EVENTS.LEAD_AWAITING_COVERAGE, data: { leadId } })
+    } else {
+      await inngest.send({ name: INNGEST_EVENTS.LEAD_CREATED, data: { leadId } })
+    }
   } catch (err) {
     console.error('[createLead] inngest send failed (non-fatal)', err)
   }

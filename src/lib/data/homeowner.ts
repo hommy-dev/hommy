@@ -59,6 +59,8 @@ export type HomeownerLead = {
   images: string[]
   urgency: (typeof leads.urgency.enumValues)[number]
   status: (typeof leads.status.enumValues)[number]
+  /** No verified contractor covers this area yet — we're recruiting one. */
+  awaitingCoverage: boolean
   city: string | null
   state: string | null
   zipCode: string | null
@@ -91,6 +93,7 @@ export const getHomeownerLeads = cache(async (
       serviceDetails: leads.serviceDetails,
       urgency: leads.urgency,
       status: leads.status,
+      awaitingCoverage: leads.awaitingCoverage,
       city: leads.city,
       state: leads.state,
       zipCode: leads.zipCode,
@@ -172,6 +175,7 @@ export const getHomeownerLeads = cache(async (
     images: leadPhotos(r.serviceDetails),
     urgency: r.urgency,
     status: r.status,
+    awaitingCoverage: r.awaitingCoverage,
     city: r.city,
     state: r.state,
     zipCode: r.zipCode,
@@ -314,6 +318,8 @@ export type HomeownerRequestDetail = {
   subtypes: string[]
   status: LeadStatus
   requestStatus: HomeownerRequestStatus
+  /** No verified contractor covers this area yet — we're recruiting one. */
+  awaitingCoverage: boolean
   urgency: (typeof leads.urgency.enumValues)[number]
   address: string | null
   city: string | null
@@ -356,6 +362,7 @@ export async function getHomeownerRequestDetail(
       serviceDetails: leads.serviceDetails,
       urgency: leads.urgency,
       status: leads.status,
+      awaitingCoverage: leads.awaitingCoverage,
       address: leads.address,
       city: leads.city,
       state: leads.state,
@@ -463,6 +470,7 @@ export async function getHomeownerRequestDetail(
     subtypes: subtypeList(lead.serviceDetails),
     status: lead.status,
     requestStatus: deriveRequestStatus({ status: lead.status, interestedCount, quoteCount, projectCompleted }),
+    awaitingCoverage: lead.awaitingCoverage,
     urgency: lead.urgency,
     address: lead.address,
     city: lead.city,

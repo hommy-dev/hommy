@@ -98,7 +98,15 @@ export const leadSlaCascade = inngest.createFunction(
     const oldOpen = await db
       .select({ id: leads.id })
       .from(leads)
-      .where(and(eq(leads.status, 'open'), lt(leads.createdAt, cutoff)))
+      .where(
+        and(
+          eq(leads.status, 'open'),
+          lt(leads.createdAt, cutoff),
+          // Never auto-expire awaiting-coverage leads — the homeowner is waiting
+          // on supply we're recruiting, not abandoning the post.
+          eq(leads.awaitingCoverage, false),
+        ),
+      )
       .limit(100)
 
     let closed = 0

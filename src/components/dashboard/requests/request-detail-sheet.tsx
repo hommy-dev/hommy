@@ -52,6 +52,8 @@ function whatsNext(d: HomeownerRequestDetail): string {
   const pro = (n: number) => `${n} roofer${n === 1 ? "" : "s"}`;
   switch (d.requestStatus) {
     case "posted":
+      if (d.awaitingCoverage)
+        return "No roofers cover your area yet. Your job is saved and we'll alert you the moment one's available — we're actively inviting roofers near you.";
       if (d.viewedCount > 0)
         return `${pro(d.viewedCount)} viewed your job and are deciding. Expect the first messages soon.`;
       return d.matchedCount > 0

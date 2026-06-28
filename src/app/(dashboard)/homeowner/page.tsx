@@ -25,6 +25,8 @@ function summary(r: HomeownerLead): string {
     return `${r.quoteCount} quote${
       r.quoteCount === 1 ? "" : "s"
     } in. Review and choose.`;
+  if (r.awaitingCoverage)
+    return "No roofers cover your area yet. Your job is saved — we'll alert you the moment one joins.";
   if (r.interestedCount > 0)
     return `${r.interestedCount} roofer${
       r.interestedCount === 1 ? " is" : "s are"
@@ -37,7 +39,7 @@ function summary(r: HomeownerLead): string {
     return `${r.matchedCount} roofer${
       r.matchedCount === 1 ? "" : "s"
     } matched. Waiting for them to respond.`;
-  return "No roofers cover your area yet. We'll alert you the moment one joins.";
+  return "Your job is posted. Roofers are being notified.";
 }
 
 export default function HomeownerJobsPage() {

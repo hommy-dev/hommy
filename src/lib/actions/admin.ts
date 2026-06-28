@@ -14,6 +14,7 @@ import { getAdminContractorDetail, type AdminContractorDetail } from '@/lib/data
 import { revalidateCityPages } from '@/lib/data/locations'
 import { revalidateRoofers } from '@/lib/data/roofers'
 import { REFERRAL_CREDITS, REFERRAL_EXPIRES_MONTHS } from '@/lib/contractor/referral'
+import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 
 type Result = { success: true } | { success: false; error: string }
 
@@ -163,6 +164,16 @@ export async function decideVerification(input: unknown): Promise<Result> {
     }
   } catch (err) {
     console.error('[decideVerification] notify failed', err)
+  }
+
+  // Newly verified → try to auto-match any awaiting-coverage leads this company
+  // now covers (recruitment engine payoff). Best-effort, off the request path.
+  if (decision === 'verified') {
+    try {
+      await inngest.send({ name: INNGEST_EVENTS.CONTRACTOR_ELIGIBLE, data: { contractorId } })
+    } catch (err) {
+      console.error('[decideVerification] eligible emit failed (non-fatal)', err)
+    }
   }
 
   revalidatePath('/admin/verification')
