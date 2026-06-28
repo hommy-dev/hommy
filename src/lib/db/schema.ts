@@ -805,9 +805,9 @@ export const stormEvents = pgTable('storm_events', {
 })
 
 // ============================================================
-// WAITLIST — out-of-area homeowner signups (service-neutral)
-// Captured on /coming-soon when we don't yet serve their region; region/country
-// are stamped from edge geo headers so we know where demand is.
+// WAITLIST — early-access email signups (service-neutral)
+// Captured by the public AnnouncementBar; region/country are stamped from edge
+// geo headers so we know where demand is.
 // ============================================================
 
 export const waitlist = pgTable('waitlist', {

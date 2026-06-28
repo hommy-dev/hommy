@@ -22,7 +22,6 @@ export default function robots(): MetadataRoute.Robots {
           "/homeowner/",
           "/accept/",
           "/review/",
-          "/coming-soon",
         ],
       },
     ],

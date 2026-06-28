@@ -1,24 +1,16 @@
 'use server'
 
-// Out-of-area waitlist. When a homeowner outside our launch states lands on
-// /coming-soon, joinWaitlist records their interest (stamping the region/country
-// we detect from edge geo headers) so we can notify them at launch and see where
-// demand is. continueAsLocal is the safety valve for a mis-geolocated real
-// customer who self-attests they're in an operating state.
+// Pre-launch / early-access waitlist email capture (used by the AnnouncementBar
+// on the public site). Records interest, stamping the region/country we detect
+// from edge geo headers so we can see where demand is.
 // See docs/HOMMY_PLATFORM.md §0 (multi-vertical) and src/lib/config/service-areas.ts.
 
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { cookies, headers } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { db } from '@/lib/db'
 import { services, waitlist } from '@/lib/db/schema'
-import {
-  AREA_BYPASS_COOKIE,
-  AREA_BYPASS_VALUE,
-  GEO_COUNTRY_HEADER,
-  GEO_REGION_HEADER,
-} from '@/lib/config/service-areas'
+import { GEO_COUNTRY_HEADER, GEO_REGION_HEADER } from '@/lib/config/service-areas'
 
 type FieldErrors = Record<string, string>
 type ActionResult<T = void> =
@@ -89,20 +81,4 @@ export async function joinWaitlist(
   }
 
   return { success: true, data: { ok: true } }
-}
-
-/**
- * Safety valve: a visitor who says they're already in an operating state sets a
- * bypass cookie and is sent to the lead form. IP geo is the only gate, so this
- * stops a wrong/VPN IP from permanently locking out a real customer.
- */
-export async function continueAsLocal(): Promise<void> {
-  const store = await cookies()
-  store.set(AREA_BYPASS_COOKIE, AREA_BYPASS_VALUE, {
-    path: '/',
-    maxAge: 60 * 60 * 24, // 1 day
-    sameSite: 'lax',
-  })
-  // redirect() throws internally — keep it outside any try/catch (CODING_GUIDE §7).
-  redirect('/get-a-quote')
 }
