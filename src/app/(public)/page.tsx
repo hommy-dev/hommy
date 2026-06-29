@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Hero } from "@/components/landing-page/hero";
 import { TrustStrip } from "@/components/landing-page/trust-strip";
 import { Statement } from "@/components/landing-page/statement";
-import { HowItWorks } from "@/components/landing-page/how-it-works";
+import { HowItWorksLazy } from "@/components/landing-page/how-it-works-lazy";
 import { Services } from "@/components/landing-page/services";
 import { Faq } from "@/components/landing-page/faq";
 import { FinalCta } from "@/components/landing-page/final-cta";
@@ -51,7 +51,7 @@ export default function HomePage() {
       <Hero />
       <TrustStrip />
       <Statement />
-      <HowItWorks />
+      <HowItWorksLazy />
       <Services />
       {/* <FeatureSection /> */}
       {/* Testimonials go live once we have real reviews to show. */}

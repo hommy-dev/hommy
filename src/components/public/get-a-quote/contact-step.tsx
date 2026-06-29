@@ -98,7 +98,7 @@ export function ContactStep({
           defaultCountry="US"
           placeholder="(214) 555-0100"
         />
-        {phone.trim() ? (
+        {/* {phone.trim() ? (
           <label className="mt-2 lg:mt-[0.556vw] flex cursor-pointer items-start gap-2 lg:gap-[0.556vw] text-left text-[13px] lg:text-[0.85vw] text-muted-foreground">
             <Checkbox
               checked={smsOptIn}
@@ -110,7 +110,7 @@ export function ContactStep({
               message &amp; data rates may apply.
             </span>
           </label>
-        ) : null}
+        ) : null} */}
       </WizardField>
 
       {emailIsHomeowner && (

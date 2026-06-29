@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { User } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { getDashboardPath } from "@/lib/actions/auth";
 import { resetAnalytics } from "@/lib/analytics/client";
 import { MenuToggleIcon } from "@/components/ui/menu-icon";
 import { Icon, type IconName } from "../ui/icon";
@@ -43,9 +44,10 @@ const ROLE_HOMES: Record<string, string> = {
   admin: "/admin",
 };
 
-// Role is stamped into Supabase user_metadata at signup (auth.ts) and by the
-// admin script, so the marketing header can resolve the dashboard link
-// client-side without a DB round-trip.
+// Optimistic dashboard link from user_metadata.role. This is set for
+// email/password signups but NOT for OAuth (Google) — those carry the role only
+// in the DB `users` row. So we use this for an instant link and then confirm/
+// correct it via the getDashboardPath() server action (DB source of truth).
 function getDashboardHref(user: User): string {
   const role = user.user_metadata?.role as string | undefined;
   return (role && ROLE_HOMES[role]) || "/";
@@ -77,6 +79,9 @@ export function SiteHeader() {
   // to show, so the auth slot renders a placeholder rather than flashing the
   // signed-out CTAs and then swapping them.
   const [authResolved, setAuthResolved] = useState(false);
+  // The dashboard link. Optimistic from metadata, then corrected from the DB
+  // role via getDashboardPath() (so OAuth users don't get sent to "/").
+  const [dashboardHref, setDashboardHref] = useState("/");
 
   // Client-side auth state — resolve the user and keep it in sync with sign-in
   // / sign-out happening in other tabs or via the auth flow.
@@ -84,19 +89,29 @@ export function SiteHeader() {
     const supabase = createClient();
     let active = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    const applyUser = (u: User | null) => {
       if (!active) return;
-      setUser(data.user ?? null);
+      setUser(u);
       setAuthResolved(true);
-    });
+      if (!u) {
+        setDashboardHref("/");
+        return;
+      }
+      setDashboardHref(getDashboardHref(u)); // instant (email signups)
+      void getDashboardPath()
+        .then((path) => {
+          if (active && path) setDashboardHref(path); // authoritative (DB role)
+        })
+        .catch(() => {});
+    };
+
+    supabase.auth.getUser().then(({ data }) => applyUser(data.user ?? null));
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!active) return;
-      setUser(session?.user ?? null);
-      setAuthResolved(true);
-    });
+    } = supabase.auth.onAuthStateChange((_event, session) =>
+      applyUser(session?.user ?? null),
+    );
 
     return () => {
       active = false;
@@ -112,13 +127,17 @@ export function SiteHeader() {
     router.refresh();
   };
 
-  const dashboardHref = user ? getDashboardHref(user) : "/";
-
   // Home: transparent header sitting over the dark hero (light text).
   // Other pages: solid canvas header (dark text) so it reads on a light bg.
   const isHome = pathname === "/";
-  const navText = isHome ? "text-background" : "text-foreground";
-  const navTextMuted = isHome ? "text-background/80" : "text-foreground/70";
+  // On the home hero the header floats transparent with light text. But when the
+  // mobile menu is open we switch to the solid treatment so the dropdown panel
+  // (and its links) sit on a real background instead of bleeding through to the
+  // hero. Off-home is always solid. `isOpen` is only ever set on mobile, so this
+  // never affects the desktop nav.
+  const solid = !isHome || isOpen;
+  const navText = solid ? "text-foreground" : "text-background";
+  const navTextMuted = solid ? "text-foreground/70" : "text-background/80";
 
   // Scroll-spy: the active link follows the section currently in view, so the
   // underline moves when you actually arrive at a section — never optimistically
@@ -174,9 +193,11 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "absolute top-0 w-full flex flex-col items-center transition-all duration-300 ease-out",
-        isHome ? "bg-transparent text-background" : "bg-canvas text-foreground",
-        isOpen ? "z-[920]" : "z-50"
+        "top-0 w-full flex flex-col items-center transition-all duration-300 ease-out",
+        solid ? "bg-canvas text-foreground" : "bg-transparent text-background",
+        // Open on mobile → a full-screen overlay (fixed + full viewport height)
+        // so the menu sits on a full background. Otherwise it floats over the hero.
+        isOpen ? "fixed h-svh z-[920]" : "absolute z-50"
       )}
     >
       {/* Main Header Row */}
@@ -272,29 +293,31 @@ export function SiteHeader() {
             )}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-1 lg:p-[0.278vw] z-50 text-background"
+              className={cn(
+                "p-1 lg:p-[0.278vw] z-50",
+                solid ? "text-foreground" : "text-background"
+              )}
               aria-label="Toggle Menu"
               aria-expanded={isOpen}
             >
               <MenuToggleIcon
                 open={isOpen}
                 className="size-8 lg:size-[2.222vw]"
-                stroke="#000"
+                stroke="currentColor"
               />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile expanding menu */}
+      {/* Mobile expanding menu — fills the rest of the viewport when open */}
       <div
         className={cn(
-          "w-full overflow-hidden border-t border-foreground/5 md:hidden",
-          isOpen ? "max-h-96 lg:max-h-[26.667vw]" : "max-h-0",
-          "transition-[max-height] duration-300 ease-out"
+          "w-full border-t border-foreground/5 md:hidden",
+          isOpen ? "flex-1 overflow-y-auto" : "max-h-0 overflow-hidden"
         )}
       >
-        <nav className="mx-auto flex flex-col gap-1 lg:gap-[0.278vw] px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
+        <nav className="mx-auto flex flex-col gap-1 lg:gap-[0.278vw] px-4 lg:px-[1.111vw] py-8 lg:py-[0.833vw]">
           <p
             className={cn(
               "px-2 lg:px-[0.556vw] pt-1 pb-0.5 text-[11px] lg:text-[0.764vw] font-semibold uppercase tracking-wide",

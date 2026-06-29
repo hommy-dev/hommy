@@ -102,10 +102,10 @@ export function WhatStep({
           description="JPG, PNG or WebP."
         />
         {photos.length === 0 && (
-          <p className="mt-2 lg:mt-[0.556vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-[11px] lg:text-[0.764vw] text-primary">
+          <div className="mt-2 lg:mt-[0.556vw] flex items-center gap-1.5 lg:gap-[0.417vw] text-[11px] lg:text-[0.764vw] text-primary">
             <Icon name="image" className="size-3.5 lg:size-[0.95vw] shrink-0" />
             Even one photo helps roofers give you a faster, more accurate quote.
-          </p>
+          </div>
         )}
       </WizardField>
     </WizardStep>

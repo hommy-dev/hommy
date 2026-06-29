@@ -7,6 +7,7 @@ import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { provisionContractor, provisionHomeowner, requestContractorWelcome } from '@/lib/auth/provisioning'
+import { getOptionalUser } from '@/lib/auth/session'
 
 // ============================================================
 // SCHEMAS
@@ -33,6 +34,18 @@ const ROLE_DEFAULT_PATH: Record<'contractor' | 'homeowner' | 'admin', string> = 
   contractor: '/contractor',
   homeowner: '/homeowner',
   admin: '/admin',
+}
+
+/**
+ * The signed-in user's dashboard home, resolved from the DB `users.role` (the
+ * source of truth). The marketing header uses this because `user_metadata.role`
+ * is only set for email/password signups, NOT OAuth — so relying on metadata sent
+ * Google-signup contractors to `/`. Returns null when signed out / role unknown.
+ */
+export async function getDashboardPath(): Promise<string | null> {
+  const user = await getOptionalUser()
+  if (!user) return null
+  return ROLE_DEFAULT_PATH[user.role as keyof typeof ROLE_DEFAULT_PATH] ?? null
 }
 
 function getAppOrigin(): string {

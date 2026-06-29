@@ -26,7 +26,7 @@ function summary(r: HomeownerLead): string {
       r.quoteCount === 1 ? "" : "s"
     } in. Review and choose.`;
   if (r.awaitingCoverage)
-    return "No roofers cover your area yet. Your job is saved — we'll alert you the moment one joins.";
+    return "Your job is saved. We'll alert you ASAP.";
   if (r.interestedCount > 0)
     return `${r.interestedCount} roofer${
       r.interestedCount === 1 ? " is" : "s are"
