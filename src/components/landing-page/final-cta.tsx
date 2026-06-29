@@ -19,23 +19,25 @@ export function FinalCta({
 }) {
   return (
     <section className="px-4 lg:px-[1.111vw] pt-24 lg:pt-[8.889vw] pb-4 lg:pb-[6vw] sm:px-5 bg-background">
-      <div className="bg-[url('/bg/cta.webp')] bg-cover relative lg:max-w-[80vw] mx-auto overflow-hidden rounded-md lg:rounded-[0.8vw] px-6 lg:px-[1.667vw] py-20 text-center text-foreground lg:py-[7vw]">
-        <h2 className="mx-auto max-w-2xl lg:max-w-[50vw] text-balance font-sebenta text-4xl font-bold leading-[1.05] tracking-tight sm:text-2xl lg:text-[3vw]">
+      <div className="bg-[url('/bg/gradient-0.webp')] bg-cover bg-center relative lg:max-w-[70vw] mx-auto overflow-hidden rounded-md lg:rounded-[0.8vw] px-6 lg:px-[1.667vw] py-20 text-center text-foreground lg:py-[7vw]">
+        <h2 className="mx-auto max-w-2xl lg:max-w-[50vw] text-balance font-sebenta text-4xl font-bold leading-[1.05] tracking-tight sm:text-2xl lg:text-[3vw] text-white">
           {title}
         </h2>
-        <p className="mx-auto mt-5 lg:mt-[1.389vw] max-w-md lg:max-w-[31.108vw] text-[17px] lg:text-[1.3vw] font-semibold leading-relaxed text-foreground">
+        <p className="mx-auto mt-5 lg:mt-[1.389vw] max-w-md lg:max-w-[31.108vw] text-[17px] lg:text-[1.3vw] font-semibold leading-relaxed text-white">
           {body}
         </p>
-        <Link
-          href={href}
-          className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-foreground px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
-        >
-          {label}
-          <Icon
-            name="arrow-right"
-            className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
-          />
-        </Link>
+        <div className="flex items-center justify-center gap-2 lg:gap-[0.556vw]">
+          <Link
+            href={href}
+            className="group mt-8 lg:mt-[3vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
+          >
+            {label}
+            <Icon
+              name="arrow-right"
+              className="size-6 lg:size-[1.5vw] text-background transition-transform group-hover:translate-x-0.5"
+            />
+          </Link>
+        </div>
 
         {/* Oversized wordmark anchored to the bottom edge */}
         {/* <p

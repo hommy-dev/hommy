@@ -8,6 +8,7 @@ import { Faq } from "@/components/landing-page/faq";
 import { FinalCta } from "@/components/landing-page/final-cta";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/structured-data";
 import { ogImageUrl } from "@/lib/og";
+import { Testimonials } from "@/components/landing-page/testimonials";
 
 const TITLE = "Hommy | Find a roofer you can actually trust";
 const DESCRIPTION =
@@ -53,11 +54,8 @@ export default function HomePage() {
       <Statement />
       <HowItWorksLazy />
       <Services />
-      {/* <FeatureSection /> */}
-      {/* Testimonials go live once we have real reviews to show. */}
-      {/* <Testimonials /> */}
+      <Testimonials />
       <Faq />
-      {/* <ProCta /> */}
       <FinalCta />
     </>
   );

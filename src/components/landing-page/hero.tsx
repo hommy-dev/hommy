@@ -33,12 +33,12 @@ export function Hero() {
 
         <Link
           href="/get-a-quote"
-          className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border-2 bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw]  text-background transition-colors"
+          className="group mt-12 lg:mt-[3.333vw] inline-flex items-center gap-2 lg:gap-[0.556vw] rounded-lg lg:rounded-[0.694vw] border bg-primary px-7 lg:px-[1.944vw] py-2.5 lg:py-[0.694vw] text-base lg:text-[1.111vw] font-medium text-background transition-colors"
         >
           Post a job
           <Icon
             name="arrow-right"
-            className="size-6 lg:size-[1.667vw] text-background transition-transform group-hover:translate-x-0.5"
+            className="size-6 lg:size-[1.5vw] text-background transition-transform group-hover:translate-x-0.5"
           />
         </Link>
       </div>

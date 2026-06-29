@@ -17,10 +17,30 @@ import { Icon, type IconName } from "../ui/icon";
 // wizard preselects it; encodeURIComponent handles the space in "Storm Damage".
 type Service = { name: string; subtype: string; icon: IconName; desc: string };
 const SERVICES: Service[] = [
-  { name: "Roof repair", subtype: "Repair", icon: "wrench", desc: "Leaks, missing shingles, quick fixes" },
-  { name: "Roof replacement", subtype: "Replacement", icon: "swap", desc: "Full tear-off and re-roof" },
-  { name: "Storm damage", subtype: "Storm Damage", icon: "storm", desc: "Hail & wind, plus insurance help" },
-  { name: "Roof inspection", subtype: "Inspection", icon: "search", desc: "Know your roof's real condition" },
+  {
+    name: "Roof repair",
+    subtype: "Repair",
+    icon: "wrench",
+    desc: "Leaks, missing shingles, quick fixes",
+  },
+  {
+    name: "Roof replacement",
+    subtype: "Replacement",
+    icon: "swap",
+    desc: "Full tear-off and re-roof",
+  },
+  {
+    name: "Storm damage",
+    subtype: "Storm Damage",
+    icon: "storm",
+    desc: "Hail & wind, plus insurance help",
+  },
+  {
+    name: "Roof inspection",
+    subtype: "Inspection",
+    icon: "search",
+    desc: "Know your roof's real condition",
+  },
 ];
 const serviceHref = (s: Service) =>
   `/get-a-quote?subtype=${encodeURIComponent(s.subtype)}`;
@@ -33,7 +53,7 @@ type NavItem =
 const NAV: NavItem[] = [
   { kind: "menu", name: "Services" },
   { kind: "link", name: "Blog", href: "/blog" },
-  { kind: "link", name: "For roofers", href: "/contractors" },
+  { kind: "link", name: "For roofers", href: "/contractor" },
 ];
 
 // Role → dashboard home. Mirrors ROLE_DEFAULT_PATH in src/lib/actions/auth.ts
@@ -110,7 +130,7 @@ export function SiteHeader() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) =>
-      applyUser(session?.user ?? null),
+      applyUser(session?.user ?? null)
     );
 
     return () => {
@@ -261,12 +281,13 @@ export function SiteHeader() {
                     Sign in
                   </span>
                 </Link>
+                {/* Primary roofer entry point — on-brand gradient border. */}
                 <Link
-                  href={isHome ? "#quote" : "/get-a-quote"}
-                  className="relative flex items-center gap-1.5 lg:gap-[0.417vw] h-full cursor-pointer transition-all duration-300 group bg-foreground hover:bg-foreground/80 text-background rounded-md lg:rounded-[0.556vw] px-5 lg:px-[1.389vw] py-2.5 lg:py-[0.694vw]"
+                  href="/auth/signup/contractor"
+                  className="relative flex items-center gap-1.5 lg:gap-[0.417vw] h-full cursor-pointer transition-all duration-300 group bg-primary hover:bg-primary/80 text-background rounded-md lg:rounded-[0.556vw] px-5 lg:px-[1.389vw] py-2.5 lg:py-[0.694vw]"
                 >
                   <span className="text-[15px] lg:text-[1.042vw]">
-                    Get my quotes
+                    Join as a roofer
                   </span>
                 </Link>
               </>
@@ -282,12 +303,12 @@ export function SiteHeader() {
               />
             ) : (
               <Link
-                href={user ? dashboardHref : isHome ? "#quote" : "/get-a-quote"}
+                href={user ? dashboardHref : isHome ? "/auth/signup/contractor" : "/get-a-quote"}
                 onClick={() => setIsOpen(false)}
                 className="flex items-center justify-center text-center cursor-pointer transition-all duration-300 group bg-foreground hover:bg-foreground/80 text-background rounded-md lg:rounded-[0.556vw] px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw]"
               >
                 <span className="text-[12px] lg:text-[0.833vw] text-nowrap">
-                  {user ? "Dashboard" : "Get my quotes"}
+                  {user ? "Dashboard" : "Join as a roofer"}
                 </span>
               </Link>
             )}
@@ -336,7 +357,10 @@ export function SiteHeader() {
                 navText
               )}
             >
-              <Icon name={s.icon} className="size-4 lg:size-[1.25vw] shrink-0 opacity-70" />
+              <Icon
+                name={s.icon}
+                className="size-4 lg:size-[1.25vw] shrink-0 opacity-70"
+              />
               {s.name}
             </Link>
           ))}
@@ -378,16 +402,30 @@ export function SiteHeader() {
               Sign out
             </button>
           ) : (
-            <Link
-              href="/auth/login"
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
-                navTextMuted
-              )}
-            >
-              Sign in
-            </Link>
+            <>
+              {/* Prominent roofer entry point in the full-screen menu. */}
+              <Link
+                href="/auth/signup/contractor"
+                onClick={() => setIsOpen(false)}
+                className="flex w-full items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] bg-primary px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] font-semibold text-background transition-colors hover:bg-primary/90"
+              >
+                <Icon
+                  name="work"
+                  className="size-4 lg:size-[1.25vw] shrink-0 opacity-70"
+                />
+                Join as a roofer
+              </Link>
+              <Link
+                href="/auth/login"
+                onClick={() => setIsOpen(false)}
+                className={cn(
+                  "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
+                  navTextMuted
+                )}
+              >
+                Sign in
+              </Link>
+            </>
           )}
         </nav>
       </div>
@@ -456,9 +494,12 @@ function ServicesMenu({ name, pathname }: { name: string; pathname: string }) {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setOpen(false), 120);
   };
-  useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    []
+  );
 
   return (
     <div
@@ -507,7 +548,10 @@ function ServicesMenu({ name, pathname }: { name: string; pathname: string }) {
                   className="flex items-start gap-3 lg:gap-[0.833vw] rounded-sm lg:rounded-[0.347vw] px-2.5 lg:px-[0.694vw] py-2.5 lg:py-[0.694vw] transition-colors hover:bg-foreground/[0.05]"
                 >
                   <span className="grid size-9 lg:size-[2.6vw] shrink-0 place-items-center rounded-md lg:rounded-[0.417vw] bg-primary/10 text-primary ring-1 ring-primary/15">
-                    <Icon name={s.icon} className="size-[18px] lg:size-[1.25vw]" />
+                    <Icon
+                      name={s.icon}
+                      className="size-[18px] lg:size-[1.25vw]"
+                    />
                   </span>
                   <span className="flex min-w-0 flex-col">
                     <span className="text-[14px] lg:text-[0.972vw] font-semibold leading-tight text-foreground">

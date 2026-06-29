@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { StepsSection } from "../ui/steps-section";
+import { Icon } from "../ui/icon";
 import { MatchProsScene } from "./scenes/match-pros-scene";
 import { RoofIntakeScene } from "./scenes/roof-intake-scene";
 import { CompareQuotesScene } from "./scenes/compare-quotes-scene";
@@ -96,6 +98,26 @@ export function HowItWorks() {
         autoPlayInterval={6000}
         className="lg:max-w-[95vw] mx-auto"
       />
+
+      {/* Dual CTA — one for each side of the marketplace. */}
+      <div className="mt-10 lg:mt-[2.778vw] flex items-center justify-center gap-3 sm:flex-row lg:gap-[0.833vw]">
+        <Link
+          href="/get-a-quote"
+          className="group inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] border-2 border-transparent bg-primary px-6 lg:px-[1.5vw] py-2 lg:py-[0.556vw] text-[15px] lg:text-[1.042vw] text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Post a job
+          <Icon
+            name="arrow-right"
+            className="size-4 lg:size-[1.25vw] transition-transform group-hover:translate-x-0.5"
+          />
+        </Link>
+        <Link
+          href="/contractors"
+          className="inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] border-2 border-foreground/30 px-6 lg:px-[1.5vw] py-2 lg:py-[0.556vw] text-[15px] lg:text-[1.042vw] font-medium text-foreground transition-colors hover:border-foreground/60"
+        >
+          Join as a roofer
+        </Link>
+      </div>
     </section>
   );
 }

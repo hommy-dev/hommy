@@ -64,22 +64,22 @@ export function Testimonials() {
                   onClick={() => go(-1)}
                   aria-label="Previous review"
                   variant="ghost"
-                  className="border border-foreground/30 rounded-full size-6 lg:size-[2.5vw] "
+                  className="border border-primary/50 hover:border-primary rounded-full lg:rounded-full size-6 lg:size-[2.5vw] "
                 >
                   <Icon
                     name="arrow-left"
-                    className="size-4 lg:size-[1.5vw] text-muted-foreground"
+                    className="size-3 lg:size-[1vw] text-primary"
                   />
                 </Button>
                 <Button
                   onClick={() => go(1)}
                   aria-label="Next review"
                   variant="ghost"
-                  className="border border-foreground/30 rounded-full size-6 lg:size-[2.5vw] "
+                  className="border border-primary/50 hover:border-primary rounded-full lg:rounded-full size-6 lg:size-[2.5vw] "
                 >
                   <Icon
                     name="arrow-right"
-                    className="size-4 lg:size-[1.5vw] text-muted-foreground"
+                    className="size-3 lg:size-[1vw] text-primary"
                   />
                 </Button>
               </div>

@@ -4,7 +4,6 @@ import { ContractorValueStrip } from "@/components/landing-page/contractors/valu
 import { ContractorStatement } from "@/components/landing-page/contractors/statement";
 import { ContractorHowItWorks } from "@/components/landing-page/contractors/how-it-works";
 import { ContractorDifference } from "@/components/landing-page/contractors/the-difference";
-import { FeatureSection } from "@/components/landing-page/feature-section";
 import { Faq, type FaqItem } from "@/components/landing-page/faq";
 import { FinalCta } from "@/components/landing-page/final-cta";
 import { ogImageUrl } from "@/lib/og";
@@ -77,7 +76,6 @@ export default function ContractorsLandingPage() {
       <ContractorStatement />
       <ContractorHowItWorks />
       <ContractorDifference />
-      <FeatureSection />
       <Faq faqs={ROOFER_FAQS} title="Roofer questions, answered" />
       <FinalCta
         title="Ready to win more roofing jobs?"

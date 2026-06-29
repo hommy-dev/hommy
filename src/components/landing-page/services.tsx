@@ -121,17 +121,6 @@ export function Services() {
           ))}
         </div>
 
-        {/* CTA for mobile, where the header button is hidden */}
-        <Link
-          href="/get-a-quote"
-          className="group mt-10 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3 text-base font-semibold text-background sm:w-auto lg:hidden"
-        >
-          Post a job
-          <Icon
-            name="arrow-right"
-            className="size-6 text-background transition-transform group-hover:translate-x-0.5"
-          />
-        </Link>
       </div>
     </section>
   );

@@ -84,7 +84,7 @@ export function StepsSection({
         style={{ filter: "blur(320px)" }}
       />
       <div className="max-w-7xl lg:max-w-[88.88vw] mx-auto w-full">
-        <div className="mb-16 lg:mb-[4.444vw] text-center">
+        <div className="mb-12 lg:mb-[4.444vw] text-center">
           <h2 className="font-sebenta text-3xl md:text-4xl lg:text-[3.333vw] font-semibold  tracking-tight">
             {title}
           </h2>
@@ -118,7 +118,7 @@ export function StepsSection({
           ) : null}
         </div>
 
-        <div className="flex flex-col md:grid md:grid-cols-2 items-center gap-6 md:gap-10 lg:gap-[2.778vw]">
+        <div className="flex flex-col md:grid md:grid-cols-2 items-center gap-12 lg:gap-[2.778vw]">
           <div className="order-2 md:order-1 space-y-8 lg:space-y-[2.222vw]">
             {features.map((feature, index) => (
               <div
@@ -154,7 +154,7 @@ export function StepsSection({
             ))}
           </div>
 
-          <div className="order-1 md:order-2 relative h-[200px] md:h-[300px] lg:h-[27.778vw] w-full overflow-hidden rounded-lg lg:rounded-[0.556vw] bg-muted">
+          <div className="order-1 md:order-2 relative h-[400px] lg:h-[27.778vw] w-full overflow-hidden rounded-lg lg:rounded-[0.556vw] bg-muted">
             {layers.map((layer, i) => {
               const feature = features[layer.index]
               return (
