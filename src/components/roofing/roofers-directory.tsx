@@ -215,7 +215,6 @@ export function RoofersDirectory({
       ) : (
         <GooglePlacesInput
           mode="cities"
-          countries={["us"]}
           onPlaceSelect={onPlace}
           placeholder="Search a city or area"
           className="h-11 rounded-md bg-card"

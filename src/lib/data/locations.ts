@@ -27,7 +27,7 @@ import {
 } from '@/lib/db/schema'
 import { findEligibleContractors } from '@/lib/leads/matching'
 import { INDEX_MIN_PROS, CITY_PRO_LIMIT, STATE_HUB_CITY_LIMIT, DEMAND_WINDOW_DAYS } from '@/lib/config/seo'
-import { OPERATING_STATE_NAMES, type OperatingState } from '@/lib/config/service-areas'
+import { US_STATES } from '@/lib/config/service-areas'
 
 /**
  * Invalidate all cached location/SEO data so city pages + the sitemap
@@ -289,7 +289,7 @@ export async function getCityDemand(stateCode: string, cityName: string): Promis
   'use cache'
   cacheLife('standard')
   cacheTag('cities')
-  const stateName = OPERATING_STATE_NAMES[stateCode as OperatingState] ?? stateCode
+  const stateName = US_STATES[stateCode] ?? stateCode
   const [row] = await db
     .select({ count: sql<number>`count(*)::int` })
     .from(leads)
@@ -312,7 +312,7 @@ export async function getCityStormHistory(
   'use cache'
   cacheLife('standard')
   cacheTag('cities')
-  const stateName = OPERATING_STATE_NAMES[stateCode as OperatingState] ?? stateCode
+  const stateName = US_STATES[stateCode] ?? stateCode
   return db
     .selectDistinct({
       eventType: stormEvents.eventType,
