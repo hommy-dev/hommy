@@ -24,6 +24,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { GoogleBusinessPicker } from "./google-business-picker";
 import { fetchPlaceContent } from "@/lib/integrations/google-places-client";
 import {
@@ -186,7 +196,7 @@ export function IntegrationsGrid({
             <DialogTitle>Google</DialogTitle>
             <DialogDescription>
               Search your business and pick it to import up to 5 recent reviews and your photos.
-              Add as many locations as you like.
+              You can connect one Google listing at a time.
             </DialogDescription>
           </DialogHeader>
 
@@ -229,8 +239,13 @@ function GoogleManage({ dataPromise }: { dataPromise: Promise<IntegrationsData> 
   const router = useRouter();
   const [connecting, setConnecting] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // The listing pending disconnect — drives a styled confirm dialog (no native confirm()).
+  const [confirmTarget, setConfirmTarget] = useState<IntegrationConnectionRow | null>(null);
 
   const googleConnections = connections.filter((c) => c.provider === GOOGLE_PLACES_PROVIDER);
+  // Only ONE Google listing may be connected at a time. To switch, the existing
+  // one must be removed first — so the picker hides once a listing is connected.
+  const atLimit = googleConnections.length >= 1;
 
   async function handleConnect(sel: GooglePlaceSelection) {
     setConnecting(true);
@@ -278,31 +293,38 @@ function GoogleManage({ dataPromise }: { dataPromise: Promise<IntegrationsData> 
     }
   }
 
-  async function handleDisconnect(conn: IntegrationConnectionRow) {
-    const ok = window.confirm(
-      `Disconnect ${conn.label ?? "this listing"}? Its imported reviews and photos will be removed from your profile.`,
-    );
-    if (!ok) return;
+  async function confirmDisconnect() {
+    const conn = confirmTarget;
+    if (!conn) return;
     setBusyId(conn.id);
     const res = await disconnectGooglePlace(conn.id);
     if (!res.success) {
       showToast(res.error, { type: "error" });
       setBusyId(null);
+      setConfirmTarget(null);
       return;
     }
     showToast("Disconnected.", { type: "success" });
+    setConfirmTarget(null);
     router.refresh();
   }
 
   return (
     <div className="space-y-4 lg:space-y-[1.111vw]">
       {canManage ? (
-        <div className="space-y-1.5 lg:space-y-[0.417vw]">
-          <GoogleBusinessPicker onSelect={handleConnect} disabled={connecting} />
-          {connecting ? (
-            <p className="text-xs lg:text-[0.764vw] text-muted-foreground">Connecting your listing…</p>
-          ) : null}
-        </div>
+        atLimit ? (
+          <p className="text-sm lg:text-[0.903vw] text-muted-foreground">
+            You can connect one Google listing at a time. Remove the current one below to connect a
+            different business.
+          </p>
+        ) : (
+          <div className="space-y-1.5 lg:space-y-[0.417vw]">
+            <GoogleBusinessPicker onSelect={handleConnect} disabled={connecting} />
+            {connecting ? (
+              <p className="text-xs lg:text-[0.764vw] text-muted-foreground">Connecting your listing…</p>
+            ) : null}
+          </div>
+        )
       ) : (
         <p className="text-sm lg:text-[0.903vw] text-muted-foreground">
           Only owners and admins can connect accounts.
@@ -342,7 +364,7 @@ function GoogleManage({ dataPromise }: { dataPromise: Promise<IntegrationsData> 
                       <Icon name="swap" className="size-4 lg:size-[1.111vw]" />
                       {rowBusy ? "Working…" : "Refresh"}
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => handleDisconnect(conn)} disabled={rowBusy || connecting}>
+                    <Button size="sm" variant="ghost" onClick={() => setConfirmTarget(conn)} disabled={rowBusy || connecting}>
                       Disconnect
                     </Button>
                   </div>
@@ -359,6 +381,36 @@ function GoogleManage({ dataPromise }: { dataPromise: Promise<IntegrationsData> 
           description="Connect your Google business to show your reviews and work photos on your Hommy profile."
         />
       ) : null}
+
+      <AlertDialog
+        open={confirmTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && busyId === null) setConfirmTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect {confirmTarget?.label ?? "this listing"}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Its imported reviews and photos will be removed from your profile. You can reconnect a
+              Google listing anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busyId !== null}>Keep it</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={busyId !== null}
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmDisconnect();
+              }}
+            >
+              {busyId !== null ? "Disconnecting…" : "Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -106,7 +106,7 @@ export function emailShell(args: {
   const { preheader, heading, bodyHtml } = args
   const year = new Date().getFullYear()
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+  return `<!DOCTYPE html><html style="color-scheme:light dark;"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="color-scheme" content="light dark"/><meta name="supported-color-schemes" content="light dark"/></head>
   <body style="margin:0;padding:0;background:${C.page};">
     ${preheaderBlock(preheader)}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:${C.page};">

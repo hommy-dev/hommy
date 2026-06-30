@@ -131,7 +131,7 @@ function buildCopy(v: RecruitmentEmailVars): Copy {
     SIGNER_IS_BRAND
       ? `I run Hommy — we connect homeowners with local roofers.`
       : `I'm ${SIGNER}, I run Hommy (we connect homeowners with local roofers).`,
-    `A homeowner in ${where} just posted a roofing job and we don't have anyone covering that area yet, so it's sitting unclaimed.`,
+    `A homeowner in ${where} just posted a roofing job, and we don't have enough roofers covering that area yet — so there's work waiting for you.`,
     ...(ratingLine ? [ratingLine] : []),
     `No subscription, nothing to pay to be listed. You'd only pay a small fee if a homeowner accepts your quote. New accounts start with some credit too, so the first few jobs will cost you nothing.`,
     `If you want a look, here's the job: ${v.claimUrl}`,
@@ -157,8 +157,13 @@ function renderHtml(v: RecruitmentEmailVars, c: Copy): string {
       return `<p style="margin:0 0 12px">${escapeHtml(l)}</p>`
     })
     .join('')
-  return `<!doctype html><html><body>
-  <div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.5;color:#222">
+  return `<!doctype html><html lang="en" style="color-scheme:light dark;"><head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="supported-color-schemes" content="light dark"/>
+  </head><body style="margin:0;background:#ffffff">
+  <div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;background:#ffffff">
     <p style="margin:0 0 12px">${escapeHtml(c.greeting)}</p>
     ${body}
     <p style="margin:16px 0 0">${SIGNER_IS_BRAND ? 'Hommy' : `${escapeHtml(SIGNER)}<br/>Hommy`}</p>
