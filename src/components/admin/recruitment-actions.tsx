@@ -37,7 +37,7 @@ export function FindRoofersButton({
   }
 
   return (
-    <Button size="sm" variant="surface" onClick={run} disabled={disabled}>
+    <Button  variant="surface" onClick={run} disabled={disabled}>
       <Icon name="search" className="size-4 lg:size-[1.111vw]" />
       {pending ? "Starting…" : "Find roofers"}
     </Button>
@@ -64,7 +64,7 @@ export function ExportProspectsButton() {
   }
 
   return (
-    <Button size="sm" onClick={run} disabled={pending} className="font-semibold">
+    <Button  onClick={run} disabled={pending} className="font-semibold">
       <Icon name="send" className="size-4 lg:size-[1.111vw]" />
       {pending ? "Sending…" : "Send to verified prospects"}
     </Button>

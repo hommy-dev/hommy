@@ -143,15 +143,15 @@ export function ProspectDetailDialog({
         detail ? (
           <div className="flex flex-wrap items-center justify-end gap-2 lg:gap-[0.556vw]">
             {detail.email ? (
-              <Button size="sm" variant="outline" onClick={copyEmail} disabled={acting}>
+              <Button  variant="outline" onClick={copyEmail} disabled={acting}>
                 Copy email
               </Button>
             ) : null}
-            <Button size="sm" variant="surface" onClick={requeue} disabled={acting || jobBusy}>
+            <Button  variant="surface" onClick={requeue} disabled={acting || jobBusy}>
               {jobBusy ? "Enriching…" : "Re-run enrichment"}
             </Button>
             {canSuppress ? (
-              <Button size="sm" variant="destructive" onClick={suppress} disabled={acting}>
+              <Button  variant="destructive" onClick={suppress} disabled={acting}>
                 Suppress
               </Button>
             ) : null}

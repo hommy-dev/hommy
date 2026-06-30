@@ -114,10 +114,10 @@ function IntentRow({ intent }: { intent: PurchaseIntentRow }) {
       <td className="px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw] text-right whitespace-nowrap">
         {intent.status === "requested" ? (
           <div className="inline-flex items-center gap-2 lg:gap-[0.556vw]">
-            <Button size="sm" variant="outline" onClick={decline} disabled={pending}>
+            <Button  variant="outline" onClick={decline} disabled={pending}>
               Decline
             </Button>
-            <Button size="sm" onClick={grant} disabled={pending}>
+            <Button  onClick={grant} disabled={pending}>
               {pending ? "Granting…" : `Grant ${intent.credits}`}
             </Button>
           </div>

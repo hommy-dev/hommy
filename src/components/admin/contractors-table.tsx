@@ -189,10 +189,10 @@ function ContractorDetailDialog({
               <Pill {...VERIF_STYLE[detail.verificationStatus]} />
               {detail.verificationStatus === "pending" ? (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => verify("rejected")} disabled={acting}>
+                  <Button  variant="outline" onClick={() => verify("rejected")} disabled={acting}>
                     Reject
                   </Button>
-                  <Button size="sm" onClick={() => verify("verified")} disabled={acting}>
+                  <Button  onClick={() => verify("verified")} disabled={acting}>
                     Verify
                   </Button>
                 </>

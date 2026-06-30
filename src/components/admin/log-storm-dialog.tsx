@@ -21,7 +21,7 @@ export function LogStormButton() {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)} className="font-semibold">
+      <Button  onClick={() => setOpen(true)} className="font-semibold">
         <Icon name="storm" className="size-4 lg:size-[1.111vw]" />
         Log a storm
       </Button>
@@ -98,16 +98,16 @@ function LogStormDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
       footer={
         created ? (
           <div className="flex justify-end">
-            <Button size="sm" onClick={() => onOpenChange(false)}>
+            <Button  onClick={() => onOpenChange(false)}>
               Done
             </Button>
           </div>
         ) : (
           <div className="flex items-center justify-end gap-2 lg:gap-[0.556vw]">
-            <Button size="sm" variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
+            <Button  variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
               Cancel
             </Button>
-            <Button size="sm" onClick={submit} disabled={pending || !place} className="font-semibold">
+            <Button  onClick={submit} disabled={pending || !place} className="font-semibold">
               {pending ? "Logging…" : "Log storm & find roofers"}
             </Button>
           </div>
@@ -125,7 +125,7 @@ function LogStormDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
             <code className="min-w-0 flex-1 truncate rounded-md lg:rounded-[0.417vw] border border-border bg-muted/40 px-3 lg:px-[0.833vw] py-2 lg:py-[0.556vw] text-xs lg:text-[0.833vw]">
               {shareUrl}
             </code>
-            <Button size="sm" variant="surface" onClick={copyShare}>
+            <Button  variant="surface" onClick={copyShare}>
               Copy
             </Button>
           </div>
