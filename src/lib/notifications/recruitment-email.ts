@@ -31,11 +31,10 @@ const SIGNER = process.env.RECRUITMENT_SIGNER_NAME || FROM_NAME
 // Hommy" and avoid the awkward "I'm Hommy, I run Hommy" intro.
 const SIGNER_IS_BRAND = SIGNER.trim().toLowerCase() === FROM_NAME.trim().toLowerCase()
 
-// Claim links in cold emails must point at the PUBLIC site, never localhost —
-// a localhost link looks broken and hurts deliverability. RECRUITMENT_APP_URL
-// overrides NEXT_PUBLIC_SITE_URL so links stay correct even when discovery runs
+// Claim links in cold emails must point at the PUBLIC site, never localhost
+// NEXT_PUBLIC_SITE_URL so links stay correct even when discovery runs
 // from a local script.
-const APP_URL = process.env.RECRUITMENT_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || ''
+const APP_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.hommy.online'
 
 // SAFETY VALVE for end-to-end testing. When set, EVERY recruitment email is
 // redirected to this address instead of the real prospect, and the intended

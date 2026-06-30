@@ -112,7 +112,7 @@ export function Td({ children, className }: { children: React.ReactNode; classNa
 
 export function Pill({ label, cls }: { label: string; cls: string }) {
   return (
-    <span className={cn("inline-flex rounded-full px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium", cls)}>
+    <span className={cn("inline-flex rounded-full text-nowrap px-2.5 lg:px-[0.694vw] py-0.5 lg:py-[0.139vw] text-xs lg:text-[0.833vw] font-medium", cls)}>
       {label}
     </span>
   );
