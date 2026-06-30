@@ -24,7 +24,7 @@ import { apolloConfigured, findEmailViaApollo } from '@/lib/integrations/apollo-
 const CRAWL_PATHS = ['', '/contact', '/contact-us', '/about'] as const
 const FETCH_TIMEOUT_MS = 8000
 const MX_TIMEOUT_MS = 3000
-const USER_AGENT = 'HommyRecruitmentBot/1.0 (+https://hommy.online)'
+const USER_AGENT = 'HommyRecruitmentBot/1.0 (+https://www.hommy.online)'
 
 // Confidence assigned to an email found on the company's OWN website that passed
 // the free checks: high trust, but NOT externally deliverability-verified. Sits

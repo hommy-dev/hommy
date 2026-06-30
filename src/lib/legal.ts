@@ -15,7 +15,7 @@ export const LEGAL = {
   /** TODO: replace with the registered legal entity name once incorporated. */
   entity: 'Hommy',
   site: 'hommy.online',
-  url: 'https://hommy.online',
+  url: 'https://www.hommy.online',
   supportEmail: 'support@hommy.online',
   privacyEmail: 'privacy@hommy.online',
   legalEmail: 'legal@hommy.online',

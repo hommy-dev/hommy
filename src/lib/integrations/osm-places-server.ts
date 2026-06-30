@@ -16,7 +16,7 @@ const OVERPASS_ENDPOINT =
   process.env.OVERPASS_ENDPOINT ?? 'https://overpass-api.de/api/interpreter'
 
 // Polite identifying UA — public Overpass instances rate-limit anonymous traffic.
-const USER_AGENT = 'hommy-recruitment/1.0 (+https://hommy.online)'
+const USER_AGENT = 'hommy-recruitment/1.0 (+https://www.hommy.online)'
 
 export type DiscoveredPlace = {
   placeId: string

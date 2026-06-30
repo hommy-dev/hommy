@@ -7,7 +7,7 @@
 // AT LAUNCH: flip SITE_INDEXABLE to `true` (one change) to allow indexing. Make
 // sure the sitemap, canonical tags, and structured data below are all in place
 // before flipping.
-export const SITE_INDEXABLE = false
+export const SITE_INDEXABLE = true
 
 /** Brand / site name, used in metadata and structured data. */
 export const SITE_NAME = "Hommy"
@@ -16,7 +16,7 @@ export const SITE_NAME = "Hommy"
  * Canonical production origin. Set NEXT_PUBLIC_SITE_URL in prod
  * (e.g. https://www.hommy.online). Falls back to localhost for dev.
  */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hommy.online"
 
 /** Default social share image (1200x630), resolved against SITE_URL. */
 export const OG_IMAGE = "/bg/seo-background.jpg"

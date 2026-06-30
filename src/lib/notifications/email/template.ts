@@ -17,7 +17,7 @@
 
 const APP_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
-  'https://hommy.online'
+  'https://www.hommy.online'
 
 // --- Brand palette (mirrors globals.css; hardcoded because CSS vars and
 //     Tailwind don't exist inside an email client) ---

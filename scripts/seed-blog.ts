@@ -80,7 +80,7 @@ function pullQuote(quote: string, attribution = 'The Hommy Team') {
   return {_type: 'pullQuote', _key: key(), quote, attribution}
 }
 
-function cta(label: string, href = 'https://hommy.online/get-a-quote', variant: 'primary' | 'secondary' = 'primary') {
+function cta(label: string, href = 'https://www.hommy.online/get-a-quote', variant: 'primary' | 'secondary' = 'primary') {
   return {
     _type: 'cta',
     _key: key(),

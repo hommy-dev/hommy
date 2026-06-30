@@ -23,7 +23,7 @@ const SAMPLE_LEAD: EmailContent = {
       { label: 'Posted', value: 'Just now' },
     ],
   },
-  cta: { label: 'View the job', url: 'https://hommy.online/contractor/jobs' },
+  cta: { label: 'View the job', url: 'https://www.hommy.online/contractor/jobs' },
   note: 'It costs 1 credit to start the chat. You only pay the win fee if the homeowner accepts your quote.',
 }
 
@@ -48,7 +48,7 @@ const SAMPLE_WELCOME: EmailContent = {
       text: 'a small % of the job, charged when the homeowner accepts your quote. No win, no fee.',
     },
   ],
-  cta: { label: 'Open your dashboard', url: 'https://hommy.online/contractor' },
+  cta: { label: 'Open your dashboard', url: 'https://www.hommy.online/contractor' },
 }
 
 const SAMPLE_QUOTE: EmailContent = {
@@ -64,7 +64,7 @@ const SAMPLE_QUOTE: EmailContent = {
     ],
   },
   paragraphs: ['Reach out to schedule the work and keep everything in one thread on Hommy.'],
-  cta: { label: 'Open the conversation', url: 'https://hommy.online/contractor/messages' },
+  cta: { label: 'Open the conversation', url: 'https://www.hommy.online/contractor/messages' },
 }
 
 // A generic notification with no custom HTML — i.e. the fallback path.
@@ -73,7 +73,7 @@ const SAMPLE_SYSTEM: EmailContent = {
   heading: "You're verified",
   intro:
     'Your license and insurance checked out. Your profile is live and you’ll start receiving matching roofing jobs in your area.',
-  cta: { label: 'Open Hommy', url: 'https://hommy.online/contractor' },
+  cta: { label: 'Open Hommy', url: 'https://www.hommy.online/contractor' },
 }
 
 export type EmailSample = { id: string; label: string; html: string }

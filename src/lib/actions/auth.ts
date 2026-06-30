@@ -53,7 +53,7 @@ function getAppOrigin(): string {
   if (site) return site
   if (process.env.VERCEL_URL)
     return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`
-  return 'http://localhost:3000'
+  return 'https://www.hommy.online'
 }
 
 // ============================================================
