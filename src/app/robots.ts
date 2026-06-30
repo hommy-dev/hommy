@@ -22,6 +22,11 @@ export default function robots(): MetadataRoute.Robots {
           "/homeowner/",
           "/accept/",
           "/review/",
+          // Token / personalized + non-content pages — never index these.
+          "/claim/",
+          "/invite/",
+          "/unsubscribe",
+          "/sandbox",
         ],
       },
     ],

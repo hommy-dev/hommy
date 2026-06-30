@@ -7,6 +7,10 @@
 // AT LAUNCH: flip SITE_INDEXABLE to `true` (one change) to allow indexing. Make
 // sure the sitemap, canonical tags, and structured data below are all in place
 // before flipping.
+//
+// ENABLED 2026-06-30: site is now crawlable. Per-page coverage gates
+// (INDEX_MIN_PROS) still keep thin/uncovered city pages noindex until a verified
+// roofer covers them — so only real, populated pages get indexed.
 export const SITE_INDEXABLE = true
 
 /** Brand / site name, used in metadata and structured data. */
