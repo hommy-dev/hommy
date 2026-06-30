@@ -118,7 +118,7 @@ export type IconName =
   | "monitor" // theme: system
   | "scale" // admin: disputes (balance scale)
 
-interface IconProps extends React.HTMLAttributes<HTMLDivElement> {
+interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   name: IconName
   /** Keep the SVG's own colors instead of inheriting the current text color. */
   preserveColors?: boolean

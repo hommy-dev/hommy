@@ -1,4 +1,11 @@
-# Recruitment enrichment worker (Phase 2)
+# Recruitment enrichment worker (Phase 2) — ⚠️ DEPRECATED
+
+> **DEPRECATED (2026-06-30).** Email enrichment now runs in-app, no AI, no Python:
+> `src/lib/inngest/functions/prospect-enrich.ts` + `src/lib/recruitment/email-finder.ts`
+> (crawl-first website email finder). The GitHub Action schedule for this worker is
+> DISABLED — do NOT re-enable it while the Inngest function is live (two writers would
+> race on `prospect_enrichment_jobs`). This directory + `.github/workflows/recruitment-worker.yml`
+> can be deleted after one verified production cycle on the TS path.
 
 A **standalone** Python service — not part of the Next app. It drains the
 `prospect_enrichment_jobs` queue, finds each prospect's email, verifies it, and

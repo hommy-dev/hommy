@@ -21,6 +21,28 @@ export const MIN_EMAIL_CONFIDENCE = 70
 /** Max prospects pushed to the cold-email tool per export run (warmup-friendly). */
 export const OUTREACH_EXPORT_BATCH = 200
 
+/**
+ * Max recruitment emails we'll ever send one prospect. We re-email (a fresh
+ * nudge) each time a new job lands in their area, but stop after this many
+ * touches even if they never sign up. Signing up (convertedToContractorId set)
+ * stops outreach immediately, regardless of count.
+ */
+export const MAX_OUTREACH_EMAILS = 4
+
+/**
+ * Minimum hours between two emails to the same prospect. 0 = every new job in
+ * their area sends a fresh nudge immediately (still bounded by the lifetime cap
+ * MAX_OUTREACH_EMAILS). Raise this if a burst of leads ever starts reading as spam.
+ */
+export const OUTREACH_FOLLOWUP_COOLDOWN_HOURS = 0
+
+/**
+ * Radius (meters) that defines "this area" when a new job re-nudges nearby
+ * prospects. Matches the discovery radius so anyone we found for the area is
+ * eligible to be re-emailed when fresh demand shows up there.
+ */
+export const OUTREACH_AREA_RADIUS_METERS = DISCOVERY_RADIUS_METERS
+
 export function searchTermForService(serviceSlug: string | null | undefined): string {
   if (!serviceSlug) return DEFAULT_SEARCH_TERM
   return RECRUITMENT_SEARCH_TERM[serviceSlug] ?? DEFAULT_SEARCH_TERM

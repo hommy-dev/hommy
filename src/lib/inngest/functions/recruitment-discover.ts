@@ -11,6 +11,7 @@ import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { db } from '@/lib/db'
 import { contractorProspects, leads, services } from '@/lib/db/schema'
 import { discoverProspectsNear, type DiscoverArgs } from '@/lib/recruitment/discovery'
+import { sendAreaOutreach } from '@/lib/recruitment/outreach-sync'
 
 async function alreadyDiscovered(serviceId: string, city: string | null, state: string | null): Promise<boolean> {
   const [row] = await db
@@ -83,15 +84,50 @@ export const recruitmentDiscover = inngest.createFunction(
 
     if (!args) return { ok: false, reason: 'no target' }
 
-    // Debounce organic re-scans (admin campaigns always run).
+    // Organic path (a homeowner posted into this area).
     if (event.name === INNGEST_EVENTS.LEAD_AWAITING_COVERAGE) {
+      // Debounce only the EXPENSIVE Places scan — if we've already found the
+      // shops here, don't re-scrape on every new lead.
       const seen = await step.run('debounce', () =>
         alreadyDiscovered(args.serviceId, args.city, args.state),
       )
-      if (seen) return { ok: true, skipped: 'already discovered this area' }
+      const discovery = seen
+        ? { skipped: 'already discovered this area' }
+        : await step.run('discover', () => discoverProspectsNear(args))
+
+      // Kick off email enrichment for each freshly-queued prospect. Best-effort:
+      // if this send is lost, prospect-enrich-drain re-emits from the job rows.
+      if ('queuedProspectIds' in discovery && discovery.queuedProspectIds.length > 0) {
+        await step.sendEvent(
+          'enqueue-enrich',
+          discovery.queuedProspectIds.map((prospectId) => ({
+            name: INNGEST_EVENTS.PROSPECT_ENRICH,
+            data: { prospectId },
+          })),
+        )
+      }
+
+      // ALWAYS (re-)nudge prospects near this job: first email for ones we just
+      // found, a follow-up for ones a previous lead already emailed — capped +
+      // throttled in sendAreaOutreach, and it stops once a prospect signs up.
+      const outreach = await step.run('area-outreach', () =>
+        sendAreaOutreach({ serviceId: args.serviceId, lat: args.lat, lng: args.lng }),
+      )
+
+      return { ok: true, discovery, outreach }
     }
 
+    // Admin city campaign: always scan; outreach stays the manual batch button.
     const result = await step.run('discover', () => discoverProspectsNear(args))
+    if (result.queuedProspectIds.length > 0) {
+      await step.sendEvent(
+        'enqueue-enrich',
+        result.queuedProspectIds.map((prospectId) => ({
+          name: INNGEST_EVENTS.PROSPECT_ENRICH,
+          data: { prospectId },
+        })),
+      )
+    }
     return { ok: true, ...result }
   },
 )

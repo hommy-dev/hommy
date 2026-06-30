@@ -59,7 +59,8 @@ export function IntroVideoField({
 
   return (
     <div className="space-y-3 lg:space-y-[0.833vw]">
-      <ImageUpload
+      {/* TDO In V2 we will show this */}
+      {/* <ImageUpload
         folder="videos"
         accept="video"
         maxFileSize={MAX_VIDEO_BYTES}
@@ -70,13 +71,13 @@ export function IntroVideoField({
           <Icon name="video" className="size-4 lg:size-[1.111vw]" />
           Upload a video
         </span>
-      </ImageUpload>
+      </ImageUpload> */}
 
-      <div className="flex items-center gap-3 lg:gap-[0.833vw] text-xs lg:text-[0.833vw] text-muted-foreground">
+      {/* <div className="flex items-center gap-3 lg:gap-[0.833vw] text-xs lg:text-[0.833vw] text-muted-foreground">
         <span className="h-px flex-1 bg-border" />
         or paste a link
         <span className="h-px flex-1 bg-border" />
-      </div>
+      </div> */}
 
       <div className="flex gap-2 lg:gap-[0.556vw]">
         <Input

@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface SVGIconProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SVGIconProps extends React.HTMLAttributes<HTMLSpanElement> {
   src: string;
   /**
    * If true, preserves the original colors of the SVG.
@@ -32,9 +32,12 @@ export function SVGIcon({ src, className, preserveColors = false, ...props }: SV
     );
   }
 
-  // Default: mask mode for color control
+  // Default: mask mode for color control. Rendered as an inline <span> (not a
+  // <div>) so the icon is valid inside inline contexts like <p>/<span> — a block
+  // element there triggers an HTML-nesting/hydration error. `inline-block` keeps
+  // sizing identical to a div.
   return (
-    <div
+    <span
       className={cn('bg-current inline-block shrink-0', className)}
       style={{
         maskImage: `url(${src})`,

@@ -1,0 +1,1 @@
+ALTER TABLE "contractor_prospects" ADD COLUMN "outreach_count" integer DEFAULT 0 NOT NULL;

@@ -994,6 +994,10 @@ export const contractorProspects = pgTable('contractor_prospects', {
   enrichmentStatus: text('enrichment_status').notNull().default('discovered'),
   // pending | exported | sent | opened | clicked | replied | bounced | suppressed | converted | skipped
   outreachStatus: text('outreach_status').notNull().default('pending'),
+  // How many recruitment emails we've sent this prospect. Capped at
+  // RECRUITMENT.MAX_OUTREACH_EMAILS so follow-ups (one per new job in their area)
+  // stop after a few touches even if they never sign up.
+  outreachCount: integer('outreach_count').notNull().default(0),
   lastOutreachAt: timestamp('last_outreach_at', { withTimezone: true }),
   inviteToken: text('invite_token'), // signed token used by the /claim link
   convertedToContractorId: uuid('converted_to_contractor_id').references((): AnyPgColumn => contractors.id, { onDelete: 'set null' }),

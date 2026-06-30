@@ -1,13 +1,19 @@
-// Recruitment discovery: given an uncovered point, find roofing companies via
-// Google Places (server) and upsert them as contractor_prospects. Companies with
-// a website but no email yet get queued for the Python enrichment worker; those
-// with no website at all are marked `no_email` (we can't find an address, so we
-// skip them — no SMS fallback).
+// Recruitment discovery: given an uncovered point, find roofing companies and
+// upsert them as contractor_prospects. Source is Google Places Text Search when
+// the server key is configured + unblocked (richer data, incl. ratings), falling
+// back to OpenStreetMap (Overpass) otherwise — no billing card needed for the
+// fallback. Companies with a website but no email yet get queued for the Python
+// enrichment worker; those with no website at all are marked `no_email` (we can't
+// find an address, so we skip them — no SMS fallback).
 
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { contractorProspects, prospectEnrichmentJobs } from '@/lib/db/schema'
-import { searchPlaces, domainFromUrl } from '@/lib/integrations/google-places-server'
+import { searchPlaces as searchOsm, domainFromUrl } from '@/lib/integrations/osm-places-server'
+import {
+  searchPlacesViaGoogle,
+  googleConfigured,
+} from '@/lib/integrations/google-places-server'
 import {
   searchTermForService,
   DISCOVERY_RADIUS_METERS,
@@ -25,17 +31,28 @@ export type DiscoverArgs = {
 
 export async function discoverProspectsNear(
   args: DiscoverArgs,
-): Promise<{ found: number; inserted: number; queued: number }> {
-  const places = await searchPlaces({
+): Promise<{ found: number; inserted: number; queued: number; queuedProspectIds: string[] }> {
+  const searchOpts = {
     query: searchTermForService(args.serviceSlug),
     lat: args.lat,
     lng: args.lng,
     radiusMeters: DISCOVERY_RADIUS_METERS,
     maxResults: DISCOVERY_MAX_RESULTS,
-  })
+  }
+
+  // Prefer Google (rich data + ratings); fall back to OSM if the key is unset,
+  // blocked, errors, or returns nothing. One source per run — we don't merge,
+  // to avoid the same company landing twice under different place ids.
+  let source = 'google_places'
+  let places = googleConfigured() ? await searchPlacesViaGoogle(searchOpts) : []
+  if (places.length === 0) {
+    source = 'openstreetmap'
+    places = await searchOsm(searchOpts)
+  }
 
   let inserted = 0
   let queued = 0
+  const queuedProspectIds: string[] = []
 
   for (const p of places) {
     // Dedupe by (service, place_id) — a single discovery run, debounced upstream,
@@ -67,7 +84,7 @@ export async function discoverProspectsNear(
           state: args.state,
           lat: p.lat,
           lng: p.lng,
-          source: 'google_places',
+          source,
           sourceRef: p.placeId,
           rating: p.rating != null ? String(p.rating) : null,
           reviewCount: p.reviewCount,
@@ -90,8 +107,9 @@ export async function discoverProspectsNear(
         .values({ prospectId: row.id })
         .onConflictDoNothing({ target: prospectEnrichmentJobs.prospectId })
       queued++
+      queuedProspectIds.push(row.id)
     }
   }
 
-  return { found: places.length, inserted, queued }
+  return { found: places.length, inserted, queued, queuedProspectIds }
 }

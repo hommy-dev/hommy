@@ -1,10 +1,15 @@
-// Server-side Google Places (New) Text Search — used by the recruitment engine
-// to DISCOVER companies near an uncovered lead/area. Distinct from the
-// client-side google-places-client.ts (which only does Place Details for review
-// import). Needs a SERVER key (GOOGLE_PLACES_API_KEY) — the NEXT_PUBLIC maps key
-// is browser/referrer-restricted and unsuitable for server fetches.
+// Server-side Google Places (New) Text Search — the PREFERRED recruitment
+// discovery source when a server key is configured and unblocked. Returns the
+// shared DiscoveredPlace shape (incl. rating + review count, which OSM lacks).
 //
-// No-ops cleanly (returns []) when the key is unset, so dev/build never break.
+// Needs a SERVER key (GOOGLE_PLACES_API_KEY) with the "Places API (New)" service
+// enabled and allowed on the key's API restrictions. The NEXT_PUBLIC maps key is
+// browser/referrer-restricted and unsuitable for server fetches.
+//
+// Never throws: returns [] on missing key / non-OK / network error, so the
+// caller (discovery) can cleanly fall back to the OSM provider.
+
+import type { DiscoveredPlace } from './osm-places-server'
 
 const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY ?? ''
 const ENDPOINT = 'https://places.googleapis.com/v1/places:searchText'
@@ -21,18 +26,6 @@ const FIELD_MASK = [
   'nextPageToken',
 ].join(',')
 
-export type DiscoveredPlace = {
-  placeId: string
-  name: string | null
-  website: string | null
-  phone: string | null
-  lat: number | null
-  lng: number | null
-  rating: number | null
-  reviewCount: number | null
-  formattedAddress: string | null
-}
-
 type PlacesResponse = {
   places?: Array<{
     id?: string
@@ -47,27 +40,24 @@ type PlacesResponse = {
   nextPageToken?: string
 }
 
-/** True when a server Places key is configured. */
-export function placesConfigured(): boolean {
+/** True when a server Places key is configured (does not verify it's unblocked). */
+export function googleConfigured(): boolean {
   return !!PLACES_KEY
 }
 
 /**
  * Text Search around a point, paginated up to `maxResults`. `query` is the
  * service search term (e.g. "roofing contractor"); the point + radius bias
- * results to the uncovered area.
+ * results to the uncovered area. Same signature as the OSM provider.
  */
-export async function searchPlaces(opts: {
+export async function searchPlacesViaGoogle(opts: {
   query: string
   lat: number
   lng: number
   radiusMeters: number
   maxResults: number
 }): Promise<DiscoveredPlace[]> {
-  if (!PLACES_KEY) {
-    console.warn('[places-server] GOOGLE_PLACES_API_KEY not set — discovery skipped')
-    return []
-  }
+  if (!PLACES_KEY) return []
 
   const out: DiscoveredPlace[] = []
   let pageToken: string | undefined
@@ -96,11 +86,11 @@ export async function searchPlaces(opts: {
         body: JSON.stringify(body),
       })
     } catch (err) {
-      console.error('[places-server] fetch failed', err)
+      console.error('[places-google] fetch failed', err)
       break
     }
     if (!res.ok) {
-      console.error('[places-server] non-OK', res.status, await res.text().catch(() => ''))
+      console.error('[places-google] non-OK', res.status, await res.text().catch(() => ''))
       break
     }
 
@@ -114,7 +104,7 @@ export async function searchPlaces(opts: {
         phone: p.nationalPhoneNumber ?? null,
         lat: p.location?.latitude ?? null,
         lng: p.location?.longitude ?? null,
-        rating: p.rating ?? null,
+        rating: p.rating ?? null, // Google rating is already 0–5
         reviewCount: p.userRatingCount ?? null,
         formattedAddress: p.formattedAddress ?? null,
       })
@@ -125,15 +115,4 @@ export async function searchPlaces(opts: {
   }
 
   return out.slice(0, opts.maxResults)
-}
-
-/** Normalize a website URL to its bare host (for Hunter lookup + dedupe). */
-export function domainFromUrl(url: string | null | undefined): string | null {
-  if (!url) return null
-  try {
-    const u = new URL(url.includes('://') ? url : `https://${url}`)
-    return u.hostname.replace(/^www\./i, '').toLowerCase() || null
-  } catch {
-    return null
-  }
 }

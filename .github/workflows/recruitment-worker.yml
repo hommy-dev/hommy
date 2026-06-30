@@ -1,13 +1,12 @@
-name: Recruitment enrichment worker
+name: Recruitment enrichment worker (DEPRECATED)
 
-# Free, low-volume deploy: hourly, drain the prospect_enrichment_jobs queue
-# (find + verify emails) and exit. No always-on server needed. Hourly stays well
-# within GitHub's free minutes on a private repo; bump to "*/30 * * * *" or more
-# on a public repo (unlimited) or if volume grows.
-# Add repo secrets: WORKER_DATABASE_URL, HUNTER_API_KEY, OPENROUTER_API_KEY.
+# DEPRECATED — superseded by the in-app TypeScript enrichment
+# (src/lib/inngest/functions/prospect-enrich.ts). The schedule is DISABLED on
+# purpose: running this Python worker alongside the Inngest function would have
+# TWO writers claiming the same prospect_enrichment_jobs rows and racing. Kept as
+# manual-dispatch only for emergency fallback; delete this file + worker/recruitment/
+# after one verified production cycle on the TS path.
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch: {}
 
 # Don't pile up overlapping runs.

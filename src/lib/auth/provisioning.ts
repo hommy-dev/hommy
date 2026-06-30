@@ -10,7 +10,7 @@
 // Company name, license, services, and service areas are collected later in the
 // onboarding wizard.
 
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import {
   users,
@@ -19,10 +19,16 @@ import {
   subscriptions,
   plans,
   homeowners,
+  serviceAreas,
 } from '@/lib/db/schema'
 import { grantCredits } from '@/lib/credits/ledger'
 import { assignReferralCodeIfMissing, resolveReferrer } from '@/lib/contractor/referral'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
+import { normalizeToE164 } from '@/lib/phone/e164'
+import type { PrefillProspect } from '@/lib/recruitment/convert'
+
+/** Default coverage radius (km) for the prefilled circle seeded from a prospect. */
+const PREFILL_AREA_RADIUS_KM = 40
 
 /** Free credits every new company gets, no strings, never expires. */
 export const SIGNUP_BONUS_CREDITS = 50
@@ -132,10 +138,11 @@ export async function provisionContractor({
     }
   })
 
-  // Recruitment attribution: if this signup came from a prospect's claim link
-  // (cookie set by /claim/<token>), link the new company back to that prospect so
-  // we mark it converted and stop emailing it. Best-effort, never blocks signup.
-  await linkRecruitProspect(newCompanyId)
+  // Recruitment attribution + prefill: if this signup is a scraped prospect (via
+  // the claim-link cookie, or an email/domain match for self-signups), link the
+  // prospect, prefill the profile from what we scraped, and fire the async Google
+  // auto-connect. Best-effort, never blocks signup.
+  await attributeAndPrefillFromProspect({ contractorId: newCompanyId, userId, email })
 
   // NOTE: the welcome email is NOT sent here. Signup can happen before the email
   // is confirmed, and we don't want to welcome an unconfirmed account. It fires
@@ -143,18 +150,95 @@ export async function provisionContractor({
   // callback / choose-role / immediate-session signup), via Inngest (retries).
 }
 
-/** Read the recruit-prospect cookie (if any) and link it to the new company. */
-async function linkRecruitProspect(contractorId: string): Promise<void> {
+/**
+ * Tie a new contractor signup back to a scraped prospect (cookie / email / domain),
+ * then: mark the prospect converted, prefill the profile from what we scraped, and
+ * fire the async Google auto-connect. Every step is independently guarded — a
+ * failure in one never blocks signup or the others.
+ */
+async function attributeAndPrefillFromProspect({
+  contractorId,
+  userId,
+  email,
+}: {
+  contractorId: string
+  userId: string
+  email: string
+}): Promise<void> {
   if (!contractorId) return
+
+  // Resolve the prospect (cookie → exact email → unique business domain).
+  let prospect: PrefillProspect | null = null
   try {
     const { cookies } = await import('next/headers')
     const jar = await cookies()
-    const prospectId = jar.get('recruit_prospect')?.value
-    if (!prospectId) return
-    const { linkProspectConversion } = await import('@/lib/recruitment/convert')
-    await linkProspectConversion(prospectId, contractorId)
+    const cookieProspectId = jar.get('recruit_prospect')?.value ?? null
+    const { resolveProspectForSignup } = await import('@/lib/recruitment/convert')
+    prospect = await resolveProspectForSignup({ cookieProspectId, email })
   } catch (err) {
-    console.error('[provisionContractor] recruit attribution failed (non-fatal)', err)
+    console.error('[provisionContractor] prospect resolve failed (non-fatal)', err)
+    return
+  }
+  if (!prospect) return
+
+  // Attribution — mark converted so we stop emailing them.
+  try {
+    const { linkProspectConversion } = await import('@/lib/recruitment/convert')
+    await linkProspectConversion(prospect.id, contractorId)
+  } catch (err) {
+    console.error('[provisionContractor] prospect link failed (non-fatal)', err)
+  }
+
+  // Prefill the profile from scraped data (each guarded; all idempotent).
+  try {
+    if (prospect.companyName) {
+      await db
+        .update(contractors)
+        .set({ companyName: prospect.companyName })
+        .where(and(eq(contractors.id, contractorId), isNull(contractors.companyName)))
+    }
+
+    const phone = normalizeToE164(prospect.phone)
+    if (phone) {
+      await db
+        .update(users)
+        .set({ phone })
+        .where(and(eq(users.id, userId), isNull(users.phone)))
+    }
+
+    if (prospect.lat != null && prospect.lng != null) {
+      const existing = await db
+        .select({ id: serviceAreas.id })
+        .from(serviceAreas)
+        .where(eq(serviceAreas.contractorId, contractorId))
+        .limit(1)
+      if (existing.length === 0) {
+        const label = [prospect.city, prospect.state].filter(Boolean).join(', ') || 'Service area'
+        // geom is maintained by a DB trigger — do not set it here.
+        await db.insert(serviceAreas).values({
+          contractorId,
+          label,
+          areaType: 'circle',
+          lat: prospect.lat,
+          lng: prospect.lng,
+          radiusKm: PREFILL_AREA_RADIUS_KM,
+        })
+      }
+    }
+  } catch (err) {
+    console.error('[provisionContractor] prospect prefill failed (non-fatal)', err)
+  }
+
+  // Async: auto-connect their Google listing (reviews + photos). Per-contractor
+  // dedup id so duplicate provisions can't double-fire.
+  try {
+    await inngest.send({
+      name: INNGEST_EVENTS.CONTRACTOR_CLAIMED,
+      data: { contractorId, prospectId: prospect.id },
+      id: `claimed-${contractorId}`,
+    })
+  } catch (err) {
+    console.error('[provisionContractor] claimed event send failed (non-fatal)', err)
   }
 }
 

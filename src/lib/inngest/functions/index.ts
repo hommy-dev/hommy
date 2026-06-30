@@ -19,7 +19,9 @@ import { creditsExpire } from './credits-expire'
 import { verificationReminders } from './verification-reminders'
 import { contractorWelcome } from './contractor-welcome'
 import { contractorEligible } from './contractor-eligible'
+import { contractorClaimed } from './contractor-claimed'
 import { recruitmentDiscover } from './recruitment-discover'
+import { prospectEnrich, prospectEnrichDrain } from './prospect-enrich'
 
 // Registered with serve() in src/app/api/inngest/route.ts
 export const functions = [
@@ -35,5 +37,8 @@ export const functions = [
   verificationReminders,
   contractorWelcome,
   contractorEligible,
+  contractorClaimed,
   recruitmentDiscover,
+  prospectEnrich,
+  prospectEnrichDrain,
 ]

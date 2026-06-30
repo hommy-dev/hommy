@@ -68,7 +68,7 @@ export function ReviewList({
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3 lg:gap-[0.833vw]">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 lg:gap-[0.417vw] text-sm lg:text-[0.972vw] font-semibold text-foreground">
+                  <div className="flex items-center gap-1.5 lg:gap-[0.417vw] text-sm lg:text-[0.972vw] font-semibold text-foreground">
                     <span className="truncate">{who}</span>
                     {!isGoogle ? (
                       <Icon
@@ -76,7 +76,7 @@ export function ReviewList({
                         className="size-3.5 lg:size-[0.972vw] shrink-0 text-primary"
                       />
                     ) : null}
-                  </p>
+                  </div>
                   <div className="mt-1 lg:mt-[0.278vw] flex items-center gap-2 lg:gap-[0.556vw]">
                     <Stars rating={r.rating} starClassName="lg:size-[1.042vw]" />
                     {isGoogle ? (

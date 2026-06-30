@@ -50,10 +50,12 @@ export const INNGEST_EVENTS = {
   CONTRACTOR_FIRST_LEAD_SCHEDULED: "contractor/first-lead.scheduled",
   CONTRACTOR_WELCOME: "contractor/welcome.requested", // first confirmed session — send the welcome (credits + how it works)
   CONTRACTOR_ELIGIBLE: "contractor/eligible", // verified or expanded coverage — try to auto-match awaiting-coverage leads
+  CONTRACTOR_CLAIMED: "contractor/claimed", // a recruited prospect signed up — auto-connect their Google listing
 
   // Recruitment engine events (see plan + docs/launch-campaign.md)
   LEAD_AWAITING_COVERAGE: "lead/awaiting-coverage", // a posted lead matched zero contractors — kick recruitment
   RECRUITMENT_DISCOVER: "recruitment/discover", // admin city campaign — discover prospects at a point
+  PROSPECT_ENRICH: "recruitment/prospect.enrich", // find+verify one prospect's email (crawl-first, no AI)
 
   // Notification events
   NOTIFICATION_LEAD_EXPIRY_WARNING: "notification/lead-expiry-warning",
