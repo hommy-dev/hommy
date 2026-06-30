@@ -24,6 +24,8 @@ import {
   MAX_OUTREACH_EMAILS,
   OUTREACH_FOLLOWUP_COOLDOWN_HOURS,
   OUTREACH_AREA_RADIUS_METERS,
+  INVITE_MAX_EMAILS,
+  INVITE_FOLLOWUP_DAYS,
 } from '@/lib/config/recruitment'
 import {
   dailySendCap,
@@ -93,9 +95,14 @@ const CANDIDATE_COLUMNS = {
  * haven't signed up (no conversion), aren't suppressed/bounced/skipped, have a
  * verified email above the confidence floor, are under the lifetime cap, and
  * their last email is older than the cooldown (or they've never been emailed).
+ *
+ * The cap + cooldown are per-stream: lead nudges re-hit on every new real job
+ * (cap 4, no cooldown); cold invites are gentler (cap 2, ~4-day cooldown).
  */
-function eligibilityFilters() {
-  const cooldownCutoff = new Date(Date.now() - OUTREACH_FOLLOWUP_COOLDOWN_HOURS * 3600 * 1000)
+function eligibilityFilters(
+  { maxEmails = MAX_OUTREACH_EMAILS, cooldownHours = OUTREACH_FOLLOWUP_COOLDOWN_HOURS } = {},
+) {
+  const cooldownCutoff = new Date(Date.now() - cooldownHours * 3600 * 1000)
   return and(
     // "until they sign up" — a converted prospect is never emailed again.
     isNull(contractorProspects.convertedToContractorId),
@@ -104,7 +111,7 @@ function eligibilityFilters() {
     isNotNull(contractorProspects.email),
     gte(contractorProspects.emailConfidence, MIN_EMAIL_CONFIDENCE),
     // lifetime cap on touches.
-    lt(contractorProspects.outreachCount, MAX_OUTREACH_EMAILS),
+    lt(contractorProspects.outreachCount, maxEmails),
     // cooldown: never emailed, or last email older than the throttle window.
     or(
       isNull(contractorProspects.lastOutreachAt),
@@ -196,9 +203,16 @@ export async function sendPendingOutreach(): Promise<SendResult> {
   const candidates = await db
     .select(CANDIDATE_COLUMNS)
     .from(contractorProspects)
-    .where(eligibilityFilters())
-    // Fewest touches first (first-timers ahead of follow-ups), then oldest found.
-    .orderBy(asc(contractorProspects.outreachCount), asc(contractorProspects.createdAt))
+    // Invites: gentler cap (2) + ~4-day cooldown before the single follow-up.
+    .where(eligibilityFilters({ maxEmails: INVITE_MAX_EMAILS, cooldownHours: INVITE_FOLLOWUP_DAYS * 24 }))
+    // Best reputation first — the daily cap goes to the most established roofers.
+    // Tiebreak: first-timers ahead of follow-ups, then oldest found.
+    .orderBy(
+      sql`${contractorProspects.rating} desc nulls last`,
+      sql`${contractorProspects.reviewCount} desc nulls last`,
+      asc(contractorProspects.outreachCount),
+      asc(contractorProspects.createdAt),
+    )
     .limit(Math.min(OUTREACH_EXPORT_BATCH, budget))
 
   return runOutreachOver(candidates, 'invite')

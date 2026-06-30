@@ -1,0 +1,1 @@
+ALTER TABLE "cities" ADD COLUMN "last_recruited_at" timestamp with time zone;

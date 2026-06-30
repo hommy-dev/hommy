@@ -225,6 +225,13 @@
       "when": 1782818713076,
       "tag": "0031_fearless_sumo",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1782831703816,
+      "tag": "0032_milky_makkari",
+      "breakpoints": true
     }
   ]
 }

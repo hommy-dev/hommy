@@ -43,6 +43,30 @@ export const OUTREACH_FOLLOWUP_COOLDOWN_HOURS = 0
  */
 export const OUTREACH_AREA_RADIUS_METERS = DISCOVERY_RADIUS_METERS
 
+// ── Proactive daily invite engine (cold "founding roofer" outreach) ───────────
+// The invite stream is gentler than the lead stream: a cold roofer who never
+// asked to hear from us gets at most one nudge after the first email, then we
+// stop — honesty + deliverability over volume.
+
+/** Lifetime cap on COLD INVITE emails per prospect (vs MAX_OUTREACH_EMAILS for lead nudges). */
+export const INVITE_MAX_EMAILS = 2
+
+/** Days to wait before the single invite follow-up (only if they haven't signed up). */
+export const INVITE_FOLLOWUP_DAYS = 4
+
+/**
+ * Verified roofers covering a city's centroid at/above which we consider the area
+ * "covered" and stop proactively sweeping it. Higher than INDEX_MIN_PROS (=1, the
+ * SEO bar) because liquidity needs a few competing roofers, not just one.
+ */
+export const COVERAGE_TARGET_PROS = 5
+
+/** Don't re-sweep the same area until this many days pass (rotation, saves Places quota). */
+export const ROTATE_DAYS = 14
+
+/** How many areas the daily sweep discovers per run. */
+export const SWEEP_AREAS_PER_DAY = 4
+
 export function searchTermForService(serviceSlug: string | null | undefined): string {
   if (!serviceSlug) return DEFAULT_SEARCH_TERM
   return RECRUITMENT_SEARCH_TERM[serviceSlug] ?? DEFAULT_SEARCH_TERM

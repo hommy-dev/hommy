@@ -3,6 +3,13 @@
 // the storm's center so there's local supply ready when storm-damage leads land.
 // Reuses the recruitment engine (RECRUITMENT_DISCOVER → discover + enrich +
 // warm invites). Idempotent via the discoverySent flag.
+//
+// DISABLED 2026-06-30: storm-triggered recruitment is turned OFF. We're moving to
+// a proactive daily discovery + honest-invite engine instead of reacting to
+// storms. The storm event still records and the /storm/[id] homeowner landing
+// page still works (a demand asset), but logging a storm no longer auto-fires any
+// supply discovery or invite emails. Parked, not deleted — flip
+// STORM_RECRUITMENT_ENABLED='true' to revive the old behavior.
 
 import { eq } from 'drizzle-orm'
 import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
@@ -17,6 +24,12 @@ export const stormDetected = inngest.createFunction(
     retries: 2,
   },
   async ({ event, step }) => {
+    // Hard off-switch: storm-driven recruitment is disabled. Returns before any
+    // discovery/invite is kicked off.
+    if (process.env.STORM_RECRUITMENT_ENABLED !== 'true') {
+      return { ok: true, skipped: 'storm recruitment disabled' }
+    }
+
     const stormEventId = event.data.stormEventId as string | undefined
     if (!stormEventId) return { ok: false, reason: 'no stormEventId' }
 

@@ -103,12 +103,45 @@ function buildCopy(v: RecruitmentEmailVars): Copy {
     Number.isFinite(ratingNum) && ratingNum >= 4
       ? pick(
           [
-            `Found you on Google, ${ratingNum.toFixed(1)} stars, so you're exactly who I'd want on it.`,
+            `Found you on Google, ${ratingNum.toFixed(1)} stars, so you're exactly who I'd want on board.`,
             `Your ${ratingNum.toFixed(1)} on Google is why I'm reaching out to you specifically.`,
           ],
           seed,
         )
       : null
+
+  // INVITE stream — a cold, HONEST "founding roofer" pitch. There is NO job
+  // waiting; we never pretend there is. We sell the opportunity (early, first
+  // pick, pay-on-win, modern + low cost) and point them at claiming their spot.
+  if ((v.stream ?? 'lead') === 'invite') {
+    if (v.isFollowUp) {
+      const subject = pick(
+        [`following up — ${where}`, `still keen?`, `one more note from Hommy`],
+        seed,
+      )
+      const lines = [
+        `Me again — just didn't want this to slip by.`,
+        `Quick version: Hommy sends you local roofing jobs in ${where}. No subscription, and you only pay a small fee when a homeowner actually accepts your quote. We're early, so the first roofers in get first pick.`,
+        `If you'd like your spot, it takes about two minutes: ${v.claimUrl}`,
+        `Not for you? No worries — there's an unsubscribe link below and I won't email again.`,
+      ]
+      return { subject, greeting, lines }
+    }
+    const subject = pick(
+      [`roofers in ${where}`, `a quick idea for ${company ?? 'your shop'}`, `${where} — a better way to get roofing jobs`],
+      seed,
+    )
+    const lines = [
+      SIGNER_IS_BRAND
+        ? `I'm with Hommy — we're building a simpler way for homeowners in ${where} to find local roofers like you.`
+        : `I'm ${SIGNER}, I'm building Hommy — a simpler way for homeowners in ${where} to find local roofers like you.`,
+      ...(ratingLine ? [ratingLine] : []),
+      `I'll be straight with you: we're brand new, so it's early. That's exactly the opportunity — the first roofers in get first pick of the jobs in their area, and you help shape how the whole thing works.`,
+      `No subscription and nothing to pay to be listed. You only pay a small fee if a homeowner accepts your quote, and new accounts start with credit, so the first jobs cost you nothing. Our goal is simple: more local jobs and better tools, at the lowest cost we can.`,
+      `If that's worth a look, you can claim your spot here: ${v.claimUrl}`,
+    ]
+    return { subject, greeting, lines }
+  }
 
   if (v.isFollowUp) {
     const subject = pick(

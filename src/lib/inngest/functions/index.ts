@@ -21,6 +21,8 @@ import { contractorWelcome } from './contractor-welcome'
 import { contractorEligible } from './contractor-eligible'
 import { contractorClaimed } from './contractor-claimed'
 import { recruitmentDiscover } from './recruitment-discover'
+import { recruitmentSweep } from './recruitment-sweep'
+import { recruitmentInviteSend } from './recruitment-invite-send'
 import { prospectEnrich, prospectEnrichDrain } from './prospect-enrich'
 import { stormDetected } from './storm-detected'
 
@@ -40,6 +42,8 @@ export const functions = [
   contractorEligible,
   contractorClaimed,
   recruitmentDiscover,
+  recruitmentSweep,
+  recruitmentInviteSend,
   prospectEnrich,
   prospectEnrichDrain,
   stormDetected,

@@ -4,7 +4,23 @@
 
 import { db } from '@/lib/db'
 import { and, desc, eq, gte, ilike, isNotNull, isNull, or, sql, type SQL } from 'drizzle-orm'
-import { leads, contractorProspects, prospectEnrichmentJobs, contractors } from '@/lib/db/schema'
+import {
+  leads,
+  contractorProspects,
+  prospectEnrichmentJobs,
+  contractors,
+  cities,
+  contractorServices,
+  serviceAreas,
+} from '@/lib/db/schema'
+import { roofingServiceId } from '@/lib/data/locations'
+import { OPERATING_STATES } from '@/lib/config/service-areas'
+import {
+  COVERAGE_TARGET_PROS,
+  ROTATE_DAYS,
+  SWEEP_AREAS_PER_DAY,
+  DISCOVERY_RADIUS_METERS,
+} from '@/lib/config/recruitment'
 
 const ADMIN_LIST_LIMIT = 200
 
@@ -50,6 +66,75 @@ export async function getUncoveredDemand(): Promise<UncoveredDemandRow[]> {
     newest: r.newest,
     lat: r.lat,
     lng: r.lng,
+  }))
+}
+
+export type SweepTarget = {
+  cityId: string
+  city: string
+  state: string
+  lat: number
+  lng: number
+}
+
+/**
+ * Areas the daily proactive recruitment sweep should discover roofers in next.
+ * Operating states only; SKIPS areas already covered (>= COVERAGE_TARGET_PROS
+ * verified roofers cover the centroid) and any area swept within ROTATE_DAYS.
+ * Ranked by real uncovered demand (open awaiting-coverage leads near the city),
+ * then population (proxy for roofing volume). The coverage subquery mirrors
+ * locations.ts:getIndexableCities so "covered" means the same thing everywhere.
+ */
+export async function getRecruitmentSweepTargets(
+  limit = SWEEP_AREAS_PER_DAY,
+): Promise<SweepTarget[]> {
+  const serviceId = await roofingServiceId()
+  const operatingStates: readonly string[] = OPERATING_STATES
+  if (!serviceId || operatingStates.length === 0) return []
+
+  const result = await db.execute(sql`
+    SELECT c.id AS city_id, c.name AS city_name, c.state_code AS state_code,
+           c.lat AS lat, c.lng AS lng,
+           (
+             SELECT count(*)
+             FROM ${leads} l
+             WHERE l.status = 'open' AND l.awaiting_coverage = true
+               AND l.lat IS NOT NULL AND l.lng IS NOT NULL
+               AND ST_DWithin(
+                 ST_SetSRID(ST_MakePoint(l.lng, l.lat), 4326)::geography,
+                 ST_SetSRID(ST_MakePoint(c.lng, c.lat), 4326)::geography,
+                 ${DISCOVERY_RADIUS_METERS}
+               )
+           ) AS demand
+    FROM ${cities} c
+    WHERE c.state_code IN (${sql.join(operatingStates.map((s) => sql`${s}`), sql`, `)})
+      AND (c.last_recruited_at IS NULL OR c.last_recruited_at < now() - make_interval(days => ${ROTATE_DAYS}))
+      AND (
+        SELECT count(DISTINCT ct.id)
+        FROM ${contractors} ct
+        JOIN ${contractorServices} cs ON cs.contractor_id = ct.id AND cs.service_id = ${serviceId}
+        JOIN ${serviceAreas} sa ON sa.contractor_id = ct.id
+        WHERE ct.verification_status = 'verified'
+          AND sa.geom IS NOT NULL
+          AND ST_Covers(sa.geom, ST_SetSRID(ST_MakePoint(c.lng, c.lat), 4326)::geography)
+      ) < ${COVERAGE_TARGET_PROS}
+    ORDER BY demand DESC, c.population DESC NULLS LAST, c.name ASC
+    LIMIT ${limit}
+  `)
+
+  const rows = result as unknown as Array<{
+    city_id: string
+    city_name: string
+    state_code: string
+    lat: number
+    lng: number
+  }>
+  return rows.map((r) => ({
+    cityId: r.city_id,
+    city: r.city_name,
+    state: r.state_code,
+    lat: Number(r.lat),
+    lng: Number(r.lng),
   }))
 }
 

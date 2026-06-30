@@ -935,6 +935,9 @@ export const cities = pgTable('cities', {
   population: integer('population'),
   intro: text('intro'),                       // optional editorial copy per city
   faq: jsonb('faq').$type<{ q: string; a: string }[]>(),
+  // Last time the proactive recruitment sweep discovered roofers here — drives
+  // rotation (don't re-scrape the same area until ROTATE_DAYS pass).
+  lastRecruitedAt: timestamp('last_recruited_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('cities_state_slug_uq').on(t.stateCode, t.slug),
