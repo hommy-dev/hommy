@@ -8,7 +8,7 @@
 // See docs/HOMMY_PLATFORM.md §4 (lead lifecycle) and §5.2 (guest auto-signup).
 
 import { z } from 'zod'
-import { and, eq, gte } from 'drizzle-orm'
+import { and, eq, gte, sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { getOptionalUser } from '@/lib/auth/session'
@@ -35,6 +35,7 @@ import {
   messages,
   projects,
   services,
+  stormEvents,
 } from '@/lib/db/schema'
 
 type FieldErrors = Record<string, string>
@@ -75,6 +76,9 @@ const CreateLeadSchema = z.object({
   // Optional SMS opt-in — only meaningful when a phone is provided. Logged as a
   // consent record; texting itself stays off until A2P 10DLC is live.
   smsOptIn: z.boolean().optional().default(false),
+  // Set when the post came from a storm landing page — attributes the lead to a
+  // storm (drives the city-page storm history + the admin leads-generated metric).
+  stormEventId: z.string().uuid().optional(),
 })
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -225,6 +229,18 @@ export async function createLead(
   const photos = d.photos.slice(0, MAX_LEAD_PHOTOS)
 
   let leadId = ''
+  // Storm attribution — keep only if the id refers to a real storm (else null,
+  // so a stale/garbage param can't fail the post on the FK).
+  let stormEventId: string | null = null
+  if (d.stormEventId) {
+    const [s] = await db
+      .select({ id: stormEvents.id })
+      .from(stormEvents)
+      .where(eq(stormEvents.id, d.stormEventId))
+      .limit(1)
+    stormEventId = s?.id ?? null
+  }
+
   let matchedCount = 0
   try {
     await db.transaction(async (tx) => {
@@ -241,6 +257,7 @@ export async function createLead(
           zipCode,
           lat,
           lng,
+          stormEventId,
           photoUrl: photos[0] ?? null,
           notes: d.notes || null,
           status: 'open',
@@ -289,6 +306,18 @@ export async function createLead(
     }
   } catch (err) {
     console.error('[createLead] inngest send failed (non-fatal)', err)
+  }
+
+  // Bump the storm's lead counter (best-effort metric for the admin storm view).
+  if (stormEventId) {
+    try {
+      await db
+        .update(stormEvents)
+        .set({ leadsGenerated: sql`${stormEvents.leadsGenerated} + 1` })
+        .where(eq(stormEvents.id, stormEventId))
+    } catch (err) {
+      console.error('[createLead] storm leadsGenerated bump failed (non-fatal)', err)
+    }
   }
 
   // Funnel: homeowner posted a job (top of the lead lifecycle). Attributed to

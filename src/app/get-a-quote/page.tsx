@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { contractors, services } from "@/lib/db/schema"
 import { getOptionalUser } from "@/lib/auth/session"
+import { getStormById } from "@/lib/data/storms"
 import { GetAQuoteWizard } from "@/components/public/get-a-quote-wizard"
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export default async function GetAQuotePage({
   searchParams,
 }: {
-  searchParams: Promise<{ subtype?: string; where?: string; for?: string }>
+  searchParams: Promise<{ subtype?: string; where?: string; for?: string; storm?: string }>
 }) {
   const sp = await searchParams
 
@@ -32,8 +33,13 @@ export default async function GetAQuotePage({
   const user = await getOptionalUser()
   const isHomeowner = user?.role === "homeowner"
 
+  // Storm flow: `?storm=<id>` pre-selects Storm Damage + emergency urgency and
+  // shows a banner; the lead is attributed to the storm. Unknown ids fall back.
+  const storm = sp.storm ? await getStormById(sp.storm) : null
+  const stormSubtype = storm && subtypes.includes("Storm Damage") ? "Storm Damage" : ""
+
   const initialSubtype =
-    sp.subtype && subtypes.includes(sp.subtype) ? sp.subtype : ""
+    stormSubtype || (sp.subtype && subtypes.includes(sp.subtype) ? sp.subtype : "")
 
   // Direct hire: `?for=<slug>` targets one verified contractor. Unknown/unverified
   // slugs are ignored silently — the wizard falls back to the broadcast flow.
@@ -56,9 +62,12 @@ export default async function GetAQuotePage({
       subtypes={subtypes}
       initialSubtype={initialSubtype}
       initialWhere={sp.where ?? ""}
+      initialUrgency={storm ? "emergency" : "within_month"}
       isLoggedInHomeowner={isHomeowner}
       loggedInName={isHomeowner ? user?.fullName ?? null : null}
       target={target}
+      stormEventId={storm?.id ?? null}
+      stormBanner={storm ? { eventType: storm.eventType, city: storm.city } : null}
     />
   )
 }

@@ -218,6 +218,13 @@
       "when": 1782728669414,
       "tag": "0030_prospect_outreach_count",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1782818713076,
+      "tag": "0031_fearless_sumo",
+      "breakpoints": true
     }
   ]
 }

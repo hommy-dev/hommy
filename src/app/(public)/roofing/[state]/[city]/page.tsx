@@ -12,7 +12,8 @@ import { ROOFING_SUBTYPE_PAGES } from "@/lib/config/roofing-subtypes";
 import { absoluteUrl, SITE_INDEXABLE } from "@/lib/seo";
 import { ogImageMeta } from "@/lib/og";
 import { getRoofersDirectory } from "@/lib/data/roofers";
-import { JsonLd, BreadcrumbJsonLd } from "@/components/seo/structured-data";
+import { JsonLd, BreadcrumbJsonLd, FaqJsonLd } from "@/components/seo/structured-data";
+import { buildCityIntro, buildCityFaq } from "@/lib/seo/city-content";
 import { Icon } from "@/components/ui/icon";
 import { RoofingHero } from "@/components/roofing/roofing-hero";
 import { RoofersDirectory } from "@/components/roofing/roofers-directory";
@@ -73,6 +74,20 @@ export default async function CityPage({
     getCityStormHistory(cityRow.stateCode, cityRow.name),
   ]);
 
+  // Unique, localized content so the page isn't a thin template. Admin-curated
+  // cities.intro / cities.faq override the generated fallback.
+  const contentInput = {
+    cityName: cityRow.name,
+    stateName: cityRow.stateName,
+    stateCode: cityRow.stateCode,
+    proCount: dir.total,
+    recentRequests: demand.recentRequests,
+    hasRecentStorm: storms.length > 0,
+  };
+  const intro = cityRow.intro ?? buildCityIntro(contentInput);
+  const faqItems =
+    cityRow.faq && cityRow.faq.length > 0 ? cityRow.faq : buildCityFaq(contentInput);
+
   return (
     <>
     <div className="mx-auto px-5 pb-10 pt-28 lg:max-w-[95vw] lg:px-[1.389vw] lg:pb-[2vw] lg:pt-[10vw]">
@@ -97,6 +112,7 @@ export default async function CityPage({
           provider: { "@type": "Organization", name: "Hommy", url: absoluteUrl("/") },
         }}
       />
+      <FaqJsonLd items={faqItems} />
 
       <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground lg:mb-[1.5vw] lg:gap-[0.4vw] lg:text-[0.903vw]" aria-label="Breadcrumb">
         <Link href="/roofing" className="hover:text-foreground">Roofing</Link>
@@ -108,10 +124,7 @@ export default async function CityPage({
 
       <RoofingHero
         title={`Roofers in ${cityRow.name}, ${cityRow.stateCode}`}
-        intro={
-          cityRow.intro ??
-          `Compare licensed and insured roofers serving ${cityRow.name}. Free to post, no spam calls, and you only hear from the roofers you choose.`
-        }
+        intro={intro}
         ctaHref={quoteHref}
         demand={
           demand.recentRequests > 0
@@ -173,12 +186,12 @@ export default async function CityPage({
         </div>
       </section>
 
-      {/* FAQ (only when curated) */}
-      {cityRow.faq && cityRow.faq.length > 0 && (
+      {/* FAQ — curated (cities.faq) or the localized generated fallback */}
+      {faqItems.length > 0 && (
         <section className="mt-14 max-w-3xl lg:mt-[4vw] lg:max-w-[62vw]">
           <h2 className="font-sebenta text-2xl font-semibold tracking-tight text-foreground lg:text-[1.944vw]">Common questions</h2>
           <dl className="mt-6 space-y-3 lg:mt-[1.667vw] lg:space-y-[0.9vw]">
-            {cityRow.faq.map((f, i) => (
+            {faqItems.map((f, i) => (
               <div key={i} className="rounded-lg bg-card p-5 ring-1 ring-foreground/10 lg:rounded-[0.556vw] lg:p-[1.389vw]">
                 <dt className="font-semibold text-foreground lg:text-[1.111vw]">{f.q}</dt>
                 <dd className="mt-1.5 text-muted-foreground lg:mt-[0.4vw] lg:text-[1.02vw]">{f.a}</dd>

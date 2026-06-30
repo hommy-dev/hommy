@@ -47,6 +47,25 @@ export function WebSiteJsonLd() {
   )
 }
 
+/** FAQPage schema. Only emit when the same Q&A are actually visible on the page
+ *  (Google requires it) — answers must be genuine, not keyword stuffing. */
+export function FaqJsonLd({ items }: { items: { q: string; a: string }[] }) {
+  if (items.length === 0) return null
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: items.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }}
+    />
+  )
+}
+
 /** Breadcrumb trail. Pass ordered { name, url } items (absolute URLs). */
 export function BreadcrumbJsonLd({ items }: { items: { name: string; url: string }[] }) {
   return (

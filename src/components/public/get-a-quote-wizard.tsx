@@ -34,17 +34,25 @@ export function GetAQuoteWizard({
   subtypes,
   initialSubtype,
   initialWhere,
+  initialUrgency = "within_month",
   isLoggedInHomeowner,
   loggedInName,
   target = null,
+  stormEventId = null,
+  stormBanner = null,
 }: {
   subtypes: string[];
   initialSubtype: string;
   initialWhere: string;
+  initialUrgency?: string;
   isLoggedInHomeowner: boolean;
   loggedInName: string | null;
   /** Direct hire: when set, the request goes to this one contractor (not broadcast). */
   target?: { slug: string; name: string; logoUrl: string | null } | null;
+  /** Set when the post came from a storm landing page — attributes the lead. */
+  stormEventId?: string | null;
+  /** Banner shown when posting in response to a logged storm. */
+  stormBanner?: { eventType: string; city: string | null } | null;
 }) {
   const router = useRouter();
   const [pending, startSubmit] = useTransition();
@@ -64,7 +72,7 @@ export function GetAQuoteWizard({
   const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(
     initialSubtype ? [initialSubtype] : []
   );
-  const [urgency, setUrgency] = useState<string>("within_month");
+  const [urgency, setUrgency] = useState<string>(initialUrgency);
   const [notes, setNotes] = useState("");
   // Photos are staged LOCALLY and only uploaded to Cloudinary on submit — keeps
   // the picker instant and avoids burning storage on photos the user removes.
@@ -221,6 +229,7 @@ export function GetAQuoteWizard({
         lat: place?.lat ?? null,
         lng: place?.lng ?? null,
         smsOptIn,
+        ...(stormEventId ? { stormEventId } : {}),
         ...(isLoggedInHomeowner || signedIn ? {} : { fullName, email, phone }),
       };
 
@@ -346,6 +355,16 @@ export function GetAQuoteWizard({
       </header>
 
       <main className="mx-auto bg-background flex w-full max-w-2xl lg:max-w-[45vw] flex-1 flex-col text-center px-6 lg:px-[1.667vw] py-10 lg:py-[2.778vw] rounded-lg lg:rounded-[1vw]">
+        {stormBanner ? (
+          <div className="mb-6 lg:mb-[1.667vw] flex items-center justify-center gap-2.5 lg:gap-[0.694vw] rounded-lg lg:rounded-[0.7vw] bg-warning-bg px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
+            <Icon name="storm" className="size-5 lg:size-[1.4vw] shrink-0 text-warning" />
+            <span className="text-sm lg:text-[0.972vw] text-foreground">
+              Responding to {stormBanner.eventType.replace(/_/g, " ")} damage
+              {stormBanner.city ? ` reported in ${stormBanner.city}` : ""} — we&apos;re prioritizing these quotes.
+            </span>
+          </div>
+        ) : null}
+
         {target ? (
           <div className="mb-6 lg:mb-[1.667vw] flex items-center justify-center gap-2.5 lg:gap-[0.694vw] rounded-lg lg:rounded-[0.7vw] bg-muted/60 px-4 lg:px-[1.111vw] py-3 lg:py-[0.833vw]">
             {target.logoUrl ? (

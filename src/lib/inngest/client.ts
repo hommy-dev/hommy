@@ -56,6 +56,7 @@ export const INNGEST_EVENTS = {
   LEAD_AWAITING_COVERAGE: "lead/awaiting-coverage", // a posted lead matched zero contractors — kick recruitment
   RECRUITMENT_DISCOVER: "recruitment/discover", // admin city campaign — discover prospects at a point
   PROSPECT_ENRICH: "recruitment/prospect.enrich", // find+verify one prospect's email (crawl-first, no AI)
+  STORM_DETECTED: "storm/detected", // a storm was logged — pre-position roofers in the area
 
   // Notification events
   NOTIFICATION_LEAD_EXPIRY_WARNING: "notification/lead-expiry-warning",

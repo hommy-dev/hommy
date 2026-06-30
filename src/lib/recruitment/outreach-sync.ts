@@ -8,9 +8,9 @@
 // The hard gates here are the compliance backbone — we never email an unverified,
 // opted-out, converted, or over-cap address.
 
-import { and, asc, eq, gte, inArray, isNotNull, isNull, lt, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, asc, count, eq, gte, inArray, isNotNull, isNull, lt, ne, notInArray, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contractorProspects } from '@/lib/db/schema'
+import { contractorProspects, emailOptOuts } from '@/lib/db/schema'
 import { isEmailOptedOut } from '@/lib/notifications/opt-out'
 import { mintInviteToken, mintUnsubscribeToken } from '@/lib/recruitment/invite'
 import {
@@ -25,6 +25,48 @@ import {
   OUTREACH_FOLLOWUP_COOLDOWN_HOURS,
   OUTREACH_AREA_RADIUS_METERS,
 } from '@/lib/config/recruitment'
+import {
+  dailySendCap,
+  inviteDailyCeiling,
+  GUARDRAILS,
+  type OutreachStream,
+} from '@/lib/recruitment/send-policy'
+
+const GUARDRAIL_MIN_SAMPLE = 50 // don't auto-throttle on tiny samples (early noise)
+
+/** Emails sent so far today (lastOutreachAt is stamped on every send). */
+async function sentToday(): Promise<number> {
+  const [r] = await db
+    .select({ n: count() })
+    .from(contractorProspects)
+    .where(gte(contractorProspects.lastOutreachAt, sql`date_trunc('day', now())`))
+  return r?.n ?? 0
+}
+
+/**
+ * Deliverability auto-throttle: once we've sent a meaningful sample, pause all
+ * outreach if bounce or complaint rates breach the guardrails (Gmail/Yahoo
+ * bulk-sender danger zone). Rates come from the Resend webhook → email_opt_outs.
+ */
+async function guardrailStatus(): Promise<{ ok: boolean; reason?: string }> {
+  const [agg] = await db
+    .select({ sent: sql<number>`coalesce(sum(${contractorProspects.outreachCount}), 0)::int` })
+    .from(contractorProspects)
+  const sent = agg?.sent ?? 0
+  if (sent < GUARDRAIL_MIN_SAMPLE) return { ok: true }
+
+  const [b] = await db.select({ n: count() }).from(emailOptOuts).where(eq(emailOptOuts.source, 'bounce'))
+  const [c] = await db.select({ n: count() }).from(emailOptOuts).where(eq(emailOptOuts.source, 'complaint'))
+  const bounceRate = (b?.n ?? 0) / sent
+  const complaintRate = (c?.n ?? 0) / sent
+  if (bounceRate > GUARDRAILS.maxBounceRate) {
+    return { ok: false, reason: `bounce rate ${(bounceRate * 100).toFixed(1)}% over ${GUARDRAILS.maxBounceRate * 100}%` }
+  }
+  if (complaintRate > GUARDRAILS.maxComplaintRate) {
+    return { ok: false, reason: `complaint rate ${(complaintRate * 100).toFixed(2)}% over ${GUARDRAILS.maxComplaintRate * 100}%` }
+  }
+  return { ok: true }
+}
 
 export type SendResult = { ok: boolean; selected: number; sent: number; reason?: string }
 
@@ -76,7 +118,10 @@ function eligibilityFilters() {
  * Returns 'sent' on success, 'suppressed' when opted out (and marks it so), or
  * 'fatal' on a config error the caller should stop the whole run for.
  */
-async function sendToProspect(c: Candidate): Promise<'sent' | 'suppressed' | 'skipped' | 'fatal'> {
+async function sendToProspect(
+  c: Candidate,
+  stream: OutreachStream,
+): Promise<'sent' | 'suppressed' | 'skipped' | 'fatal'> {
   if (!c.email) return 'skipped'
   if (await isEmailOptedOut(c.email)) {
     await db
@@ -99,6 +144,7 @@ async function sendToProspect(c: Candidate): Promise<'sent' | 'suppressed' | 'sk
     isFollowUp: c.outreachCount > 0,
     claimUrl: `${appUrl()}/claim/${inviteToken}`,
     unsubscribeUrl: `${appUrl()}/unsubscribe/${unsubToken}`,
+    stream,
   })
   if (!res.ok) {
     console.error('[outreach-sync] send failed', { id: c.id })
@@ -119,10 +165,10 @@ async function sendToProspect(c: Candidate): Promise<'sent' | 'suppressed' | 'sk
 }
 
 /** Walk a candidate list, sending each, stopping early only on a fatal config error. */
-async function runOutreachOver(candidates: Candidate[]): Promise<SendResult> {
+async function runOutreachOver(candidates: Candidate[], stream: OutreachStream): Promise<SendResult> {
   let sent = 0
   for (const c of candidates) {
-    const outcome = await sendToProspect(c)
+    const outcome = await sendToProspect(c, stream)
     if (outcome === 'fatal') {
       return { ok: false, selected: candidates.length, sent, reason: 'UNSUBSCRIBE_SECRET not set' }
     }
@@ -131,11 +177,21 @@ async function runOutreachOver(candidates: Candidate[]): Promise<SendResult> {
   return { ok: true, selected: candidates.length, sent }
 }
 
-/** Send the next global batch of recruitment emails (oldest prospects first). */
+/**
+ * Send the next global batch of INVITE emails (oldest prospects first). Invites
+ * are the lower-priority stream: they're bounded by the invite daily ceiling
+ * (a share of the cap) so they can never starve lead mails, and pause entirely
+ * if the deliverability guardrails trip.
+ */
 export async function sendPendingOutreach(): Promise<SendResult> {
   if (!recruitmentEmailConfigured()) {
     return { ok: false, selected: 0, sent: 0, reason: 'recruitment email not configured' }
   }
+  const guard = await guardrailStatus()
+  if (!guard.ok) return { ok: false, selected: 0, sent: 0, reason: `paused — ${guard.reason}` }
+
+  const budget = Math.max(0, inviteDailyCeiling() - (await sentToday()))
+  if (budget === 0) return { ok: true, selected: 0, sent: 0, reason: 'daily invite budget reached' }
 
   const candidates = await db
     .select(CANDIDATE_COLUMNS)
@@ -143,9 +199,9 @@ export async function sendPendingOutreach(): Promise<SendResult> {
     .where(eligibilityFilters())
     // Fewest touches first (first-timers ahead of follow-ups), then oldest found.
     .orderBy(asc(contractorProspects.outreachCount), asc(contractorProspects.createdAt))
-    .limit(OUTREACH_EXPORT_BATCH)
+    .limit(Math.min(OUTREACH_EXPORT_BATCH, budget))
 
-  return runOutreachOver(candidates)
+  return runOutreachOver(candidates, 'invite')
 }
 
 /**
@@ -162,6 +218,12 @@ export async function sendAreaOutreach(
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return { ok: false, selected: 0, sent: 0, reason: 'no coordinates' }
   }
+  // Lead mails are the priority stream: bounded only by the FULL daily cap.
+  const guard = await guardrailStatus()
+  if (!guard.ok) return { ok: false, selected: 0, sent: 0, reason: `paused — ${guard.reason}` }
+
+  const budget = Math.max(0, dailySendCap() - (await sentToday()))
+  if (budget === 0) return { ok: true, selected: 0, sent: 0, reason: 'daily cap reached' }
 
   const point = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography`
   const prospectPoint = sql`ST_SetSRID(ST_MakePoint(${contractorProspects.lng}, ${contractorProspects.lat}), 4326)::geography`
@@ -180,9 +242,9 @@ export async function sendAreaOutreach(
     )
     // Fewest touches first, so we spread nudges before re-hitting the same shops.
     .orderBy(asc(contractorProspects.outreachCount), asc(contractorProspects.lastOutreachAt))
-    .limit(OUTREACH_EXPORT_BATCH)
+    .limit(Math.min(OUTREACH_EXPORT_BATCH, budget))
 
-  return runOutreachOver(candidates)
+  return runOutreachOver(candidates, 'lead')
 }
 
 /** Skip prospects we'll never email (no findable email) — housekeeping. */

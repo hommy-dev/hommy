@@ -22,6 +22,7 @@ import { contractorEligible } from './contractor-eligible'
 import { contractorClaimed } from './contractor-claimed'
 import { recruitmentDiscover } from './recruitment-discover'
 import { prospectEnrich, prospectEnrichDrain } from './prospect-enrich'
+import { stormDetected } from './storm-detected'
 
 // Registered with serve() in src/app/api/inngest/route.ts
 export const functions = [
@@ -41,4 +42,5 @@ export const functions = [
   recruitmentDiscover,
   prospectEnrich,
   prospectEnrichDrain,
+  stormDetected,
 ]

@@ -798,7 +798,15 @@ export const stormEvents = pgTable('storm_events', {
   eventType: stormEventType('event_type').notNull(),
   severity: text('severity'),
   affectedZipCodes: text('affected_zip_codes').array().notNull().default(sql`'{}'::text[]`),
+  // Storm center + area: drives recruitment discovery (lat/lng) and the public
+  // storm landing page (city/state). Optional so legacy rows still work.
+  lat: doublePrecision('lat'),
+  lng: doublePrecision('lng'),
+  city: text('city'),
+  state: text('state'),
   detectedAt: timestamp('detected_at', { withTimezone: true }).notNull().defaultNow(),
+  // True once we've fired contractor discovery to pre-position roofers in the area.
+  discoverySent: boolean('discovery_sent').notNull().default(false),
   alertsSent: integer('alerts_sent').notNull().default(0),
   leadsGenerated: integer('leads_generated').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

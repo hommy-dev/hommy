@@ -12,18 +12,32 @@
 // which both helps deliverability and is how a real person's email actually looks.
 
 import { Resend } from 'resend'
+import { streamConfig, type OutreachStream } from '@/lib/recruitment/send-policy'
 
 // The recruitment subdomain lives in a SEPARATE Resend account (free plan = 1
 // domain per account), so it needs its OWN key. Fall back to the main key only
-// if a dedicated one isn't set (e.g. once both domains live in one account).
+// if a dedicated one isn't set. recruitmentEmailConfigured() checks the primary.
 const RECRUITMENT_KEY = process.env.RECRUITMENT_RESEND_API_KEY || process.env.RESEND_API_KEY
-const resend = new Resend(RECRUITMENT_KEY)
 
 const FROM_NAME = process.env.RECRUITMENT_FROM_NAME ?? 'Hommy'
 const FROM_EMAIL = process.env.RECRUITMENT_FROM_EMAIL ?? ''
 const REPLY_TO = process.env.RECRUITMENT_REPLY_TO || FROM_EMAIL
 const MAILING_ADDRESS = process.env.RECRUITMENT_MAILING_ADDRESS ?? ''
-const FROM = FROM_EMAIL.includes('<') ? FROM_EMAIL : `${FROM_NAME} <${FROM_EMAIL}>`
+
+// Lead vs invite send from different accounts/domains (see send-policy.streamConfig)
+// so cold-invite complaints can't hurt the lead channel. One Resend client per key.
+const clients = new Map<string, Resend>()
+function clientFor(apiKey: string): Resend {
+  let c = clients.get(apiKey)
+  if (!c) {
+    c = new Resend(apiKey)
+    clients.set(apiKey, c)
+  }
+  return c
+}
+function fromHeader(fromEmail: string): string {
+  return fromEmail.includes('<') ? fromEmail : `${FROM_NAME} <${fromEmail}>`
+}
 // Who the email is signed by. Set RECRUITMENT_SIGNER_NAME to a real first name so
 // it reads as a person, not a brand. Falls back to the from-name.
 const SIGNER = process.env.RECRUITMENT_SIGNER_NAME || FROM_NAME
@@ -57,6 +71,8 @@ export type RecruitmentEmailVars = {
   rating?: string | null
   /** True when this isn't the prospect's first email (a later job in their area). */
   isFollowUp?: boolean
+  /** Which sending stream/account+domain to use. 'lead' (default) = protected; 'invite' = secondary. */
+  stream?: OutreachStream
 }
 
 // Stable per-prospect seed so phrasing varies between prospects but stays the
@@ -130,7 +146,7 @@ function renderHtml(v: RecruitmentEmailVars, c: Copy): string {
   const cta = v.isFollowUp ? 'See the jobs' : 'See the job'
   const button =
     `<p style="margin:4px 0 18px">` +
-    `<a href="${v.claimUrl}" style="display:inline-block;padding:10px 20px;background:#111;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px">${cta}</a>` +
+    `<a href="${v.claimUrl}" style="display:inline-block;padding:10px 20px;background:#1f00ce;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px">${cta}</a>` +
     `</p>`
   const body = c.lines
     .map((l) => {
@@ -186,8 +202,9 @@ export async function sendRecruitmentEmail(
     // links are a strong "this is marketing" signal that pushes mail to Gmail
     // Promotions. Tracking is a domain-level setting, not a per-send flag here.
     // Resend does NOT throw on API errors - it returns them in `error`. Check it.
-    const { data, error } = await resend.emails.send({
-      from: FROM,
+    const cfg = streamConfig(v.stream ?? 'lead')
+    const { data, error } = await clientFor(cfg.apiKey).emails.send({
+      from: fromHeader(cfg.fromEmail),
       to,
       replyTo: REPLY_TO || undefined,
       subject,
