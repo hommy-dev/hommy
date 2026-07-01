@@ -10,7 +10,7 @@
 
 import { and, asc, count, eq, gte, inArray, isNotNull, isNull, lt, ne, notInArray, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contractorProspects, emailOptOuts, leads } from '@/lib/db/schema'
+import { contractorProspects, emailOptOuts, leads, outreachSends } from '@/lib/db/schema'
 import { isEmailOptedOut } from '@/lib/notifications/opt-out'
 import { mintInviteToken, mintUnsubscribeToken } from '@/lib/recruitment/invite'
 import {
@@ -28,20 +28,21 @@ import {
   INVITE_FOLLOWUP_DAYS,
 } from '@/lib/config/recruitment'
 import {
-  dailySendCap,
-  inviteDailyCeiling,
+  streamDailyCap,
   GUARDRAILS,
   type OutreachStream,
 } from '@/lib/recruitment/send-policy'
 
 const GUARDRAIL_MIN_SAMPLE = 50 // don't auto-throttle on tiny samples (early noise)
 
-/** Emails sent so far today (lastOutreachAt is stamped on every send). */
-async function sentToday(): Promise<number> {
+/** Emails sent so far today ON THIS STREAM's domain. Exact per-send count from
+ *  the ledger — the prospect's last_outreach_at is a single timestamp and can't
+ *  count two sends in a day or attribute a send to a stream. */
+async function sentToday(stream: OutreachStream): Promise<number> {
   const [r] = await db
     .select({ n: count() })
-    .from(contractorProspects)
-    .where(gte(contractorProspects.lastOutreachAt, sql`date_trunc('day', now())`))
+    .from(outreachSends)
+    .where(and(eq(outreachSends.stream, stream), gte(outreachSends.sentAt, sql`date_trunc('day', now())`)))
   return r?.n ?? 0
 }
 
@@ -50,15 +51,25 @@ async function sentToday(): Promise<number> {
  * outreach if bounce or complaint rates breach the guardrails (Gmail/Yahoo
  * bulk-sender danger zone). Rates come from the Resend webhook → email_opt_outs.
  */
-async function guardrailStatus(): Promise<{ ok: boolean; reason?: string }> {
+async function guardrailStatus(stream: OutreachStream): Promise<{ ok: boolean; reason?: string }> {
+  // Sample + rates are PER STREAM/domain: an invite-domain complaint spike must
+  // never pause the money-making lead domain. Sent sample = ledger rows for the
+  // stream; bounces/complaints = opt-outs the Resend webhook attributed to it.
   const [agg] = await db
-    .select({ sent: sql<number>`coalesce(sum(${contractorProspects.outreachCount}), 0)::int` })
-    .from(contractorProspects)
-  const sent = agg?.sent ?? 0
+    .select({ n: count() })
+    .from(outreachSends)
+    .where(eq(outreachSends.stream, stream))
+  const sent = agg?.n ?? 0
   if (sent < GUARDRAIL_MIN_SAMPLE) return { ok: true }
 
-  const [b] = await db.select({ n: count() }).from(emailOptOuts).where(eq(emailOptOuts.source, 'bounce'))
-  const [c] = await db.select({ n: count() }).from(emailOptOuts).where(eq(emailOptOuts.source, 'complaint'))
+  const [b] = await db
+    .select({ n: count() })
+    .from(emailOptOuts)
+    .where(and(eq(emailOptOuts.source, 'bounce'), eq(emailOptOuts.stream, stream)))
+  const [c] = await db
+    .select({ n: count() })
+    .from(emailOptOuts)
+    .where(and(eq(emailOptOuts.source, 'complaint'), eq(emailOptOuts.stream, stream)))
   const bounceRate = (b?.n ?? 0) / sent
   const complaintRate = (c?.n ?? 0) / sent
   if (bounceRate > GUARDRAILS.maxBounceRate) {
@@ -100,7 +111,11 @@ const CANDIDATE_COLUMNS = {
  * (cap 4, no cooldown); cold invites are gentler (cap 2, ~4-day cooldown).
  */
 function eligibilityFilters(
-  { maxEmails = MAX_OUTREACH_EMAILS, cooldownHours = OUTREACH_FOLLOWUP_COOLDOWN_HOURS } = {},
+  {
+    maxEmails = MAX_OUTREACH_EMAILS,
+    cooldownHours = OUTREACH_FOLLOWUP_COOLDOWN_HOURS,
+    firstTouchOnly = false,
+  } = {},
 ) {
   const cooldownCutoff = new Date(Date.now() - cooldownHours * 3600 * 1000)
   return and(
@@ -112,6 +127,10 @@ function eligibilityFilters(
     gte(contractorProspects.emailConfidence, MIN_EMAIL_CONFIDENCE),
     // lifetime cap on touches.
     lt(contractorProspects.outreachCount, maxEmails),
+    // Catch-up path only: roofers we've NEVER emailed, so a stubbornly-uncovered
+    // lead can't daily-spam the same shop and the honest first-touch copy is
+    // always used (never a false "another homeowner just posted").
+    firstTouchOnly ? eq(contractorProspects.outreachCount, 0) : undefined,
     // cooldown: never emailed, or last email older than the throttle window.
     or(
       isNull(contractorProspects.lastOutreachAt),
@@ -168,6 +187,9 @@ async function sendToProspect(
       updatedAt: new Date(),
     })
     .where(eq(contractorProspects.id, c.id))
+  // Ledger row: the exact per-stream/day counter behind per-domain caps, and the
+  // resend_id the webhook uses to attribute a future bounce/complaint to this domain.
+  await db.insert(outreachSends).values({ prospectId: c.id, stream, resendId: res.id ?? null })
   return 'sent'
 }
 
@@ -194,10 +216,10 @@ export async function sendPendingOutreach(): Promise<SendResult> {
   if (!recruitmentEmailConfigured()) {
     return { ok: false, selected: 0, sent: 0, reason: 'recruitment email not configured' }
   }
-  const guard = await guardrailStatus()
+  const guard = await guardrailStatus('invite')
   if (!guard.ok) return { ok: false, selected: 0, sent: 0, reason: `paused — ${guard.reason}` }
 
-  const budget = Math.max(0, inviteDailyCeiling() - (await sentToday()))
+  const budget = Math.max(0, streamDailyCap('invite') - (await sentToday('invite')))
   if (budget === 0) return { ok: true, selected: 0, sent: 0, reason: 'daily invite budget reached' }
 
   const candidates = await db
@@ -224,7 +246,12 @@ export async function sendPendingOutreach(): Promise<SendResult> {
  * already-emailed prospects get a follow-up (subject to the cap + cooldown).
  */
 export async function sendAreaOutreach(
-  { serviceId, lat, lng }: { serviceId: string; lat: number; lng: number },
+  {
+    serviceId,
+    lat,
+    lng,
+    firstTouchOnly = false,
+  }: { serviceId: string; lat: number; lng: number; firstTouchOnly?: boolean },
 ): Promise<SendResult> {
   if (!recruitmentEmailConfigured()) {
     return { ok: false, selected: 0, sent: 0, reason: 'recruitment email not configured' }
@@ -232,11 +259,11 @@ export async function sendAreaOutreach(
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return { ok: false, selected: 0, sent: 0, reason: 'no coordinates' }
   }
-  // Lead mails are the priority stream: bounded only by the FULL daily cap.
-  const guard = await guardrailStatus()
+  // Lead mails run on their own domain's cap + guardrail (independent of invites).
+  const guard = await guardrailStatus('lead')
   if (!guard.ok) return { ok: false, selected: 0, sent: 0, reason: `paused — ${guard.reason}` }
 
-  const budget = Math.max(0, dailySendCap() - (await sentToday()))
+  const budget = Math.max(0, streamDailyCap('lead') - (await sentToday('lead')))
   if (budget === 0) return { ok: true, selected: 0, sent: 0, reason: 'daily cap reached' }
 
   const point = sql`ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography`
@@ -251,7 +278,7 @@ export async function sendAreaOutreach(
         isNotNull(contractorProspects.lat),
         isNotNull(contractorProspects.lng),
         sql`ST_DWithin(${prospectPoint}, ${point}, ${OUTREACH_AREA_RADIUS_METERS})`,
-        eligibilityFilters(),
+        eligibilityFilters({ firstTouchOnly }),
       ),
     )
     // Fewest touches first, so we spread nudges before re-hitting the same shops.
@@ -275,10 +302,10 @@ export async function sendProspectLeadIfAwaitingDemand(prospectId: string): Prom
   if (!recruitmentEmailConfigured()) {
     return { ok: false, selected: 0, sent: 0, reason: 'recruitment email not configured' }
   }
-  const guard = await guardrailStatus()
+  const guard = await guardrailStatus('lead')
   if (!guard.ok) return { ok: false, selected: 0, sent: 0, reason: `paused — ${guard.reason}` }
 
-  const budget = Math.max(0, dailySendCap() - (await sentToday()))
+  const budget = Math.max(0, streamDailyCap('lead') - (await sentToday('lead')))
   if (budget === 0) return { ok: true, selected: 0, sent: 0, reason: 'daily cap reached' }
 
   const prospectPoint = sql`ST_SetSRID(ST_MakePoint(${contractorProspects.lng}, ${contractorProspects.lat}), 4326)::geography`

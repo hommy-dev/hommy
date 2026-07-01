@@ -8,10 +8,34 @@
 // RESEND_WEBHOOK_SECRET is set, the secret must match.
 
 import { type NextRequest, NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contractorProspects } from '@/lib/db/schema'
+import { contractorProspects, outreachSends } from '@/lib/db/schema'
 import { setEmailOptOut, normalizeEmail } from '@/lib/notifications/opt-out'
+
+/**
+ * Which cold-outreach domain sent the message that just bounced/complained, so
+ * the suppression is attributed to the right stream's guardrail. Prefer the
+ * exact Resend message id; fall back to the prospect's most recent send.
+ */
+async function resolveStream(emailId: string | undefined, email: string): Promise<string | null> {
+  if (emailId) {
+    const [row] = await db
+      .select({ stream: outreachSends.stream })
+      .from(outreachSends)
+      .where(eq(outreachSends.resendId, emailId))
+      .limit(1)
+    if (row?.stream) return row.stream
+  }
+  const [row] = await db
+    .select({ stream: outreachSends.stream })
+    .from(outreachSends)
+    .innerJoin(contractorProspects, eq(contractorProspects.id, outreachSends.prospectId))
+    .where(eq(contractorProspects.email, email))
+    .orderBy(desc(outreachSends.sentAt))
+    .limit(1)
+  return row?.stream ?? null
+}
 
 // Resend event type → our outreach_status. Suppression events also opt-out.
 const STATUS_MAP: Record<string, string> = {
@@ -34,7 +58,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (provided !== secret) return new NextResponse('Invalid secret', { status: 401 })
   }
 
-  let payload: { type?: string; data?: { to?: string[] | string; email?: string } }
+  let payload: { type?: string; data?: { to?: string[] | string; email?: string; email_id?: string } }
   try {
     payload = await req.json()
   } catch {
@@ -50,7 +74,10 @@ export async function POST(req: NextRequest): Promise<Response> {
 
   const email = normalizeEmail(recipient)
   try {
-    if (SUPPRESS[type]) await setEmailOptOut(email, SUPPRESS[type])
+    if (SUPPRESS[type]) {
+      const stream = await resolveStream(payload.data?.email_id, email)
+      await setEmailOptOut(email, SUPPRESS[type], stream)
+    }
     await db
       .update(contractorProspects)
       .set({ outreachStatus: mapped, updatedAt: new Date() })

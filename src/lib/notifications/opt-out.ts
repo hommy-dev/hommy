@@ -51,12 +51,21 @@ export async function isEmailOptedOut(email: string): Promise<boolean> {
   return !!row
 }
 
-/** Record an email opt-out (idempotent). `source`: 'unsubscribe' | 'bounce' | 'complaint'. */
-export async function setEmailOptOut(email: string, source: string): Promise<void> {
+/**
+ * Record an email opt-out (idempotent). `source`: 'unsubscribe' | 'bounce' |
+ * 'complaint'. `stream` ('lead' | 'invite') attributes a bounce/complaint to the
+ * sending domain so guardrails are computed per-domain; null for unsubscribes or
+ * when the origin send can't be resolved.
+ */
+export async function setEmailOptOut(
+  email: string,
+  source: string,
+  stream?: string | null,
+): Promise<void> {
   const e = normalizeEmail(email)
   if (!e) return
   await db
     .insert(emailOptOuts)
-    .values({ email: e, source })
+    .values({ email: e, source, stream: stream ?? null })
     .onConflictDoNothing({ target: emailOptOuts.email })
 }

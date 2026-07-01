@@ -3,6 +3,7 @@ import { getRequiredUser } from "@/lib/auth/session"
 import { roofingServiceId } from "@/lib/data/locations"
 import {
   getRecruitmentOverview,
+  getStreamSendStatus,
   listProspects,
   getUncoveredDemand,
   getEnrichmentErrors,
@@ -40,8 +41,9 @@ export default async function AdminRecruitmentPage() {
   await getRequiredUser("admin")
   const serviceId = (await roofingServiceId()) ?? undefined
 
-  const [overview, prospects, demand, errors] = await Promise.all([
+  const [overview, sendStatus, prospects, demand, errors] = await Promise.all([
     getRecruitmentOverview(serviceId),
+    getStreamSendStatus(),
     listProspects({ serviceId, limit: 200 }),
     getUncoveredDemand(),
     getEnrichmentErrors(50, serviceId),
@@ -114,6 +116,34 @@ export default async function AdminRecruitmentPage() {
           }
           icon={<Icon name="danger-triangle" className="size-[18px] lg:size-[1.25vw]" />}
         />
+      </div>
+
+      {/* Per-domain sending today (warmup ramp) */}
+      <div className="grid grid-cols-1 gap-4 lg:gap-[1.111vw] sm:grid-cols-2">
+        {sendStatus.map((s) => {
+          const usedPct = Math.min(100, Math.round((s.sentToday / Math.max(1, s.cap)) * 100))
+          return (
+            <div
+              key={s.stream}
+              className="rounded-lg lg:rounded-[0.556vw] border bg-card p-4 lg:p-[1.111vw]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm lg:text-[0.972vw] font-medium capitalize">
+                  {s.stream} domain
+                </span>
+                <span className="text-sm lg:text-[0.972vw] tabular-nums text-muted-foreground">
+                  {s.sentToday} / {s.cap} sent today
+                </span>
+              </div>
+              <div className="mt-2 lg:mt-[0.556vw] h-2 lg:h-[0.556vw] overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn("h-full rounded-full", usedPct >= 100 ? "bg-amber-500" : "bg-primary")}
+                  style={{ width: `${usedPct}%` }}
+                />
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {/* Funnel + outreach donut */}

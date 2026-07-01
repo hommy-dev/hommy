@@ -24,9 +24,9 @@
  */
 
 import 'dotenv/config'
-import { and, eq, isNotNull, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contractorProspects, leads } from '@/lib/db/schema'
+import { contractorProspects, leads, outreachSends } from '@/lib/db/schema'
 import { OUTREACH_AREA_RADIUS_METERS } from '@/lib/config/recruitment'
 import { sendAreaOutreach } from '@/lib/recruitment/outreach-sync'
 
@@ -53,6 +53,13 @@ async function resetAreaOutreach(serviceId: string, lat: number, lng: number): P
       ),
     )
     .returning({ id: contractorProspects.id })
+  // Also drop their ledger rows so the reset truly restores first-touch state and
+  // frees today's per-stream budget (sentToday counts the ledger, not the prospect).
+  if (rows.length > 0) {
+    await db.delete(outreachSends).where(
+      inArray(outreachSends.prospectId, rows.map((r) => r.id)),
+    )
+  }
   return rows.length
 }
 

@@ -12,8 +12,10 @@ import {
   cities,
   contractorServices,
   serviceAreas,
+  outreachSends,
 } from '@/lib/db/schema'
 import { roofingServiceId } from '@/lib/data/locations'
+import { streamDailyCap, type OutreachStream } from '@/lib/recruitment/send-policy'
 import { OPERATING_STATES } from '@/lib/config/service-areas'
 import {
   COVERAGE_TARGET_PROS,
@@ -161,6 +163,24 @@ export type RecruitmentOverview = {
   outreachBreakdown: { status: string; count: number }[]
   enrichmentJobs: { queued: number; processing: number; done: number; error: number }
   timeseries: { date: string; label: string; discovered: number; emailed: number }[]
+}
+
+export type StreamSendStatus = { stream: OutreachStream; sentToday: number; cap: number }
+
+/** Today's sends vs the warmup cap for each cold-email domain (lead + invite),
+ *  read from the per-stream ledger — so admins can watch each domain's warmup. */
+export async function getStreamSendStatus(): Promise<StreamSendStatus[]> {
+  const rows = await db
+    .select({ stream: outreachSends.stream, n: sql<number>`count(*)::int` })
+    .from(outreachSends)
+    .where(gte(outreachSends.sentAt, sql`date_trunc('day', now())`))
+    .groupBy(outreachSends.stream)
+  const byStream = new Map(rows.map((r) => [r.stream, r.n]))
+  return (['lead', 'invite'] as OutreachStream[]).map((stream) => ({
+    stream,
+    sentToday: byStream.get(stream) ?? 0,
+    cap: streamDailyCap(stream),
+  }))
 }
 
 /** Funnel counts, KPIs, outreach split, enrichment-job health, and a 30-day trend. */

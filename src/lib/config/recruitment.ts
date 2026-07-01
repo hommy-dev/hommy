@@ -67,6 +67,22 @@ export const ROTATE_DAYS = 14
 /** How many areas the daily sweep discovers per run. */
 export const SWEEP_AREAS_PER_DAY = 4
 
+// ── Lead catch-up + stale-lead expiry ─────────────────────────────────────────
+
+/**
+ * How recent an open awaiting-coverage lead must be for the daily lead catch-up
+ * to keep emailing reachable roofers about it. Matches the window a newly-eligible
+ * roofer is auto-matched over, so we stop chasing supply for demand that's gone stale.
+ */
+export const RECRUIT_LEAD_MAX_AGE_DAYS = 21
+
+/**
+ * After this many days with no roofer, an awaiting-coverage lead is honestly
+ * expired and the homeowner is told (rather than left on "we're matching you"
+ * forever). Must be > RECRUIT_LEAD_MAX_AGE_DAYS so the two windows never overlap.
+ */
+export const RECRUIT_LEAD_EXPIRE_DAYS = 30
+
 export function searchTermForService(serviceSlug: string | null | undefined): string {
   if (!serviceSlug) return DEFAULT_SEARCH_TERM
   return RECRUITMENT_SEARCH_TERM[serviceSlug] ?? DEFAULT_SEARCH_TERM

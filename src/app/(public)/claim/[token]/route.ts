@@ -1,9 +1,10 @@
 // Prospect claim link: /claim/<signed-token>. A recruited roofer clicks the CTA
-// in the cold email → we verify the token, record the click, drop a short-lived
-// cookie so signup can attribute the conversion, and redirect into contractor
-// signup pre-filled with what we know. Invalid/known tokens just fall through to
-// a normal signup (never dead-end). Route handler (not a page) so it can set a
-// cookie + redirect.
+// in the cold email → we verify the token, record the click, and drop a
+// short-lived cookie so signup can attribute the conversion. The cookie (not URL
+// params) carries everything: provisionContractor reads it after signup to link
+// the prospect and prefill the company name, phone, and service area. Invalid/
+// converted tokens just fall through to a normal signup (never dead-end). Route
+// handler (not a page) so it can set a cookie + redirect.
 
 import { type NextRequest, NextResponse } from 'next/server'
 import { verifyInviteToken } from '@/lib/recruitment/invite'
@@ -23,17 +24,12 @@ export async function GET(
   const base = new URL(SIGNUP, req.url)
   if (!prospectId) return NextResponse.redirect(base)
 
+  // Load only to guard against a dead/converted token — the actual prefill is
+  // applied later from the cookie in provisionContractor, not from URL params.
   const prospect = await getProspectForClaim(prospectId).catch(() => null)
   if (!prospect || prospect.alreadyConverted) {
     return NextResponse.redirect(base)
   }
-
-  // Pre-fill what we know (the signup/onboarding can read these if wired).
-  if (prospect.companyName) base.searchParams.set('company', prospect.companyName)
-  if (prospect.website) base.searchParams.set('website', prospect.website)
-  if (prospect.phone) base.searchParams.set('phone', prospect.phone)
-  if (prospect.city) base.searchParams.set('city', prospect.city)
-  if (prospect.state) base.searchParams.set('state', prospect.state)
 
   await markProspectClicked(prospectId).catch((err) =>
     console.error('[claim] markClicked failed', err),

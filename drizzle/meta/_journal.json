@@ -232,6 +232,13 @@
       "when": 1782831703816,
       "tag": "0032_milky_makkari",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1782903609256,
+      "tag": "0033_previous_micromax",
+      "breakpoints": true
     }
   ]
 }

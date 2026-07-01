@@ -970,6 +970,10 @@ export const emailOptOuts = pgTable('email_opt_outs', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   email: text('email').notNull(), // always stored lowercased
   source: text('source'), // 'unsubscribe' | 'bounce' | 'complaint'
+  // Which cold-outreach stream/domain this suppression is attributed to, so
+  // bounce/complaint guardrails are computed PER DOMAIN ('lead' | 'invite').
+  // Null for unsubscribes or when the origin send can't be resolved.
+  stream: text('stream'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('email_opt_outs_email_uq').on(t.email),
@@ -1023,6 +1027,28 @@ export const contractorProspects = pgTable('contractor_prospects', {
   index('contractor_prospects_domain_idx').on(t.domain),
   index('contractor_prospects_enrichment_idx').on(t.enrichmentStatus),
   index('contractor_prospects_outreach_idx').on(t.outreachStatus),
+])
+
+// ============================================================
+// OUTREACH SENDS — one row per successful recruitment email, tagged by stream.
+// This is the exact per-stream/day counter behind per-domain daily caps + warmup
+// (the prospect's last_outreach_at is a single timestamp and can't count two
+// streams or two sends in a day). `resend_id` is the attribution key the Resend
+// webhook uses to credit a bounce/complaint to the domain that actually sent it.
+// Additive + append-only: the prospect row still carries outreach_count/
+// last_outreach_at/outreach_status for the dashboard, cooldown, and eligibility.
+// ============================================================
+
+export const outreachSends = pgTable('outreach_sends', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  prospectId: uuid('prospect_id').notNull().references(() => contractorProspects.id, { onDelete: 'cascade' }),
+  stream: text('stream').notNull(), // 'lead' | 'invite'
+  resendId: text('resend_id'), // Resend message id — webhook bounce/complaint attribution
+  sentAt: timestamp('sent_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('outreach_sends_stream_sent_idx').on(t.stream, t.sentAt),
+  index('outreach_sends_resend_idx').on(t.resendId),
+  index('outreach_sends_prospect_idx').on(t.prospectId),
 ])
 
 // prospect_enrichment_jobs — the queue the external Python worker drains to find

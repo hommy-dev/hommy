@@ -23,6 +23,8 @@ import { contractorClaimed } from './contractor-claimed'
 import { recruitmentDiscover } from './recruitment-discover'
 import { recruitmentSweep } from './recruitment-sweep'
 import { recruitmentInviteSend } from './recruitment-invite-send'
+import { recruitmentLeadCatchup } from './recruitment-lead-catchup'
+import { leadCoverageExpiry } from './lead-coverage-expiry'
 import { prospectEnrich, prospectEnrichDrain } from './prospect-enrich'
 import { stormDetected } from './storm-detected'
 
@@ -44,6 +46,8 @@ export const functions = [
   recruitmentDiscover,
   recruitmentSweep,
   recruitmentInviteSend,
+  recruitmentLeadCatchup,
+  leadCoverageExpiry,
   prospectEnrich,
   prospectEnrichDrain,
   stormDetected,
