@@ -16,7 +16,20 @@ import { Icon } from "@/components/ui/icon"
 
 type FieldErrors = Record<string, string>
 
-export function ContractorSignupForm({ referralCode }: { referralCode?: string }) {
+type Claim = {
+  companyName: string | null
+  city: string | null
+  state: string | null
+  email: string | null
+}
+
+export function ContractorSignupForm({
+  referralCode,
+  claim,
+}: {
+  referralCode?: string
+  claim?: Claim | null
+}) {
   const router = useRouter()
   const [pending, startSubmit] = useTransition()
   const [googlePending, startGoogle] = useTransition()
@@ -79,14 +92,22 @@ export function ContractorSignupForm({ referralCode }: { referralCode?: string }
     )
   }
 
+  const claimLocation = [claim?.city, claim?.state].filter(Boolean).join(", ")
+
   return (
     <div>
       <h1 className="font-sebenta text-[1.9rem] lg:text-[2.111vw] font-bold leading-tight tracking-tight">
-        Create your roofer account
+        {claim?.companyName ? "Claim your listing" : "Create your roofer account"}
       </h1>
       <p className="mt-2 lg:mt-[0.3vw] text-[15px] lg:text-[1.042vw] text-foreground/60">
         Free to join. You only pay credits when you win a job.
       </p>
+      {claim?.companyName && (
+        <p className="mt-3 lg:mt-[0.833vw] rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-[13px] lg:text-[0.903vw] text-primary">
+          You&apos;re claiming <strong>{claim.companyName}</strong>
+          {claimLocation ? ` in ${claimLocation}` : ""}. Set a password to take it over. Your details are already saved.
+        </p>
+      )}
       {referralCode && (
         <p className="mt-3 lg:mt-[0.833vw] rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-[13px] lg:text-[0.903vw] text-primary">
           🎁 You were referred. You both get <strong>25 bonus credits</strong> once you&apos;re verified.
@@ -133,6 +154,7 @@ export function ContractorSignupForm({ referralCode }: { referralCode?: string }
             type="email"
             autoComplete="email"
             placeholder="you@company.com"
+            defaultValue={claim?.email ?? undefined}
             disabled={pending}
             className="h-11 lg:h-[3.056vw] bg-card"
             aria-invalid={!!errors.email}

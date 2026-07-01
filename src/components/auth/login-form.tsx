@@ -27,9 +27,13 @@ export function LoginForm() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(() => {
     const err = searchParams.get("error");
-    return err === "missing_code" || err === "callback"
-      ? "That sign-in link expired or is invalid. Please try again."
-      : null;
+    // A confirmation link that couldn't auto-sign-you-in still confirmed your
+    // email server-side — so reassure + point to sign in, don't alarm.
+    if (err === "callback")
+      return "You're almost in — please sign in to finish. If you just confirmed your email, your account is ready.";
+    if (err === "missing_code")
+      return "That link was incomplete. Please sign in, or request a new link.";
+    return null;
   });
   const [emailStatus, setEmailStatus] = useState<EmailStatus>("idle");
   const [pending, startTransition] = useTransition();

@@ -16,6 +16,7 @@ import {
   users,
   contractors,
   contractorMembers,
+  contractorServices,
   subscriptions,
   plans,
   homeowners,
@@ -196,6 +197,17 @@ async function attributeAndPrefillFromProspect({
         .update(contractors)
         .set({ companyName: prospect.companyName })
         .where(and(eq(contractors.id, contractorId), isNull(contractors.companyName)))
+    }
+
+    // Attach the vertical we recruited them for (roofing) so an auto-verified
+    // recruited roofer matches jobs immediately — they can still edit/add services
+    // in onboarding. Without this, a verified recruit has 0 services and matches
+    // nothing (contractor-eligible joins contractor_services).
+    if (prospect.serviceId) {
+      await db
+        .insert(contractorServices)
+        .values({ contractorId, serviceId: prospect.serviceId })
+        .onConflictDoNothing()
     }
 
     const phone = normalizeToE164(prospect.phone)

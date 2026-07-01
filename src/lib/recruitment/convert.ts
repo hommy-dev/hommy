@@ -10,6 +10,7 @@ import { domainFromUrl } from '@/lib/integrations/osm-places-server'
 export type ClaimProspect = {
   id: string
   companyName: string | null
+  email: string | null
   website: string | null
   phone: string | null
   city: string | null
@@ -23,6 +24,7 @@ export async function getProspectForClaim(prospectId: string): Promise<ClaimPros
     .select({
       id: contractorProspects.id,
       companyName: contractorProspects.companyName,
+      email: contractorProspects.email,
       website: contractorProspects.website,
       phone: contractorProspects.phone,
       city: contractorProspects.city,
@@ -41,6 +43,7 @@ export async function getProspectForClaim(prospectId: string): Promise<ClaimPros
 /** The prospect fields we use to prefill onboarding + auto-connect Google. */
 export type PrefillProspect = {
   id: string
+  serviceId: string | null // the vertical we discovered them for (roofing) → auto-attach
   companyName: string | null
   phone: string | null
   city: string | null
@@ -52,6 +55,7 @@ export type PrefillProspect = {
 
 const PREFILL_COLUMNS = {
   id: contractorProspects.id,
+  serviceId: contractorProspects.serviceId,
   companyName: contractorProspects.companyName,
   phone: contractorProspects.phone,
   city: contractorProspects.city,

@@ -21,7 +21,7 @@
 import 'dotenv/config'
 import { and, eq, like } from 'drizzle-orm'
 import { db } from '../src/lib/db'
-import { contractorProspects } from '../src/lib/db/schema'
+import { contractorProspects, services } from '../src/lib/db/schema'
 import { mintInviteToken } from '../src/lib/recruitment/invite'
 
 const TEST_TAG = 'CLAIM-FLOW-TEST'
@@ -54,9 +54,24 @@ async function main() {
   // A unique email keeps the (email) unique index happy on re-runs.
   const email = `claim-test+${Date.now()}@example.com`
 
+  // --pending → no rating (stays 'pending' for manual license/insurance review).
+  // Default → 4.8 / 20 reviews so contractor-claimed AUTO-VERIFIES (rating>=4 AND
+  // reviews>=5) and the roofer lands straight on live jobs.
+  const pending = hasFlag('pending')
+  // Google review/photo import needs a real place_id. Off by default (it collides
+  // with the (service_id, source_ref) unique index of the real prospect that owns
+  // it); pass --place-id=<a real, unused place_id> to exercise the import path.
+  const sourceRef = pending ? null : (arg('place-id') ?? null)
+  // Real prospects carry the vertical we discovered them for; set it so the
+  // claim provisions a roofing service (→ auto-verified recruit sees jobs).
+  // (Query directly — roofingServiceId() uses cacheLife(), N/A outside Next.)
+  const [svc] = await db.select({ id: services.id }).from(services).where(eq(services.slug, 'roofing')).limit(1)
+  const serviceId = svc?.id ?? null
+
   const [p] = await db
     .insert(contractorProspects)
     .values({
+      serviceId,
       companyName: `${TEST_TAG} Roofing (${stamp})`,
       email,
       emailConfidence: 90,
@@ -68,6 +83,9 @@ async function main() {
       lat: 30.2672,
       lng: -97.7431,
       source: 'manual',
+      sourceRef, // real place_id → Google reviews/photos auto-import on claim
+      rating: pending ? null : '4.80',
+      reviewCount: pending ? null : 20,
       enrichmentStatus: 'email_verified',
       outreachStatus: 'sent',
       outreachCount: 1,
@@ -81,15 +99,16 @@ async function main() {
 
   console.log('\n─────────────────────────────────────────────')
   console.log('Test prospect created:')
-  console.log(`  id       : ${p.id}`)
-  console.log(`  company  : ${TEST_TAG} Roofing (${stamp})`)
-  console.log(`  prefill  : company=example, website, phone, Austin TX`)
+  console.log(`  id        : ${p.id}`)
+  console.log(`  company   : ${TEST_TAG} Roofing (${stamp})`)
+  console.log(`  prefill   : company, website, phone, Austin TX`)
+  console.log(`  verify    : ${pending ? 'PENDING (manual review path)' : 'AUTO-VERIFY (4.8★ / 20 reviews)'}`)
+  console.log(`  google    : ${sourceRef ? `reviews will import (place_id ${sourceRef.slice(0, 12)}…)` : 'none (no place_id)'}`)
   console.log('\nClaim link the roofer would click (open in a fresh/incognito window):\n')
   console.log(`  ${url}`)
-  console.log('\nLocal equivalent (if testing on localhost):')
-  console.log(`  http://localhost:3000/claim/${token}`)
   console.log('\nCleanup when done:')
   console.log('  npx tsx scripts/make-claim-link.ts --cleanup')
+  console.log('  npx tsx scripts/confirm-test-user.ts --email=<your signup email> --delete')
   console.log('─────────────────────────────────────────────\n')
 
   process.exit(0)

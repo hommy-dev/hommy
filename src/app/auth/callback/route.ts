@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest, NextResponse } from 'next/server'
+import { type EmailOtpType } from '@supabase/supabase-js'
 import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
@@ -10,29 +11,39 @@ const ROLE_HOMES: Record<string, string> = {
   homeowner: '/homeowner',
   admin: '/admin',
 }
+// Where each role lands right after confirming a signup (no explicit `next`).
+const ROLE_SIGNUP_NEXT: Record<string, string> = {
+  contractor: '/onboarding',
+  homeowner: '/homeowner',
+}
 
 /**
- * Exchanges Supabase PKCE `code` for a session (OAuth, email confirmation, magic links).
+ * Establishes a session from a Supabase auth callback, then routes.
  *
- * Three cases:
- * - intent=contractor|homeowner (signup buttons): provision the profile, go to `next`.
- * - no intent (LOGIN page "Continue with Google"): a Supabase auth user exists but
- *   may have no app profile. If a profile exists → their dashboard; if brand new →
- *   /auth/choose-role to pick homeowner/contractor (provisioning happens there).
+ * Two link shapes:
+ * - `token_hash` + `type` — EMAIL confirmation / magic link. Verified with
+ *   verifyOtp, which is STATELESS: no PKCE code_verifier cookie, so a link opened
+ *   on a different device or browser than signup still works (the old `code`/PKCE
+ *   flow failed cross-device — that's what the email template must now use).
+ * - `code` — OAuth (Google), exchanged via PKCE in the same browser.
  *
- * Cookies set during the code exchange are collected and re-applied to whichever
- * redirect we ultimately return.
+ * Intent (which profile to provision, where to land) comes from the `intent`
+ * query param on OAuth buttons, or — for email links, which carry no intent — the
+ * `role` we stored in the user's metadata at signup. Cookies from the exchange
+ * are re-applied to the final redirect.
  */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
-  const intent = url.searchParams.get('intent')
-  let next = url.searchParams.get('next') ?? '/'
-  if (!next.startsWith('/') || next.startsWith('//')) {
-    next = '/'
+  const tokenHash = url.searchParams.get('token_hash')
+  const otpType = url.searchParams.get('type') as EmailOtpType | null
+  const intentParam = url.searchParams.get('intent')
+  let next = url.searchParams.get('next') ?? ''
+  if (next && (!next.startsWith('/') || next.startsWith('//'))) {
+    next = ''
   }
 
-  if (!code) {
+  if (!code && !(tokenHash && otpType)) {
     return NextResponse.redirect(new URL('/auth/login?error=missing_code', request.url))
   }
 
@@ -53,10 +64,25 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+  const { data, error } =
+    tokenHash && otpType
+      ? await supabase.auth.verifyOtp({ type: otpType, token_hash: tokenHash })
+      : await supabase.auth.exchangeCodeForSession(code!)
   if (error || !data.user) {
+    // Usually an already-used/expired link. The email is confirmed server-side
+    // regardless, so send them to sign in rather than a dead end.
     return NextResponse.redirect(new URL('/auth/login?error=callback', request.url))
   }
+
+  // Intent: explicit param (OAuth buttons), else the role stored at signup
+  // (email-confirmation links carry no intent param).
+  const roleMeta = data.user.user_metadata?.role as string | undefined
+  const intent =
+    intentParam === 'contractor' || intentParam === 'homeowner'
+      ? intentParam
+      : roleMeta === 'contractor' || roleMeta === 'homeowner'
+        ? roleMeta
+        : null
 
   let destination = next
 
@@ -67,8 +93,9 @@ export async function GET(request: NextRequest) {
     null
 
   if (intent === 'contractor' || intent === 'homeowner') {
-    // Signup-with-Google: no pre-signup step ran, so provision here. Both
-    // provisioning functions are idempotent, so existing users pass through.
+    // Email-confirmation or signup-with-Google. Provisioning is idempotent, so an
+    // already-provisioned user (e.g. the email/password path already ran it) just
+    // passes through — this only matters for the OAuth-first case.
     const fullName =
       (data.user.user_metadata?.full_name as string | undefined) ?? null
     try {
@@ -95,6 +122,8 @@ export async function GET(request: NextRequest) {
     } catch (err) {
       console.error(`[auth/callback] ${intent} provisioning failed`, err)
     }
+    // Email-confirmation links carry no `next` — send them to the role's home.
+    if (!destination) destination = ROLE_SIGNUP_NEXT[intent]
   } else {
     // Login-with-Google (no role intent): route by whether they already have a
     // profile. Brand-new users have no profile yet → let them pick a role.
@@ -120,6 +149,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  if (!destination) destination = '/'
   const response = NextResponse.redirect(new URL(destination, request.url))
   cookieJar.forEach(({ name, value, options }) =>
     response.cookies.set(name, value, options)

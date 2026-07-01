@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { users } from '@/lib/db/schema'
+import { users, contractorMembers, serviceAreas } from '@/lib/db/schema'
 import { provisionContractor, provisionHomeowner, requestContractorWelcome } from '@/lib/auth/provisioning'
 import { getOptionalUser } from '@/lib/auth/session'
 
@@ -105,8 +105,26 @@ export async function loginAction(
     }
   }
 
-  const redirectTo =
-    ROLE_DEFAULT_PATH[row.role as keyof typeof ROLE_DEFAULT_PATH] ?? '/'
+  let redirectTo = ROLE_DEFAULT_PATH[row.role as keyof typeof ROLE_DEFAULT_PATH] ?? '/'
+
+  // A contractor who hasn't set up any coverage area yet is mid-onboarding (e.g.
+  // confirmed their email but never finished) — send them to finish rather than
+  // an empty dashboard. Recruited roofers already have an area, so they pass through.
+  if (row.role === 'contractor') {
+    const [m] = await db
+      .select({ contractorId: contractorMembers.contractorId })
+      .from(contractorMembers)
+      .where(eq(contractorMembers.userId, signInData.user.id))
+      .limit(1)
+    if (m) {
+      const [area] = await db
+        .select({ id: serviceAreas.id })
+        .from(serviceAreas)
+        .where(eq(serviceAreas.contractorId, m.contractorId))
+        .limit(1)
+      if (!area) redirectTo = '/onboarding'
+    }
+  }
 
   return { success: true, data: { redirectTo } }
 }
