@@ -116,29 +116,29 @@ function buildCopy(v: RecruitmentEmailVars): Copy {
   if ((v.stream ?? 'lead') === 'invite') {
     if (v.isFollowUp) {
       const subject = pick(
-        [`following up — ${where}`, `still keen?`, `one more note from Hommy`],
+        [`following up on ${where}`, `still worth a look?`, `your spot in ${where}`],
         seed,
       )
       const lines = [
-        `Me again — just didn't want this to slip by.`,
-        `Quick version: Hommy sends you local roofing jobs in ${where}. No subscription, and you only pay a small fee when a homeowner actually accepts your quote. We're early, so the first roofers in get first pick.`,
-        `If you'd like your spot, it takes about two minutes: ${v.claimUrl}`,
-        `Not for you? No worries — there's an unsubscribe link below and I won't email again.`,
+        `Circling back so this doesn't get buried.`,
+        `Short version: Hommy sends you local roofing jobs in ${where}, with no subscription and nothing paid upfront. You pay a small fee only when a homeowner accepts your quote, so your money goes out only when a real job comes in.`,
+        `The early spots go first come, first served, so it's worth grabbing yours while ${where} is still open. Takes about two minutes: ${v.claimUrl}`,
+        `If it's not for you, no problem. There's an unsubscribe link below and I won't email again.`,
       ]
       return { subject, greeting, lines }
     }
     const subject = pick(
-      [`roofers in ${where}`, `a quick idea for ${company ?? 'your shop'}`, `${where} — a better way to get roofing jobs`],
+      [`roofing jobs in ${where}, pay only when you win`, `a better way to win roofing jobs in ${where}`, `${company ?? 'your shop'} + Hommy`],
       seed,
     )
     const lines = [
       SIGNER_IS_BRAND
-        ? `I'm with Hommy — we're building a simpler way for homeowners in ${where} to find local roofers like you.`
-        : `I'm ${SIGNER}, I'm building Hommy — a simpler way for homeowners in ${where} to find local roofers like you.`,
+        ? `I'll keep this short. Hommy sends local roofing jobs in ${where} straight to you, and you only pay when you actually win the work.`
+        : `I'm ${SIGNER}, I run Hommy. I'll keep this short: we send local roofing jobs in ${where} straight to you, and you only pay when you actually win the work.`,
       ...(ratingLine ? [ratingLine] : []),
-      `I'll be straight with you: we're brand new, so it's early. That's exactly the opportunity — the first roofers in get first pick of the jobs in their area, and you help shape how the whole thing works.`,
-      `No subscription and nothing to pay to be listed. You only pay a small fee if a homeowner accepts your quote, and new accounts start with credit, so the first jobs cost you nothing. Our goal is simple: more local jobs and better tools, at the lowest cost we can.`,
-      `If that's worth a look, you can claim your spot here: ${v.claimUrl}`,
+      `You know the drill with most lead sites: a monthly fee, or paying for shared leads that four other roofers already bought and half of which never answer. Hommy is the opposite. No subscription, no buying dead leads. You pay a small fee only when a homeowner accepts your quote, and new accounts start with credit, so your first jobs cost you nothing.`,
+      `We're early in ${where}, and that works in your favor. The first roofers on get first pick of every job in the area, plus modern tools to quote, message, and manage the work in one place instead of chasing paper and phone tag.`,
+      `It takes about two minutes to claim your spot: ${v.claimUrl}`,
     ]
     return { subject, greeting, lines }
   }
@@ -149,22 +149,22 @@ function buildCopy(v: RecruitmentEmailVars): Copy {
       seed,
     )
     const lines = [
-      `Me again — another homeowner in ${where} just posted a roofing job and still no one's covering it.`,
+      `Me again. Another homeowner in ${where} just posted a roofing job and still no one's covering it.`,
       `Same as before: free to look, you only pay if a homeowner accepts your quote. Here it is: ${v.claimUrl}`,
-      `If it's not for you, no worries — there's an unsubscribe link below and I won't email again.`,
+      `If it's not for you, no worries. There's an unsubscribe link below and I won't email again.`,
     ]
     return { subject, greeting, lines }
   }
 
   const subject = pick(
-    [`roofing job in ${where}`, `quick one about ${where}`, `${where} — homeowner needs a roofer`],
+    [`roofing job in ${where}`, `quick one about ${where}`, `homeowner in ${where} needs a roofer`],
     seed,
   )
   const lines = [
     SIGNER_IS_BRAND
-      ? `I run Hommy — we connect homeowners with local roofers.`
+      ? `I run Hommy. We connect homeowners with local roofers.`
       : `I'm ${SIGNER}, I run Hommy (we connect homeowners with local roofers).`,
-    `A homeowner in ${where} just posted a roofing job, and we don't have enough roofers covering that area yet — so there's work waiting for you.`,
+    `A homeowner in ${where} just posted a roofing job, and we don't have enough roofers covering that area yet, so there's work waiting for you.`,
     ...(ratingLine ? [ratingLine] : []),
     `No subscription, nothing to pay to be listed. You'd only pay a small fee if a homeowner accepts your quote. New accounts start with some credit too, so the first few jobs will cost you nothing.`,
     `If you want a look, here's the job: ${v.claimUrl}`,
