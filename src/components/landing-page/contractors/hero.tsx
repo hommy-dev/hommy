@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/icon";
 
 // A roofer-at-work shot reads better here than a finished-home shot — this page
 // speaks to the pro, not the homeowner. Swap the path to change it.
-const HERO_IMAGE = "/bg/Recreate_image_upper_top_far_202607010916.jpeg";
+const HERO_IMAGE = "/bg/roofers.webp";
 
 export function ContractorHero() {
   return (
