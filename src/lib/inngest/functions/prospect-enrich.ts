@@ -16,6 +16,7 @@ import { inngest, INNGEST_EVENTS } from '@/lib/inngest/client'
 import { db } from '@/lib/db'
 import { contractorProspects, prospectEnrichmentJobs } from '@/lib/db/schema'
 import { findEmailForProspect } from '@/lib/recruitment/email-finder'
+import { sendProspectLeadIfAwaitingDemand } from '@/lib/recruitment/outreach-sync'
 
 const MAX_ATTEMPTS = 3
 const STALE_CLAIM_MINUTES = 30
@@ -102,15 +103,16 @@ export const prospectEnrich = inngest.createFunction(
       }),
     )
 
-    // 4) Write back the prospect + finish the job.
-    await step.run('writeback', async () => {
+    // 4) Write back the prospect + finish the job. Returns true only when we
+    //    just made this prospect reachable (a fresh, verified email landed).
+    const enriched = await step.run('writeback', async (): Promise<boolean> => {
       if (result.status === 'no_email') {
         await db
           .update(contractorProspects)
           .set({ enrichmentStatus: 'no_email', updatedAt: new Date() })
           .where(eq(contractorProspects.id, prospectId))
         await finishJob(prospectId, 'done', result.reason)
-        return
+        return false
       }
       try {
         await db
@@ -123,6 +125,7 @@ export const prospectEnrich = inngest.createFunction(
           })
           .where(eq(contractorProspects.id, prospectId))
         await finishJob(prospectId, 'done', null)
+        return true
       } catch (err) {
         // Another prospect already owns this email (contractor_prospects_email_uq).
         // Treat as no_email/done — parity with the Python worker's unique-violation branch.
@@ -131,8 +134,18 @@ export const prospectEnrich = inngest.createFunction(
           .set({ enrichmentStatus: 'no_email', updatedAt: new Date() })
           .where(eq(contractorProspects.id, prospectId))
         await finishJob(prospectId, 'done', `duplicate email: ${String(err).slice(0, 200)}`)
+        return false
       }
     })
+
+    // 5) Fresh-area catch-up: if a homeowner is already waiting nearby with no
+    //    coverage, email this now-reachable roofer the job immediately instead of
+    //    waiting for the next lead or the daily cron. No-op (gated) otherwise.
+    if (enriched) {
+      await step.run('lead-outreach-if-awaiting', () =>
+        sendProspectLeadIfAwaitingDemand(prospectId),
+      )
+    }
 
     return { ok: true, status: result.status, confidence: result.confidence }
   },

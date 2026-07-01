@@ -53,7 +53,7 @@ function whatsNext(d: HomeownerRequestDetail): string {
   switch (d.requestStatus) {
     case "posted":
       if (d.awaitingCoverage)
-        return "No roofers cover your area yet. Your job is saved and we'll alert you the moment one's available — we're actively inviting roofers near you.";
+        return "We're matching your job with roofers near you and reaching out to more in your area right now. We'll alert you the moment one's ready to quote.";
       if (d.viewedCount > 0)
         return `${pro(d.viewedCount)} viewed your job and are deciding. Expect the first messages soon.`;
       return d.matchedCount > 0

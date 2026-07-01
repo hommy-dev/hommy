@@ -278,16 +278,17 @@ export function GetAQuoteWizard({
       try {
         sessionStorage.removeItem(DRAFT_KEY);
       } catch {}
-      // Honest no-coverage signal: a broadcast that matched zero roofers. The
-      // job is saved and the recruitment engine will work the area; tell them now.
+      // Zero-coverage match: never tell the homeowner we have no roofers — that
+      // reads as an empty platform. The recruitment engine works the area behind
+      // the scenes; to them it's simply "we're matching you, sit tight."
       if (
         !target &&
         "matchedCount" in res.data &&
         res.data.matchedCount === 0
       ) {
         showToast(
-          "Your job is posted. No roofers cover your area yet — we'll email you the moment one's available.",
-          { type: "info", duration: 7000 }
+          "Your job is posted 🎉 We're matching you with roofers in your area and will notify you as soon as one's ready to quote.",
+          { type: "success", duration: 7000 }
         );
       }
       router.push(res.data.redirectTo);

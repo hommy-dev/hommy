@@ -26,7 +26,7 @@ function summary(r: HomeownerLead): string {
       r.quoteCount === 1 ? "" : "s"
     } in. Review and choose.`;
   if (r.awaitingCoverage)
-    return "Your job is saved. We'll alert you ASAP.";
+    return "Hang tight. We're finding the right roofer for your job and will let you know the moment one's ready.";
   if (r.interestedCount > 0)
     return `${r.interestedCount} roofer${
       r.interestedCount === 1 ? " is" : "s are"

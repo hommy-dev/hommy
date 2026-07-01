@@ -10,7 +10,7 @@
 
 import { and, asc, count, eq, gte, inArray, isNotNull, isNull, lt, ne, notInArray, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contractorProspects, emailOptOuts } from '@/lib/db/schema'
+import { contractorProspects, emailOptOuts, leads } from '@/lib/db/schema'
 import { isEmailOptedOut } from '@/lib/notifications/opt-out'
 import { mintInviteToken, mintUnsubscribeToken } from '@/lib/recruitment/invite'
 import {
@@ -259,6 +259,60 @@ export async function sendAreaOutreach(
     .limit(Math.min(OUTREACH_EXPORT_BATCH, budget))
 
   return runOutreachOver(candidates, 'lead')
+}
+
+/**
+ * Send ONE just-enriched prospect their lead email IF a homeowner is already
+ * waiting nearby with no coverage. Closes the fresh-area timing gap: when a job
+ * lands in a never-scraped area, sendAreaOutreach fires before enrichment has
+ * found any emails, so it emails no one; minutes later enrichment finds the
+ * email, but nothing re-sends. This runs at the moment enrichment completes —
+ * if an open awaiting-coverage job sits within the area radius, the roofer gets
+ * the job now instead of never. Reuses the same eligibility/cap/cooldown/opt-out/
+ * guardrail/budget gates as every other send, so it can't double-send or spam.
+ */
+export async function sendProspectLeadIfAwaitingDemand(prospectId: string): Promise<SendResult> {
+  if (!recruitmentEmailConfigured()) {
+    return { ok: false, selected: 0, sent: 0, reason: 'recruitment email not configured' }
+  }
+  const guard = await guardrailStatus()
+  if (!guard.ok) return { ok: false, selected: 0, sent: 0, reason: `paused — ${guard.reason}` }
+
+  const budget = Math.max(0, dailySendCap() - (await sentToday()))
+  if (budget === 0) return { ok: true, selected: 0, sent: 0, reason: 'daily cap reached' }
+
+  const prospectPoint = sql`ST_SetSRID(ST_MakePoint(${contractorProspects.lng}, ${contractorProspects.lat}), 4326)::geography`
+
+  // Eligible AND an open, still-uncovered job sits within the area radius.
+  const [candidate] = await db
+    .select(CANDIDATE_COLUMNS)
+    .from(contractorProspects)
+    .where(
+      and(
+        eq(contractorProspects.id, prospectId),
+        isNotNull(contractorProspects.lat),
+        isNotNull(contractorProspects.lng),
+        eligibilityFilters(),
+        sql`EXISTS (
+          SELECT 1 FROM ${leads} l
+          WHERE l.service_id = ${contractorProspects.serviceId}
+            AND l.awaiting_coverage = true
+            AND l.status = 'open'
+            AND l.lat IS NOT NULL AND l.lng IS NOT NULL
+            AND ST_DWithin(
+              ST_SetSRID(ST_MakePoint(l.lng, l.lat), 4326)::geography,
+              ${prospectPoint},
+              ${OUTREACH_AREA_RADIUS_METERS}
+            )
+        )`,
+      ),
+    )
+    .limit(1)
+
+  if (!candidate) {
+    return { ok: true, selected: 0, sent: 0, reason: 'no nearby awaiting-coverage demand or not eligible' }
+  }
+  return runOutreachOver([candidate], 'lead')
 }
 
 /** Skip prospects we'll never email (no findable email) — housekeeping. */

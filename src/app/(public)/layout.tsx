@@ -1,9 +1,7 @@
 import { SiteFooter } from "@/components/landing-page/site-footer";
 import { SiteHeader } from "@/components/public/site-header";
-import { AnnouncementBar } from "@/components/public/announcement-bar";
 
-/** Shared chrome for the public marketing site: header, footer, and the
- *  pre-launch "early access" bar. */
+/** Shared chrome for the public marketing site: header and footer. */
 export default function PublicLayout({
   children,
 }: {
@@ -14,7 +12,6 @@ export default function PublicLayout({
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-      <AnnouncementBar />
     </div>
   );
 }
