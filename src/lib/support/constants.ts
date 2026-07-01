@@ -10,7 +10,7 @@ import type { IconName } from "@/components/ui/icon"
 // every platform message show one uniform face + the stored logo avatar.
 export const SUPPORT_USER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
 export const SUPPORT_USER_NAME = "Hommy Support"
-export const SUPPORT_USER_EMAIL = "support@hommy.com"
+export const SUPPORT_USER_EMAIL = "support@hommy.online"
 export const SUPPORT_LOGO_URL = "/logo/logo.png"
 
 // Message types offered in the composer's chooser. `feature_request` opens the

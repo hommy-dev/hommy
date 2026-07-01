@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "../ui/icon";
 import { CookieSettingsLink } from "@/components/consent/cookie-settings-link";
+import { SOCIAL_LINKS, SITE_EMAIL, SITE_PHONE } from "@/lib/seo";
 
 const FOOTER = [
   {
@@ -23,7 +24,7 @@ const FOOTER = [
     title: "Company",
     links: [
       { href: "#", label: "About" },
-      { href: "#", label: "Contact" },
+      { href: `mailto:${SITE_EMAIL}`, label: "Contact" },
       { href: "/privacy", label: "Privacy Policy" },
       { href: "/terms", label: "Terms of Service" },
     ],
@@ -52,6 +53,51 @@ export function SiteFooter() {
                 className="size-6 lg:size-[1.4vw] transition-transform group-hover:translate-x-0.5"
               />
             </Link>
+
+            {/* Contact + social profiles */}
+            <div className="mt-8 lg:mt-[2.222vw] space-y-2 lg:space-y-[0.556vw] text-sm lg:text-[0.972vw]">
+              <Link
+                href={`mailto:${SITE_EMAIL}`}
+                className="inline-flex items-center gap-2 lg:gap-[0.556vw] transition-colors hover:text-foreground/70"
+              >
+                <Icon name="email" className="size-4 lg:size-[1.111vw]" />
+                {SITE_EMAIL}
+              </Link>
+              <Link
+                href={`https://wa.me/${SITE_PHONE.replace(/[^0-9]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Message us on WhatsApp at ${SITE_PHONE}`}
+                className="flex items-center gap-2 lg:gap-[0.556vw] transition-colors hover:text-foreground/70"
+              >
+                <Icon
+                  name="whatsapp"
+                  preserveColors
+                  className="size-4 lg:size-[1.111vw]"
+                />
+                {SITE_PHONE}
+              </Link>
+            </div>
+
+            <ul className="mt-5 lg:mt-[1.389vw] flex items-center gap-3 lg:gap-[0.833vw]">
+              {SOCIAL_LINKS.map((s) => (
+                <li key={s.label}>
+                  <Link
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="inline-flex transition-opacity hover:opacity-80"
+                  >
+                    <Icon
+                      name={s.icon}
+                      preserveColors
+                      className="size-7 lg:size-[1.944vw]"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
           {FOOTER.map((col) => (
             <div key={col.title}>

@@ -2,7 +2,15 @@
 // <script type="application/ld+json">. Keep the data honest — only emit fields
 // that are actually true (e.g. don't fake ratings/review counts).
 
-import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo"
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_EMAIL,
+  SITE_PHONE,
+  SOCIAL_LINKS,
+  SITE_FOUNDER,
+  absoluteUrl,
+} from "@/lib/seo"
 
 /** Renders a JSON-LD <script>. `<` is escaped so the JSON can't break out of the tag. */
 export function JsonLd({ data }: { data: Record<string, unknown> }) {
@@ -28,6 +36,23 @@ export function OrganizationJsonLd() {
         logo: absoluteUrl("/logo/logo.png"),
         description:
           "Hommy connects homeowners with licensed and insured local roofers.",
+        email: SITE_EMAIL,
+        telephone: SITE_PHONE,
+        // Verified brand profiles — strengthens entity recognition /
+        // knowledge-graph disambiguation for the Organization. (The founder's
+        // personal profile is linked separately via `founder`, below.)
+        sameAs: SOCIAL_LINKS.map((s) => s.href),
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "customer support",
+          email: SITE_EMAIL,
+          telephone: SITE_PHONE,
+        },
+        founder: {
+          "@type": "Person",
+          name: SITE_FOUNDER.name,
+          sameAs: [SITE_FOUNDER.linkedin],
+        },
       }}
     />
   )

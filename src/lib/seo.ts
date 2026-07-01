@@ -25,6 +25,28 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hommy.o
 /** Default social share image (1200x630), resolved against SITE_URL. */
 export const OG_IMAGE = "/bg/seo-background.jpg"
 
+/** Public contact channels — shared by the footer and Organization structured data. */
+export const SITE_EMAIL = "contact@hommy.online"
+export const SITE_PHONE = "+923147651112"
+
+/**
+ * Official brand social profiles. Used both for the footer social row and the
+ * Organization `sameAs` array (entity recognition / knowledge graph). `icon`
+ * matches a brand SVG in /public/icons.
+ */
+export const SOCIAL_LINKS = [
+  { label: "Instagram", href: "https://www.instagram.com/hommy.online/", icon: "instagram" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/hommymarketplace/", icon: "linkedin" },
+  { label: "YouTube", href: "https://www.youtube.com/@Hommy-marketplace", icon: "youtube" },
+  { label: "Facebook", href: "https://www.facebook.com/share/1DL5wTk7ZF/", icon: "facebook" },
+] as const
+
+/** Founder — linked (via LinkedIn) for entity recognition in Organization schema. */
+export const SITE_FOUNDER = {
+  name: "Haseeb Ahmed Raza Khan",
+  linkedin: "https://www.linkedin.com/in/haseeb-ahmed-raza-khan",
+} as const
+
 /** Build an absolute URL for a path against SITE_URL. */
 export function absoluteUrl(path = "/"): string {
   return new URL(path, SITE_URL).toString()

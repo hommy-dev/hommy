@@ -54,7 +54,7 @@ export default function HomePage() {
       <Statement />
       <HowItWorksLazy />
       <Services />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <Faq />
       <FinalCta />
     </>
