@@ -27,6 +27,7 @@ import { recruitmentLeadCatchup } from './recruitment-lead-catchup'
 import { leadCoverageExpiry } from './lead-coverage-expiry'
 import { prospectEnrich, prospectEnrichDrain } from './prospect-enrich'
 import { stormDetected } from './storm-detected'
+import { messagesDigest } from './messages-digest'
 
 // Registered with serve() in src/app/api/inngest/route.ts
 export const functions = [
@@ -51,4 +52,5 @@ export const functions = [
   prospectEnrich,
   prospectEnrichDrain,
   stormDetected,
+  messagesDigest,
 ]
