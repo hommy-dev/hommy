@@ -318,7 +318,7 @@ export function RoofersDirectory({
         <div className="pointer-events-none sticky bottom-3 z-30 mt-6 flex justify-center lg:hidden">
           <Link
             href={quoteHref}
-            className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground ring-4 ring-background"
+            className="pointer-events-auto inline-flex items-center gap-2 rounded bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground ring-4 ring-background"
           >
             Get free quotes
             <Icon name="arrow-right" className="size-4" />

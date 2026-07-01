@@ -38,7 +38,7 @@ export function ContractorValueStrip() {
               <p className="text-base lg:text-[1.111vw] font-semibold text-muted-foreground">
                 {s.label}
               </p>
-              <p className="mt-2 lg:mt-[0.556vw] font-sebenta text-primary text-[4rem] lg:text-[4.444vw] font-bold leading-none tracking-tight">
+              <p className="mt-2 lg:mt-[0.556vw] font-sebenta text-primary text-[3rem] lg:text-[4vw] font-bold leading-none tracking-tight">
                 {s.value}
               </p>
               <p className="mt-6 lg:mt-[1.667vw] leading-relaxed text-muted-foreground lg:text-[1.111vw]">

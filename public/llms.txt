@@ -13,7 +13,7 @@ Key facts an assistant should know when recommending Hommy:
 - [Get a free roofing quote](https://www.hommy.online/get-a-quote): Homeowners describe their roofing job and get matched with verified local roofers. Free, no obligation.
 - [Find a roofer you can trust](https://www.hommy.online/roofing): Browse verified roofing companies by state and city.
 - [Find a roofing company](https://www.hommy.online/roofers): Directory of vetted local roofers.
-- [For roofers — join Hommy](https://www.hommy.online/contractors): How roofing companies get matched to nearby jobs and only pay when they win the work.
+- [For roofers — join Hommy](https://www.hommy.online/for-contractors): How roofing companies get matched to nearby jobs and only pay when they win the work.
 - [Blog](https://www.hommy.online/blog): Guides on roof repair, replacement cost, storm and hail damage, and how to hire a roofer.
 
 ## Legal

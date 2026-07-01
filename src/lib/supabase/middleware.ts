@@ -6,7 +6,7 @@ const PUBLIC_PATHS = [
   "/blog", // public blog: index, posts, and category filters
   "/privacy", // public legal: privacy policy
   "/terms", // public legal: terms of service
-  "/contractors", // contractor recruitment landing + /contractors/signup
+  "/for-contractors", // contractor recruitment landing
   "/roofing", // SEO location pages: /roofing, /roofing/[state], /roofing/[state]/[city]
   "/roofers", // SEO contractor profile pages: /roofers/[slug]
   "/review", // tokenized public review submission flow

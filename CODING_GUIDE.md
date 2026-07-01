@@ -117,7 +117,7 @@ src/
 ├── app/
 │   ├── page.tsx            # Homepage — public, no auth (homeowner lead intake)
 │   ├── get-a-quote/        # Public homeowner pages — NO accounts for homeowners
-│   ├── contractors/        # Public contractor recruitment + /contractors/signup
+│   ├── for-contractors/    # Public contractor recruitment landing
 │   ├── roofing-contractors/[slug]/   # Public SEO city pages
 │   ├── review/[token]/     # Tokenized homeowner review submission (no login)
 │   ├── dashboard/          # Contractor CRM — auth required, role = contractor
@@ -177,7 +177,7 @@ const PUBLIC_PATHS = [
   "/",
   "/get-a-quote",
   "/thank-you",
-  "/contractors",          // recruitment landing + /contractors/signup
+  "/for-contractors",      // recruitment landing
   "/roofing-contractors",  // SEO city pages
   "/review",               // tokenized homeowner review flow
   "/auth/login",

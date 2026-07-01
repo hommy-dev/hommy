@@ -17,7 +17,7 @@ const OG_CARD = ogImageUrl({ title: "Win more roofing jobs. Only pay when you do
 export const metadata: Metadata = {
   title: { absolute: TITLE },
   description: DESCRIPTION,
-  alternates: { canonical: "/contractors" },
+  alternates: { canonical: "/for-contractors" },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,

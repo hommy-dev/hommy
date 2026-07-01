@@ -53,7 +53,7 @@ type NavItem =
 const NAV: NavItem[] = [
   { kind: "menu", name: "Services" },
   { kind: "link", name: "Blog", href: "/blog" },
-  { kind: "link", name: "For roofers", href: "/contractor" },
+  { kind: "link", name: "For roofers", href: "/for-contractors" },
 ];
 
 // Role → dashboard home. Mirrors ROLE_DEFAULT_PATH in src/lib/actions/auth.ts
@@ -147,15 +147,17 @@ export function SiteHeader() {
     router.refresh();
   };
 
-  // Home: transparent header sitting over the dark hero (light text).
-  // Other pages: solid canvas header (dark text) so it reads on a light bg.
+  // Dark-hero pages (home + the roofer recruitment page): transparent header
+  // sitting over the dark hero (light text). Other pages: solid canvas header
+  // (dark text) so it reads on a light bg.
   const isHome = pathname === "/";
-  // On the home hero the header floats transparent with light text. But when the
-  // mobile menu is open we switch to the solid treatment so the dropdown panel
-  // (and its links) sit on a real background instead of bleeding through to the
-  // hero. Off-home is always solid. `isOpen` is only ever set on mobile, so this
-  // never affects the desktop nav.
-  const solid = !isHome || isOpen;
+  const hasDarkHero = isHome || pathname === "/for-contractors";
+  // On a dark-hero page the header floats transparent with light text. But when
+  // the mobile menu is open we switch to the solid treatment so the dropdown
+  // panel (and its links) sit on a real background instead of bleeding through
+  // to the hero. Non-hero pages are always solid. `isOpen` is only ever set on
+  // mobile, so this never affects the desktop nav.
+  const solid = !hasDarkHero || isOpen;
   const navText = solid ? "text-foreground" : "text-background";
   const navTextMuted = solid ? "text-foreground/70" : "text-background/80";
 
@@ -258,7 +260,7 @@ export function SiteHeader() {
                   href={dashboardHref}
                   className={cn(
                     "relative flex items-center gap-1.5 lg:gap-[0.417vw] h-full cursor-pointer transition-all duration-300 group border-2 rounded-md lg:rounded-[0.556vw] px-4 lg:px-[1.111vw] py-1.5 lg:py-[0.417vw]",
-                    isHome
+                    hasDarkHero
                       ? "border-background/60 text-background hover:border-background/90"
                       : "border-foreground/30 text-foreground hover:border-foreground/60"
                   )}
@@ -303,7 +305,7 @@ export function SiteHeader() {
               />
             ) : (
               <Link
-                href={user ? dashboardHref : isHome ? "/auth/signup/contractor" : "/get-a-quote"}
+                href={user ? dashboardHref : hasDarkHero ? "/auth/signup/contractor" : "/get-a-quote"}
                 onClick={() => setIsOpen(false)}
                 className="flex items-center justify-center text-center cursor-pointer transition-all duration-300 group bg-foreground hover:bg-foreground/80 text-background rounded-md lg:rounded-[0.556vw] px-4 lg:px-[1.111vw] py-2.5 lg:py-[0.694vw]"
               >
@@ -407,7 +409,7 @@ export function SiteHeader() {
               <Link
                 href="/auth/signup/contractor"
                 onClick={() => setIsOpen(false)}
-                className="flex w-full items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] bg-primary px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] font-semibold text-background transition-colors hover:bg-primary/90"
+                className="flex w-full items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] bg-primary px-2 lg:px-[0.556vw] py-3 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] font-semibold text-background transition-colors hover:bg-primary/90"
               >
                 <Icon
                   name="work"
@@ -419,7 +421,7 @@ export function SiteHeader() {
                 href="/auth/login"
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "rounded-md lg:rounded-[0.556vw] px-2 lg:px-[0.556vw] py-2.5 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] hover:bg-foreground/5",
+                  "flex w-full items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] bg-background border border-foreground px-2 lg:px-[0.556vw] py-3 lg:py-[0.694vw] text-[15px] lg:text-[1.042vw] font-semibold text-background transition-colors hover:bg-primary/90",
                   navTextMuted
                 )}
               >

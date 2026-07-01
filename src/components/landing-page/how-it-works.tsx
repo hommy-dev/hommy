@@ -112,7 +112,7 @@ export function HowItWorks() {
           />
         </Link>
         <Link
-          href="/contractors"
+          href="/for-contractors"
           className="inline-flex items-center justify-center gap-2 lg:gap-[0.556vw] rounded-md lg:rounded-[0.556vw] border-2 border-foreground/30 px-6 lg:px-[1.5vw] py-2 lg:py-[0.556vw] text-[15px] lg:text-[1.042vw] font-medium text-foreground transition-colors hover:border-foreground/60"
         >
           Join as a roofer

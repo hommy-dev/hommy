@@ -285,7 +285,7 @@ Every notification goes through one `sendNotification()` core: writes a per-user
 
 `src/app` is organized with route groups by audience (the group name is NOT in the URL): `(public)/` for marketing, `auth/` for auth flows, and `(dashboard)/{contractor,homeowner,admin}/` for the three authenticated areas. So the contractor area lives at `src/app/(dashboard)/contractor/` and serves `/contractor`.
 
-- **Public / marketing:** `/`, `/get-a-quote`, `/contractors`, `/contractors/signup`, `/roofing-contractors/[city]-[state]`. (`src/app/(public)/`)
+- **Public / marketing:** `/`, `/get-a-quote`, `/for-contractors`, `/roofing-contractors/[city]-[state]`. (`src/app/(public)/`)
 - **Homeowner (auth, role `homeowner`):** `/homeowner` dashboard, `/homeowner/requests` — the **Jobs** board (tabbed table; quotes are accepted inline in chat/detail, so there is **no** `/homeowner/quotes` page), `/homeowner/messages`, settings (profile/password). (Frictionless auto-signup from the post flow.) (`src/app/(dashboard)/homeowner/`)
 - **Contractor (auth, role `contractor`):** `/contractor` — command center, **`/contractor/jobs`** — the unified board (offers → engage → quote → won → done; **Leads + Projects were merged into it**, so `/contractor/leads` redirects here), contacts, messages, storm-alerts, reviews, **team** (members + invites), **billing** (plan + credits + purchase), profile, settings. (`src/app/(dashboard)/contractor/`)
 - **Admin (auth, role `admin`):** `/admin` — leads, contractors (verify), members, storm-events, plans/credits, analytics, settings. (`src/app/(dashboard)/admin/`)

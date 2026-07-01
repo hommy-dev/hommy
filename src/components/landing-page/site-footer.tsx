@@ -14,8 +14,8 @@ const FOOTER = [
   {
     title: "For roofers",
     links: [
-      { href: "/contractors", label: "Become a roofer" },
-      { href: "/contractors", label: "How it works" },
+      { href: "/for-contractors", label: "Become a roofer" },
+      { href: "/for-contractors", label: "How it works" },
       { href: "/auth/login", label: "Sign in" },
     ],
   },
