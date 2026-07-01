@@ -49,6 +49,42 @@ async function main() {
     return
   }
 
+  // --prospect=<id>: mint a claim link for an EXISTING real prospect (real
+  // place_id → real Google reviews/photos import; real rating → auto-verify).
+  const existingId = arg('prospect')
+  if (existingId) {
+    const [p] = await db
+      .select({
+        company: contractorProspects.companyName,
+        city: contractorProspects.city,
+        state: contractorProspects.state,
+        rating: contractorProspects.rating,
+        sourceRef: contractorProspects.sourceRef,
+        lat: contractorProspects.lat,
+        lng: contractorProspects.lng,
+        converted: contractorProspects.convertedToContractorId,
+      })
+      .from(contractorProspects)
+      .where(eq(contractorProspects.id, existingId))
+      .limit(1)
+    if (!p) throw new Error(`prospect ${existingId} not found`)
+    if (p.converted) throw new Error('prospect already converted — pick another (or re-run discovery)')
+    const token = mintInviteToken(existingId)
+    if (!token) throw new Error('mintInviteToken returned null (UNSUBSCRIBE_SECRET missing).')
+    const linkBase = (arg('base') || 'https://www.hommy.online').replace(/\/+$/, '')
+    console.log('\n─────────────────────────────────────────────')
+    console.log('Claiming an EXISTING real prospect:')
+    console.log(`  company : ${p.company}`)
+    console.log(`  where   : ${[p.city, p.state].filter(Boolean).join(', ')}  (lat ${p.lat}, lng ${p.lng})`)
+    console.log(`  rating  : ${p.rating}★  → auto-verify`)
+    console.log(`  google  : ${p.sourceRef ? `reviews/photos import (place_id ${p.sourceRef.slice(0, 12)}…)` : 'none'}`)
+    console.log('\nClaim link (same one the lead email embeds):\n')
+    console.log(`  ${linkBase}/claim/${token}`)
+    console.log(`\nPost a homeowner job in ${p.city}, ${p.state} so it lands on the dashboard after claim.`)
+    console.log('─────────────────────────────────────────────\n')
+    return
+  }
+
   const base = (arg('base') || 'https://www.hommy.online').replace(/\/+$/, '')
   const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ')
   // A unique email keeps the (email) unique index happy on re-runs.

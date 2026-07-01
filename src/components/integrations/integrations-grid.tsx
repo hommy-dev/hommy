@@ -364,7 +364,7 @@ function GoogleManage({ dataPromise }: { dataPromise: Promise<IntegrationsData> 
                       <Icon name="swap" className="size-4 lg:size-[1.111vw]" />
                       {rowBusy ? "Working…" : "Refresh"}
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setConfirmTarget(conn)} disabled={rowBusy || connecting}>
+                    <Button size="sm" variant="destructive" onClick={() => setConfirmTarget(conn)} disabled={rowBusy || connecting}>
                       Disconnect
                     </Button>
                   </div>
