@@ -3,6 +3,7 @@ import { getRequiredUser } from "@/lib/auth/session"
 import { countNeedsReplySupport } from "@/lib/data/support"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { UserMenu } from "@/components/dashboard/user-menu"
+import { HeaderThemeToggle } from "@/components/dashboard/header-theme-toggle"
 import { ADMIN_NAV } from "@/components/dashboard/dashboard-nav"
 import { AnalyticsIdentify } from "@/components/analytics/analytics-identify"
 
@@ -21,6 +22,7 @@ export default async function AdminLayout({
         navUnreadCounts={{ "/admin/support": openTickets }}
         brandHref="/admin"
         brandLabel="Hommy Admin"
+        topRight={<HeaderThemeToggle />}
         footerUser={
           <UserMenu
             user={{
